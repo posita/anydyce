@@ -1,0 +1,29 @@
+[build-system]   # ---------------------------------------------------------------------
+
+requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]  # ---------------------------------------------------------------
+
+[tool.mypy]  # -------------------------------------------------------------------------
+
+check_untyped_defs = true
+# See <https://github.com/python/mypy/issues/10250#issuecomment-899187636>,
+# <https://github.com/python/mypy/issues/10310>, and
+# <https://github.com/python/mypy/issues/11825>
+exclude = "(?x)( (^|/)build/ )"
+ignore_missing_imports = true
+strict_optional = true
+show_error_codes = true
+warn_redundant_casts = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]  # -----------------------------------------------------------
+
+addopts = "--doctest-continue-on-failure --doctest-glob='*.md' --doctest-modules --pythonwarnings=ignore"
+doctest_optionflags = [
+  "ELLIPSIS",
+  "IGNORE_EXCEPTION_DETAIL",
+  "NORMALIZE_WHITESPACE",
+  "NUMBER",
+]

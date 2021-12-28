@@ -1,0 +1,85 @@
+site_name: anydyce
+site_description: Visualization tools for dyce
+site_url: https://posita.github.io/anydyce/
+site_author: Matt Bogosian
+copyright: <i>Copyright and other protections apply.
+  Please see the accompanying <tt>LICENSE</tt> file for rights and restrictions governing use of this software.
+  All rights not expressly waived or licensed are reserved.
+  If that file is missing or appears to be modified from its original, then please contact the author before viewing or using this software in any capacity.</i>
+repo_url: https://github.com/posita/anydyce
+
+nav:
+  - Introduction: index.md
+  - Release notes: notes.md
+  - Contributing: contrib.md
+  - License: license.md
+  - API:
+    - <tt>anydyce</tt>: anydyce.md
+    - <tt>anydyce.viz</tt>: anydyce.viz.md
+
+# See:
+# * <https://squidfunk.github.io/mkdocs-material/reference/admonitions/>, etc.
+# * <https://mkdocstrings.github.io/>
+# * <https://www.mkdocs.org/>
+
+extra:
+  version:
+    provider: mike
+
+extra_javascript:
+  - js/site.js
+  # ---- BEGIN MathJax config ----
+  - js/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  # ----- END MathJax config -----
+
+markdown_extensions:
+  - admonition
+  - def_list
+  - footnotes
+  # ---- BEGIN MathJax config ----
+  - pymdownx.arithmatex:
+      generic: true
+  # ----- END MathJax config -----
+  - pymdownx.emoji
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.superfences
+  - pymdownx.tilde
+
+plugins:
+  - exclude:
+      # TODO(posita): See <https://github.com/apenwarr/mkdocs-exclude/pull/9>
+      # gitignore: true
+      glob:
+        - "Makefile"
+        - "*.py"
+  - mike:
+      version_selector: true
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_if_no_docstring: true
+            show_root_full_path: false
+            show_signature_annotations: true
+      watch:
+        - anydyce
+  - search
+
+theme:
+  name: "material"  # required by mkdocstrings
+  features:
+    - content.code.annotate
+    - navigation.expand
+    - navigation.sections
+    - toc.integrate
+  palette:
+    - scheme: default
+      primary: teal
+      accent: teal
