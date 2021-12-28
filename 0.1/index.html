@@ -1,0 +1,1072 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Visualization tools for dyce">
+      
+      
+        <meta name="author" content="Matt Bogosian">
+      
+      
+        <link rel="canonical" href="https://posita.github.io/anydyce/0.1/">
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.3">
+    
+    
+      
+        <title>anydyce</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.edf004c2.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.e6a45f82.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL(".",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#anydyce-visualization-tools-for-dyce" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+        </aside>
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="anydyce" class="md-header__button md-logo" aria-label="anydyce" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            anydyce
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Introduction
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/posita/anydyce/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="anydyce" class="md-nav__button md-logo" aria-label="anydyce" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    anydyce
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/posita/anydyce/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Introduction
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        Introduction
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation-and-use" class="md-nav__link">
+    Installation and use
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation and use">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#interactive-quick-start" class="md-nav__link">
+    Interactive quick start
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-interfaces" class="md-nav__link">
+    Additional interfaces
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    Requirements
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-philosophy" class="md-nav__link">
+    Design philosophy
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparison-to-anydice" class="md-nav__link">
+    Comparison to AnyDice
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    License
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customers" class="md-nav__link">
+    Customers
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="notes/" class="md-nav__link">
+        Release notes
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="contrib/" class="md-nav__link">
+        Contributing
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="license/" class="md-nav__link">
+        License
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" data-md-state="indeterminate" type="checkbox" id="__nav_5" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          API
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="API" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          API
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="anydyce/" class="md-nav__link">
+        <tt>anydyce</tt>
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="anydyce.viz/" class="md-nav__link">
+        <tt>anydyce.viz</tt>
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+<a href="https://github.com/posita/anydyce/edit/master/docs/index.md" title="Edit this page" class="md-content__button md-icon">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+</a>
+
+
+<!---
+  Copyright and other protections apply. Please see the accompanying LICENSE file for
+  rights and restrictions governing use of this software. All rights not expressly
+  waived or licensed are reserved. If that file is missing or appears to be modified
+  from its original, then please contact the author before viewing or using this
+  software in any capacity.
+-->
+
+<!---
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!! IMPORTANT: READ THIS BEFORE EDITING! !!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Please keep each sentence on its own unwrapped line.
+  It looks like crap in a text editor, but it has no effect on rendering, and it allows much more useful diffs.
+  Thank you!
+
+  WARNING: THIS DOCUMENT MUST BE SELF-CONTAINED.
+  ALL LINKS MUST BE ABSOLUTE.
+  This file is used on GitHub and PyPi (via setup.cfg).
+  There is no guarantee that other docs/resources will be available where this content is displayed.
+-->
+
+<p><em>Copyright and other protections apply.
+Please see the accompanying <code>LICENSE</code> file for rights and restrictions governing use of this software.
+All rights not expressly waived or licensed are reserved.
+If that file is missing or appears to be modified from its original, then please contact the author before viewing or using this software in any capacity.</em></p>
+<p><a href="https://github.com/posita/anydyce/actions/workflows/unit-tests.yaml"><img alt="Tests" src="https://github.com/posita/anydyce/actions/workflows/unit-tests.yaml/badge.svg" /></a>
+<a href="https://pypi.org/project/anydyce/0.1.0/"><img alt="Version" src="https://img.shields.io/pypi/v/anydyce/0.1.0.svg" /></a>
+<a href="https://pypi.org/project/anydyce/0.1.0/"><img alt="Development Stage" src="https://img.shields.io/pypi/status/anydyce/0.1.0.svg" /></a>
+<a href="http://opensource.org/licenses/MIT"><img alt="License" src="https://img.shields.io/pypi/l/anydyce/0.1.0.svg" /></a>
+<a href="https://pypi.org/project/anydyce/0.1.0/"><img alt="Supported Python Versions" src="https://img.shields.io/pypi/pyversions/anydyce/0.1.0.svg" /></a>
+<a href="https://pypi.org/project/anydyce/0.1.0/"><img alt="Supported Python Implementations" src="https://img.shields.io/pypi/implementation/anydyce/0.1.0.svg" /></a>
+<a href="https://github.com/pre-commit/pre-commit"><img alt="pre-commit" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&amp;logoColor=white" /></a>
+<a href="https://posita.github.io/dyce/"><img alt="dyce-powered!" src="https://raw.githubusercontent.com/posita/dyce/latest/docs/dyce-powered.svg" /></a>
+<a href="https://posita.github.io/numerary/"><img alt="numerary-encumbered" src="https://raw.githubusercontent.com/posita/numerary/latest/docs/numerary-encumbered.svg" /></a>
+<a href="https://beartype.rtfd.io/"><img alt="Bear-ified™" src="https://raw.githubusercontent.com/beartype/beartype-assets/main/badge/bear-ified.svg" /></a></p>
+<h1 id="anydyce-visualization-tools-for-dyce"><code>anydyce</code> – visualization tools for <a href="https://posita.github.io/dyce/"><code>dyce</code></a></h1>
+<p><code>anydyce</code> exposes an interactive interface to <a href="https://posita.github.io/dyce/"><code>dyce</code></a> (the dice mechanic modeling library) in <a href="https://jupyter.org/">Jupyter</a> similar to <a href="https://anydice.com/">AnyDice</a>.</p>
+<p><code>anydyce</code> is licensed under the <a href="https://opensource.org/licenses/MIT">MIT License</a>.
+See the accompanying <code>LICENSE</code> file for details.
+Non-experimental features should be considered stable.
+See the <a href="https://posita.github.io/anydyce/0.1/notes/">release notes</a> for a summary of version-to-version changes.
+Source code is <a href="https://github.com/posita/anydyce">available on GitHub</a>.</p>
+<p>If you find it lacking in any way, please don’t hesitate to <a href="https://posita.github.io/anydyce/0.1/contrib/">bring it to my attention</a>.</p>
+<h2 id="installation-and-use">Installation and use</h2>
+<p><code>anydyce</code> is available <a href="https://pypi.python.org/pypi/anydyce/">as a PyPI package</a> and <a href="https://github.com/posita/anydyce">as source</a>.</p>
+<h3 id="interactive-quick-start">Interactive quick start</h3>
+<p>Probably the <em>easiest</em> way to start tinkering with <code>anydyce</code> is via Binder.
+<a href="https://mybinder.org/v2/gh/posita/anydyce/v0.1.0?/labpath=docs%2Fnotebooks%2FVisualization%20Examples.ipynb"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a></p>
+<div class="admonition danger">
+<p class="admonition-title">Binder will not save your work!</p>
+<p>After a period of activity, Binder is configured to destroy all instances and delete any associated data.
+Be careful to download any notebooks you wish to keep before that happens.</p>
+</div>
+<p>You can also <a href="https://mybinder.org/">create your own binders</a> from Gists or other sources.
+If you want to include <code>anydyce</code>, include the following bootstrap code in one of your notebook’s cells:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">warnings</span>
+<span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+  <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">anydyce</span>
+  <span class="k">except</span> <span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">ModuleNotFoundError</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="err">!</span><span class="p">{</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">}</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">pip</span>
+    <span class="err">!</span><span class="p">{</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">}</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">anydyce</span> <span class="n">ipywidgets</span> <span class="n">matplotlib</span>
+    <span class="kn">import</span> <span class="nn">anydyce</span>
+</code></pre></div>
+</td></tr></table>
+<p><code>anydyce</code> also makes it relatively easy to spool up your own local Jupyter instance.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>% git clone https://github.com/posita/anydyce.git
+% <span class="nb">cd</span> anydyce
+% ./quickstart-local.sh
+…
+</code></pre></div>
+</td></tr></table>
+<p>The <a href="https://github.com/posita/anydyce/blob/v0.1.0//quickstart-local.sh"><code>quickstart-local.sh</code> script</a> will create a local <a href="https://docs.python.org/3/library/venv.html">virtual environment</a> to bootstrap a local Jupyter server with <code>anydice</code> installed and open a web browser to the <a href="https://github.com/posita/anydyce/blob/v0.1.0//docs/notebooks/Visualization%20Examples.ipynb">examples notebook</a>.</p>
+<h3 id="additional-interfaces">Additional interfaces</h3>
+<p><a href="https://posita.github.io/anydyce/0.1/anydyce.viz/"><code>anydyce.viz</code></a> also provides some rudimentary conveniences if it detects that <code class="highlight"><span class="n">matplotlib</span></code> is installed.
+One such convenience enables creation of “burst” charts (<code>anydyce</code>’s take on donut charts).</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span>  <span class="c1"># doctest: +SKIP</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">dyce</span> <span class="kn">import</span> <span class="n">H</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">anydyce.viz</span> <span class="kn">import</span> <span class="n">plot_burst</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span> <span class="c1"># doctest: +SKIP</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot_burst</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="mi">2</span><span class="nd">@H</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>  <span class="c1"># doctest: +SKIP</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  <span class="c1"># doctest: +SKIP</span>
+</code></pre></div>
+</td></tr></table>
+<!-- Should match any title of the corresponding plot title -->
+<p><picture>
+  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.1.0//docs/assets/plot_burst_1_dark.png" media="(prefers-color-scheme: dark)">
+  <img alt="Plot: Basic plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.0//docs/assets/plot_burst_1_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.0//docs/assets/plot_burst_1_dark.png#gh-dark-mode-only"></span>
+</picture></p>
+<details>
+<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.1.0//docs/assets/plot_burst_1.py"><code>plot_burst_1.py</code></a></summary>
+
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># ======================================================================================</span>
+<span class="c1"># Copyright and other protections apply. Please see the accompanying LICENSE file for</span>
+<span class="c1"># rights and restrictions governing use of this software. All rights not expressly</span>
+<span class="c1"># waived or licensed are reserved. If that file is missing or appears to be modified</span>
+<span class="c1"># from its original, then please contact the author before viewing or using this</span>
+<span class="c1"># software in any capacity.</span>
+<span class="c1"># ======================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">dyce</span> <span class="kn">import</span> <span class="n">H</span>
+
+<span class="kn">from</span> <span class="nn">anydyce.viz</span> <span class="kn">import</span> <span class="n">plot_burst</span>
+
+
+<span class="k">def</span> <span class="nf">do_it</span><span class="p">(</span><span class="n">style</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span>
+    <span class="n">text_color</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span> <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s2">&quot;dark&quot;</span> <span class="k">else</span> <span class="s2">&quot;black&quot;</span>
+    <span class="n">plot_burst</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="mi">2</span> <span class="o">@</span> <span class="n">H</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span> <span class="n">text_color</span><span class="o">=</span><span class="n">text_color</span><span class="p">)</span>
+</code></pre></div>
+</td></tr></table>
+</details>
+
+<p>The outer ring can also be used to compare two histograms directly.
+Ever been curious how your four shiny new fudge dice stack up against your trusty ol’ double six-siders?
+Well wonder no more!
+The outer ring and corresponding labels can be overridden for interesting, at-a-glance displays.
+<code>anydyce</code> abides.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">df_4</span> <span class="o">=</span> <span class="mi">4</span><span class="nd">@H</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d6_2</span> <span class="o">=</span> <span class="mi">2</span><span class="nd">@H</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span> <span class="c1"># doctest: +SKIP</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot_burst</span><span class="p">(</span>
+<span class="o">...</span>   <span class="n">ax</span><span class="p">,</span>
+<span class="o">...</span>   <span class="n">df_4</span><span class="p">,</span> <span class="n">d6_2</span><span class="p">,</span>
+<span class="o">...</span>   <span class="n">inner_color</span><span class="o">=</span><span class="s2">&quot;turbo&quot;</span><span class="p">,</span>
+<span class="o">...</span>   <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="o">...</span> <span class="p">)</span>  <span class="c1"># doctest: +SKIP</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  <span class="c1"># doctest: +SKIP</span>
+</code></pre></div>
+</td></tr></table>
+<!-- Should match any title of the corresponding plot title -->
+<p><picture>
+  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.1.0//docs/assets/plot_burst_2_dark.png" media="(prefers-color-scheme: dark)">
+  <img alt="Plot: 2d6 vs. 4dF plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.0//docs/assets/plot_burst_2_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.0//docs/assets/plot_burst_2_dark.png#gh-dark-mode-only"></span>
+</picture></p>
+<details>
+<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.1.0//docs/assets/plot_burst_2.py"><code>plot_burst_2.py</code></a></summary>
+
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># ======================================================================================</span>
+<span class="c1"># Copyright and other protections apply. Please see the accompanying LICENSE file for</span>
+<span class="c1"># rights and restrictions governing use of this software. All rights not expressly</span>
+<span class="c1"># waived or licensed are reserved. If that file is missing or appears to be modified</span>
+<span class="c1"># from its original, then please contact the author before viewing or using this</span>
+<span class="c1"># software in any capacity.</span>
+<span class="c1"># ======================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">dyce</span> <span class="kn">import</span> <span class="n">H</span>
+
+<span class="kn">from</span> <span class="nn">anydyce.viz</span> <span class="kn">import</span> <span class="n">plot_burst</span>
+
+
+<span class="k">def</span> <span class="nf">do_it</span><span class="p">(</span><span class="n">style</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span>
+
+    <span class="n">df_4</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">@</span> <span class="n">H</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">d6_2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">@</span> <span class="n">H</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span>
+    <span class="n">text_color</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span> <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s2">&quot;dark&quot;</span> <span class="k">else</span> <span class="s2">&quot;black&quot;</span>
+    <span class="n">plot_burst</span><span class="p">(</span>
+        <span class="n">ax</span><span class="p">,</span>
+        <span class="n">df_4</span><span class="p">,</span>
+        <span class="n">d6_2</span><span class="p">,</span>
+        <span class="n">inner_color</span><span class="o">=</span><span class="s2">&quot;turbo&quot;</span><span class="p">,</span>
+        <span class="n">text_color</span><span class="o">=</span><span class="n">text_color</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div>
+</td></tr></table>
+</details>
+
+<p>Labels can even be overridden for interesting, at-a-glance displays.
+Overrides apply counter-clockwise, starting from the 12 o’clock position.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="k">def</span> <span class="nf">d20formatter</span><span class="p">(</span><span class="n">outcome</span><span class="p">,</span> <span class="n">probability</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="o">...</span>   <span class="n">vals</span> <span class="o">=</span> <span class="p">{</span>
+<span class="o">...</span>     <span class="o">-</span><span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;crit. fail.&quot;</span><span class="p">,</span>
+<span class="o">...</span>     <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;fail.&quot;</span><span class="p">,</span>
+<span class="o">...</span>     <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;succ.&quot;</span><span class="p">,</span>
+<span class="o">...</span>     <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;crit. succ.&quot;</span><span class="p">,</span>
+<span class="o">...</span>   <span class="p">}</span>
+<span class="o">...</span>   <span class="k">return</span> <span class="n">vals</span><span class="p">[</span><span class="n">outcome</span><span class="p">]</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d20</span> <span class="o">=</span> <span class="n">H</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span> <span class="c1"># doctest: +SKIP</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot_burst</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">h_inner</span><span class="o">=</span><span class="n">d20</span><span class="p">,</span> <span class="n">h_outer</span><span class="o">=</span><span class="n">H</span><span class="p">({</span>
+<span class="o">...</span>   <span class="o">-</span><span class="mi">2</span><span class="p">:</span> <span class="n">d20</span><span class="o">.</span><span class="n">le</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
+<span class="o">...</span>   <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="n">d20</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">14</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+<span class="o">...</span>   <span class="mi">1</span><span class="p">:</span> <span class="n">d20</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">19</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+<span class="o">...</span>   <span class="mi">2</span><span class="p">:</span> <span class="n">d20</span><span class="o">.</span><span class="n">ge</span><span class="p">(</span><span class="mi">20</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
+<span class="o">...</span> <span class="p">}),</span> <span class="n">inner_color</span><span class="o">=</span><span class="s2">&quot;RdYlBu_r&quot;</span><span class="p">,</span> <span class="n">outer_formatter</span><span class="o">=</span><span class="n">d20formatter</span><span class="p">)</span>  <span class="c1"># doctest: +SKIP</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  <span class="c1"># doctest: +SKIP</span>
+</code></pre></div>
+</td></tr></table>
+<!-- Should match any title of the corresponding plot title -->
+<p><picture>
+  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.1.0//docs/assets/plot_burst_3_dark.png" media="(prefers-color-scheme: dark)">
+  <img alt="Plot: Advanced plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.0//docs/assets/plot_burst_3_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.0//docs/assets/plot_burst_3_dark.png#gh-dark-mode-only"></span>
+</picture></p>
+<details>
+<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.1.0//docs/assets/plot_burst_3.py"><code>plot_burst_3.py</code></a></summary>
+
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c1"># ======================================================================================</span>
+<span class="c1"># Copyright and other protections apply. Please see the accompanying LICENSE file for</span>
+<span class="c1"># rights and restrictions governing use of this software. All rights not expressly</span>
+<span class="c1"># waived or licensed are reserved. If that file is missing or appears to be modified</span>
+<span class="c1"># from its original, then please contact the author before viewing or using this</span>
+<span class="c1"># software in any capacity.</span>
+<span class="c1"># ======================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">fractions</span> <span class="kn">import</span> <span class="n">Fraction</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="kn">from</span> <span class="nn">dyce</span> <span class="kn">import</span> <span class="n">H</span>
+<span class="kn">from</span> <span class="nn">numerary</span> <span class="kn">import</span> <span class="n">RealLikeSCU</span>
+
+<span class="kn">from</span> <span class="nn">anydyce.viz</span> <span class="kn">import</span> <span class="n">plot_burst</span>
+
+
+<span class="k">def</span> <span class="nf">do_it</span><span class="p">(</span><span class="n">style</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span>
+
+    <span class="k">def</span> <span class="nf">d20formatter</span><span class="p">(</span><span class="n">outcome</span><span class="p">:</span> <span class="n">RealLikeSCU</span><span class="p">,</span> <span class="n">probability</span><span class="p">:</span> <span class="n">Fraction</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">H</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">vals</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">RealLikeSCU</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="o">-</span><span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;crit. fail.&quot;</span><span class="p">,</span>
+            <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;fail.&quot;</span><span class="p">,</span>
+            <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;succ.&quot;</span><span class="p">,</span>
+            <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;crit. succ.&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">vals</span><span class="p">[</span><span class="n">outcome</span><span class="p">]</span>
+
+    <span class="n">d20</span> <span class="o">=</span> <span class="n">H</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span>
+    <span class="n">text_color</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span> <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s2">&quot;dark&quot;</span> <span class="k">else</span> <span class="s2">&quot;black&quot;</span>
+    <span class="n">plot_burst</span><span class="p">(</span>
+        <span class="n">ax</span><span class="p">,</span>
+        <span class="n">h_inner</span><span class="o">=</span><span class="n">d20</span><span class="p">,</span>
+        <span class="n">h_outer</span><span class="o">=</span><span class="n">H</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="o">-</span><span class="mi">2</span><span class="p">:</span> <span class="n">d20</span><span class="o">.</span><span class="n">le</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="n">d20</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">14</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="mi">1</span><span class="p">:</span> <span class="n">d20</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">19</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="mi">2</span><span class="p">:</span> <span class="n">d20</span><span class="o">.</span><span class="n">ge</span><span class="p">(</span><span class="mi">20</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">}</span>
+        <span class="p">),</span>
+        <span class="n">inner_color</span><span class="o">=</span><span class="s2">&quot;RdYlBu_r&quot;</span><span class="p">,</span>
+        <span class="n">outer_formatter</span><span class="o">=</span><span class="n">d20formatter</span><span class="p">,</span>
+        <span class="n">text_color</span><span class="o">=</span><span class="n">text_color</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div>
+</td></tr></table>
+</details>
+
+<h3 id="requirements">Requirements</h3>
+<p><code>anydyce</code> requires a relatively modern version of Python:</p>
+<ul>
+<li><a href="https://www.python.org/">CPython</a> (3.7+)</li>
+<li><a href="http://pypy.org/">PyPy</a> (CPython 3.7+ compatible)</li>
+</ul>
+<p>It has the following runtime dependencies:</p>
+<ul>
+<li><a href="https://pypi.org/project/dyce/"><code>dyce</code></a> for dice mechanic modeling <a href="https://posita.github.io/dyce/"><img alt="dyce-powered!" src="https://raw.githubusercontent.com/posita/dyce/latest/docs/dyce-powered.svg" /></a></li>
+<li><a href="https://pypi.org/project/numerary/"><code>numerary</code></a> for <del>proper</del> <em>best-effort hacking around deficiencies in</em> static and runtime numeric type-checking <a href="https://posita.github.io/numerary/"><img alt="numerary-encumbered" src="https://raw.githubusercontent.com/posita/numerary/latest/docs/numerary-encumbered.svg" /></a></li>
+</ul>
+<p><code>anydyce</code> will opportunistically use the following, if available at runtime:</p>
+<ul>
+<li><a href="https://pypi.org/project/beartype/"><code>beartype</code></a> for yummy runtime type-checking goodness (0.8+) <a href="https://beartype.rtfd.io/"><img alt="Bear-ified™" src="https://raw.githubusercontent.com/beartype/beartype-assets/main/badge/bear-ified.svg" /></a></li>
+<li><a href="https://ipywidgets.readthedocs.io/"><code>ipywidgets</code></a> for interactivity in Jupyter</li>
+<li><a href="https://matplotlib.org/"><code>matplotlib</code></a> for visualizing <a href="https://posita.github.io/dyce/latest/countin/">histograms and pools</a></li>
+</ul>
+<p><code>anydyce</code> (and <code>dyce</code>) leverage <code>numerary</code> for its opportunistic use of <code>beartype</code>. If you use <code>beartype</code> for type checking your code, but don’t want <code>anydyce</code>, <code>dyce</code>, or <code>numerary</code> to use it internally, disable it with <a href="https://posita.github.io/numerary/latest/#requirements"><code>numerary</code>’s <code>NUMERARY_BEARTYPE</code> environment variable</a>.</p>
+<p>See the <a href="https://posita.github.io/anydyce/0.1/contrib/#hacking-quick-start">hacking quick-start</a> for additional development and testing dependencies.</p>
+<h2 id="design-philosophy">Design philosophy</h2>
+<p><code>anydyce</code> (currently) targets Matplotlib (both alone and within Jupyter).
+Support for additional visualization tools may be added in the future.
+It is intended as a convenience layer for those who benefit from simple interfaces with reasonable defaults and limited configurability.
+If you find they are too restrictive, or have any requests or ideas for improvements, <a href="https://posita.github.io/anydyce/0.1/contrib/#starting-discussions-and-filing-issues">let me know</a>!<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup></p>
+<p>If used within Jupyter, <code>anydyce</code> provides <a href="https://posita.github.io/anydyce/0.1/anydyce/#anydyce.viz.jupyter_visualize">a high-level, interactive interface</a> with functionality that echos AnyDice.
+(See <a href="#comparison-to-anydice">Comparison to AnyDice</a>.)</p>
+<h2 id="comparison-to-anydice">Comparison to AnyDice</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th align="center"><code>anydyce</code></th>
+<th align="center">AnyDice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Modeling language</td>
+<td align="center"><a href="https://www.python.org/">Python</a></td>
+<td align="center">Proprietary</td>
+</tr>
+<tr>
+<td>Share session URLs</td>
+<td align="center">Yes 👍<sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
+<td align="center">Yes 👍</td>
+</tr>
+<tr>
+<td>Configure plots</td>
+<td align="center">Yes 👍</td>
+<td align="center">No 👎</td>
+</tr>
+<tr>
+<td>“Burst” graphs</td>
+<td align="center">Yes 👍</td>
+<td align="center">No 👎</td>
+</tr>
+<tr>
+<td>Open source</td>
+<td align="center">Yes 👍</td>
+<td align="center">No 👎</td>
+</tr>
+<tr>
+<td>Install and run locally</td>
+<td align="center">Yes 👍</td>
+<td align="center">No 👎</td>
+</tr>
+</tbody>
+</table>
+<h2 id="license">License</h2>
+<p><code>anydyce</code> is licensed under the <a href="https://opensource.org/licenses/MIT">MIT License</a>.
+See the included <a href="https://posita.github.io/anydyce/0.1/license/"><code>LICENSE</code></a> file for details.
+Source code is <a href="https://github.com/posita/anydyce">available on GitHub</a>.</p>
+<h2 id="customers">Customers <a href="https://posita.github.io/dyce/"><img alt="dyce-powered!" src="https://raw.githubusercontent.com/posita/dyce/latest/docs/dyce-powered.svg" /></a></h2>
+<ul>
+<li>This could be <em>you</em>! 👋</li>
+</ul>
+<p>Do you have a project that uses <code>dyce</code>?
+<a href="https://posita.github.io/anydyce/0.1/contrib/#starting-discussions-and-filing-issues">Let me know</a>, and I’ll promote it here!</p>
+<p>And don’t forget to do your part in perpetuating gratuitous badge-ification!</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>&lt;!-- Markdown --&gt;
+As of version 1.1, HighRollin is
+[<span class="nt">![dyce-powered</span>](<span class="na">https://raw.githubusercontent.com/posita/dyce/master/docs/dyce-powered.svg</span>)][dyce-powered]!
+[<span class="nl">dyce-powered</span>]: <span class="na">https://posita.github.io/dyce/ &quot;dyce-powered!&quot;</span>
+</code></pre></div>
+</td></tr></table>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="cp">..</span>
+<span class="cp">    reStructuredText - see https://docutils.sourceforge.io/docs/ref/rst/directives.html#image</span>
+
+As of version 1.1, HighRollin is |dyce-powered|!
+
+<span class="p">..</span> <span class="nt">|dyce-powered|</span> <span class="ow">image</span><span class="p">::</span> https://raw.githubusercontent.com/posita/dyce/master/docs/dyce-powered.svg
+   <span class="nc">:align:</span> top
+   <span class="nc">:target:</span> https://posita.github.io/dyce/
+   <span class="nc">:alt:</span> dyce-powered
+</code></pre></div>
+</td></tr></table>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="c">&lt;!-- HTML --&gt;</span>
+As of version 1.1, HighRollin is <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;https://posita.github.io/dyce/&quot;</span><span class="p">&gt;&lt;</span><span class="nt">img</span>
+  <span class="na">src</span><span class="o">=</span><span class="s">&quot;https://raw.githubusercontent.com/posita/dyce/master/docs/dyce-powered.svg&quot;</span>
+  <span class="na">alt</span><span class="o">=</span><span class="s">&quot;dyce-powered&quot;</span>
+  <span class="na">style</span><span class="o">=</span><span class="s">&quot;vertical-align: middle;&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>!
+</code></pre></div>
+</td></tr></table>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>At some point this devolves into an exercise in chasing a diversity of very specific preferences.
+If you have a very specific need, <a href="https://posita.github.io/dyce/"><code>dyce</code></a> is fairly low level and should be able to integrate directly with whatever visualization context or package you prefer.
+That being said, I am always on the lookout for more intuitive or accessible visualizations and will eagerly <a href="https://posita.github.io/anydyce/0.1/contrib/#starting-discussions-and-filing-issues">explore ideas with you</a>.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p>Relies on external depedencies.
+Notebooks that are published via GitHub Gists or in Git repositories can be auto-loaded via Binder.
+(See <a href="#interactive-quick-start">Interactive quick start</a>.)
+However, edits are not persisted.
+Notebooks can also be downloaded and shared as <code>.ipynb</code> files.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+      
+        
+        <a href="notes/" class="md-footer__link md-footer__link--next" aria-label="Next: Release notes" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Release notes
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      <i>Copyright and other protections apply. Please see the accompanying <tt>LICENSE</tt> file for rights and restrictions governing use of this software. All rights not expressly waived or licensed are reserved. If that file is missing or appears to be modified from its original, then please contact the author before viewing or using this software in any capacity.</i>
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": ".", "features": ["content.code.annotate", "navigation.expand", "navigation.sections", "toc.integrate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "assets/javascripts/workers/search.0bbba5b5.min.js", "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.e1a181d9.min.js"></script>
+      
+        <script src="js/site.js"></script>
+      
+        <script src="js/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
