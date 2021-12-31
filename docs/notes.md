@@ -17,7 +17,7 @@
 
 ## [0.1.1](https://github.com/posita/dyce/releases/tag/v0.1.1)
 
-* TODO
+* Links to an external (Gist) repository for example notebook.
 
 ## [0.1.0](https://github.com/posita/dyce/releases/tag/v0.1.0)
 

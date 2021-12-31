@@ -40,6 +40,40 @@ Source code is [available on GitHub](https://github.com/posita/anydyce).
 
 If you find it lacking in any way, please don’t hesitate to [bring it to my attention](https://posita.github.io/anydyce/latest/contrib/).
 
+## Design philosophy
+
+``anydyce`` (currently) targets Matplotlib (both alone and within Jupyter).
+Support for additional visualization tools may be added in the future.
+It is intended as a convenience layer for those who benefit from simple interfaces with reasonable defaults and limited configurability.
+If you find they are too restrictive, or have any requests or ideas for improvements, [let me know](https://posita.github.io/anydyce/latest/contrib/#starting-discussions-and-filing-issues)![^1]
+
+[^1]:
+
+    At some point this devolves into an exercise in chasing a diversity of very specific preferences.
+    If you have a very specific need, [``dyce``](https://posita.github.io/dyce/) is fairly low level and should be able to integrate directly with whatever visualization context or package you prefer.
+    That being said, I am always on the lookout for more intuitive or accessible visualizations and will eagerly [explore ideas with you](https://posita.github.io/anydyce/latest/contrib/#starting-discussions-and-filing-issues).
+
+If used within Jupyter, ``anydyce`` provides [a high-level, interactive interface](https://posita.github.io/anydyce/latest/anydyce/#anydyce.viz.jupyter_visualize) with functionality that echos AnyDice.
+
+### Comparison to AnyDice
+
+| Feature                 | ``anydyce``                       | AnyDice     |
+|-------------------------|:---------------------------------:|:-----------:|
+| Modeling language       | [Python](https://www.python.org/) | Proprietary |
+| Share session URLs      | Yes 👍[^2]                        | Yes 👍      |
+| Configure plots         | Yes 👍                            | No 👎       |
+| “Burst” graphs          | Yes 👍                            | No 👎       |
+| Open source             | Yes 👍                            | No 👎       |
+| Install and run locally | Yes 👍                            | No 👎       |
+
+[^2]:
+
+    Relies on external depedencies.
+    Notebooks that are published via GitHub Gists or in Git repositories can be auto-loaded via Binder.
+    (See [Interactive quick start](#interactive-quick-start).)
+    However, edits are not persisted.
+    Notebooks can also be downloaded and shared as ``.ipynb`` files.
+
 ## Installation and use
 
 ``anydyce`` is available [as a PyPI package](https://pypi.python.org/pypi/anydyce/) and [as source](https://github.com/posita/anydyce).
@@ -47,28 +81,12 @@ If you find it lacking in any way, please don’t hesitate to [bring it to my at
 ### Interactive quick start
 
 Probably the _easiest_ way to start tinkering with ``anydyce`` is via Binder.
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/posita/anydyce/latest?labpath=docs%2Fnotebooks%2FVisualization%20Examples.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gist/posita/f65800898aa0ad08b8c927246bf32c0f/751a24d46dbec2d9be2348d8b6b52e5372e0cfba?labpath=anydyce_intro.ipynb)
 
 !!! danger "Binder will not save your work!"
 
-    After a period of activity, Binder is configured to destroy all instances and delete any associated data.
+    After a period of inactivity, Binder is configured to destroy all instances and delete any associated data.
     Be careful to download any notebooks you wish to keep before that happens.
-
-You can also [create your own binders](https://mybinder.org/) from Gists or other sources.
-If you want to include ``anydyce``, include the following bootstrap code in one of your notebook’s cells:
-
-``` python
-import warnings
-with warnings.catch_warnings():
-  warnings.simplefilter("ignore")
-  try:
-    import anydyce
-  except (ImportError, ModuleNotFoundError):
-    import sys
-    !{sys.executable} -m pip install --upgrade pip
-    !{sys.executable} -m pip install anydyce ipywidgets matplotlib
-    import anydyce
-```
 
 ``anydyce`` also makes it relatively easy to spool up your own local Jupyter instance.
 
@@ -79,7 +97,23 @@ with warnings.catch_warnings():
 …
 ```
 
-The [``quickstart-local.sh`` script](https://github.com/posita/anydyce/blob/latest/quickstart-local.sh) will create a local [virtual environment](https://docs.python.org/3/library/venv.html) to bootstrap a local Jupyter server with ``anydice`` installed and open a web browser to the [examples notebook](https://github.com/posita/anydyce/blob/latest/docs/notebooks/Visualization%20Examples.ipynb).
+The [``quickstart-local.sh`` script](https://github.com/posita/anydyce/blob/latest/quickstart-local.sh) will create a local [virtual environment](https://docs.python.org/3/library/venv.html) to bootstrap a local Jupyter server with ``anydice`` installed and open a web browser to the [introduction notebook](https://gist.github.com/posita/f65800898aa0ad08b8c927246bf32c0f/751a24d46dbec2d9be2348d8b6b52e5372e0cfba#file-anydyce_intro-ipynb).
+
+You can also [create your own binders](https://mybinder.org/) from Gists or other sources.
+Running the following in your notebook will bootstrap[^3] ``anydyce`` if it is not already installed:
+
+``` python
+import warnings
+with warnings.catch_warnings():
+  warnings.simplefilter("ignore")
+  try:
+    import anydyce
+  except (ImportError, ModuleNotFoundError):
+    import sys
+    !{sys.executable} -m pip install --upgrade pip
+    !{sys.executable} -m pip install 'https://gist.githubusercontent.com/posita/f65800898aa0ad08b8c927246bf32c0f/raw/751a24d46dbec2d9be2348d8b6b52e5372e0cfba/requirements.txt'
+    import anydyce
+```
 
 ### Additional interfaces
 
@@ -113,7 +147,6 @@ One such convenience enables creation of “burst” charts (``anydyce``’s tak
 The outer ring can also be used to compare two histograms directly.
 Ever been curious how your four shiny new fudge dice stack up against your trusty ol’ double six-siders?
 Well wonder no more!
-The outer ring and corresponding labels can be overridden for interesting, at-a-glance displays.
 ``anydyce`` abides.
 
 ``` python
@@ -204,41 +237,6 @@ It has the following runtime dependencies:
 ``anydyce`` (and ``dyce``) leverage ``numerary`` for its opportunistic use of ``beartype``. If you use ``beartype`` for type checking your code, but don’t want ``anydyce``, ``dyce``, or ``numerary`` to use it internally, disable it with [``numerary``’s ``NUMERARY_BEARTYPE`` environment variable](https://posita.github.io/numerary/latest/#requirements).
 
 See the [hacking quick-start](https://posita.github.io/anydyce/latest/contrib/#hacking-quick-start) for additional development and testing dependencies.
-
-## Design philosophy
-
-``anydyce`` (currently) targets Matplotlib (both alone and within Jupyter).
-Support for additional visualization tools may be added in the future.
-It is intended as a convenience layer for those who benefit from simple interfaces with reasonable defaults and limited configurability.
-If you find they are too restrictive, or have any requests or ideas for improvements, [let me know](https://posita.github.io/anydyce/latest/contrib/#starting-discussions-and-filing-issues)![^1]
-
-[^1]:
-
-    At some point this devolves into an exercise in chasing a diversity of very specific preferences.
-    If you have a very specific need, [``dyce``](https://posita.github.io/dyce/) is fairly low level and should be able to integrate directly with whatever visualization context or package you prefer.
-    That being said, I am always on the lookout for more intuitive or accessible visualizations and will eagerly [explore ideas with you](https://posita.github.io/anydyce/latest/contrib/#starting-discussions-and-filing-issues).
-
-If used within Jupyter, ``anydyce`` provides [a high-level, interactive interface](https://posita.github.io/anydyce/latest/anydyce/#anydyce.viz.jupyter_visualize) with functionality that echos AnyDice.
-(See [Comparison to AnyDice](#comparison-to-anydice).)
-
-## Comparison to AnyDice
-
-| Feature                 | ``anydyce``                       | AnyDice     |
-|-------------------------|:---------------------------------:|:-----------:|
-| Modeling language       | [Python](https://www.python.org/) | Proprietary |
-| Share session URLs      | Yes 👍[^2]                        | Yes 👍      |
-| Configure plots         | Yes 👍                            | No 👎       |
-| “Burst” graphs          | Yes 👍                            | No 👎       |
-| Open source             | Yes 👍                            | No 👎       |
-| Install and run locally | Yes 👍                            | No 👎       |
-
-[^2]:
-
-    Relies on external depedencies.
-    Notebooks that are published via GitHub Gists or in Git repositories can be auto-loaded via Binder.
-    (See [Interactive quick start](#interactive-quick-start).)
-    However, edits are not persisted.
-    Notebooks can also be downloaded and shared as ``.ipynb`` files.
 
 ## License
 

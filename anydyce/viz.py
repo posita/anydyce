@@ -496,8 +496,8 @@ def jupyter_visualize(
     H)``. The second ``#! H`` object is used for the interior ring in “burst” break-out
     graphs, but otherwise ignored.
 
-    The “Powered by the _Apocalypse_ (PbtA)” example in the ``Visualization
-    Examples.ipynb`` notebook should give an idea of the effect. (See [Interactive quick
+    The “Powered by the _Apocalypse_ (PbtA)” example in the introduction notebook should
+    give an idea of the effect. (See [Interactive quick
     start](index.md#interactive-quick-start).)
 
     The *default_breakout_type* parameter indicates which break-out graphs to display

@@ -33,4 +33,4 @@ _venvsetup() {
 }
 
 _venvsetup \
-    && "${_VENVSETUP_DIR}/bin/tox" -e anydyce -- "${@}"
+    && "${_VENVSETUP_DIR}/bin/tox" -e jupyter -- "${@}"
