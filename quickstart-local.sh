@@ -33,4 +33,4 @@ _venvsetup() {
 }
 
 _venvsetup \
-    && "${_VENVSETUP_DIR}/bin/tox" -e jupyter -- "${@}"
+    && "${_VENVSETUP_DIR}/bin/tox" -e jupyter -- --notebook-dir="${_MY_DIR}/docs/notebooks" "${@}"

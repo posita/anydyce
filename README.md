@@ -57,14 +57,15 @@ If used within Jupyter, ``anydyce`` provides [a high-level, interactive interfac
 
 ### Comparison to AnyDice
 
-| Feature                 | ``anydyce``                       | AnyDice     |
-|-------------------------|:---------------------------------:|:-----------:|
-| Modeling language       | [Python](https://www.python.org/) | Proprietary |
-| Share session URLs      | Yes 👍[^2]                        | Yes 👍      |
-| Configure plots         | Yes 👍                            | No 👎       |
-| “Burst” graphs          | Yes 👍                            | No 👎       |
-| Open source             | Yes 👍                            | No 👎       |
-| Install and run locally | Yes 👍                            | No 👎       |
+| Feature | ``anydyce`` | AnyDice |
+|---|:---:|:---:|
+| Shareable session URLs | ⚠️ Via third party[^2] | ✅ Yes |
+| Modeling language | 🐍 [Python](https://www.python.org/) | Proprietary |
+| Computation time limit | ✅ No limit | ❌ 5 seconds |
+| Configurable plots<br>(including “burst” graphs) | ✅ Yes | ❌ No |
+| Install and use third party libraries | ✅ Yes | ❌ No |
+| Open source<br>(install, run, and modify locally) | ✅ Yes | ❌ No |
+| Advanced language features<br>(memoization, nested functions, etc.) | ✅ Yes | ❌ No |
 
 [^2]:
 
@@ -81,7 +82,7 @@ If used within Jupyter, ``anydyce`` provides [a high-level, interactive interfac
 ### Interactive quick start
 
 Probably the _easiest_ way to start tinkering with ``anydyce`` is via Binder.
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gist/posita/f65800898aa0ad08b8c927246bf32c0f/751a24d46dbec2d9be2348d8b6b52e5372e0cfba?labpath=anydyce_intro.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gist/posita/f65800898aa0ad08b8c927246bf32c0f/13c591bf6192e2e7ac49e58050d47125c8b326e4?labpath=anydyce_intro.ipynb)
 
 !!! danger "Binder will not save your work!"
 
@@ -97,7 +98,7 @@ Probably the _easiest_ way to start tinkering with ``anydyce`` is via Binder.
 …
 ```
 
-The [``quickstart-local.sh`` script](https://github.com/posita/anydyce/blob/latest/quickstart-local.sh) will create a local [virtual environment](https://docs.python.org/3/library/venv.html) to bootstrap a local Jupyter server with ``anydice`` installed and open a web browser to the [introduction notebook](https://gist.github.com/posita/f65800898aa0ad08b8c927246bf32c0f/751a24d46dbec2d9be2348d8b6b52e5372e0cfba#file-anydyce_intro-ipynb).
+The [``quickstart-local.sh`` script](https://github.com/posita/anydyce/blob/latest/quickstart-local.sh) will create a local [virtual environment](https://docs.python.org/3/library/venv.html) to bootstrap a local Jupyter server with ``anydice`` installed and open a web browser to the [introduction notebook](https://gist.github.com/posita/f65800898aa0ad08b8c927246bf32c0f/13c591bf6192e2e7ac49e58050d47125c8b326e4#file-anydyce_intro-ipynb).
 
 You can also [create your own binders](https://mybinder.org/) from Gists or other sources.
 Running the following in your notebook will bootstrap[^3] ``anydyce`` if it is not already installed:
@@ -111,7 +112,7 @@ with warnings.catch_warnings():
   except (ImportError, ModuleNotFoundError):
     import sys
     !{sys.executable} -m pip install --upgrade pip
-    !{sys.executable} -m pip install 'https://gist.githubusercontent.com/posita/f65800898aa0ad08b8c927246bf32c0f/raw/751a24d46dbec2d9be2348d8b6b52e5372e0cfba/requirements.txt'
+    !{sys.executable} -m pip install 'https://gist.githubusercontent.com/posita/f65800898aa0ad08b8c927246bf32c0f/raw/13c591bf6192e2e7ac49e58050d47125c8b326e4/requirements.txt'
     import anydyce
 ```
 
