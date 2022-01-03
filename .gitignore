@@ -9,6 +9,7 @@
 # Project
 /.coverage
 /.tox/
+/anydyce/_version.py
 /build/
 /dist/
 /site/
