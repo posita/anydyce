@@ -12,7 +12,7 @@ from fractions import Fraction
 from typing import Dict
 
 from dyce import H
-from numerary import RealLikeSCU
+from numerary import RealLike
 
 from anydyce.viz import plot_burst
 
@@ -20,8 +20,8 @@ from anydyce.viz import plot_burst
 def do_it(style: str) -> None:
     import matplotlib.pyplot
 
-    def d20formatter(outcome: RealLikeSCU, probability: Fraction, h: H) -> str:
-        vals: Dict[RealLikeSCU, str] = {
+    def d20formatter(outcome: RealLike, probability: Fraction, h: H) -> str:
+        vals: Dict[RealLike, str] = {
             -2: "crit. fail.",
             -1: "fail.",
             1: "succ.",

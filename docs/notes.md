@@ -17,7 +17,9 @@
 
 ## [0.1.1](https://github.com/posita/dyce/releases/tag/v0.1.1)
 
+* Removes use of ``#!python numerary.types.…SCU`` types.
 * Links to an external (Gist) repository for example notebook.
+* Adds comparison table to AnyDice to ``README.md``.
 
 ## [0.1.0](https://github.com/posita/dyce/releases/tag/v0.1.0)
 

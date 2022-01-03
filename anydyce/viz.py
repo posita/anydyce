@@ -31,7 +31,7 @@ from typing import (
 from dyce import H
 from dyce.h import HableT
 from dyce.lifecycle import experimental
-from numerary import RealLikeSCU
+from numerary import RealLike
 from numerary.bt import beartype
 
 try:
@@ -69,7 +69,7 @@ __all__ = ("BreakoutType", "jupyter_visualize")
 ColorT = Sequence[float]
 ColorListT = Iterable[ColorT]
 HLikeT = Union[H, HableT]
-HFormatterT = Callable[[RealLikeSCU, Fraction, H], str]
+HFormatterT = Callable[[RealLike, Fraction, H], str]
 
 
 class BreakoutType(Enum):
@@ -137,9 +137,9 @@ _DEFAULT_MAIN_PLOT_FUNCS_BY_NAME = {
 _formatter: HFormatterT
 
 
-def _outcome_name_formatter(outcome: RealLikeSCU, _, __) -> str:
+def _outcome_name_formatter(outcome: RealLike, _, __) -> str:
     if hasattr(outcome, "name"):
-        return f"{outcome.name}"  # type: ignore [union-attr]
+        return f"{outcome.name}"  # type: ignore [attr-defined]
     else:
         return f"{str(outcome)}"
 
@@ -148,10 +148,10 @@ _formatter = _outcome_name_formatter
 
 
 def _outcome_name_probability_formatter(
-    outcome: RealLikeSCU, probability: Fraction, _
+    outcome: RealLike, probability: Fraction, _
 ) -> str:
     if hasattr(outcome, "name"):
-        return f"{outcome.name}\n{float(probability):.2%}"  # type: ignore [union-attr]
+        return f"{outcome.name}\n{float(probability):.2%}"  # type: ignore [attr-defined]
     else:
         return f"{str(outcome)}\n{float(probability):.2%}"
 
@@ -188,7 +188,7 @@ def alphasize(colors: ColorListT, alpha: float) -> ColorListT:
 @experimental
 @beartype
 def cumulative_probability_formatter(
-    outcome: RealLikeSCU,
+    outcome: RealLike,
     probability: Fraction,
     h: H,
 ) -> str:
