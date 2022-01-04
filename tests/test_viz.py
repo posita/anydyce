@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import random
+from fractions import Fraction
 
 import pytest
 from dyce import H
@@ -51,6 +52,27 @@ def test_cumulative_probability_formatter() -> None:
         "11 5.56%; ≥97.22%; ≤8.33%",
         "12 2.78%; ≥100.00%; ≤2.78%",
     )
+
+
+def test_limit_for_display_identity() -> None:
+    h = H(6)
+    assert viz.limit_for_display(h, Fraction(0)) is h
+
+
+def test_limit_for_display_empty() -> None:
+    assert viz.limit_for_display(H({})) == H({})
+
+
+def test_limit_for_display_cull_everything() -> None:
+    assert viz.limit_for_display(H(6), Fraction(1)) == H({})
+
+
+def test_limit_for_display_out_of_bounds() -> None:
+    with pytest.raises(ValueError):
+        assert viz.limit_for_display(H(6), Fraction(-1))
+
+    with pytest.raises(ValueError):
+        assert viz.limit_for_display(H(6), Fraction(2))
 
 
 def test_plot_burst() -> None:

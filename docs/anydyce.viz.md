@@ -30,4 +30,10 @@
     selection:
       members:
         - "cumulative_probability_formatter"
+        - "limit_for_display"
+        - "plot_bar"
+        - "plot_line"
+        - "plot_scatter"
         - "plot_burst"
+        - "plot_burst_subplot"
+        - "jupyter_visualize"

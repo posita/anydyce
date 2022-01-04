@@ -16,6 +16,7 @@ import warnings
 from enum import Enum, auto
 from fractions import Fraction
 from itertools import chain, cycle
+from operator import itemgetter
 from typing import (
     Any,
     Callable,
@@ -122,7 +123,10 @@ DEFAULT_GRAPH_COLOR = "RdYlGn_r"
 DEFAULT_TEXT_COLOR = "black"
 DEFAULT_BURST_ALPHA = 0.6
 DEFAULT_GRAPH_ALPHA = 0.8
-_HIDE_LIM = Fraction(1, 2 ** 5)
+_LABEL_LIM = Fraction(1, 2 ** 5)
+_CUTOFF_LIM = Fraction(1, 2 ** 13)
+_CUTOFF_BASE = 10
+_CUTOFF_EXP = 6
 
 _DEFAULT_MAIN_PLOT_FUNCS_BY_NAME = {
     "bar": _bar,
@@ -148,7 +152,7 @@ _formatter = _outcome_name_formatter
 
 
 def _outcome_name_probability_formatter(
-    outcome: RealLike, probability: Fraction, _
+    outcome: RealLike, probability: Fraction, __
 ) -> str:
     if hasattr(outcome, "name"):
         return f"{outcome.name}\n{float(probability):.2%}"  # type: ignore [attr-defined]
@@ -243,12 +247,72 @@ def graph_colors(name: str, vals: Iterable, alpha: float = -1.0) -> ColorListT:
 
 @experimental
 @beartype
+def limit_for_display(h: H, cutoff: Fraction = _CUTOFF_LIM) -> H:
+    r"""
+    !!! warning "Experimental"
+
+        This function should be considered experimental and may change or disappear in
+        future versions.
+
+    Discards outcomes in *h*, starting with the smallest counts as long as the total
+    discarded in proportion to ``#!python h.total`` does not exceed *cutoff*. This can
+    be useful in speeding up plots where there are large number of negligible
+    probabilities.
+
+    ``` python
+    >>> from anydyce.viz import limit_for_display
+    >>> from dyce import H
+    >>> from fractions import Fraction
+    >>> h = H({1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6})
+    >>> h.total
+    21
+    >>> limit_for_display(h, cutoff=Fraction(5, 21))
+    H({3: 3, 4: 4, 5: 5, 6: 6})
+    >>> limit_for_display(h, cutoff=Fraction(6, 21))
+    H({4: 4, 5: 5, 6: 6})
+
+    ```
+    """
+    if cutoff < 0 or cutoff > 1:
+        raise ValueError(f"cutoff ({cutoff}) must be between zero and one, inclusive")
+
+    cutoff_count = int(cutoff * h.total)
+
+    if cutoff_count == 0:
+        return h
+
+    def _cull() -> Iterator[Tuple[RealLike, int]]:
+        so_far = 0
+
+        for outcome, count in sorted(h.items(), key=itemgetter(1)):
+            so_far += count
+
+            if so_far > cutoff_count:
+                yield outcome, count
+
+    return H(_cull())
+
+
+@experimental
+@beartype
 def plot_bar(
     ax: AxesT,
     hs: Sequence[Tuple[str, H]],
     alpha: float = DEFAULT_GRAPH_ALPHA,
     shadow: bool = False,
 ) -> None:
+    r"""
+    !!! warning "Experimental"
+
+        This function should be considered experimental and may change or disappear in
+        future versions.
+
+    Plots a bar graph of *hs* using
+    [*ax*](https://matplotlib.org/stable/api/axes_api.html#the-axes-class) with *alpha*
+    and *shadow*. *hs* is a sequence of two-tuples (pairs) of strings (labels) and ``H``
+    objects. Bars are interleaved and non-overlapping, so this is best suited to plots
+    where *hs* contains a small number of histograms.
+    """
     ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(xmax=1))
     width = 0.8
     bar_kw: Dict[str, Any] = dict(alpha=alpha, width=width / len(hs))
@@ -286,6 +350,20 @@ def plot_line(
     shadow: bool = False,
     markers: str = "o",
 ) -> None:
+    r"""
+    !!! warning "Experimental"
+
+        This function should be considered experimental and may change or disappear in
+        future versions.
+
+    Plots a line graph of *hs* using
+    [*ax*](https://matplotlib.org/stable/api/axes_api.html#the-axes-class) with *alpha*
+    and *shadow*. *hs* is a sequence of two-tuples (pairs) of strings (labels) and
+    ``#!python dyce.H`` objects. *markers* is cycled through when creating each line.
+    For example, if *markers* is ``#!python "o+"``, the first histogram in *hs* will be
+    plotted with a circle, the second will be plotted with a plus, the third will be
+    plotted with a circle, the fourth will be plotted with a plus, and so on.
+    """
     ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(xmax=1))
     plot_kw: Dict[str, Any] = dict(alpha=alpha)
 
@@ -313,6 +391,20 @@ def plot_scatter(
     shadow: bool = False,
     markers: str = "<>v^dPXo",
 ) -> None:
+    r"""
+    !!! warning "Experimental"
+
+        This function should be considered experimental and may change or disappear in
+        future versions.
+
+    Plots a scatter graph of *hs* using
+    [*ax*](https://matplotlib.org/stable/api/axes_api.html#the-axes-class) with *alpha*
+    and *shadow*. *hs* is a sequence of two-tuples (pairs) of strings (labels) and
+    ``dyce.H`` objects. *markers* is cycled through when creating each line. For
+    example, if *markers* is ``#!python "o+"``, the first histogram in *hs* will be
+    plotted with a circle, the second will be plotted with a plus, the third will be
+    plotted with a circle, the fourth will be plotted with a plus, and so on.
+    """
     ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(xmax=1))
     scatter_kw: Dict[str, Any] = dict(alpha=alpha)
 
@@ -351,9 +443,10 @@ def plot_burst(
         This function should be considered experimental and may change or disappear in
         future versions.
 
-    Creates a dual, overlapping, cocentric pie chart in *ax*, which can be useful for
-    visualizing relative probability distributions. See the TODO (was
-    countin.md#visualization) for examples.
+    Creates a dual, overlapping, cocentric pie chart in
+    [*ax*](https://matplotlib.org/stable/api/axes_api.html#the-axes-class), which can be
+    useful for visualizing relative probability distributions. Examples can be found in
+    [Additional interfaces](index.md#additional-interfaces).
     """
     assert matplotlib
     h_outer = h_inner if h_outer is None else h_outer
@@ -369,7 +462,7 @@ def plot_burst(
     inner = (
         (
             inner_formatter(outcome, probability, h_inner)
-            if probability >= _HIDE_LIM
+            if probability >= _LABEL_LIM
             else "",
             probability,
         )
@@ -382,7 +475,7 @@ def plot_burst(
     outer = (
         (
             outer_formatter(outcome, probability, h_outer)
-            if probability >= _HIDE_LIM
+            if probability >= _LABEL_LIM
             else "",
             probability,
         )
@@ -489,12 +582,12 @@ def jupyter_visualize(
     visualization reminiscent of [AnyDice](https://anydice.com/), but with some extra
     goodies.
 
-    Each item in *histogram_specs* can be an ``dyce.H`` object, a 2-tuple, or a 3-tuple.
-    2-tuples are in the format ``#!python (str, H)``, where ``#!python str`` is a name
-    or description that will be used to identify the accompanying ``#! H`` object where
-    it appears in the visualization. 3-tuples are in the format ``#!python (str, H,
-    H)``. The second ``#! H`` object is used for the interior ring in “burst” break-out
-    graphs, but otherwise ignored.
+    Each item in *histogram_specs* can be a ``#!python dyce.H`` object, a 2-tuple, or a
+    3-tuple. 2-tuples are in the format ``#!python (str, H)``, where ``#!python str`` is
+    a name or description that will be used to identify the accompanying ``#!python H``
+    object where it appears in the visualization. 3-tuples are in the format ``#!python
+    (str, H, H)``. The second ``#!python H`` object is used for the interior ring in
+    “burst” break-out graphs, but otherwise ignored.
 
     The “Powered by the _Apocalypse_ (PbtA)” example in the introduction notebook should
     give an idea of the effect. (See [Interactive quick
@@ -514,8 +607,10 @@ def jupyter_visualize(
     assert default_main_plot_type in main_plot_funcs_by_type
 
     def _display(
+        scale: int,
+        enable_cutoff: bool,
+        cutoff: int,
         breakouts: BreakoutType,
-        scale: float,
         main_plot_type: str,
         main_plot_style: str,
         alpha: float,
@@ -527,6 +622,13 @@ def jupyter_visualize(
         burst_swap: bool,
     ) -> None:
         def _hs() -> Iterator[Tuple[str, H, Optional[H]]]:
+            if enable_cutoff:
+                cutoff_frac = Fraction(cutoff).limit_denominator(
+                    _CUTOFF_BASE ** _CUTOFF_EXP
+                )
+            else:
+                cutoff_frac = Fraction(0)
+
             label: str
             first_h_like: HLikeT
             second_h_like: Optional[HLikeT]
@@ -545,19 +647,26 @@ def jupyter_visualize(
                         second_h_like = thing[2]  # type: ignore [misc]
 
                 assert isinstance(label, str)
-                first_h = (
+                first_h = limit_for_display(
                     first_h_like.h()
                     if isinstance(first_h_like, HableT)
-                    else first_h_like
+                    else first_h_like,
+                    cutoff_frac,
                 )
                 assert isinstance(
                     first_h, H
                 ), f"unrecognized histogram type {first_h!r}"
-                second_h = (
-                    second_h_like.h()
-                    if isinstance(second_h_like, HableT)
-                    else second_h_like
-                )
+
+                if second_h_like is None:
+                    second_h = None
+                else:
+                    second_h = limit_for_display(
+                        second_h_like.h()
+                        if isinstance(second_h_like, HableT)
+                        else second_h_like,
+                        cutoff_frac,
+                    )
+
                 assert second_h is None or isinstance(
                     second_h, H
                 ), f"unrecognized histogram type {second_h!r}"
@@ -630,6 +739,7 @@ Download raw data as CSV
 
         matplotlib.pyplot.show()
 
+        cutoff_widget.disabled = not enable_cutoff
         burst_graph_color_widget.disabled = True
         burst_text_color_widget.disabled = True
         burst_bg_color_widget.disabled = True
@@ -747,6 +857,28 @@ Download raw data as CSV
                 breakouts == BreakoutType.NONE
             ), f"unrecognized breakout type {breakouts!r}"
 
+    scale_widget = ipywidgets.widgets.IntSlider(
+        value=12,
+        min=8,
+        max=16,
+        step=1,
+        continuous_update=False,
+        description="Scale",
+    )
+    enable_cutoff_widget = ipywidgets.widgets.Checkbox(
+        value=True,
+        description="Hide Data",
+    )
+    cutoff_widget = ipywidgets.widgets.FloatLogSlider(
+        value=_CUTOFF_BASE ** -(_CUTOFF_EXP - 2),
+        base=_CUTOFF_BASE,
+        min=-_CUTOFF_EXP,
+        max=-(_CUTOFF_EXP - 3),
+        step=0.2,
+        continuous_update=False,
+        readout_format=".6f",
+        description="Hide up to",
+    )
     breakouts_widget = ipywidgets.widgets.RadioButtons(
         value=BreakoutType(default_breakout_type),
         options=(
@@ -754,15 +886,6 @@ Download raw data as CSV
             ("Horizontal Bar", BreakoutType.BARH),
             ("Burst", BreakoutType.BURST),
         ),
-    )
-    scale_widget = ipywidgets.widgets.FloatSlider(
-        value=12,
-        min=8,
-        max=16,
-        step=1,
-        continuous_update=False,
-        readout_format="0d",
-        description="Scale",
     )
     main_plot_type_widget = ipywidgets.widgets.Dropdown(
         value=default_main_plot_type,
@@ -821,9 +944,11 @@ Download raw data as CSV
                     [
                         ipywidgets.widgets.VBox(
                             [
+                                scale_widget,
+                                enable_cutoff_widget,
+                                cutoff_widget,
                                 ipywidgets.widgets.Label("Break-out Graphs:"),
                                 breakouts_widget,
-                                scale_widget,
                             ]
                         ),
                         ipywidgets.widgets.VBox(
@@ -848,8 +973,10 @@ Download raw data as CSV
                 ipywidgets.widgets.interactive_output(
                     _display,
                     {
-                        "breakouts": breakouts_widget,
                         "scale": scale_widget,
+                        "enable_cutoff": enable_cutoff_widget,
+                        "cutoff": cutoff_widget,
+                        "breakouts": breakouts_widget,
                         "main_plot_type": main_plot_type_widget,
                         "main_plot_style": main_plot_style_widget,
                         "alpha": alpha_widget,
