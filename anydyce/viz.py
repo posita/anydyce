@@ -265,7 +265,7 @@ def limit_for_display(h: H, cutoff: Fraction = _CUTOFF_LIM) -> H:
         future versions.
 
     Discards outcomes in *h*, starting with the smallest counts as long as the total
-    discarded in proportion to ``#!python h.total()`` does not exceed *cutoff*. This can
+    discarded in proportion to ``#!python h.total`` does not exceed *cutoff*. This can
     be useful in speeding up plots where there are large number of negligible
     probabilities.
 
@@ -274,7 +274,7 @@ def limit_for_display(h: H, cutoff: Fraction = _CUTOFF_LIM) -> H:
     >>> from dyce import H
     >>> from fractions import Fraction
     >>> h = H({1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6})
-    >>> h.total() if callable(h.total) else h.total  # type: ignore
+    >>> h.total
     21
     >>> limit_for_display(h, cutoff=Fraction(5, 21))
     H({3: 3, 4: 4, 5: 5, 6: 6})
@@ -286,7 +286,7 @@ def limit_for_display(h: H, cutoff: Fraction = _CUTOFF_LIM) -> H:
     if cutoff < 0 or cutoff > 1:
         raise ValueError(f"cutoff ({cutoff}) must be between zero and one, inclusive")
 
-    cutoff_count = int(cutoff * _h_total(h))
+    cutoff_count = int(cutoff * h.total)
 
     if cutoff_count == 0:
         return h
@@ -718,7 +718,7 @@ def jupyter_visualize(
                 row = {"Outcome": outcome}
                 row.update(
                     {
-                        label: h[outcome] / _h_total(h)
+                        label: h[outcome] / h.total
                         for label, h, _ in hs_list
                         if outcome in h
                     }
@@ -1028,9 +1028,3 @@ Download raw data as CSV
             ]
         )
     )
-
-
-def _h_total(h: H) -> int:
-    from typing import cast
-
-    return cast(int, h.total() if callable(h.total) else h.total)

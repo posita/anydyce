@@ -15,8 +15,9 @@
 
 # ``anydyce`` release notes
 
-## [0.1.7](https://github.com/posita/anydyce/releases/tag/v0.1.7)
+## [0.2.0](https://github.com/posita/anydyce/releases/tag/v0.2.0)
 
+* Completes update to ``dyce>=0.6``.
 * Migrates from [``setuptools_scm``](https://pypi.org/project/setuptools-scm/) to [``versioningit``](https://pypi.org/project/versioningit/) for more flexible version number formatting.
 * Allows deployments to PyPI from CI based on tags.
 
