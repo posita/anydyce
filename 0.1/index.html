@@ -882,7 +882,7 @@ Overrides apply counter-clockwise, starting from the 12 o’clock position.</p>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
 
 <span class="kn">from</span> <span class="nn">dyce</span> <span class="kn">import</span> <span class="n">H</span>
-<span class="kn">from</span> <span class="nn">numerary</span> <span class="kn">import</span> <span class="n">RealLikeSCU</span>
+<span class="kn">from</span> <span class="nn">numerary</span> <span class="kn">import</span> <span class="n">RealLike</span>
 
 <span class="kn">from</span> <span class="nn">anydyce.viz</span> <span class="kn">import</span> <span class="n">plot_burst</span>
 
@@ -890,8 +890,8 @@ Overrides apply counter-clockwise, starting from the 12 o’clock position.</p>
 <span class="k">def</span> <span class="nf">do_it</span><span class="p">(</span><span class="n">style</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span>
 
-    <span class="k">def</span> <span class="nf">d20formatter</span><span class="p">(</span><span class="n">outcome</span><span class="p">:</span> <span class="n">RealLikeSCU</span><span class="p">,</span> <span class="n">probability</span><span class="p">:</span> <span class="n">Fraction</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">H</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="n">vals</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">RealLikeSCU</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="k">def</span> <span class="nf">d20formatter</span><span class="p">(</span><span class="n">outcome</span><span class="p">:</span> <span class="n">RealLike</span><span class="p">,</span> <span class="n">probability</span><span class="p">:</span> <span class="n">Fraction</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">H</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">vals</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">RealLike</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="o">-</span><span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;crit. fail.&quot;</span><span class="p">,</span>
             <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;fail.&quot;</span><span class="p">,</span>
             <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;succ.&quot;</span><span class="p">,</span>
