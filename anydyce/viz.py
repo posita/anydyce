@@ -866,7 +866,7 @@ Download raw data as CSV
         description="Scale",
     )
     enable_cutoff_widget = ipywidgets.widgets.Checkbox(
-        value=True,
+        value=False,
         description="Hide Data",
     )
     cutoff_widget = ipywidgets.widgets.FloatLogSlider(

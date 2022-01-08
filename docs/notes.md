@@ -15,6 +15,10 @@
 
 # ``anydyce`` release notes
 
+## [0.1.3](https://github.com/posita/dyce/releases/tag/v0.1.3)
+
+* Turns data limiting off by default in [``jupyter_visualize``][anydyce.viz.jupyter_visualize].
+
 ## [0.1.2](https://github.com/posita/dyce/releases/tag/v0.1.2)
 
 * Adds [``limit_for_display``][anydyce.viz.limit_for_display] and updates [``jupyter_visualize``][anydyce.viz.jupyter_visualize].
