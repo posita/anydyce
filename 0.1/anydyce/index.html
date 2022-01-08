@@ -463,7 +463,7 @@
 
 
 <h2 id="anydyce.viz.jupyter_visualize" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">jupyter_visualize</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">]]],</span> <span class="n">default_breakout_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">BreakoutType</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">BreakoutType</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span> <span class="mi">0</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">default_markers</span> <span class="o">=</span> <span class="s1">&#39;&lt;&gt;v^dPXo&#39;</span><span class="p">,</span> <span class="n">default_main_plot_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="n">main_plot_funcs_by_type</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;bar&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_bar</span> <span class="n">at</span> <span class="mh">0x11ce78040</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;line&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_line</span> <span class="n">at</span> <span class="mh">0x11e1f74c0</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;scatter&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_scatter</span> <span class="n">at</span> <span class="mh">0x11e1f7550</span><span class="o">&gt;</span><span class="p">})</span></code>
+<code class="highlight language-python"><span class="n">jupyter_visualize</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">]]],</span> <span class="n">default_breakout_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">BreakoutType</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">BreakoutType</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span> <span class="mi">0</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">default_markers</span> <span class="o">=</span> <span class="s1">&#39;&lt;&gt;v^dPXo&#39;</span><span class="p">,</span> <span class="n">default_main_plot_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="n">main_plot_funcs_by_type</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;bar&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_bar</span> <span class="n">at</span> <span class="mh">0x11a3a08b0</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;line&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_line</span> <span class="n">at</span> <span class="mh">0x11b70bd30</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;scatter&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_scatter</span> <span class="n">at</span> <span class="mh">0x11b70bdc0</span><span class="o">&gt;</span><span class="p">})</span></code>
 
 
 </h2>
@@ -478,11 +478,11 @@ future versions.</p>
 <p>Takes a list of one or more <em>histogram_specs</em> and produces an interactive
 visualization reminiscent of <a href="https://anydice.com/">AnyDice</a>, but with some extra
 goodies.</p>
-<p>Each item in <em>histogram_specs</em> can be an <code>dyce.H</code> object, a 2-tuple, or a 3-tuple.
-2-tuples are in the format <code class="highlight"><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span></code>, where <code class="highlight"><span class="nb">str</span></code> is a name
-or description that will be used to identify the accompanying <code>H</code> object where
-it appears in the visualization. 3-tuples are in the format <code class="highlight"><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span><span class="n">H</span><span class="p">)</span></code>. The second <code>H</code> object is used for the interior ring in “burst” break-out
-graphs, but otherwise ignored.</p>
+<p>Each item in <em>histogram_specs</em> can be a <code class="highlight"><span class="n">dyce</span><span class="o">.</span><span class="n">H</span></code> object, a 2-tuple, or a
+3-tuple. 2-tuples are in the format <code class="highlight"><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span></code>, where <code class="highlight"><span class="nb">str</span></code> is
+a name or description that will be used to identify the accompanying <code class="highlight"><span class="n">H</span></code>
+object where it appears in the visualization. 3-tuples are in the format <code class="highlight"><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span></code>. The second <code class="highlight"><span class="n">H</span></code> object is used for the interior ring in
+“burst” break-out graphs, but otherwise ignored.</p>
 <p>The “Powered by the <em>Apocalypse</em> (PbtA)” example in the introduction notebook should
 give an idea of the effect. (See <a href="..#interactive-quick-start">Interactive quick
 start</a>.)</p>
@@ -514,12 +514,12 @@ with the interactive controls.</p>
 <span class="sd">    visualization reminiscent of [AnyDice](https://anydice.com/), but with some extra</span>
 <span class="sd">    goodies.</span>
 
-<span class="sd">    Each item in *histogram_specs* can be an ``dyce.H`` object, a 2-tuple, or a 3-tuple.</span>
-<span class="sd">    2-tuples are in the format ``#!python (str, H)``, where ``#!python str`` is a name</span>
-<span class="sd">    or description that will be used to identify the accompanying ``#! H`` object where</span>
-<span class="sd">    it appears in the visualization. 3-tuples are in the format ``#!python (str, H,</span>
-<span class="sd">    H)``. The second ``#! H`` object is used for the interior ring in “burst” break-out</span>
-<span class="sd">    graphs, but otherwise ignored.</span>
+<span class="sd">    Each item in *histogram_specs* can be a ``#!python dyce.H`` object, a 2-tuple, or a</span>
+<span class="sd">    3-tuple. 2-tuples are in the format ``#!python (str, H)``, where ``#!python str`` is</span>
+<span class="sd">    a name or description that will be used to identify the accompanying ``#!python H``</span>
+<span class="sd">    object where it appears in the visualization. 3-tuples are in the format ``#!python</span>
+<span class="sd">    (str, H, H)``. The second ``#!python H`` object is used for the interior ring in</span>
+<span class="sd">    “burst” break-out graphs, but otherwise ignored.</span>
 
 <span class="sd">    The “Powered by the _Apocalypse_ (PbtA)” example in the introduction notebook should</span>
 <span class="sd">    give an idea of the effect. (See [Interactive quick</span>
@@ -539,8 +539,10 @@ with the interactive controls.</p>
     <span class="k">assert</span> <span class="n">default_main_plot_type</span> <span class="ow">in</span> <span class="n">main_plot_funcs_by_type</span>
 
     <span class="k">def</span> <span class="nf">_display</span><span class="p">(</span>
+        <span class="n">scale</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">enable_cutoff</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">cutoff</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">breakouts</span><span class="p">:</span> <span class="n">BreakoutType</span><span class="p">,</span>
-        <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">main_plot_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">main_plot_style</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -552,6 +554,13 @@ with the interactive controls.</p>
         <span class="n">burst_swap</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">def</span> <span class="nf">_hs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">H</span><span class="p">]]]:</span>
+            <span class="k">if</span> <span class="n">enable_cutoff</span><span class="p">:</span>
+                <span class="n">cutoff_frac</span> <span class="o">=</span> <span class="n">Fraction</span><span class="p">(</span><span class="n">cutoff</span><span class="p">)</span><span class="o">.</span><span class="n">limit_denominator</span><span class="p">(</span>
+                    <span class="n">_CUTOFF_BASE</span> <span class="o">**</span> <span class="n">_CUTOFF_EXP</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cutoff_frac</span> <span class="o">=</span> <span class="n">Fraction</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
             <span class="n">label</span><span class="p">:</span> <span class="nb">str</span>
             <span class="n">first_h_like</span><span class="p">:</span> <span class="n">HLikeT</span>
             <span class="n">second_h_like</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]</span>
@@ -570,19 +579,26 @@ with the interactive controls.</p>
                         <span class="n">second_h_like</span> <span class="o">=</span> <span class="n">thing</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># type: ignore [misc]</span>
 
                 <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-                <span class="n">first_h</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">first_h</span> <span class="o">=</span> <span class="n">limit_for_display</span><span class="p">(</span>
                     <span class="n">first_h_like</span><span class="o">.</span><span class="n">h</span><span class="p">()</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first_h_like</span><span class="p">,</span> <span class="n">HableT</span><span class="p">)</span>
-                    <span class="k">else</span> <span class="n">first_h_like</span>
+                    <span class="k">else</span> <span class="n">first_h_like</span><span class="p">,</span>
+                    <span class="n">cutoff_frac</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
                     <span class="n">first_h</span><span class="p">,</span> <span class="n">H</span>
                 <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;unrecognized histogram type </span><span class="si">{</span><span class="n">first_h</span><span class="si">!r}</span><span class="s2">&quot;</span>
-                <span class="n">second_h</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">second_h_like</span><span class="o">.</span><span class="n">h</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">second_h_like</span><span class="p">,</span> <span class="n">HableT</span><span class="p">)</span>
-                    <span class="k">else</span> <span class="n">second_h_like</span>
-                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">second_h_like</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">second_h</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">second_h</span> <span class="o">=</span> <span class="n">limit_for_display</span><span class="p">(</span>
+                        <span class="n">second_h_like</span><span class="o">.</span><span class="n">h</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">second_h_like</span><span class="p">,</span> <span class="n">HableT</span><span class="p">)</span>
+                        <span class="k">else</span> <span class="n">second_h_like</span><span class="p">,</span>
+                        <span class="n">cutoff_frac</span><span class="p">,</span>
+                    <span class="p">)</span>
+
                 <span class="k">assert</span> <span class="n">second_h</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span>
                     <span class="n">second_h</span><span class="p">,</span> <span class="n">H</span>
                 <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;unrecognized histogram type </span><span class="si">{</span><span class="n">second_h</span><span class="si">!r}</span><span class="s2">&quot;</span>
@@ -655,6 +671,7 @@ with the interactive controls.</p>
 
         <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
+        <span class="n">cutoff_widget</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">enable_cutoff</span>
         <span class="n">burst_graph_color_widget</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">burst_text_color_widget</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">burst_bg_color_widget</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="kc">True</span>
@@ -772,6 +789,28 @@ with the interactive controls.</p>
                 <span class="n">breakouts</span> <span class="o">==</span> <span class="n">BreakoutType</span><span class="o">.</span><span class="n">NONE</span>
             <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;unrecognized breakout type </span><span class="si">{</span><span class="n">breakouts</span><span class="si">!r}</span><span class="s2">&quot;</span>
 
+    <span class="n">scale_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">IntSlider</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+        <span class="nb">min</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+        <span class="nb">max</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+        <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">continuous_update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Scale&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">enable_cutoff_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Hide Data&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">cutoff_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">FloatLogSlider</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="n">_CUTOFF_BASE</span> <span class="o">**</span> <span class="o">-</span><span class="p">(</span><span class="n">_CUTOFF_EXP</span> <span class="o">-</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="n">base</span><span class="o">=</span><span class="n">_CUTOFF_BASE</span><span class="p">,</span>
+        <span class="nb">min</span><span class="o">=-</span><span class="n">_CUTOFF_EXP</span><span class="p">,</span>
+        <span class="nb">max</span><span class="o">=-</span><span class="p">(</span><span class="n">_CUTOFF_EXP</span> <span class="o">-</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="n">step</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">continuous_update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">readout_format</span><span class="o">=</span><span class="s2">&quot;.6f&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Hide up to&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">breakouts_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">RadioButtons</span><span class="p">(</span>
         <span class="n">value</span><span class="o">=</span><span class="n">BreakoutType</span><span class="p">(</span><span class="n">default_breakout_type</span><span class="p">),</span>
         <span class="n">options</span><span class="o">=</span><span class="p">(</span>
@@ -779,15 +818,6 @@ with the interactive controls.</p>
             <span class="p">(</span><span class="s2">&quot;Horizontal Bar&quot;</span><span class="p">,</span> <span class="n">BreakoutType</span><span class="o">.</span><span class="n">BARH</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">&quot;Burst&quot;</span><span class="p">,</span> <span class="n">BreakoutType</span><span class="o">.</span><span class="n">BURST</span><span class="p">),</span>
         <span class="p">),</span>
-    <span class="p">)</span>
-    <span class="n">scale_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">FloatSlider</span><span class="p">(</span>
-        <span class="n">value</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-        <span class="nb">min</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-        <span class="nb">max</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
-        <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">continuous_update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">readout_format</span><span class="o">=</span><span class="s2">&quot;0d&quot;</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Scale&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">main_plot_type_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span>
         <span class="n">value</span><span class="o">=</span><span class="n">default_main_plot_type</span><span class="p">,</span>
@@ -846,9 +876,11 @@ with the interactive controls.</p>
                     <span class="p">[</span>
                         <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">(</span>
                             <span class="p">[</span>
+                                <span class="n">scale_widget</span><span class="p">,</span>
+                                <span class="n">enable_cutoff_widget</span><span class="p">,</span>
+                                <span class="n">cutoff_widget</span><span class="p">,</span>
                                 <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="s2">&quot;Break-out Graphs:&quot;</span><span class="p">),</span>
                                 <span class="n">breakouts_widget</span><span class="p">,</span>
-                                <span class="n">scale_widget</span><span class="p">,</span>
                             <span class="p">]</span>
                         <span class="p">),</span>
                         <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">(</span>
@@ -873,8 +905,10 @@ with the interactive controls.</p>
                 <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">interactive_output</span><span class="p">(</span>
                     <span class="n">_display</span><span class="p">,</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;breakouts&quot;</span><span class="p">:</span> <span class="n">breakouts_widget</span><span class="p">,</span>
                         <span class="s2">&quot;scale&quot;</span><span class="p">:</span> <span class="n">scale_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;enable_cutoff&quot;</span><span class="p">:</span> <span class="n">enable_cutoff_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;cutoff&quot;</span><span class="p">:</span> <span class="n">cutoff_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;breakouts&quot;</span><span class="p">:</span> <span class="n">breakouts_widget</span><span class="p">,</span>
                         <span class="s2">&quot;main_plot_type&quot;</span><span class="p">:</span> <span class="n">main_plot_type_widget</span><span class="p">,</span>
                         <span class="s2">&quot;main_plot_style&quot;</span><span class="p">:</span> <span class="n">main_plot_style_widget</span><span class="p">,</span>
                         <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="n">alpha_widget</span><span class="p">,</span>

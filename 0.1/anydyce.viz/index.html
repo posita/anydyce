@@ -375,8 +375,50 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#anydyce.viz.jupyter_visualize" class="md-nav__link">
+    jupyter_visualize()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anydyce.viz.limit_for_display" class="md-nav__link">
+    limit_for_display()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anydyce.viz.plot_bar" class="md-nav__link">
+    plot_bar()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#anydyce.viz.plot_burst" class="md-nav__link">
     plot_burst()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anydyce.viz.plot_burst_subplot" class="md-nav__link">
+    plot_burst_subplot()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anydyce.viz.plot_line" class="md-nav__link">
+    plot_line()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anydyce.viz.plot_scatter" class="md-nav__link">
+    plot_scatter()
   </a>
   
 </li>
@@ -518,8 +560,8 @@ value to <a href="#anydyce.viz.plot_burst"><code>plot_burst</code></a>.</p>
 
 
 
-<h2 id="anydyce.viz.plot_burst" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">plot_burst</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span> <span class="n">h_inner</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span> <span class="n">h_outer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">H</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inner_formatter</span><span class="p">:</span> <span class="n">HFormatterT</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_outcome_name_formatter</span> <span class="n">at</span> <span class="mh">0x11e1f75e0</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">inner_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;RdYlGn_r&#39;</span><span class="p">,</span> <span class="n">outer_formatter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HFormatterT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">outer_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">text_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+<h2 id="anydyce.viz.jupyter_visualize" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">jupyter_visualize</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">]]],</span> <span class="n">default_breakout_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">BreakoutType</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">BreakoutType</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span> <span class="mi">0</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">default_markers</span> <span class="o">=</span> <span class="s1">&#39;&lt;&gt;v^dPXo&#39;</span><span class="p">,</span> <span class="n">default_main_plot_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="n">main_plot_funcs_by_type</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;bar&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_bar</span> <span class="n">at</span> <span class="mh">0x11a3a08b0</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;line&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_line</span> <span class="n">at</span> <span class="mh">0x11b70bd30</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;scatter&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_scatter</span> <span class="n">at</span> <span class="mh">0x11b70bdc0</span><span class="o">&gt;</span><span class="p">})</span></code>
 
 
 </h2>
@@ -531,9 +573,661 @@ value to <a href="#anydyce.viz.plot_burst"><code>plot_burst</code></a>.</p>
 <p>This function should be considered experimental and may change or disappear in
 future versions.</p>
 </div>
-<p>Creates a dual, overlapping, cocentric pie chart in <em>ax</em>, which can be useful for
-visualizing relative probability distributions. See the TODO (was
-countin.md#visualization) for examples.</p>
+<p>Takes a list of one or more <em>histogram_specs</em> and produces an interactive
+visualization reminiscent of <a href="https://anydice.com/">AnyDice</a>, but with some extra
+goodies.</p>
+<p>Each item in <em>histogram_specs</em> can be a <code class="highlight"><span class="n">dyce</span><span class="o">.</span><span class="n">H</span></code> object, a 2-tuple, or a
+3-tuple. 2-tuples are in the format <code class="highlight"><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span></code>, where <code class="highlight"><span class="nb">str</span></code> is
+a name or description that will be used to identify the accompanying <code class="highlight"><span class="n">H</span></code>
+object where it appears in the visualization. 3-tuples are in the format <code class="highlight"><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span></code>. The second <code class="highlight"><span class="n">H</span></code> object is used for the interior ring in
+“burst” break-out graphs, but otherwise ignored.</p>
+<p>The “Powered by the <em>Apocalypse</em> (PbtA)” example in the introduction notebook should
+give an idea of the effect. (See <a href="..#interactive-quick-start">Interactive quick
+start</a>.)</p>
+<p>The <em>default_breakout_type</em> parameter indicates which break-out graphs to display
+initially and defaults to <a href="../anydyce/#anydyce.viz.BreakoutType.NONE"><code>BreakoutType.NONE</code></a>.
+This only affects the initial display. Break-out graphs can be hidden or changed
+with the interactive controls.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>anydyce/viz.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@experimental</span>
+<span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">jupyter_visualize</span><span class="p">(</span>
+    <span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span>
+        <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">]]</span>
+    <span class="p">],</span>
+    <span class="n">default_breakout_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">BreakoutType</span><span class="p">]</span> <span class="o">=</span> <span class="n">BreakoutType</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+    <span class="n">default_markers</span><span class="o">=</span><span class="s2">&quot;&lt;&gt;v^dPXo&quot;</span><span class="p">,</span>
+    <span class="n">default_main_plot_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;line&quot;</span><span class="p">,</span>
+    <span class="n">main_plot_funcs_by_type</span><span class="o">=</span><span class="n">_DEFAULT_MAIN_PLOT_FUNCS_BY_NAME</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    !!! warning &quot;Experimental&quot;</span>
+
+<span class="sd">        This function should be considered experimental and may change or disappear in</span>
+<span class="sd">        future versions.</span>
+
+<span class="sd">    Takes a list of one or more *histogram_specs* and produces an interactive</span>
+<span class="sd">    visualization reminiscent of [AnyDice](https://anydice.com/), but with some extra</span>
+<span class="sd">    goodies.</span>
+
+<span class="sd">    Each item in *histogram_specs* can be a ``#!python dyce.H`` object, a 2-tuple, or a</span>
+<span class="sd">    3-tuple. 2-tuples are in the format ``#!python (str, H)``, where ``#!python str`` is</span>
+<span class="sd">    a name or description that will be used to identify the accompanying ``#!python H``</span>
+<span class="sd">    object where it appears in the visualization. 3-tuples are in the format ``#!python</span>
+<span class="sd">    (str, H, H)``. The second ``#!python H`` object is used for the interior ring in</span>
+<span class="sd">    “burst” break-out graphs, but otherwise ignored.</span>
+
+<span class="sd">    The “Powered by the _Apocalypse_ (PbtA)” example in the introduction notebook should</span>
+<span class="sd">    give an idea of the effect. (See [Interactive quick</span>
+<span class="sd">    start](index.md#interactive-quick-start).)</span>
+
+<span class="sd">    The *default_breakout_type* parameter indicates which break-out graphs to display</span>
+<span class="sd">    initially and defaults to [``BreakoutType.NONE``][anydyce.viz.BreakoutType.NONE].</span>
+<span class="sd">    This only affects the initial display. Break-out graphs can be hidden or changed</span>
+<span class="sd">    with the interactive controls.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO(posita): This is a hack-on-a-stream-of-consciousness-until-it-kind-of-works</span>
+    <span class="c1"># approach. It would be nice if we had some semblance of an architecture, especially</span>
+    <span class="c1"># one that allowed for better customization building blocks. Right now, it&#39;s pretty</span>
+    <span class="c1"># limited and fragile.</span>
+    <span class="k">assert</span> <span class="n">ipywidgets</span>
+    <span class="k">assert</span> <span class="n">matplotlib</span>
+    <span class="k">assert</span> <span class="n">default_main_plot_type</span> <span class="ow">in</span> <span class="n">main_plot_funcs_by_type</span>
+
+    <span class="k">def</span> <span class="nf">_display</span><span class="p">(</span>
+        <span class="n">scale</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">enable_cutoff</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">cutoff</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">breakouts</span><span class="p">:</span> <span class="n">BreakoutType</span><span class="p">,</span>
+        <span class="n">main_plot_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">main_plot_style</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">show_shadow</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">markers</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">burst_graph_color</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">burst_text_color</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">burst_bg_color</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">burst_swap</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">_hs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">H</span><span class="p">]]]:</span>
+            <span class="k">if</span> <span class="n">enable_cutoff</span><span class="p">:</span>
+                <span class="n">cutoff_frac</span> <span class="o">=</span> <span class="n">Fraction</span><span class="p">(</span><span class="n">cutoff</span><span class="p">)</span><span class="o">.</span><span class="n">limit_denominator</span><span class="p">(</span>
+                    <span class="n">_CUTOFF_BASE</span> <span class="o">**</span> <span class="n">_CUTOFF_EXP</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cutoff_frac</span> <span class="o">=</span> <span class="n">Fraction</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">label</span><span class="p">:</span> <span class="nb">str</span>
+            <span class="n">first_h_like</span><span class="p">:</span> <span class="n">HLikeT</span>
+            <span class="n">second_h_like</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">thing</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">HableT</span><span class="p">)):</span>
+                    <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Histogram </span><span class="si">{</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">first_h_like</span> <span class="o">=</span> <span class="n">thing</span>
+                    <span class="n">second_h_like</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">label</span><span class="p">,</span> <span class="n">first_h_like</span> <span class="o">=</span> <span class="n">thing</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">thing</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">second_h_like</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">second_h_like</span> <span class="o">=</span> <span class="n">thing</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># type: ignore [misc]</span>
+
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+                <span class="n">first_h</span> <span class="o">=</span> <span class="n">limit_for_display</span><span class="p">(</span>
+                    <span class="n">first_h_like</span><span class="o">.</span><span class="n">h</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first_h_like</span><span class="p">,</span> <span class="n">HableT</span><span class="p">)</span>
+                    <span class="k">else</span> <span class="n">first_h_like</span><span class="p">,</span>
+                    <span class="n">cutoff_frac</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">first_h</span><span class="p">,</span> <span class="n">H</span>
+                <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;unrecognized histogram type </span><span class="si">{</span><span class="n">first_h</span><span class="si">!r}</span><span class="s2">&quot;</span>
+
+                <span class="k">if</span> <span class="n">second_h_like</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">second_h</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">second_h</span> <span class="o">=</span> <span class="n">limit_for_display</span><span class="p">(</span>
+                        <span class="n">second_h_like</span><span class="o">.</span><span class="n">h</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">second_h_like</span><span class="p">,</span> <span class="n">HableT</span><span class="p">)</span>
+                        <span class="k">else</span> <span class="n">second_h_like</span><span class="p">,</span>
+                        <span class="n">cutoff_frac</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                <span class="k">assert</span> <span class="n">second_h</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">second_h</span><span class="p">,</span> <span class="n">H</span>
+                <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;unrecognized histogram type </span><span class="si">{</span><span class="n">second_h</span><span class="si">!r}</span><span class="s2">&quot;</span>
+                <span class="k">yield</span> <span class="n">label</span><span class="p">,</span> <span class="n">first_h</span><span class="p">,</span> <span class="n">second_h</span>
+
+        <span class="n">hs_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_hs</span><span class="p">())</span>
+        <span class="n">unique_outcomes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">outcomes</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">hs_list</span><span class="p">))</span>
+        <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_csv_download_link</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">HTML</span><span class="p">:</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">hs_list</span><span class="p">]</span>
+            <span class="n">raw_buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
+            <span class="n">csv_buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">TextIOWrapper</span><span class="p">(</span>
+                <span class="n">raw_buffer</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">write_through</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="n">csv_writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">csv_buffer</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Outcome&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">labels</span><span class="p">)</span>
+            <span class="n">csv_writer</span><span class="o">.</span><span class="n">writeheader</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="n">unique_outcomes</span><span class="p">:</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Outcome&quot;</span><span class="p">:</span> <span class="n">outcome</span><span class="p">}</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="n">label</span><span class="p">:</span> <span class="n">h</span><span class="p">[</span><span class="n">outcome</span><span class="p">]</span> <span class="o">/</span> <span class="n">h</span><span class="o">.</span><span class="n">total</span>
+                        <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">hs_list</span>
+                        <span class="k">if</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="n">h</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+                <span class="n">csv_writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+            <span class="c1"># Inspiration: &lt;https://medium.com/@charles2588/how-to-upload-download-files-to-from-notebook-in-my-local-machine-6a4e65a15767&gt;</span>
+            <span class="n">csv_name</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+            <span class="n">csv_name</span> <span class="o">=</span> <span class="n">csv_name</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">32</span> <span class="k">else</span> <span class="p">(</span><span class="n">csv_name</span><span class="p">[:</span><span class="mi">29</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span><span class="p">)</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">standard_b64encode</span><span class="p">(</span><span class="n">raw_buffer</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="n">HTML</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;a download=&quot;</span><span class="si">{</span><span class="n">csv_name</span><span class="si">}</span><span class="s2">.csv&quot; href=&quot;data:text/csv;base64,</span><span class="si">{</span><span class="n">payload</span><span class="si">}</span><span class="s2">&quot; target=&quot;_blank&quot;&gt;</span>
+<span class="s2">Download raw data as CSV</span>
+<span class="s2">&lt;/a&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">display</span><span class="p">(</span><span class="n">_csv_download_link</span><span class="p">())</span>
+
+        <span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParamsDefault</span><span class="p">)</span>
+        <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;figure.figsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">scale</span><span class="p">,</span>
+            <span class="n">scale</span> <span class="o">/</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">9</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">matplotlib</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">main_plot_style</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">main_plot_type</span> <span class="o">==</span> <span class="s2">&quot;scatter&quot;</span><span class="p">:</span>
+            <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;lines.markersize&quot;</span><span class="p">]</span> <span class="o">*=</span> <span class="mi">2</span>
+
+        <span class="n">main_plot_funcs_by_type</span><span class="p">[</span><span class="n">main_plot_type</span><span class="p">](</span>
+            <span class="n">ax</span><span class="p">,</span>
+            <span class="n">hs_list</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+            <span class="n">show_shadow</span><span class="o">=</span><span class="n">show_shadow</span><span class="p">,</span>
+            <span class="n">markers</span><span class="o">=</span><span class="n">markers</span> <span class="k">if</span> <span class="n">markers</span> <span class="k">else</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">unique_outcomes</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+            <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+        <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="n">cutoff_widget</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">enable_cutoff</span>
+        <span class="n">burst_graph_color_widget</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">burst_text_color_widget</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">burst_bg_color_widget</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">burst_swap_widget</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">breakouts</span> <span class="o">==</span> <span class="n">BreakoutType</span><span class="o">.</span><span class="n">BARH</span><span class="p">:</span>
+            <span class="n">per_outcome_height</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">per_breakout_height</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">total_height</span> <span class="o">=</span> <span class="n">per_breakout_height</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">hs_list</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span>
+                <span class="n">per_outcome_height</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">outcomes</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">hs_list</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">inches_per_height_unit</span> <span class="o">=</span> <span class="n">scale</span> <span class="o">/</span> <span class="mi">64</span>
+            <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;figure.figsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">scale</span><span class="p">,</span>
+                <span class="n">total_height</span> <span class="o">*</span> <span class="n">inches_per_height_unit</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">grid</span> <span class="o">=</span> <span class="p">(</span><span class="n">total_height</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">top</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">src_ax</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">barh_kw</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">show_shadow</span><span class="p">:</span>
+                <span class="n">barh_kw</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">path_effects</span><span class="o">=</span><span class="p">[</span>
+                            <span class="n">matplotlib</span><span class="o">.</span><span class="n">patheffects</span><span class="o">.</span><span class="n">withSimplePatchShadow</span><span class="p">(),</span>
+                            <span class="n">matplotlib</span><span class="o">.</span><span class="n">patheffects</span><span class="o">.</span><span class="n">Normal</span><span class="p">(),</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hs_list</span><span class="p">):</span>
+                <span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="o">*</span><span class="n">h</span><span class="o">.</span><span class="n">distribution</span><span class="p">(</span><span class="n">rational_t</span><span class="o">=</span><span class="k">lambda</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">n</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">outcomes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">outcomes</span><span class="p">)</span>
+                <span class="n">loc</span> <span class="o">=</span> <span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">rowspan</span> <span class="o">=</span> <span class="n">per_breakout_height</span> <span class="o">+</span> <span class="n">per_outcome_height</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">outcomes</span><span class="p">)</span>
+                <span class="n">top</span> <span class="o">+=</span> <span class="n">rowspan</span>
+
+                <span class="k">if</span> <span class="n">src_ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">src_ax</span> <span class="o">=</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">(</span>
+                        <span class="n">grid</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">rowspan</span><span class="o">=</span><span class="n">rowspan</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">(</span>
+                        <span class="n">grid</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">rowspan</span><span class="o">=</span><span class="n">rowspan</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">src_ax</span>
+                    <span class="p">)</span>
+
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">outcomes</span><span class="p">))</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="o">**</span><span class="n">barh_kw</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelbottom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">PercentFormatter</span><span class="p">(</span><span class="n">xmax</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+
+            <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+                <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+            <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">breakouts</span> <span class="o">==</span> <span class="n">BreakoutType</span><span class="o">.</span><span class="n">BURST</span><span class="p">:</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">hs_list</span><span class="p">)</span> <span class="o">//</span> <span class="n">cols</span> <span class="o">+</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hs_list</span><span class="p">)</span> <span class="o">%</span> <span class="n">cols</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;figure.figsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">scale</span><span class="p">,</span>
+                <span class="n">scale</span> <span class="o">/</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">rows</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="n">burst_bg_color</span><span class="p">)</span>
+            <span class="n">burst_graph_color_widget</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">burst_text_color_widget</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">burst_bg_color_widget</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="n">h_outer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">h_inner</span> <span class="o">!=</span> <span class="n">h_outer</span>
+                <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">h_inner</span><span class="p">,</span> <span class="n">h_outer</span> <span class="ow">in</span> <span class="n">hs_list</span>
+            <span class="p">):</span>
+                <span class="n">burst_swap_widget</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">h_inner</span><span class="p">,</span> <span class="n">h_outer</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hs_list</span><span class="p">):</span>
+                <span class="n">plot_burst_kw</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">title</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                    <span class="n">inner_color</span><span class="o">=</span><span class="n">burst_graph_color</span><span class="p">,</span>
+                    <span class="n">text_color</span><span class="o">=</span><span class="n">burst_text_color</span><span class="p">,</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">h_outer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">burst_swap</span><span class="p">:</span>
+                        <span class="n">h_inner</span><span class="p">,</span> <span class="n">h_outer</span> <span class="o">=</span> <span class="n">h_outer</span><span class="p">,</span> <span class="n">h_inner</span>
+
+                    <span class="n">plot_burst_kw</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                        <span class="nb">dict</span><span class="p">(</span><span class="n">outer_formatter</span><span class="o">=</span><span class="n">_outcome_name_probability_formatter</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">),</span> <span class="p">(</span><span class="n">i</span> <span class="o">//</span> <span class="n">cols</span><span class="p">,</span> <span class="n">i</span> <span class="o">%</span> <span class="n">cols</span><span class="p">))</span>
+                <span class="n">plot_burst</span><span class="p">(</span>
+                    <span class="n">ax</span><span class="p">,</span>
+                    <span class="n">h_inner</span><span class="p">,</span>
+                    <span class="n">h_outer</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">plot_burst_kw</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+                <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+            <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">breakouts</span> <span class="o">==</span> <span class="n">BreakoutType</span><span class="o">.</span><span class="n">NONE</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;unrecognized breakout type </span><span class="si">{</span><span class="n">breakouts</span><span class="si">!r}</span><span class="s2">&quot;</span>
+
+    <span class="n">scale_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">IntSlider</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+        <span class="nb">min</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+        <span class="nb">max</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+        <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">continuous_update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Scale&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">enable_cutoff_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Hide Data&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">cutoff_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">FloatLogSlider</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="n">_CUTOFF_BASE</span> <span class="o">**</span> <span class="o">-</span><span class="p">(</span><span class="n">_CUTOFF_EXP</span> <span class="o">-</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="n">base</span><span class="o">=</span><span class="n">_CUTOFF_BASE</span><span class="p">,</span>
+        <span class="nb">min</span><span class="o">=-</span><span class="n">_CUTOFF_EXP</span><span class="p">,</span>
+        <span class="nb">max</span><span class="o">=-</span><span class="p">(</span><span class="n">_CUTOFF_EXP</span> <span class="o">-</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="n">step</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">continuous_update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">readout_format</span><span class="o">=</span><span class="s2">&quot;.6f&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Hide up to&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">breakouts_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">RadioButtons</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="n">BreakoutType</span><span class="p">(</span><span class="n">default_breakout_type</span><span class="p">),</span>
+        <span class="n">options</span><span class="o">=</span><span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">,</span> <span class="n">BreakoutType</span><span class="o">.</span><span class="n">NONE</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;Horizontal Bar&quot;</span><span class="p">,</span> <span class="n">BreakoutType</span><span class="o">.</span><span class="n">BARH</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;Burst&quot;</span><span class="p">,</span> <span class="n">BreakoutType</span><span class="o">.</span><span class="n">BURST</span><span class="p">),</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">main_plot_type_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="n">default_main_plot_type</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="n">main_plot_funcs_by_type</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Main Type&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">main_plot_style_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="s2">&quot;bmh&quot;</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">available</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Main Colors&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">alpha_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">FloatSlider</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+        <span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="nb">max</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">step</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+        <span class="n">continuous_update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">readout_format</span><span class="o">=</span><span class="s2">&quot;0.0%&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Opacity&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">show_shadow_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Shadows&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">markers_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="n">default_markers</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Markers&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">burst_graph_color_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="n">DEFAULT_GRAPH_COLOR</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">cmap_d</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+        <span class="n">disabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Burst Graph&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">burst_text_color_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="n">DEFAULT_TEXT_COLOR</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">CSS4_COLORS</span><span class="o">.</span><span class="n">keys</span><span class="p">())),</span>
+        <span class="n">disabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Burst Text&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">burst_bg_color_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">CSS4_COLORS</span><span class="o">.</span><span class="n">keys</span><span class="p">())),</span>
+        <span class="n">disabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Burst Bkgrd&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">burst_swap_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Burst Swap&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">display</span><span class="p">(</span>
+        <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="n">scale_widget</span><span class="p">,</span>
+                                <span class="n">enable_cutoff_widget</span><span class="p">,</span>
+                                <span class="n">cutoff_widget</span><span class="p">,</span>
+                                <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="s2">&quot;Break-out Graphs:&quot;</span><span class="p">),</span>
+                                <span class="n">breakouts_widget</span><span class="p">,</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                        <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="n">main_plot_type_widget</span><span class="p">,</span>
+                                <span class="n">main_plot_style_widget</span><span class="p">,</span>
+                                <span class="n">alpha_widget</span><span class="p">,</span>
+                                <span class="n">show_shadow_widget</span><span class="p">,</span>
+                                <span class="n">markers_widget</span><span class="p">,</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                        <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="n">burst_graph_color_widget</span><span class="p">,</span>
+                                <span class="n">burst_text_color_widget</span><span class="p">,</span>
+                                <span class="n">burst_bg_color_widget</span><span class="p">,</span>
+                                <span class="n">burst_swap_widget</span><span class="p">,</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="p">]</span>
+                <span class="p">),</span>
+                <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">interactive_output</span><span class="p">(</span>
+                    <span class="n">_display</span><span class="p">,</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;scale&quot;</span><span class="p">:</span> <span class="n">scale_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;enable_cutoff&quot;</span><span class="p">:</span> <span class="n">enable_cutoff_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;cutoff&quot;</span><span class="p">:</span> <span class="n">cutoff_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;breakouts&quot;</span><span class="p">:</span> <span class="n">breakouts_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;main_plot_type&quot;</span><span class="p">:</span> <span class="n">main_plot_type_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;main_plot_style&quot;</span><span class="p">:</span> <span class="n">main_plot_style_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="n">alpha_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;show_shadow&quot;</span><span class="p">:</span> <span class="n">show_shadow_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;markers&quot;</span><span class="p">:</span> <span class="n">markers_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;burst_graph_color&quot;</span><span class="p">:</span> <span class="n">burst_graph_color_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;burst_text_color&quot;</span><span class="p">:</span> <span class="n">burst_text_color_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;burst_bg_color&quot;</span><span class="p">:</span> <span class="n">burst_bg_color_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;burst_swap&quot;</span><span class="p">:</span> <span class="n">burst_swap_widget</span><span class="p">,</span>
+                    <span class="p">},</span>
+                <span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="anydyce.viz.limit_for_display" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">limit_for_display</span><span class="p">(</span><span class="n">h</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">:</span> <span class="n">Fraction</span> <span class="o">=</span> <span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8192</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="n">H</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <div class="admonition warning">
+<p class="admonition-title">Experimental</p>
+<p>This function should be considered experimental and may change or disappear in
+future versions.</p>
+</div>
+<p>Discards outcomes in <em>h</em>, starting with the smallest counts as long as the total
+discarded in proportion to <code class="highlight"><span class="n">h</span><span class="o">.</span><span class="n">total</span></code> does not exceed <em>cutoff</em>. This can
+be useful in speeding up plots where there are large number of negligible
+probabilities.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">anydyce.viz</span> <span class="kn">import</span> <span class="n">limit_for_display</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">dyce</span> <span class="kn">import</span> <span class="n">H</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fractions</span> <span class="kn">import</span> <span class="n">Fraction</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">h</span> <span class="o">=</span> <span class="n">H</span><span class="p">({</span><span class="mi">1</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="mi">6</span><span class="p">})</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">h</span><span class="o">.</span><span class="n">total</span>
+<span class="mi">21</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">limit_for_display</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">21</span><span class="p">))</span>
+<span class="n">H</span><span class="p">({</span><span class="mi">3</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="mi">6</span><span class="p">})</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">limit_for_display</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">21</span><span class="p">))</span>
+<span class="n">H</span><span class="p">({</span><span class="mi">4</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="mi">6</span><span class="p">})</span>
+</code></pre></div>
+</td></tr></table>
+
+        <details class="quote">
+          <summary>Source code in <code>anydyce/viz.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@experimental</span>
+<span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">limit_for_display</span><span class="p">(</span><span class="n">h</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">:</span> <span class="n">Fraction</span> <span class="o">=</span> <span class="n">_CUTOFF_LIM</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">H</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    !!! warning &quot;Experimental&quot;</span>
+
+<span class="sd">        This function should be considered experimental and may change or disappear in</span>
+<span class="sd">        future versions.</span>
+
+<span class="sd">    Discards outcomes in *h*, starting with the smallest counts as long as the total</span>
+<span class="sd">    discarded in proportion to ``#!python h.total`` does not exceed *cutoff*. This can</span>
+<span class="sd">    be useful in speeding up plots where there are large number of negligible</span>
+<span class="sd">    probabilities.</span>
+
+<span class="sd">    ``` python</span>
+<span class="sd">    &gt;&gt;&gt; from anydyce.viz import limit_for_display</span>
+<span class="sd">    &gt;&gt;&gt; from dyce import H</span>
+<span class="sd">    &gt;&gt;&gt; from fractions import Fraction</span>
+<span class="sd">    &gt;&gt;&gt; h = H({1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6})</span>
+<span class="sd">    &gt;&gt;&gt; h.total</span>
+<span class="sd">    21</span>
+<span class="sd">    &gt;&gt;&gt; limit_for_display(h, cutoff=Fraction(5, 21))</span>
+<span class="sd">    H({3: 3, 4: 4, 5: 5, 6: 6})</span>
+<span class="sd">    &gt;&gt;&gt; limit_for_display(h, cutoff=Fraction(6, 21))</span>
+<span class="sd">    H({4: 4, 5: 5, 6: 6})</span>
+
+<span class="sd">    ```</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cutoff</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">cutoff</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cutoff (</span><span class="si">{</span><span class="n">cutoff</span><span class="si">}</span><span class="s2">) must be between zero and one, inclusive&quot;</span><span class="p">)</span>
+
+    <span class="n">cutoff_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cutoff</span> <span class="o">*</span> <span class="n">h</span><span class="o">.</span><span class="n">total</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cutoff_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">h</span>
+
+    <span class="k">def</span> <span class="nf">_cull</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">RealLike</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+        <span class="n">so_far</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">)):</span>
+            <span class="n">so_far</span> <span class="o">+=</span> <span class="n">count</span>
+
+            <span class="k">if</span> <span class="n">so_far</span> <span class="o">&gt;</span> <span class="n">cutoff_count</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">count</span>
+
+    <span class="k">return</span> <span class="n">H</span><span class="p">(</span><span class="n">_cull</span><span class="p">())</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="anydyce.viz.plot_bar" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">plot_bar</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span> <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <div class="admonition warning">
+<p class="admonition-title">Experimental</p>
+<p>This function should be considered experimental and may change or disappear in
+future versions.</p>
+</div>
+<p>Plots a bar graph of <em>hs</em> using
+<a href="https://matplotlib.org/stable/api/axes_api.html#the-axes-class"><em>ax</em></a> with <em>alpha</em>
+and <em>shadow</em>. <em>hs</em> is a sequence of two-tuples (pairs) of strings (labels) and <code>H</code>
+objects. Bars are interleaved and non-overlapping, so this is best suited to plots
+where <em>hs</em> contains a small number of histograms.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>anydyce/viz.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@experimental</span>
+<span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">plot_bar</span><span class="p">(</span>
+    <span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span>
+    <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_GRAPH_ALPHA</span><span class="p">,</span>
+    <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    !!! warning &quot;Experimental&quot;</span>
+
+<span class="sd">        This function should be considered experimental and may change or disappear in</span>
+<span class="sd">        future versions.</span>
+
+<span class="sd">    Plots a bar graph of *hs* using</span>
+<span class="sd">    [*ax*](https://matplotlib.org/stable/api/axes_api.html#the-axes-class) with *alpha*</span>
+<span class="sd">    and *shadow*. *hs* is a sequence of two-tuples (pairs) of strings (labels) and ``H``</span>
+<span class="sd">    objects. Bars are interleaved and non-overlapping, so this is best suited to plots</span>
+<span class="sd">    where *hs* contains a small number of histograms.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">PercentFormatter</span><span class="p">(</span><span class="n">xmax</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="mf">0.8</span>
+    <span class="n">bar_kw</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">hs</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">shadow</span><span class="p">:</span>
+        <span class="n">bar_kw</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">path_effects</span><span class="o">=</span><span class="p">[</span>
+                    <span class="n">matplotlib</span><span class="o">.</span><span class="n">patheffects</span><span class="o">.</span><span class="n">withSimplePatchShadow</span><span class="p">(),</span>
+                    <span class="n">matplotlib</span><span class="o">.</span><span class="n">patheffects</span><span class="o">.</span><span class="n">Normal</span><span class="p">(),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hs</span><span class="p">):</span>
+        <span class="c1"># Orient to the middle of each bar ((i + 0.5) ... ) whose width is an even share</span>
+        <span class="c1"># of the total width (... * width / len(hs) ...) and center the whole cluster of</span>
+        <span class="c1"># bars around the data point (... - width / 2)</span>
+        <span class="n">adj</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">width</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">hs</span><span class="p">)</span> <span class="o">-</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">h</span><span class="o">.</span><span class="n">distribution</span><span class="p">(</span><span class="n">rational_t</span><span class="o">=</span><span class="k">lambda</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">n</span> <span class="o">/</span> <span class="n">d</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">outcome</span> <span class="o">+</span> <span class="n">adj</span> <span class="k">for</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="n">outcomes</span><span class="p">],</span>
+            <span class="n">probabilities</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">bar_kw</span><span class="p">,</span>
+        <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="anydyce.viz.plot_burst" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">plot_burst</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span> <span class="n">h_inner</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span> <span class="n">h_outer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">H</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inner_formatter</span><span class="p">:</span> <span class="n">HFormatterT</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_outcome_name_formatter</span> <span class="n">at</span> <span class="mh">0x11b70be50</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">inner_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;RdYlGn_r&#39;</span><span class="p">,</span> <span class="n">outer_formatter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HFormatterT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">outer_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">text_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <div class="admonition warning">
+<p class="admonition-title">Experimental</p>
+<p>This function should be considered experimental and may change or disappear in
+future versions.</p>
+</div>
+<p>Creates a dual, overlapping, cocentric pie chart in
+<a href="https://matplotlib.org/stable/api/axes_api.html#the-axes-class"><em>ax</em></a>, which can be
+useful for visualizing relative probability distributions. Examples can be found in
+<a href="..#additional-interfaces">Additional interfaces</a>.</p>
 
         <details class="quote">
           <summary>Source code in <code>anydyce/viz.py</code></summary>
@@ -557,9 +1251,10 @@ countin.md#visualization) for examples.</p>
 <span class="sd">        This function should be considered experimental and may change or disappear in</span>
 <span class="sd">        future versions.</span>
 
-<span class="sd">    Creates a dual, overlapping, cocentric pie chart in *ax*, which can be useful for</span>
-<span class="sd">    visualizing relative probability distributions. See the TODO (was</span>
-<span class="sd">    countin.md#visualization) for examples.</span>
+<span class="sd">    Creates a dual, overlapping, cocentric pie chart in</span>
+<span class="sd">    [*ax*](https://matplotlib.org/stable/api/axes_api.html#the-axes-class), which can be</span>
+<span class="sd">    useful for visualizing relative probability distributions. Examples can be found in</span>
+<span class="sd">    [Additional interfaces](index.md#additional-interfaces).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="n">matplotlib</span>
     <span class="n">h_outer</span> <span class="o">=</span> <span class="n">h_inner</span> <span class="k">if</span> <span class="n">h_outer</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">h_outer</span>
@@ -575,7 +1270,7 @@ countin.md#visualization) for examples.</p>
     <span class="n">inner</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span>
             <span class="n">inner_formatter</span><span class="p">(</span><span class="n">outcome</span><span class="p">,</span> <span class="n">probability</span><span class="p">,</span> <span class="n">h_inner</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">probability</span> <span class="o">&gt;=</span> <span class="n">_HIDE_LIM</span>
+            <span class="k">if</span> <span class="n">probability</span> <span class="o">&gt;=</span> <span class="n">_LABEL_LIM</span>
             <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="n">probability</span><span class="p">,</span>
         <span class="p">)</span>
@@ -588,7 +1283,7 @@ countin.md#visualization) for examples.</p>
     <span class="n">outer</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span>
             <span class="n">outer_formatter</span><span class="p">(</span><span class="n">outcome</span><span class="p">,</span> <span class="n">probability</span><span class="p">,</span> <span class="n">h_outer</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">probability</span> <span class="o">&gt;=</span> <span class="n">_HIDE_LIM</span>
+            <span class="k">if</span> <span class="n">probability</span> <span class="o">&gt;=</span> <span class="n">_LABEL_LIM</span>
             <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="n">probability</span><span class="p">,</span>
         <span class="p">)</span>
@@ -626,6 +1321,230 @@ countin.md#visualization) for examples.</p>
         <span class="n">wedgeprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="n">text_color</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="anydyce.viz.plot_burst_subplot" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">plot_burst_subplot</span><span class="p">(</span><span class="n">h_inner</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span> <span class="n">h_outer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">H</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inner_formatter</span><span class="p">:</span> <span class="n">HFormatterT</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_outcome_name_formatter</span> <span class="n">at</span> <span class="mh">0x11b70be50</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">inner_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;RdYlGn_r&#39;</span><span class="p">,</span> <span class="n">outer_formatter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HFormatterT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">outer_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">text_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">FigureT</span><span class="p">,</span> <span class="n">AxesT</span><span class="p">]</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <div class="admonition warning">
+<p class="admonition-title">Experimental</p>
+<p>This function should be considered experimental and may change or disappear in
+future versions.</p>
+</div>
+<p>Wrapper around <a href="#anydyce.viz.plot_burst"><code>plot_burst</code></a> that creates a figure, axis
+pair, calls
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html"><code>matplotlib.pyplot.tight_layout</code></a>,
+and returns the pair.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>anydyce/viz.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@experimental</span>
+<span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">plot_burst_subplot</span><span class="p">(</span>
+    <span class="n">h_inner</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span>
+    <span class="n">h_outer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">H</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">inner_formatter</span><span class="p">:</span> <span class="n">HFormatterT</span> <span class="o">=</span> <span class="n">_outcome_name_formatter</span><span class="p">,</span>
+    <span class="n">inner_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_GRAPH_COLOR</span><span class="p">,</span>
+    <span class="n">outer_formatter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HFormatterT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">outer_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">text_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_TEXT_COLOR</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_BURST_ALPHA</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">FigureT</span><span class="p">,</span> <span class="n">AxesT</span><span class="p">]:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    !!! warning &quot;Experimental&quot;</span>
+
+<span class="sd">        This function should be considered experimental and may change or disappear in</span>
+<span class="sd">        future versions.</span>
+
+<span class="sd">    Wrapper around [``plot_burst``][anydyce.viz.plot_burst] that creates a figure, axis</span>
+<span class="sd">    pair, calls</span>
+<span class="sd">    [``matplotlib.pyplot.tight_layout``](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html),</span>
+<span class="sd">    and returns the pair.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">matplotlib</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+    <span class="n">plot_burst</span><span class="p">(</span>
+        <span class="n">ax</span><span class="p">,</span>
+        <span class="n">h_inner</span><span class="p">,</span>
+        <span class="n">h_outer</span><span class="p">,</span>
+        <span class="n">title</span><span class="p">,</span>
+        <span class="n">inner_formatter</span><span class="p">,</span>
+        <span class="n">inner_color</span><span class="p">,</span>
+        <span class="n">outer_formatter</span><span class="p">,</span>
+        <span class="n">outer_color</span><span class="p">,</span>
+        <span class="n">text_color</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+        <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="anydyce.viz.plot_line" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span> <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;o&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <div class="admonition warning">
+<p class="admonition-title">Experimental</p>
+<p>This function should be considered experimental and may change or disappear in
+future versions.</p>
+</div>
+<p>Plots a line graph of <em>hs</em> using
+<a href="https://matplotlib.org/stable/api/axes_api.html#the-axes-class"><em>ax</em></a> with <em>alpha</em>
+and <em>shadow</em>. <em>hs</em> is a sequence of two-tuples (pairs) of strings (labels) and
+<code class="highlight"><span class="n">dyce</span><span class="o">.</span><span class="n">H</span></code> objects. <em>markers</em> is cycled through when creating each line.
+For example, if <em>markers</em> is <code class="highlight"><span class="s2">&quot;o+&quot;</span></code>, the first histogram in <em>hs</em> will be
+plotted with a circle, the second will be plotted with a plus, the third will be
+plotted with a circle, the fourth will be plotted with a plus, and so on.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>anydyce/viz.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@experimental</span>
+<span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">plot_line</span><span class="p">(</span>
+    <span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span>
+    <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_GRAPH_ALPHA</span><span class="p">,</span>
+    <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    !!! warning &quot;Experimental&quot;</span>
+
+<span class="sd">        This function should be considered experimental and may change or disappear in</span>
+<span class="sd">        future versions.</span>
+
+<span class="sd">    Plots a line graph of *hs* using</span>
+<span class="sd">    [*ax*](https://matplotlib.org/stable/api/axes_api.html#the-axes-class) with *alpha*</span>
+<span class="sd">    and *shadow*. *hs* is a sequence of two-tuples (pairs) of strings (labels) and</span>
+<span class="sd">    ``#!python dyce.H`` objects. *markers* is cycled through when creating each line.</span>
+<span class="sd">    For example, if *markers* is ``#!python &quot;o+&quot;``, the first histogram in *hs* will be</span>
+<span class="sd">    plotted with a circle, the second will be plotted with a plus, the third will be</span>
+<span class="sd">    plotted with a circle, the fourth will be plotted with a plus, and so on.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">PercentFormatter</span><span class="p">(</span><span class="n">xmax</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">plot_kw</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">shadow</span><span class="p">:</span>
+        <span class="n">plot_kw</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">path_effects</span><span class="o">=</span><span class="p">[</span>
+                    <span class="n">matplotlib</span><span class="o">.</span><span class="n">patheffects</span><span class="o">.</span><span class="n">SimpleLineShadow</span><span class="p">(),</span>
+                    <span class="n">matplotlib</span><span class="o">.</span><span class="n">patheffects</span><span class="o">.</span><span class="n">Normal</span><span class="p">(),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">h</span><span class="p">),</span> <span class="n">marker</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">hs</span><span class="p">,</span> <span class="n">cycle</span><span class="p">(</span><span class="n">markers</span><span class="p">)):</span>
+        <span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">h</span><span class="o">.</span><span class="n">distribution</span><span class="p">(</span><span class="n">rational_t</span><span class="o">=</span><span class="k">lambda</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">n</span> <span class="o">/</span> <span class="n">d</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kw</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="anydyce.viz.plot_scatter" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">plot_scatter</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span> <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&lt;&gt;v^dPXo&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <div class="admonition warning">
+<p class="admonition-title">Experimental</p>
+<p>This function should be considered experimental and may change or disappear in
+future versions.</p>
+</div>
+<p>Plots a scatter graph of <em>hs</em> using
+<a href="https://matplotlib.org/stable/api/axes_api.html#the-axes-class"><em>ax</em></a> with <em>alpha</em>
+and <em>shadow</em>. <em>hs</em> is a sequence of two-tuples (pairs) of strings (labels) and
+<code>dyce.H</code> objects. <em>markers</em> is cycled through when creating each line. For
+example, if <em>markers</em> is <code class="highlight"><span class="s2">&quot;o+&quot;</span></code>, the first histogram in <em>hs</em> will be
+plotted with a circle, the second will be plotted with a plus, the third will be
+plotted with a circle, the fourth will be plotted with a plus, and so on.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>anydyce/viz.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@experimental</span>
+<span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">plot_scatter</span><span class="p">(</span>
+    <span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span>
+    <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_GRAPH_ALPHA</span><span class="p">,</span>
+    <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;&gt;v^dPXo&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    !!! warning &quot;Experimental&quot;</span>
+
+<span class="sd">        This function should be considered experimental and may change or disappear in</span>
+<span class="sd">        future versions.</span>
+
+<span class="sd">    Plots a scatter graph of *hs* using</span>
+<span class="sd">    [*ax*](https://matplotlib.org/stable/api/axes_api.html#the-axes-class) with *alpha*</span>
+<span class="sd">    and *shadow*. *hs* is a sequence of two-tuples (pairs) of strings (labels) and</span>
+<span class="sd">    ``dyce.H`` objects. *markers* is cycled through when creating each line. For</span>
+<span class="sd">    example, if *markers* is ``#!python &quot;o+&quot;``, the first histogram in *hs* will be</span>
+<span class="sd">    plotted with a circle, the second will be plotted with a plus, the third will be</span>
+<span class="sd">    plotted with a circle, the fourth will be plotted with a plus, and so on.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">PercentFormatter</span><span class="p">(</span><span class="n">xmax</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">scatter_kw</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">shadow</span><span class="p">:</span>
+        <span class="n">scatter_kw</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">path_effects</span><span class="o">=</span><span class="p">[</span>
+                    <span class="n">matplotlib</span><span class="o">.</span><span class="n">patheffects</span><span class="o">.</span><span class="n">SimpleLineShadow</span><span class="p">(),</span>
+                    <span class="n">matplotlib</span><span class="o">.</span><span class="n">patheffects</span><span class="o">.</span><span class="n">Normal</span><span class="p">(),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">h</span><span class="p">),</span> <span class="n">marker</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">hs</span><span class="p">,</span> <span class="n">cycle</span><span class="p">(</span><span class="n">markers</span><span class="p">)):</span>
+        <span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">h</span><span class="o">.</span><span class="n">distribution</span><span class="p">(</span><span class="n">rational_t</span><span class="o">=</span><span class="k">lambda</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">n</span> <span class="o">/</span> <span class="n">d</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span> <span class="o">**</span><span class="n">scatter_kw</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
