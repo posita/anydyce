@@ -38,6 +38,8 @@ def _main() -> None:
     import matplotlib.pyplot
     import matplotlib.style
 
+    matplotlib.use("agg")
+
     args = _PARSER.parse_args()
     logging.getLogger().setLevel(args.log_level)
     mod_name, mod_do_it = args.fig

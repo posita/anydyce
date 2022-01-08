@@ -76,8 +76,10 @@ def test_limit_for_display_out_of_bounds() -> None:
 
 
 def test_plot_burst() -> None:
-    patches = pytest.importorskip("matplotlib.patches", reason="requires matplotlib")
-    pyplot = pytest.importorskip("matplotlib.pyplot", reason="requires matplotlib")
+    matplotlib = pytest.importorskip("matplotlib", reason="requires matplotlib")
+    # See <https://github.com/matplotlib/matplotlib/issues/14304#issuecomment-545717061>
+    matplotlib.use("agg")
+    from matplotlib import patches, pyplot
 
     _, ax = pyplot.subplots()
     d6_2 = 2 @ H(6)
@@ -113,8 +115,10 @@ def test_plot_burst() -> None:
 
 
 def test_plot_burst_outer() -> None:
-    patches = pytest.importorskip("matplotlib.patches", reason="requires matplotlib")
-    pyplot = pytest.importorskip("matplotlib.pyplot", reason="requires matplotlib")
+    matplotlib = pytest.importorskip("matplotlib", reason="requires matplotlib")
+    # See <https://github.com/matplotlib/matplotlib/issues/14304#issuecomment-545717061>
+    matplotlib.use("agg")
+    from matplotlib import patches, pyplot
 
     _, ax = pyplot.subplots()
     d6_2 = 2 @ H(6)
