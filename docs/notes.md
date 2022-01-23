@@ -15,6 +15,10 @@
 
 # ``anydyce`` release notes
 
+## [0.1.4](https://github.com/posita/dyce/releases/tag/v0.1.4)
+
+* Adds experimental [``values_xy_for_graph_type``][anydyce.viz.values_xy_for_graph_type] function and exposes new “at least” and “at most” graph types via [``jupyter_visualize``][anydyce.viz.jupyter_visualize] interface.
+
 ## [0.1.3](https://github.com/posita/dyce/releases/tag/v0.1.3)
 
 * Turns data limiting off by default in [``jupyter_visualize``][anydyce.viz.jupyter_visualize].

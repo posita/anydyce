@@ -31,6 +31,7 @@
       members:
         - "cumulative_probability_formatter"
         - "limit_for_display"
+        - "values_xy_for_graph_type"
         - "plot_bar"
         - "plot_line"
         - "plot_scatter"

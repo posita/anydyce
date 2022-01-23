@@ -15,8 +15,8 @@ import math
 import warnings
 from enum import Enum, auto
 from fractions import Fraction
-from itertools import chain, cycle
-from operator import itemgetter
+from itertools import accumulate, chain, cycle
+from operator import __add__, __sub__, itemgetter
 from typing import (
     Any,
     Callable,
@@ -73,6 +73,12 @@ HLikeT = Union[H, HableT]
 HFormatterT = Callable[[RealLike, Fraction, H], str]
 
 
+class GraphType(Enum):
+    NORMAL = 0
+    AT_MOST = auto()
+    AT_LEAST = auto()
+
+
 class BreakoutType(Enum):
     NONE = 0
     BARH = auto()
@@ -85,34 +91,55 @@ class BreakoutType(Enum):
 def _bar(
     ax: AxesT,
     hs: Sequence[Tuple[str, H, Optional[H]]],
+    graph_type: GraphType,
     alpha: float,
     show_shadow: bool,
     **kw,
 ) -> None:
-    plot_bar(ax, tuple((label, h) for label, h, _ in hs), alpha, show_shadow)
+    plot_bar(
+        ax,
+        tuple((label, h) for label, h, _ in hs),
+        graph_type,
+        alpha,
+        show_shadow,
+    )
 
 
 def _line(
     ax: AxesT,
     hs: Sequence[Tuple[str, H, Optional[H]]],
+    graph_type: GraphType,
     alpha: float,
     show_shadow: bool,
     markers: str,
     **kw,
 ) -> None:
-    plot_line(ax, tuple((label, h) for label, h, _ in hs), alpha, show_shadow, markers)
+    plot_line(
+        ax,
+        tuple((label, h) for label, h, _ in hs),
+        graph_type,
+        alpha,
+        show_shadow,
+        markers,
+    )
 
 
 def _scatter(
     ax: AxesT,
     hs: Sequence[Tuple[str, H, Optional[H]]],
+    graph_type: GraphType,
     alpha: float,
     show_shadow: bool,
     markers: str,
     **kw,
 ) -> None:
     plot_scatter(
-        ax, tuple((label, h) for label, h, _ in hs), alpha, show_shadow, markers
+        ax,
+        tuple((label, h) for label, h, _ in hs),
+        graph_type,
+        alpha,
+        show_shadow,
+        markers,
     )
 
 
@@ -160,7 +187,7 @@ def _outcome_name_probability_formatter(
         return f"{str(outcome)}\n{float(probability):.2%}"
 
 
-_formatter = _outcome_name_formatter
+_formatter = _outcome_name_probability_formatter
 
 
 def _probability_formatter(_, probability: Fraction, __) -> str:
@@ -295,9 +322,31 @@ def limit_for_display(h: H, cutoff: Fraction = _CUTOFF_LIM) -> H:
 
 @experimental
 @beartype
+def values_xy_for_graph_type(
+    h: H, graph_type: GraphType
+) -> Tuple[Tuple[RealLike, ...], Tuple[float, ...]]:
+    outcomes, probabilities = h.distribution_xy()
+
+    # TODO(posita): Use accumulate's initial parameter once we retire support for Python
+    # 3.7
+    if graph_type is GraphType.AT_LEAST:
+        probabilities = tuple(accumulate((1.0,) + probabilities[:-1], __sub__))
+        # probabilities = tuple(accumulate(probabilities, __sub__, initial=1.0))[:-1]
+    elif graph_type is GraphType.AT_MOST:
+        probabilities = tuple(accumulate(probabilities, __add__))
+        # probabilities = tuple(accumulate(probabilities, __add__, initial=0.0))[1:]
+    else:
+        assert graph_type is GraphType.NORMAL, f"unrecognized graph type {graph_type}"
+
+    return outcomes, probabilities
+
+
+@experimental
+@beartype
 def plot_bar(
     ax: AxesT,
     hs: Sequence[Tuple[str, H]],
+    graph_type: GraphType = GraphType.NORMAL,
     alpha: float = DEFAULT_GRAPH_ALPHA,
     shadow: bool = False,
 ) -> None:
@@ -332,10 +381,11 @@ def plot_bar(
         # of the total width (... * width / len(hs) ...) and center the whole cluster of
         # bars around the data point (... - width / 2)
         adj = (i + 0.5) * width / len(hs) - width / 2
-        outcomes, probabilities = zip(*h.distribution(rational_t=lambda n, d: n / d))
+        outcomes, values = values_xy_for_graph_type(h, graph_type)
+
         ax.bar(
             [outcome + adj for outcome in outcomes],
-            probabilities,
+            values,
             label=label,
             **bar_kw,
         )
@@ -346,6 +396,7 @@ def plot_bar(
 def plot_line(
     ax: AxesT,
     hs: Sequence[Tuple[str, H]],
+    graph_type: GraphType = GraphType.NORMAL,
     alpha: float = DEFAULT_GRAPH_ALPHA,
     shadow: bool = False,
     markers: str = "o",
@@ -378,8 +429,8 @@ def plot_line(
         )
 
     for (label, h), marker in zip(hs, cycle(markers)):
-        outcomes, probabilities = zip(*h.distribution(rational_t=lambda n, d: n / d))
-        ax.plot(outcomes, probabilities, label=label, marker=marker, **plot_kw)
+        outcomes, values = values_xy_for_graph_type(h, graph_type)
+        ax.plot(outcomes, values, label=label, marker=marker, **plot_kw)
 
 
 @experimental
@@ -387,6 +438,7 @@ def plot_line(
 def plot_scatter(
     ax: AxesT,
     hs: Sequence[Tuple[str, H]],
+    graph_type: GraphType = GraphType.NORMAL,
     alpha: float = DEFAULT_GRAPH_ALPHA,
     shadow: bool = False,
     markers: str = "<>v^dPXo",
@@ -419,8 +471,8 @@ def plot_scatter(
         )
 
     for (label, h), marker in zip(hs, cycle(markers)):
-        outcomes, probabilities = zip(*h.distribution(rational_t=lambda n, d: n / d))
-        ax.scatter(outcomes, probabilities, label=label, marker=marker, **scatter_kw)
+        outcomes, values = values_xy_for_graph_type(h, graph_type)
+        ax.scatter(outcomes, values, label=label, marker=marker, **scatter_kw)
 
 
 @experimental
@@ -612,6 +664,7 @@ def jupyter_visualize(
         cutoff: int,
         breakouts: BreakoutType,
         main_plot_type: str,
+        graph_type: GraphType,
         main_plot_style: str,
         alpha: float,
         show_shadow: bool,
@@ -726,6 +779,7 @@ Download raw data as CSV
         main_plot_funcs_by_type[main_plot_type](
             ax,
             hs_list,
+            graph_type=graph_type,
             alpha=alpha,
             show_shadow=show_shadow,
             markers=markers if markers else " ",
@@ -774,10 +828,7 @@ Download raw data as CSV
                 )
 
             for i, (label, h, _) in enumerate(hs_list):
-                outcomes, probabilities = zip(
-                    *h.distribution(rational_t=lambda n, d: n / d)
-                )
-                outcomes = list(outcomes)
+                outcomes, values = values_xy_for_graph_type(h, graph_type)
                 loc = (top, 0)
                 rowspan = per_breakout_height + per_outcome_height * len(outcomes)
                 top += rowspan
@@ -791,9 +842,9 @@ Download raw data as CSV
                         grid, loc, rowspan=rowspan, sharex=src_ax
                     )
 
-                ax.set_yticks(sorted(outcomes))
+                ax.set_yticks(outcomes)
                 ax.tick_params(labelbottom=False)
-                ax.barh(outcomes, probabilities, label=label, **barh_kw)
+                ax.barh(outcomes, values, label=label, **barh_kw)
                 ax.legend(loc="upper right")
 
             if ax is not None:
@@ -892,6 +943,14 @@ Download raw data as CSV
         options=main_plot_funcs_by_type.keys(),
         description="Main Type",
     )
+    graph_type_widget = ipywidgets.widgets.RadioButtons(
+        value=GraphType.NORMAL,
+        options=(
+            ("Normal", GraphType.NORMAL),
+            ("At Least", GraphType.AT_LEAST),
+            ("At Most", GraphType.AT_MOST),
+        ),
+    )
     main_plot_style_widget = ipywidgets.widgets.Dropdown(
         value="bmh",
         options=["default"] + matplotlib.style.available,
@@ -954,6 +1013,8 @@ Download raw data as CSV
                         ipywidgets.widgets.VBox(
                             [
                                 main_plot_type_widget,
+                                ipywidgets.widgets.Label("Plot Type:"),
+                                graph_type_widget,
                                 main_plot_style_widget,
                                 alpha_widget,
                                 show_shadow_widget,
@@ -978,6 +1039,7 @@ Download raw data as CSV
                         "cutoff": cutoff_widget,
                         "breakouts": breakouts_widget,
                         "main_plot_type": main_plot_type_widget,
+                        "graph_type": graph_type_widget,
                         "main_plot_style": main_plot_style_widget,
                         "alpha": alpha_widget,
                         "show_shadow": show_shadow_widget,

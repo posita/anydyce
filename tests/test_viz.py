@@ -10,9 +10,11 @@ from __future__ import annotations
 
 import random
 from fractions import Fraction
+from math import isclose
+from typing import Tuple
 
 import pytest
-from dyce import H
+from dyce import H, P
 
 from anydyce import viz
 
@@ -73,6 +75,80 @@ def test_limit_for_display_out_of_bounds() -> None:
 
     with pytest.raises(ValueError):
         assert viz.limit_for_display(H(6), Fraction(2))
+
+
+def test_values_xy_for_graph_type() -> None:
+    d6 = H(6)
+    d6_outcomes = tuple(d6.outcomes())
+    p_3d6 = 3 @ P(d6)
+    lo = p_3d6.h(0)
+    hi = p_3d6.h(-1)
+
+    def _tuples_close(a: Tuple[float, ...], b: Tuple[float, ...]) -> bool:
+        if len(a) != len(b):
+            return False
+
+        return all(isclose(a_val, b_val) for a_val, b_val in zip(a, b))
+
+    lo_outcomes_normal, lo_values_normal = viz.values_xy_for_graph_type(
+        lo, viz.GraphType.NORMAL
+    )
+    hi_outcomes_normal, hi_values_normal = viz.values_xy_for_graph_type(
+        hi, viz.GraphType.NORMAL
+    )
+    assert lo_outcomes_normal == d6_outcomes
+    assert _tuples_close(
+        lo_values_normal,
+        (
+            0.4212962962962,
+            0.2824074074074,
+            0.1712962962962,
+            0.0879629629629,
+            0.0324074074074,
+            0.0046296296296,
+        ),
+    )
+    assert _tuples_close(hi_values_normal, lo_values_normal[::-1])
+
+    lo_outcomes_at_least, lo_values_at_least = viz.values_xy_for_graph_type(
+        lo, viz.GraphType.AT_LEAST
+    )
+    hi_outcomes_at_least, hi_values_at_least = viz.values_xy_for_graph_type(
+        hi, viz.GraphType.AT_LEAST
+    )
+    assert lo_outcomes_at_least == d6_outcomes
+    assert _tuples_close(
+        lo_values_at_least,
+        (
+            1.0,
+            0.5787037037037,
+            0.2962962962962,
+            0.125,
+            0.0370370370370,
+            0.0046296296296,
+        ),
+    )
+    assert _tuples_close(
+        hi_values_at_least,
+        (
+            1.0,
+            0.9953703703703,
+            0.9629629629629,
+            0.875,
+            0.7037037037037,
+            0.4212962962962,
+        ),
+    )
+
+    lo_outcomes_at_most, lo_values_at_most = viz.values_xy_for_graph_type(
+        lo, viz.GraphType.AT_MOST
+    )
+    hi_outcomes_at_most, hi_values_at_most = viz.values_xy_for_graph_type(
+        hi, viz.GraphType.AT_MOST
+    )
+    assert lo_outcomes_at_most == d6_outcomes
+    assert _tuples_close(lo_values_at_most, hi_values_at_least[::-1])
+    assert _tuples_close(hi_values_at_most, lo_values_at_least[::-1])
 
 
 def test_plot_burst() -> None:
