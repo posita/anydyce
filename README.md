@@ -18,11 +18,11 @@ All rights not expressly waived or licensed are reserved.
 If that file is missing or appears to be modified from its original, then please contact the author before viewing or using this software in any capacity.*
 
 [![Tests](https://github.com/posita/anydyce/actions/workflows/unit-tests.yaml/badge.svg)](https://github.com/posita/anydyce/actions/workflows/unit-tests.yaml)
-[![Version](https://img.shields.io/pypi/v/anydyce/0.1.3.svg)](https://pypi.org/project/anydyce/0.1.3/)
-[![Development Stage](https://img.shields.io/pypi/status/anydyce/0.1.3.svg)](https://pypi.org/project/anydyce/0.1.3/)
-[![License](https://img.shields.io/pypi/l/anydyce/0.1.3.svg)](http://opensource.org/licenses/MIT)
-[![Supported Python Versions](https://img.shields.io/pypi/pyversions/anydyce/0.1.3.svg)](https://pypi.org/project/anydyce/0.1.3/)
-[![Supported Python Implementations](https://img.shields.io/pypi/implementation/anydyce/0.1.3.svg)](https://pypi.org/project/anydyce/0.1.3/)
+[![Version](https://img.shields.io/pypi/v/anydyce/0.1.4.svg)](https://pypi.org/project/anydyce/0.1.4/)
+[![Development Stage](https://img.shields.io/pypi/status/anydyce/0.1.4.svg)](https://pypi.org/project/anydyce/0.1.4/)
+[![License](https://img.shields.io/pypi/l/anydyce/0.1.4.svg)](http://opensource.org/licenses/MIT)
+[![Supported Python Versions](https://img.shields.io/pypi/pyversions/anydyce/0.1.4.svg)](https://pypi.org/project/anydyce/0.1.4/)
+[![Supported Python Implementations](https://img.shields.io/pypi/implementation/anydyce/0.1.4.svg)](https://pypi.org/project/anydyce/0.1.4/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![``dyce``-powered!](https://raw.githubusercontent.com/posita/dyce/latest/docs/dyce-powered.svg)](https://posita.github.io/dyce/)
 [![``numerary``-encumbered](https://raw.githubusercontent.com/posita/numerary/latest/docs/numerary-encumbered.svg)](https://posita.github.io/numerary/)
@@ -98,7 +98,7 @@ Probably the _easiest_ way to start tinkering with ``anydyce`` is via Binder.
 …
 ```
 
-The [``quickstart-local.sh`` script](https://github.com/posita/anydyce/blob/v0.1.3/quickstart-local.sh) will create a local [virtual environment](https://docs.python.org/3/library/venv.html) to bootstrap a local Jupyter server with ``anydice`` installed and open a web browser to the [introduction notebook](https://gist.github.com/posita/f65800898aa0ad08b8c927246bf32c0f/9c7bd3f836127850a9ca0429e5daa96cd9b81929#file-anydyce_intro-ipynb).
+The [``quickstart-local.sh`` script](https://github.com/posita/anydyce/blob/v0.1.4/quickstart-local.sh) will create a local [virtual environment](https://docs.python.org/3/library/venv.html) to bootstrap a local Jupyter server with ``anydice`` installed and open a web browser to the [introduction notebook](https://gist.github.com/posita/f65800898aa0ad08b8c927246bf32c0f/9c7bd3f836127850a9ca0429e5daa96cd9b81929#file-anydyce_intro-ipynb).
 
 You can also [create your own binders](https://mybinder.org/) from Gists or other sources.
 Running the following in your notebook will bootstrap[^3] ``anydyce`` if it is not already installed:
@@ -133,12 +133,12 @@ One such convenience enables creation of “burst” charts (``anydyce``’s tak
 
 <!-- Should match any title of the corresponding plot title -->
 <picture>
-  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.1.3/docs/assets/plot_burst_1_dark.png" media="(prefers-color-scheme: dark)">
-  <img alt="Plot: Basic plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.3/docs/assets/plot_burst_1_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.3/docs/assets/plot_burst_1_dark.png#gh-dark-mode-only"></span>
+  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.1.4/docs/assets/plot_burst_1_dark.png" media="(prefers-color-scheme: dark)">
+  <img alt="Plot: Basic plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.4/docs/assets/plot_burst_1_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.4/docs/assets/plot_burst_1_dark.png#gh-dark-mode-only"></span>
 </picture>
 
 <details>
-<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.1.3/docs/assets/plot_burst_1.py"><code>plot_burst_1.py</code></a></summary>
+<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.1.4/docs/assets/plot_burst_1.py"><code>plot_burst_1.py</code></a></summary>
 
 ``` python
 --8<-- "docs/assets/plot_burst_1.py"
@@ -166,12 +166,12 @@ Well wonder no more!
 
 <!-- Should match any title of the corresponding plot title -->
 <picture>
-  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.1.3/docs/assets/plot_burst_2_dark.png" media="(prefers-color-scheme: dark)">
-  <img alt="Plot: 2d6 vs. 4dF plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.3/docs/assets/plot_burst_2_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.3/docs/assets/plot_burst_2_dark.png#gh-dark-mode-only"></span>
+  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.1.4/docs/assets/plot_burst_2_dark.png" media="(prefers-color-scheme: dark)">
+  <img alt="Plot: 2d6 vs. 4dF plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.4/docs/assets/plot_burst_2_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.4/docs/assets/plot_burst_2_dark.png#gh-dark-mode-only"></span>
 </picture>
 
 <details>
-<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.1.3/docs/assets/plot_burst_2.py"><code>plot_burst_2.py</code></a></summary>
+<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.1.4/docs/assets/plot_burst_2.py"><code>plot_burst_2.py</code></a></summary>
 
 ``` python
 --8<-- "docs/assets/plot_burst_2.py"
@@ -205,12 +205,12 @@ Overrides apply counter-clockwise, starting from the 12 o’clock position.
 
 <!-- Should match any title of the corresponding plot title -->
 <picture>
-  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.1.3/docs/assets/plot_burst_3_dark.png" media="(prefers-color-scheme: dark)">
-  <img alt="Plot: Advanced plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.3/docs/assets/plot_burst_3_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.3/docs/assets/plot_burst_3_dark.png#gh-dark-mode-only"></span>
+  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.1.4/docs/assets/plot_burst_3_dark.png" media="(prefers-color-scheme: dark)">
+  <img alt="Plot: Advanced plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.4/docs/assets/plot_burst_3_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.1.4/docs/assets/plot_burst_3_dark.png#gh-dark-mode-only"></span>
 </picture>
 
 <details>
-<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.1.3/docs/assets/plot_burst_3.py"><code>plot_burst_3.py</code></a></summary>
+<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.1.4/docs/assets/plot_burst_3.py"><code>plot_burst_3.py</code></a></summary>
 
 ``` python
 --8<-- "docs/assets/plot_burst_3.py"
