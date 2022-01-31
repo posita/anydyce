@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://posita.github.io/anydyce/0.1/anydyce/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.4">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.9">
     
     
       
@@ -23,7 +23,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.bb3983ee.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.2b4465f4.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.e6a45f82.min.css">
@@ -62,7 +62,7 @@
   
     
     
-      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)</script>
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -463,7 +463,7 @@
 
 
 <h2 id="anydyce.viz.jupyter_visualize" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">jupyter_visualize</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">]]],</span> <span class="n">default_breakout_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">BreakoutType</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">BreakoutType</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span> <span class="mi">0</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">default_markers</span> <span class="o">=</span> <span class="s1">&#39;&lt;&gt;v^dPXo&#39;</span><span class="p">,</span> <span class="n">default_main_plot_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="n">main_plot_funcs_by_type</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;bar&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_bar</span> <span class="n">at</span> <span class="mh">0x10c64a8b0</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;line&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_line</span> <span class="n">at</span> <span class="mh">0x119a30d30</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;scatter&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_scatter</span> <span class="n">at</span> <span class="mh">0x119a30dc0</span><span class="o">&gt;</span><span class="p">})</span></code>
+<code class="highlight language-python"><span class="n">jupyter_visualize</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">]]],</span> <span class="n">default_breakout_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">BreakoutType</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">BreakoutType</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span> <span class="mi">0</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">default_markers</span> <span class="o">=</span> <span class="s1">&#39;&lt;&gt;v^dPXo&#39;</span><span class="p">,</span> <span class="n">default_main_plot_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="n">main_plot_funcs_by_type</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;bar&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_bar</span> <span class="n">at</span> <span class="mh">0x10a2ddca0</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;line&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_line</span> <span class="n">at</span> <span class="mh">0x11573d5e0</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;scatter&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_scatter</span> <span class="n">at</span> <span class="mh">0x11573d670</span><span class="o">&gt;</span><span class="p">})</span></code>
 
 
 </h2>
@@ -544,6 +544,7 @@ with the interactive controls.</p>
         <span class="n">cutoff</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">breakouts</span><span class="p">:</span> <span class="n">BreakoutType</span><span class="p">,</span>
         <span class="n">main_plot_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">graph_type</span><span class="p">:</span> <span class="n">GraphType</span><span class="p">,</span>
         <span class="n">main_plot_style</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">show_shadow</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -622,7 +623,7 @@ with the interactive controls.</p>
                 <span class="n">row</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Outcome&quot;</span><span class="p">:</span> <span class="n">outcome</span><span class="p">}</span>
                 <span class="n">row</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
                     <span class="p">{</span>
-                        <span class="n">label</span><span class="p">:</span> <span class="n">h</span><span class="p">[</span><span class="n">outcome</span><span class="p">]</span> <span class="o">/</span> <span class="n">h</span><span class="o">.</span><span class="n">total</span>
+                        <span class="n">label</span><span class="p">:</span> <span class="n">h</span><span class="p">[</span><span class="n">outcome</span><span class="p">]</span> <span class="o">/</span> <span class="n">_h_total</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
                         <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">hs_list</span>
                         <span class="k">if</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="n">h</span>
                     <span class="p">}</span>
@@ -658,6 +659,7 @@ with the interactive controls.</p>
         <span class="n">main_plot_funcs_by_type</span><span class="p">[</span><span class="n">main_plot_type</span><span class="p">](</span>
             <span class="n">ax</span><span class="p">,</span>
             <span class="n">hs_list</span><span class="p">,</span>
+            <span class="n">graph_type</span><span class="o">=</span><span class="n">graph_type</span><span class="p">,</span>
             <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
             <span class="n">show_shadow</span><span class="o">=</span><span class="n">show_shadow</span><span class="p">,</span>
             <span class="n">markers</span><span class="o">=</span><span class="n">markers</span> <span class="k">if</span> <span class="n">markers</span> <span class="k">else</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
@@ -706,10 +708,7 @@ with the interactive controls.</p>
                 <span class="p">)</span>
 
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hs_list</span><span class="p">):</span>
-                <span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span>
-                    <span class="o">*</span><span class="n">h</span><span class="o">.</span><span class="n">distribution</span><span class="p">(</span><span class="n">rational_t</span><span class="o">=</span><span class="k">lambda</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">n</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span>
-                <span class="p">)</span>
-                <span class="n">outcomes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">outcomes</span><span class="p">)</span>
+                <span class="n">outcomes</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">values_xy_for_graph_type</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">graph_type</span><span class="p">)</span>
                 <span class="n">loc</span> <span class="o">=</span> <span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
                 <span class="n">rowspan</span> <span class="o">=</span> <span class="n">per_breakout_height</span> <span class="o">+</span> <span class="n">per_outcome_height</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">outcomes</span><span class="p">)</span>
                 <span class="n">top</span> <span class="o">+=</span> <span class="n">rowspan</span>
@@ -723,9 +722,9 @@ with the interactive controls.</p>
                         <span class="n">grid</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">rowspan</span><span class="o">=</span><span class="n">rowspan</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">src_ax</span>
                     <span class="p">)</span>
 
-                <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">outcomes</span><span class="p">))</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">outcomes</span><span class="p">)</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="o">**</span><span class="n">barh_kw</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">outcomes</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="o">**</span><span class="n">barh_kw</span><span class="p">)</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -824,6 +823,14 @@ with the interactive controls.</p>
         <span class="n">options</span><span class="o">=</span><span class="n">main_plot_funcs_by_type</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Main Type&quot;</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">graph_type_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">RadioButtons</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="n">GraphType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;Normal&quot;</span><span class="p">,</span> <span class="n">GraphType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;At Least&quot;</span><span class="p">,</span> <span class="n">GraphType</span><span class="o">.</span><span class="n">AT_LEAST</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;At Most&quot;</span><span class="p">,</span> <span class="n">GraphType</span><span class="o">.</span><span class="n">AT_MOST</span><span class="p">),</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
     <span class="n">main_plot_style_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span>
         <span class="n">value</span><span class="o">=</span><span class="s2">&quot;bmh&quot;</span><span class="p">,</span>
         <span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">available</span><span class="p">,</span>
@@ -886,6 +893,8 @@ with the interactive controls.</p>
                         <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">(</span>
                             <span class="p">[</span>
                                 <span class="n">main_plot_type_widget</span><span class="p">,</span>
+                                <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="s2">&quot;Plot Type:&quot;</span><span class="p">),</span>
+                                <span class="n">graph_type_widget</span><span class="p">,</span>
                                 <span class="n">main_plot_style_widget</span><span class="p">,</span>
                                 <span class="n">alpha_widget</span><span class="p">,</span>
                                 <span class="n">show_shadow_widget</span><span class="p">,</span>
@@ -910,6 +919,7 @@ with the interactive controls.</p>
                         <span class="s2">&quot;cutoff&quot;</span><span class="p">:</span> <span class="n">cutoff_widget</span><span class="p">,</span>
                         <span class="s2">&quot;breakouts&quot;</span><span class="p">:</span> <span class="n">breakouts_widget</span><span class="p">,</span>
                         <span class="s2">&quot;main_plot_type&quot;</span><span class="p">:</span> <span class="n">main_plot_type_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;graph_type&quot;</span><span class="p">:</span> <span class="n">graph_type_widget</span><span class="p">,</span>
                         <span class="s2">&quot;main_plot_style&quot;</span><span class="p">:</span> <span class="n">main_plot_style_widget</span><span class="p">,</span>
                         <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="n">alpha_widget</span><span class="p">,</span>
                         <span class="s2">&quot;show_shadow&quot;</span><span class="p">:</span> <span class="n">show_shadow_widget</span><span class="p">,</span>
@@ -1099,10 +1109,10 @@ BreakoutType            (<span title="enum.Enum">Enum</span>)
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate", "navigation.expand", "navigation.sections", "toc.integrate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.361d90f1.min.js", "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate", "navigation.expand", "navigation.sections", "toc.integrate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.22074ed6.min.js", "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.289a2a4b.min.js"></script>
+      <script src="../assets/javascripts/bundle.960e086b.min.js"></script>
       
         <script src="../js/site.js"></script>
       

@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://posita.github.io/anydyce/0.1/anydyce.viz/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.4">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.9">
     
     
       
@@ -23,7 +23,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.bb3983ee.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.2b4465f4.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.e6a45f82.min.css">
@@ -62,7 +62,7 @@
   
     
     
-      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)</script>
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -423,6 +423,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#anydyce.viz.values_xy_for_graph_type" class="md-nav__link">
+    values_xy_for_graph_type()
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -561,7 +568,7 @@ value to <a href="#anydyce.viz.plot_burst"><code>plot_burst</code></a>.</p>
 
 
 <h2 id="anydyce.viz.jupyter_visualize" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">jupyter_visualize</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">]]],</span> <span class="n">default_breakout_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">BreakoutType</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">BreakoutType</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span> <span class="mi">0</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">default_markers</span> <span class="o">=</span> <span class="s1">&#39;&lt;&gt;v^dPXo&#39;</span><span class="p">,</span> <span class="n">default_main_plot_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="n">main_plot_funcs_by_type</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;bar&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_bar</span> <span class="n">at</span> <span class="mh">0x10c64a8b0</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;line&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_line</span> <span class="n">at</span> <span class="mh">0x119a30d30</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;scatter&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_scatter</span> <span class="n">at</span> <span class="mh">0x119a30dc0</span><span class="o">&gt;</span><span class="p">})</span></code>
+<code class="highlight language-python"><span class="n">jupyter_visualize</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">]]],</span> <span class="n">default_breakout_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">BreakoutType</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">BreakoutType</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span> <span class="mi">0</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">default_markers</span> <span class="o">=</span> <span class="s1">&#39;&lt;&gt;v^dPXo&#39;</span><span class="p">,</span> <span class="n">default_main_plot_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="n">main_plot_funcs_by_type</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;bar&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_bar</span> <span class="n">at</span> <span class="mh">0x10a2ddca0</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;line&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_line</span> <span class="n">at</span> <span class="mh">0x11573d5e0</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;scatter&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_scatter</span> <span class="n">at</span> <span class="mh">0x11573d670</span><span class="o">&gt;</span><span class="p">})</span></code>
 
 
 </h2>
@@ -642,6 +649,7 @@ with the interactive controls.</p>
         <span class="n">cutoff</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">breakouts</span><span class="p">:</span> <span class="n">BreakoutType</span><span class="p">,</span>
         <span class="n">main_plot_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">graph_type</span><span class="p">:</span> <span class="n">GraphType</span><span class="p">,</span>
         <span class="n">main_plot_style</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">show_shadow</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -720,7 +728,7 @@ with the interactive controls.</p>
                 <span class="n">row</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Outcome&quot;</span><span class="p">:</span> <span class="n">outcome</span><span class="p">}</span>
                 <span class="n">row</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
                     <span class="p">{</span>
-                        <span class="n">label</span><span class="p">:</span> <span class="n">h</span><span class="p">[</span><span class="n">outcome</span><span class="p">]</span> <span class="o">/</span> <span class="n">h</span><span class="o">.</span><span class="n">total</span>
+                        <span class="n">label</span><span class="p">:</span> <span class="n">h</span><span class="p">[</span><span class="n">outcome</span><span class="p">]</span> <span class="o">/</span> <span class="n">_h_total</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
                         <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">hs_list</span>
                         <span class="k">if</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="n">h</span>
                     <span class="p">}</span>
@@ -756,6 +764,7 @@ with the interactive controls.</p>
         <span class="n">main_plot_funcs_by_type</span><span class="p">[</span><span class="n">main_plot_type</span><span class="p">](</span>
             <span class="n">ax</span><span class="p">,</span>
             <span class="n">hs_list</span><span class="p">,</span>
+            <span class="n">graph_type</span><span class="o">=</span><span class="n">graph_type</span><span class="p">,</span>
             <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
             <span class="n">show_shadow</span><span class="o">=</span><span class="n">show_shadow</span><span class="p">,</span>
             <span class="n">markers</span><span class="o">=</span><span class="n">markers</span> <span class="k">if</span> <span class="n">markers</span> <span class="k">else</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
@@ -804,10 +813,7 @@ with the interactive controls.</p>
                 <span class="p">)</span>
 
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hs_list</span><span class="p">):</span>
-                <span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span>
-                    <span class="o">*</span><span class="n">h</span><span class="o">.</span><span class="n">distribution</span><span class="p">(</span><span class="n">rational_t</span><span class="o">=</span><span class="k">lambda</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">n</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span>
-                <span class="p">)</span>
-                <span class="n">outcomes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">outcomes</span><span class="p">)</span>
+                <span class="n">outcomes</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">values_xy_for_graph_type</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">graph_type</span><span class="p">)</span>
                 <span class="n">loc</span> <span class="o">=</span> <span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
                 <span class="n">rowspan</span> <span class="o">=</span> <span class="n">per_breakout_height</span> <span class="o">+</span> <span class="n">per_outcome_height</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">outcomes</span><span class="p">)</span>
                 <span class="n">top</span> <span class="o">+=</span> <span class="n">rowspan</span>
@@ -821,9 +827,9 @@ with the interactive controls.</p>
                         <span class="n">grid</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">rowspan</span><span class="o">=</span><span class="n">rowspan</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">src_ax</span>
                     <span class="p">)</span>
 
-                <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">outcomes</span><span class="p">))</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">outcomes</span><span class="p">)</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="o">**</span><span class="n">barh_kw</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">outcomes</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="o">**</span><span class="n">barh_kw</span><span class="p">)</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -922,6 +928,14 @@ with the interactive controls.</p>
         <span class="n">options</span><span class="o">=</span><span class="n">main_plot_funcs_by_type</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Main Type&quot;</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">graph_type_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">RadioButtons</span><span class="p">(</span>
+        <span class="n">value</span><span class="o">=</span><span class="n">GraphType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;Normal&quot;</span><span class="p">,</span> <span class="n">GraphType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;At Least&quot;</span><span class="p">,</span> <span class="n">GraphType</span><span class="o">.</span><span class="n">AT_LEAST</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;At Most&quot;</span><span class="p">,</span> <span class="n">GraphType</span><span class="o">.</span><span class="n">AT_MOST</span><span class="p">),</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
     <span class="n">main_plot_style_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span>
         <span class="n">value</span><span class="o">=</span><span class="s2">&quot;bmh&quot;</span><span class="p">,</span>
         <span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">available</span><span class="p">,</span>
@@ -984,6 +998,8 @@ with the interactive controls.</p>
                         <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">(</span>
                             <span class="p">[</span>
                                 <span class="n">main_plot_type_widget</span><span class="p">,</span>
+                                <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="s2">&quot;Plot Type:&quot;</span><span class="p">),</span>
+                                <span class="n">graph_type_widget</span><span class="p">,</span>
                                 <span class="n">main_plot_style_widget</span><span class="p">,</span>
                                 <span class="n">alpha_widget</span><span class="p">,</span>
                                 <span class="n">show_shadow_widget</span><span class="p">,</span>
@@ -1008,6 +1024,7 @@ with the interactive controls.</p>
                         <span class="s2">&quot;cutoff&quot;</span><span class="p">:</span> <span class="n">cutoff_widget</span><span class="p">,</span>
                         <span class="s2">&quot;breakouts&quot;</span><span class="p">:</span> <span class="n">breakouts_widget</span><span class="p">,</span>
                         <span class="s2">&quot;main_plot_type&quot;</span><span class="p">:</span> <span class="n">main_plot_type_widget</span><span class="p">,</span>
+                        <span class="s2">&quot;graph_type&quot;</span><span class="p">:</span> <span class="n">graph_type_widget</span><span class="p">,</span>
                         <span class="s2">&quot;main_plot_style&quot;</span><span class="p">:</span> <span class="n">main_plot_style_widget</span><span class="p">,</span>
                         <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="n">alpha_widget</span><span class="p">,</span>
                         <span class="s2">&quot;show_shadow&quot;</span><span class="p">:</span> <span class="n">show_shadow_widget</span><span class="p">,</span>
@@ -1047,7 +1064,7 @@ with the interactive controls.</p>
 future versions.</p>
 </div>
 <p>Discards outcomes in <em>h</em>, starting with the smallest counts as long as the total
-discarded in proportion to <code class="highlight"><span class="n">h</span><span class="o">.</span><span class="n">total</span></code> does not exceed <em>cutoff</em>. This can
+discarded in proportion to <code class="highlight"><span class="n">h</span><span class="o">.</span><span class="n">total</span><span class="p">()</span></code> does not exceed <em>cutoff</em>. This can
 be useful in speeding up plots where there are large number of negligible
 probabilities.</p>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -1063,7 +1080,7 @@ probabilities.</p>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">dyce</span> <span class="kn">import</span> <span class="n">H</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fractions</span> <span class="kn">import</span> <span class="n">Fraction</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">h</span> <span class="o">=</span> <span class="n">H</span><span class="p">({</span><span class="mi">1</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="mi">6</span><span class="p">})</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">h</span><span class="o">.</span><span class="n">total</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">h</span><span class="o">.</span><span class="n">total</span><span class="p">()</span> <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">total</span><span class="p">)</span> <span class="k">else</span> <span class="n">h</span><span class="o">.</span><span class="n">total</span>  <span class="c1"># type: ignore</span>
 <span class="mi">21</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">limit_for_display</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">21</span><span class="p">))</span>
 <span class="n">H</span><span class="p">({</span><span class="mi">3</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="mi">6</span><span class="p">})</span>
@@ -1084,7 +1101,7 @@ probabilities.</p>
 <span class="sd">        future versions.</span>
 
 <span class="sd">    Discards outcomes in *h*, starting with the smallest counts as long as the total</span>
-<span class="sd">    discarded in proportion to ``#!python h.total`` does not exceed *cutoff*. This can</span>
+<span class="sd">    discarded in proportion to ``#!python h.total()`` does not exceed *cutoff*. This can</span>
 <span class="sd">    be useful in speeding up plots where there are large number of negligible</span>
 <span class="sd">    probabilities.</span>
 
@@ -1093,7 +1110,7 @@ probabilities.</p>
 <span class="sd">    &gt;&gt;&gt; from dyce import H</span>
 <span class="sd">    &gt;&gt;&gt; from fractions import Fraction</span>
 <span class="sd">    &gt;&gt;&gt; h = H({1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6})</span>
-<span class="sd">    &gt;&gt;&gt; h.total</span>
+<span class="sd">    &gt;&gt;&gt; h.total() if callable(h.total) else h.total  # type: ignore</span>
 <span class="sd">    21</span>
 <span class="sd">    &gt;&gt;&gt; limit_for_display(h, cutoff=Fraction(5, 21))</span>
 <span class="sd">    H({3: 3, 4: 4, 5: 5, 6: 6})</span>
@@ -1105,7 +1122,7 @@ probabilities.</p>
     <span class="k">if</span> <span class="n">cutoff</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">cutoff</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cutoff (</span><span class="si">{</span><span class="n">cutoff</span><span class="si">}</span><span class="s2">) must be between zero and one, inclusive&quot;</span><span class="p">)</span>
 
-    <span class="n">cutoff_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cutoff</span> <span class="o">*</span> <span class="n">h</span><span class="o">.</span><span class="n">total</span><span class="p">)</span>
+    <span class="n">cutoff_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cutoff</span> <span class="o">*</span> <span class="n">_h_total</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">cutoff_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">h</span>
@@ -1133,7 +1150,7 @@ probabilities.</p>
 
 
 <h2 id="anydyce.viz.plot_bar" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">plot_bar</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span> <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+<code class="highlight language-python"><span class="n">plot_bar</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span> <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span> <span class="n">graph_type</span><span class="p">:</span> <span class="n">GraphType</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">GraphType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">:</span> <span class="mi">0</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 
 </h2>
@@ -1158,6 +1175,7 @@ where <em>hs</em> contains a small number of histograms.</p>
 <span class="k">def</span> <span class="nf">plot_bar</span><span class="p">(</span>
     <span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span>
     <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span>
+    <span class="n">graph_type</span><span class="p">:</span> <span class="n">GraphType</span> <span class="o">=</span> <span class="n">GraphType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">,</span>
     <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_GRAPH_ALPHA</span><span class="p">,</span>
     <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -1192,10 +1210,11 @@ where <em>hs</em> contains a small number of histograms.</p>
         <span class="c1"># of the total width (... * width / len(hs) ...) and center the whole cluster of</span>
         <span class="c1"># bars around the data point (... - width / 2)</span>
         <span class="n">adj</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">width</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">hs</span><span class="p">)</span> <span class="o">-</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span>
-        <span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">h</span><span class="o">.</span><span class="n">distribution</span><span class="p">(</span><span class="n">rational_t</span><span class="o">=</span><span class="k">lambda</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">n</span> <span class="o">/</span> <span class="n">d</span><span class="p">))</span>
+        <span class="n">outcomes</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">values_xy_for_graph_type</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">graph_type</span><span class="p">)</span>
+
         <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span>
             <span class="p">[</span><span class="n">outcome</span> <span class="o">+</span> <span class="n">adj</span> <span class="k">for</span> <span class="n">outcome</span> <span class="ow">in</span> <span class="n">outcomes</span><span class="p">],</span>
-            <span class="n">probabilities</span><span class="p">,</span>
+            <span class="n">values</span><span class="p">,</span>
             <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
             <span class="o">**</span><span class="n">bar_kw</span><span class="p">,</span>
         <span class="p">)</span>
@@ -1212,7 +1231,7 @@ where <em>hs</em> contains a small number of histograms.</p>
 
 
 <h2 id="anydyce.viz.plot_burst" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">plot_burst</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span> <span class="n">h_inner</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span> <span class="n">h_outer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">H</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inner_formatter</span><span class="p">:</span> <span class="n">HFormatterT</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_outcome_name_formatter</span> <span class="n">at</span> <span class="mh">0x119a30e50</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">inner_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;RdYlGn_r&#39;</span><span class="p">,</span> <span class="n">outer_formatter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HFormatterT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">outer_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">text_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+<code class="highlight language-python"><span class="n">plot_burst</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span> <span class="n">h_inner</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span> <span class="n">h_outer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">H</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inner_formatter</span><span class="p">:</span> <span class="n">HFormatterT</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_outcome_name_formatter</span> <span class="n">at</span> <span class="mh">0x11573d700</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">inner_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;RdYlGn_r&#39;</span><span class="p">,</span> <span class="n">outer_formatter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HFormatterT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">outer_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">text_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 
 </h2>
@@ -1334,7 +1353,7 @@ useful for visualizing relative probability distributions. Examples can be found
 
 
 <h2 id="anydyce.viz.plot_burst_subplot" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">plot_burst_subplot</span><span class="p">(</span><span class="n">h_inner</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span> <span class="n">h_outer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">H</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inner_formatter</span><span class="p">:</span> <span class="n">HFormatterT</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_outcome_name_formatter</span> <span class="n">at</span> <span class="mh">0x119a30e50</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">inner_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;RdYlGn_r&#39;</span><span class="p">,</span> <span class="n">outer_formatter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HFormatterT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">outer_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">text_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">FigureT</span><span class="p">,</span> <span class="n">AxesT</span><span class="p">]</span></code>
+<code class="highlight language-python"><span class="n">plot_burst_subplot</span><span class="p">(</span><span class="n">h_inner</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span> <span class="n">h_outer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">H</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inner_formatter</span><span class="p">:</span> <span class="n">HFormatterT</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_outcome_name_formatter</span> <span class="n">at</span> <span class="mh">0x11573d700</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">inner_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;RdYlGn_r&#39;</span><span class="p">,</span> <span class="n">outer_formatter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HFormatterT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">outer_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">text_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">FigureT</span><span class="p">,</span> <span class="n">AxesT</span><span class="p">]</span></code>
 
 
 </h2>
@@ -1410,7 +1429,7 @@ and returns the pair.</p>
 
 
 <h2 id="anydyce.viz.plot_line" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span> <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;o&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+<code class="highlight language-python"><span class="n">plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span> <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span> <span class="n">graph_type</span><span class="p">:</span> <span class="n">GraphType</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">GraphType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">:</span> <span class="mi">0</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;o&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 
 </h2>
@@ -1437,6 +1456,7 @@ plotted with a circle, the fourth will be plotted with a plus, and so on.</p>
 <span class="k">def</span> <span class="nf">plot_line</span><span class="p">(</span>
     <span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span>
     <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span>
+    <span class="n">graph_type</span><span class="p">:</span> <span class="n">GraphType</span> <span class="o">=</span> <span class="n">GraphType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">,</span>
     <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_GRAPH_ALPHA</span><span class="p">,</span>
     <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span>
@@ -1469,8 +1489,8 @@ plotted with a circle, the fourth will be plotted with a plus, and so on.</p>
         <span class="p">)</span>
 
     <span class="k">for</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">h</span><span class="p">),</span> <span class="n">marker</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">hs</span><span class="p">,</span> <span class="n">cycle</span><span class="p">(</span><span class="n">markers</span><span class="p">)):</span>
-        <span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">h</span><span class="o">.</span><span class="n">distribution</span><span class="p">(</span><span class="n">rational_t</span><span class="o">=</span><span class="k">lambda</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">n</span> <span class="o">/</span> <span class="n">d</span><span class="p">))</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kw</span><span class="p">)</span>
+        <span class="n">outcomes</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">values_xy_for_graph_type</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">graph_type</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">outcomes</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kw</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -1484,7 +1504,7 @@ plotted with a circle, the fourth will be plotted with a plus, and so on.</p>
 
 
 <h2 id="anydyce.viz.plot_scatter" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">plot_scatter</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span> <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&lt;&gt;v^dPXo&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+<code class="highlight language-python"><span class="n">plot_scatter</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span> <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span> <span class="n">graph_type</span><span class="p">:</span> <span class="n">GraphType</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">GraphType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">:</span> <span class="mi">0</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&lt;&gt;v^dPXo&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 
 </h2>
@@ -1511,6 +1531,7 @@ plotted with a circle, the fourth will be plotted with a plus, and so on.</p>
 <span class="k">def</span> <span class="nf">plot_scatter</span><span class="p">(</span>
     <span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span>
     <span class="n">hs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">]],</span>
+    <span class="n">graph_type</span><span class="p">:</span> <span class="n">GraphType</span> <span class="o">=</span> <span class="n">GraphType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">,</span>
     <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_GRAPH_ALPHA</span><span class="p">,</span>
     <span class="n">shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;&gt;v^dPXo&quot;</span><span class="p">,</span>
@@ -1543,8 +1564,50 @@ plotted with a circle, the fourth will be plotted with a plus, and so on.</p>
         <span class="p">)</span>
 
     <span class="k">for</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">h</span><span class="p">),</span> <span class="n">marker</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">hs</span><span class="p">,</span> <span class="n">cycle</span><span class="p">(</span><span class="n">markers</span><span class="p">)):</span>
-        <span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">h</span><span class="o">.</span><span class="n">distribution</span><span class="p">(</span><span class="n">rational_t</span><span class="o">=</span><span class="k">lambda</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">n</span> <span class="o">/</span> <span class="n">d</span><span class="p">))</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span> <span class="o">**</span><span class="n">scatter_kw</span><span class="p">)</span>
+        <span class="n">outcomes</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">values_xy_for_graph_type</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">graph_type</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">outcomes</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span> <span class="o">**</span><span class="n">scatter_kw</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="anydyce.viz.values_xy_for_graph_type" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">values_xy_for_graph_type</span><span class="p">(</span><span class="n">h</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span> <span class="n">graph_type</span><span class="p">:</span> <span class="n">GraphType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">RealLike</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>anydyce/viz.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@experimental</span>
+<span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">values_xy_for_graph_type</span><span class="p">(</span>
+    <span class="n">h</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span> <span class="n">graph_type</span><span class="p">:</span> <span class="n">GraphType</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">RealLike</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+    <span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">distribution_xy</span><span class="p">()</span>
+
+    <span class="c1"># TODO(posita): Use accumulate&#39;s initial parameter once we retire support for Python</span>
+    <span class="c1"># 3.7</span>
+    <span class="k">if</span> <span class="n">graph_type</span> <span class="ow">is</span> <span class="n">GraphType</span><span class="o">.</span><span class="n">AT_LEAST</span><span class="p">:</span>
+        <span class="n">probabilities</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">accumulate</span><span class="p">((</span><span class="mf">1.0</span><span class="p">,)</span> <span class="o">+</span> <span class="n">probabilities</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="fm">__sub__</span><span class="p">))</span>
+        <span class="c1"># probabilities = tuple(accumulate(probabilities, __sub__, initial=1.0))[:-1]</span>
+    <span class="k">elif</span> <span class="n">graph_type</span> <span class="ow">is</span> <span class="n">GraphType</span><span class="o">.</span><span class="n">AT_MOST</span><span class="p">:</span>
+        <span class="n">probabilities</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">accumulate</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="fm">__add__</span><span class="p">))</span>
+        <span class="c1"># probabilities = tuple(accumulate(probabilities, __add__, initial=0.0))[1:]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">graph_type</span> <span class="ow">is</span> <span class="n">GraphType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;unrecognized graph type </span><span class="si">{</span><span class="n">graph_type</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="n">outcomes</span><span class="p">,</span> <span class="n">probabilities</span>
 </code></pre></div>
         </details>
     </div>
@@ -1615,10 +1678,10 @@ plotted with a circle, the fourth will be plotted with a plus, and so on.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate", "navigation.expand", "navigation.sections", "toc.integrate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.361d90f1.min.js", "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate", "navigation.expand", "navigation.sections", "toc.integrate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.22074ed6.min.js", "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.289a2a4b.min.js"></script>
+      <script src="../assets/javascripts/bundle.960e086b.min.js"></script>
       
         <script src="../js/site.js"></script>
       
