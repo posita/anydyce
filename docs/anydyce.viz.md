@@ -37,4 +37,3 @@
         - "plot_scatter"
         - "plot_burst"
         - "plot_burst_subplot"
-        - "jupyter_visualize"
