@@ -116,17 +116,14 @@ with warnings.catch_warnings():
     import anydyce
 ```
 
-### Additional interfaces
-
-[``anydyce.viz``](https://posita.github.io/anydyce/0.1/anydyce.viz/) also provides some rudimentary conveniences if it detects that ``#!python matplotlib`` is installed.
-One such convenience enables creation of “burst” charts (``anydyce``’s take on donut charts).
+[``anydyce.viz``](https://posita.github.io/anydyce/0.1/anydyce.viz/) provides some rudimentary conveniences such as “burst” charts (``anydyce``’s take on donut charts).
 
 ``` python
->>> import matplotlib.pyplot  # doctest: +SKIP
+>>> import matplotlib.pyplot
 >>> from dyce import H
 >>> from anydyce.viz import plot_burst
->>> ax = matplotlib.pyplot.axes() # doctest: +SKIP
->>> plot_burst(ax, 2@H(6))  # doctest: +SKIP
+>>> ax = matplotlib.pyplot.axes()
+>>> plot_burst(ax, 2@H(6))
 >>> matplotlib.pyplot.show()  # doctest: +SKIP
 
 ```
@@ -153,13 +150,13 @@ Well wonder no more!
 ``` python
 >>> df_4 = 4@H((-1, 0, 1))
 >>> d6_2 = 2@H(6)
->>> ax = matplotlib.pyplot.axes() # doctest: +SKIP
+>>> ax = matplotlib.pyplot.axes()
 >>> plot_burst(
 ...   ax,
 ...   df_4, d6_2,
 ...   inner_color="turbo",
 ...   alpha=1.0,
-... )  # doctest: +SKIP
+... )
 >>> matplotlib.pyplot.show()  # doctest: +SKIP
 
 ```
@@ -192,13 +189,13 @@ Overrides apply counter-clockwise, starting from the 12 o’clock position.
 ...   return vals[outcome]
 
 >>> d20 = H(20)
->>> ax = matplotlib.pyplot.axes() # doctest: +SKIP
+>>> ax = matplotlib.pyplot.axes()
 >>> plot_burst(ax, h_inner=d20, h_outer=H({
 ...   -2: d20.le(1)[1],
 ...   -1: d20.within(2, 14)[0],
 ...   1: d20.within(15, 19)[0],
 ...   2: d20.ge(20)[1],
-... }), inner_color="RdYlBu_r", outer_formatter=d20formatter)  # doctest: +SKIP
+... }), inner_color="RdYlBu_r", outer_formatter=d20formatter)
 >>> matplotlib.pyplot.show()  # doctest: +SKIP
 
 ```
@@ -221,17 +218,12 @@ Overrides apply counter-clockwise, starting from the 12 o’clock position.
 
 ``anydyce`` requires a relatively modern version of Python:
 
-* [CPython](https://www.python.org/) (3.7+)
-* [PyPy](http://pypy.org/) (CPython 3.7+ compatible)
+* [CPython](https://www.python.org/) (3.8+)
+* [PyPy](http://pypy.org/) (CPython 3.8+ compatible)
 
 It has the following runtime dependencies:
 
 * [``dyce``](https://pypi.org/project/dyce/) for dice mechanic modeling [![``dyce``-powered!](https://raw.githubusercontent.com/posita/dyce/latest/docs/dyce-powered.svg)](https://posita.github.io/dyce/)
-* [``numerary``](https://pypi.org/project/numerary/) for ~~proper~~ *best-effort hacking around deficiencies in* static and runtime numeric type-checking [![``numerary``-encumbered](https://raw.githubusercontent.com/posita/numerary/latest/docs/numerary-encumbered.svg)](https://posita.github.io/numerary/)
-
-``anydyce`` will opportunistically use the following, if available at runtime:
-
-* [``beartype``](https://pypi.org/project/beartype/) for yummy runtime type-checking goodness (0.8+) [![Bear-ified™](https://raw.githubusercontent.com/beartype/beartype-assets/main/badge/bear-ified.svg)](https://beartype.rtfd.io/)
 * [``ipywidgets``](https://ipywidgets.readthedocs.io/) for interactivity in Jupyter
 * [``matplotlib``](https://matplotlib.org/) for visualizing [histograms and pools](https://posita.github.io/dyce/latest/countin/)
 

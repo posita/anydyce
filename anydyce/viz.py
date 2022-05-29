@@ -29,37 +29,21 @@ from typing import (
     Union,
 )
 
+import ipywidgets
+import matplotlib.cm
+import matplotlib.colors
+import matplotlib.patheffects
+import matplotlib.pyplot
+import matplotlib.style
+import matplotlib.ticker
 from dyce import H
 from dyce.h import HableT
 from dyce.lifecycle import experimental
+from IPython.display import HTML, display
+from matplotlib.axes import Axes as AxesT
+from matplotlib.figure import Figure as FigureT
 from numerary import RealLike
 from numerary.bt import beartype
-
-try:
-    import ipywidgets
-    from IPython.display import HTML, display
-except ImportError:
-    warnings.warn(f"ipywidgets not found; some {__name__} APIs disabled")
-    ipywidgets = None  # noqa: F811
-
-    def display(*args, **kw) -> Any:
-        pass
-
-
-try:
-    import matplotlib.cm
-    import matplotlib.colors
-    import matplotlib.patheffects
-    import matplotlib.pyplot
-    import matplotlib.style
-    import matplotlib.ticker
-    from matplotlib.axes import Axes as AxesT
-    from matplotlib.figure import Figure as FigureT
-except ImportError:
-    warnings.warn(f"matplotlib not found; some {__name__} APIs disabled")
-    matplotlib = None  # noqa: F811
-    AxesT = Any  # noqa: F811
-    FigureT = Any  # noqa: F811
 
 __all__ = ("BreakoutType", "jupyter_visualize")
 
@@ -150,8 +134,8 @@ DEFAULT_GRAPH_COLOR = "RdYlGn_r"
 DEFAULT_TEXT_COLOR = "black"
 DEFAULT_BURST_ALPHA = 0.6
 DEFAULT_GRAPH_ALPHA = 0.8
-_LABEL_LIM = Fraction(1, 2 ** 5)
-_CUTOFF_LIM = Fraction(1, 2 ** 13)
+_LABEL_LIM = Fraction(1, 2**5)
+_CUTOFF_LIM = Fraction(1, 2**13)
 _CUTOFF_BASE = 10
 _CUTOFF_EXP = 6
 
@@ -260,7 +244,6 @@ def graph_colors(name: str, vals: Iterable, alpha: float = -1.0) -> ColorListT:
     matching *name*, weighted to to *vals*. The color list and *alpha* are passed
     through [``alphasize``][anydyce.viz.alphasize] before being returned.
     """
-    assert matplotlib
     cmap = matplotlib.pyplot.get_cmap(name)
     count = sum(1 for _ in vals)
 
@@ -327,14 +310,10 @@ def values_xy_for_graph_type(
 ) -> Tuple[Tuple[RealLike, ...], Tuple[float, ...]]:
     outcomes, probabilities = h.distribution_xy()
 
-    # TODO(posita): Use accumulate's initial parameter once we retire support for Python
-    # 3.7
     if graph_type is GraphType.AT_LEAST:
-        probabilities = tuple(accumulate((1.0,) + probabilities[:-1], __sub__))
-        # probabilities = tuple(accumulate(probabilities, __sub__, initial=1.0))[:-1]
+        probabilities = tuple(accumulate(probabilities, __sub__, initial=1.0))[:-1]
     elif graph_type is GraphType.AT_MOST:
-        probabilities = tuple(accumulate(probabilities, __add__))
-        # probabilities = tuple(accumulate(probabilities, __add__, initial=0.0))[1:]
+        probabilities = tuple(accumulate(probabilities, __add__, initial=0.0))[1:]
     else:
         assert graph_type is GraphType.NORMAL, f"unrecognized graph type {graph_type}"
 
@@ -500,7 +479,6 @@ def plot_burst(
     useful for visualizing relative probability distributions. Examples can be found in
     [Additional interfaces](index.md#additional-interfaces).
     """
-    assert matplotlib
     h_outer = h_inner if h_outer is None else h_outer
 
     if outer_formatter is None:
@@ -591,7 +569,6 @@ def plot_burst_subplot(
     [``matplotlib.pyplot.tight_layout``](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html),
     and returns the pair.
     """
-    assert matplotlib
     fig, ax = matplotlib.pyplot.subplots()
     plot_burst(
         ax,
@@ -654,8 +631,6 @@ def jupyter_visualize(
     # approach. It would be nice if we had some semblance of an architecture, especially
     # one that allowed for better customization building blocks. Right now, it's pretty
     # limited and fragile.
-    assert ipywidgets
-    assert matplotlib
     assert default_main_plot_type in main_plot_funcs_by_type
 
     def _display(
@@ -677,7 +652,7 @@ def jupyter_visualize(
         def _hs() -> Iterator[Tuple[str, H, Optional[H]]]:
             if enable_cutoff:
                 cutoff_frac = Fraction(cutoff).limit_denominator(
-                    _CUTOFF_BASE ** _CUTOFF_EXP
+                    _CUTOFF_BASE**_CUTOFF_EXP
                 )
             else:
                 cutoff_frac = Fraction(0)

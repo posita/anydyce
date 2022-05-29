@@ -15,6 +15,11 @@
 
 # ``anydyce`` release notes
 
+## [0.1.5](https://github.com/posita/dyce/releases/tag/v0.1.5)
+
+* ``ipywidgets`` and ``matplotlib`` are now required dependencies.
+* Minor corrections to required Python version.
+
 ## [0.1.4](https://github.com/posita/dyce/releases/tag/v0.1.4)
 
 * Prepares for breaking changes in future release of ``dyce>=0.6``.
