@@ -69,52 +69,46 @@ If used within Jupyter, ``anydyce`` provides [a high-level, interactive interfac
 
 [^2]:
 
-    Relies on external depedencies.
-    Notebooks that are published via GitHub Gists or in Git repositories can be auto-loaded via Binder.
+    Relies on external depedencies such as [Binder](https://mybinder.org/) or [JupyterLite](https://jupyterlite.readthedocs.io/en/latest/).
     (See [Interactive quick start](#interactive-quick-start).)
     However, edits are not persisted.
     Notebooks can also be downloaded and shared as ``.ipynb`` files.
 
-## Installation and use
-
-``anydyce`` is available [as a PyPI package](https://pypi.python.org/pypi/anydyce/) and [as source](https://github.com/posita/anydyce).
-
 ### Interactive quick start
 
-Probably the _easiest_ way to start tinkering with ``anydyce`` is via Binder.
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gist/posita/f65800898aa0ad08b8c927246bf32c0f/9c7bd3f836127850a9ca0429e5daa96cd9b81929?labpath=anydyce_intro.ipynb)
+Probably the _easiest_ way to start tinkering with ``anydyce`` is with [JupyterLite](https://jupyterlite.readthedocs.io/):
+[![Try dyce](https://jupyterlite.readthedocs.io/en/latest/_static/badge.svg)](https://posita.github.io/dyce-notebooks/lab/?path=notebooks%2Fanydyce_intro.ipynb)
 
-!!! danger "Binder will not save your work!"
+[Binder](https://mybinder.org/) is another great resource that you can use to share notebooks from your Git repositories (including [Gists](https://gist.github.com/)):
+[![Try dyce](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/posita/dyce-notebooks/HEAD?labpath=notebooks%2Fanydyce_intro.ipynb)
 
-    After a period of inactivity, Binder is configured to destroy all instances and delete any associated data.
-    Be careful to download any notebooks you wish to keep before that happens.
+!!! danger "JupyterLite and Binder may not save your work!"
 
-``anydyce`` also makes it relatively easy to spool up your own local Jupyter instance.
+    JupyterLite attempts to make use of your browser’s local storage for saving notebook changes.
+    Browser environments vary, including how long local storage is persisted.
+    Further, Binder loses all state once its instances shut down after a period of inactivity.
+    Be careful to download any notebooks you wish to keep.
 
-``` sh
-% git clone https://github.com/posita/anydyce.git
-% cd anydyce
-% ./quickstart-local.sh
-…
-```
-
-The [``quickstart-local.sh`` script](https://github.com/posita/anydyce/blob/v0.1.4/quickstart-local.sh) will create a local [virtual environment](https://docs.python.org/3/library/venv.html) to bootstrap a local Jupyter server with ``anydice`` installed and open a web browser to the [introduction notebook](https://gist.github.com/posita/f65800898aa0ad08b8c927246bf32c0f/9c7bd3f836127850a9ca0429e5daa96cd9b81929#file-anydyce_intro-ipynb).
-
-You can also [create your own binders](https://mybinder.org/) from Gists or other sources.
-Running the following in your notebook will bootstrap[^3] ``anydyce`` if it is not already installed:
+When creating your own notebooks, including and running the following will bootstrap ``anydyce`` if it is not already installed:
 
 ``` python
 import warnings
 with warnings.catch_warnings():
   warnings.simplefilter("ignore")
   try:
-    import anydyce
+      import anydyce
   except (ImportError, ModuleNotFoundError):
-    import sys
-    !{sys.executable} -m pip install --upgrade pip
-    !{sys.executable} -m pip install 'https://gist.githubusercontent.com/posita/f65800898aa0ad08b8c927246bf32c0f/raw/9c7bd3f836127850a9ca0429e5daa96cd9b81929/requirements.txt'
-    import anydyce
+      requirements = ["anydyce>=0.1.4"]
+      try:
+          import piplite ; await piplite.install(requirements)
+      except ImportError:
+          import pip ; pip.main(["install"] + requirements)
+  import anydyce
 ```
+
+## Installation and use
+
+``anydyce`` is available [as a PyPI package](https://pypi.python.org/pypi/anydyce/) and [as source](https://github.com/posita/anydyce).
 
 [``anydyce.viz``](https://posita.github.io/anydyce/0.1/anydyce.viz/) provides some rudimentary conveniences such as “burst” charts (``anydyce``’s take on donut charts).
 
