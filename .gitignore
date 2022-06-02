@@ -14,9 +14,12 @@
 /anydyce/_version.py
 /build/
 /dist/
+/docs/jupyter/
 /site/
 /htmlcov/
 .dmypy.json
+.ipynb_checkpoints/
+.jupyterlite.doit.db
 
 # Objects and packages
 *.7z

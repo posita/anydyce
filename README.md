@@ -77,7 +77,9 @@ If used within Jupyter, ``anydyce`` provides [a high-level, interactive interfac
 ### Interactive quick start
 
 Probably the _easiest_ way to start tinkering with ``anydyce`` is with [JupyterLite](https://jupyterlite.readthedocs.io/):
-[![Try dyce](https://jupyterlite.readthedocs.io/en/latest/_static/badge.svg)](https://posita.github.io/dyce-notebooks/lab/?path=notebooks%2Fanydyce_intro.ipynb)
+[![Try dyce](https://jupyterlite.readthedocs.io/en/latest/_static/badge.svg)](https://posita.github.io/anydyce/0.1/jupyter/lab/?path=anydyce_intro.ipynb)
+
+The [``quickstart-local.sh`` script](https://github.com/posita/anydyce/blob/v0.1.4/quickstart-local.sh) will create a local [virtual environment](https://docs.python.org/3/library/venv.html) to bootstrap a local Jupyter server with ``anydyce`` installed and open a web browser to the [introduction notebook](https://github.com/posita/anydyce/blob/v0.1.4/docs/notebooks/anydyce_intro-ipynb).
 
 [Binder](https://mybinder.org/) is another great resource that you can use to share notebooks from your Git repositories (including [Gists](https://gist.github.com/)):
 [![Try dyce](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/posita/dyce-notebooks/HEAD?labpath=notebooks%2Fanydyce_intro.ipynb)
@@ -94,16 +96,16 @@ When creating your own notebooks, including and running the following will boots
 ``` python
 import warnings
 with warnings.catch_warnings():
-  warnings.simplefilter("ignore")
-  try:
-      import anydyce
-  except (ImportError, ModuleNotFoundError):
-      requirements = ["anydyce>=0.1.4"]
-      try:
-          import piplite ; await piplite.install(requirements)
-      except ImportError:
-          import pip ; pip.main(["install"] + requirements)
-  import anydyce
+    warnings.simplefilter("ignore")
+    try:
+        import anydyce
+    except (ImportError, ModuleNotFoundError):
+        requirements = ["anydyce~=0.1", "ipywidgets"]
+        try:
+            import piplite ; await piplite.install(requirements)
+        except ImportError:
+            import pip ; pip.main(["install"] + requirements)
+    import anydyce
 ```
 
 ## Installation and use
