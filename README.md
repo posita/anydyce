@@ -100,7 +100,7 @@ with warnings.catch_warnings():
     try:
         import anydyce
     except (ImportError, ModuleNotFoundError):
-        requirements = ["anydyce~=0.1", "ipywidgets"]
+        requirements = ["anydyce~=0.1"]
         try:
             import piplite ; await piplite.install(requirements)
         except ImportError:
