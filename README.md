@@ -82,7 +82,7 @@ Probably the _easiest_ way to start tinkering with ``anydyce`` is with [JupyterL
 The [``quickstart-local.sh`` script](https://github.com/posita/anydyce/blob/v0.1.6/quickstart-local.sh) will create a local [virtual environment](https://docs.python.org/3/library/venv.html) to bootstrap a local Jupyter server with ``anydyce`` installed and open a web browser to the [introduction notebook](https://github.com/posita/anydyce/blob/v0.1.6/docs/notebooks/anydyce_intro-ipynb).
 
 [Binder](https://mybinder.org/) is another great resource that you can use to share notebooks from your Git repositories (including [Gists](https://gist.github.com/)):
-[![Try dyce](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/posita/dyce-notebooks/HEAD?labpath=notebooks%2Fanydyce_intro.ipynb)
+[![Try dyce](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/posita/anydyce/HEAD?labpath=docs%2Fnotebooks%2Fanydyce_intro.ipynb)
 
 !!! danger "JupyterLite and Binder may not save your work!"
 
@@ -100,7 +100,7 @@ with warnings.catch_warnings():
     try:
         import anydyce
     except (ImportError, ModuleNotFoundError):
-        requirements = ["anydyce~=0.1", "ipywidgets"]
+        requirements = ["anydyce~=0.1"]
         try:
             import piplite ; await piplite.install(requirements)
         except ImportError:

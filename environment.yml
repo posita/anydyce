@@ -1,0 +1,6 @@
+# For bootstrapping Binder environments so the link the README.md will work. See
+# <https://mybinder.readthedocs.io/en/latest/using/config_files.html#environment-yml-install-a-conda-environment>.
+name: anydyce-binder-environment
+
+dependencies:
+  - python=3.10
