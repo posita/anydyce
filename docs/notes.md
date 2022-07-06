@@ -17,7 +17,8 @@
 
 ## [0.1.7](https://github.com/posita/anydyce/releases/tag/v0.1.7)
 
-* Allow deployments to PyPI from CI based on tags.
+* Migrates from [``setuptools_scm``](https://pypi.org/project/setuptools-scm/) to [``versioningit``](https://pypi.org/project/versioningit/) for more flexible version number formatting.
+* Allows deployments to PyPI from CI based on tags.
 
 ## [0.1.6](https://github.com/posita/anydyce/releases/tag/v0.1.6)
 
