@@ -17,7 +17,7 @@
 
 ## [0.2.0](https://github.com/posita/anydyce/releases/tag/v0.2.0)
 
-* Completes update to ``dyce>=0.6``.
+* Completes update to ``dyce~=0.6``.
 * Migrates from [``setuptools_scm``](https://pypi.org/project/setuptools-scm/) to [``versioningit``](https://pypi.org/project/versioningit/) for more flexible version number formatting.
 * Allows deployments to PyPI from CI based on tags.
 
@@ -28,7 +28,7 @@
 
 ## [0.1.4](https://github.com/posita/anydyce/releases/tag/v0.1.4)
 
-* Prepares for breaking changes in future release of ``dyce>=0.6``.
+* Prepares for breaking changes in future release of ``dyce~=0.6``.
 * Adds experimental [``values_xy_for_graph_type``][anydyce.viz.values_xy_for_graph_type] function and exposes new “at least” and “at most” graph types via [``jupyter_visualize``][anydyce.viz.jupyter_visualize] interface.
 
 ## [0.1.3](https://github.com/posita/anydyce/releases/tag/v0.1.3)

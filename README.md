@@ -35,25 +35,25 @@ If that file is missing or appears to be modified from its original, then please
 ``anydyce`` is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 See the accompanying ``LICENSE`` file for details.
 Non-experimental features should be considered stable.
-See the [release notes](https://posita.github.io/anydyce/0.1/notes/) for a summary of version-to-version changes.
+See the [release notes](https://posita.github.io/anydyce/0.2/notes/) for a summary of version-to-version changes.
 Source code is [available on GitHub](https://github.com/posita/anydyce).
 
-If you find it lacking in any way, please don’t hesitate to [bring it to my attention](https://posita.github.io/anydyce/0.1/contrib/).
+If you find it lacking in any way, please don’t hesitate to [bring it to my attention](https://posita.github.io/anydyce/0.2/contrib/).
 
 ## Design philosophy
 
 ``anydyce`` (currently) targets Matplotlib (both alone and within Jupyter).
 Support for additional visualization tools may be added in the future.
 It is intended as a convenience layer for those who benefit from simple interfaces with reasonable defaults and limited configurability.
-If you find they are too restrictive, or have any requests or ideas for improvements, [let me know](https://posita.github.io/anydyce/0.1/contrib/#starting-discussions-and-filing-issues)![^1]
+If you find they are too restrictive, or have any requests or ideas for improvements, [let me know](https://posita.github.io/anydyce/0.2/contrib/#starting-discussions-and-filing-issues)![^1]
 
 [^1]:
 
     At some point this devolves into an exercise in chasing a diversity of very specific preferences.
     If you have a very specific need, [``dyce``](https://posita.github.io/dyce/) is fairly low level and should be able to integrate directly with whatever visualization context or package you prefer.
-    That being said, I am always on the lookout for more intuitive or accessible visualizations and will eagerly [explore ideas with you](https://posita.github.io/anydyce/0.1/contrib/#starting-discussions-and-filing-issues).
+    That being said, I am always on the lookout for more intuitive or accessible visualizations and will eagerly [explore ideas with you](https://posita.github.io/anydyce/0.2/contrib/#starting-discussions-and-filing-issues).
 
-If used within Jupyter, ``anydyce`` provides [a high-level, interactive interface](https://posita.github.io/anydyce/0.1/anydyce/#anydyce.viz.jupyter_visualize) with functionality that echos AnyDice.
+If used within Jupyter, ``anydyce`` provides [a high-level, interactive interface](https://posita.github.io/anydyce/0.2/anydyce/#anydyce.viz.jupyter_visualize) with functionality that echos AnyDice.
 
 ### Comparison to AnyDice
 
@@ -77,7 +77,7 @@ If used within Jupyter, ``anydyce`` provides [a high-level, interactive interfac
 ### Interactive quick start
 
 Probably the _easiest_ way to start tinkering with ``anydyce`` is with [JupyterLite](https://jupyterlite.readthedocs.io/):
-[![Try dyce](https://jupyterlite.readthedocs.io/en/latest/_static/badge.svg)](https://posita.github.io/anydyce/0.1/jupyter/lab/?path=anydyce_intro.ipynb)
+[![Try dyce](https://jupyterlite.readthedocs.io/en/latest/_static/badge.svg)](https://posita.github.io/anydyce/0.2/jupyter/lab/?path=anydyce_intro.ipynb)
 
 The [``quickstart-local.sh`` script](https://github.com/posita/anydyce/blob/v0.1.6.100/quickstart-local.sh) will create a local [virtual environment](https://docs.python.org/3/library/venv.html) to bootstrap a local Jupyter server with ``anydyce`` installed and open a web browser to the [introduction notebook](https://github.com/posita/anydyce/blob/v0.1.6.100/docs/notebooks/anydyce_intro-ipynb).
 
@@ -94,13 +94,14 @@ The [``quickstart-local.sh`` script](https://github.com/posita/anydyce/blob/v0.1
 When creating your own notebooks, including and running the following will bootstrap ``anydyce`` if it is not already installed:
 
 ``` python
+# Install additional requirements if necessary
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     try:
         import anydyce
     except (ImportError, ModuleNotFoundError):
-        requirements = ["anydyce~=0.1"]
+        requirements = ["anydyce~=0.2"]
         try:
             import piplite ; await piplite.install(requirements)
         except ImportError:
@@ -112,7 +113,7 @@ with warnings.catch_warnings():
 
 ``anydyce`` is available [as a PyPI package](https://pypi.python.org/pypi/anydyce/) and [as source](https://github.com/posita/anydyce).
 
-[``anydyce.viz``](https://posita.github.io/anydyce/0.1/anydyce.viz/) provides some rudimentary conveniences such as “burst” charts (``anydyce``’s take on donut charts).
+[``anydyce.viz``](https://posita.github.io/anydyce/0.2/anydyce.viz/) provides some rudimentary conveniences such as “burst” charts (``anydyce``’s take on donut charts).
 
 ``` python
 >>> import matplotlib.pyplot
@@ -225,12 +226,12 @@ It has the following runtime dependencies:
 
 ``anydyce`` (and ``dyce``) leverage ``numerary`` for its opportunistic use of ``beartype``. If you use ``beartype`` for type checking your code, but don’t want ``anydyce``, ``dyce``, or ``numerary`` to use it internally, disable it with [``numerary``’s ``NUMERARY_BEARTYPE`` environment variable](https://posita.github.io/numerary/latest/#requirements).
 
-See the [hacking quick-start](https://posita.github.io/anydyce/0.1/contrib/#hacking-quick-start) for additional development and testing dependencies.
+See the [hacking quick-start](https://posita.github.io/anydyce/0.2/contrib/#hacking-quick-start) for additional development and testing dependencies.
 
 ## License
 
 ``anydyce`` is licensed under the [MIT License](https://opensource.org/licenses/MIT).
-See the included [``LICENSE``](https://posita.github.io/anydyce/0.1/license/) file for details.
+See the included [``LICENSE``](https://posita.github.io/anydyce/0.2/license/) file for details.
 Source code is [available on GitHub](https://github.com/posita/anydyce).
 
 ## Customers [![``dyce``-powered!](https://raw.githubusercontent.com/posita/dyce/latest/docs/dyce-powered.svg)](https://posita.github.io/dyce/)
@@ -238,7 +239,7 @@ Source code is [available on GitHub](https://github.com/posita/anydyce).
 * This could be _you_! 👋
 
 Do you have a project that uses ``dyce``?
-[Let me know](https://posita.github.io/anydyce/0.1/contrib/#starting-discussions-and-filing-issues), and I’ll promote it here!
+[Let me know](https://posita.github.io/anydyce/0.2/contrib/#starting-discussions-and-filing-issues), and I’ll promote it here!
 
 And don’t forget to do your part in perpetuating gratuitous badge-ification!
 
