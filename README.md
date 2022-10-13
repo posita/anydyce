@@ -17,7 +17,7 @@ Please see the accompanying ``LICENSE`` file for rights and restrictions governi
 All rights not expressly waived or licensed are reserved.
 If that file is missing or appears to be modified from its original, then please contact the author before viewing or using this software in any capacity.*
 
-[![Tests](https://github.com/posita/anydyce/actions/workflows/unit-tests.yaml/badge.svg)](https://github.com/posita/anydyce/actions/workflows/unit-tests.yaml)
+[![Tests](https://github.com/posita/anydyce/actions/workflows/on-push.yaml/badge.svg)](https://github.com/posita/anydyce/actions/workflows/on-push.yaml)
 [![Version](https://img.shields.io/pypi/v/anydyce/0.1.6.100.svg)](https://pypi.org/project/anydyce/0.1.6.100/)
 [![Development Stage](https://img.shields.io/pypi/status/anydyce/0.1.6.100.svg)](https://pypi.org/project/anydyce/0.1.6.100/)
 [![License](https://img.shields.io/pypi/l/anydyce/0.1.6.100.svg)](http://opensource.org/licenses/MIT)
