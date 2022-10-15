@@ -15,6 +15,12 @@
 
 # ``anydyce`` release notes
 
+## [0.3.1](https://github.com/posita/anydyce/releases/tag/v0.3.1)
+
+* Fixes badges in docs.
+* Migrates to ``jupyterlite==0.1.0b13``.
+* Un-breaks 0.3.0 in JupyterLite.
+
 ## [0.3.0](https://github.com/posita/anydyce/releases/tag/v0.3.0)
 
 * Migrates to ``ipywidgets~=8.0``.

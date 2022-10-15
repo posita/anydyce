@@ -30,7 +30,6 @@ from typing import (
 )
 
 import ipywidgets
-import matplotlib.cm
 import matplotlib.colors
 import matplotlib.patheffects
 import matplotlib.pyplot
@@ -950,7 +949,7 @@ Download raw data as CSV
     )
     burst_graph_color_widget = ipywidgets.widgets.Dropdown(
         value=DEFAULT_GRAPH_COLOR,
-        options=sorted(matplotlib.cm.cmap_d.keys()),
+        options=sorted(matplotlib.colormaps.keys()),
         disabled=True,
         description="Burst Graph",
     )
