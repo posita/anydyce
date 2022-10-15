@@ -498,7 +498,8 @@ with the interactive controls.</p>
 
       <details class="quote">
         <summary>Source code in <code>anydyce/viz.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 593</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 592</span>
+<span class="normal"> 593</span>
 <span class="normal"> 594</span>
 <span class="normal"> 595</span>
 <span class="normal"> 596</span>
@@ -934,8 +935,7 @@ with the interactive controls.</p>
 <span class="normal">1026</span>
 <span class="normal">1027</span>
 <span class="normal">1028</span>
-<span class="normal">1029</span>
-<span class="normal">1030</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
+<span class="normal">1029</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
 <span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">jupyter_visualize</span><span class="p">(</span>
     <span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span>
@@ -1295,7 +1295,7 @@ with the interactive controls.</p>
     <span class="p">)</span>
     <span class="n">burst_graph_color_widget</span> <span class="o">=</span> <span class="n">ipywidgets</span><span class="o">.</span><span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span>
         <span class="n">value</span><span class="o">=</span><span class="n">DEFAULT_GRAPH_COLOR</span><span class="p">,</span>
-        <span class="n">options</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">cmap_d</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+        <span class="n">options</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">colormaps</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
         <span class="n">disabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Burst Graph&quot;</span><span class="p">,</span>
     <span class="p">)</span>
@@ -1398,10 +1398,10 @@ with the interactive controls.</p>
 
         <details class="quote">
           <summary>Source code in <code>anydyce/viz.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">66</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">65</span>
+<span class="normal">66</span>
 <span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">BreakoutType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">BreakoutType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
     <span class="n">NONE</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">BARH</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
     <span class="n">BURST</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>

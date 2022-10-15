@@ -526,7 +526,8 @@ value to <a class="autorefs autorefs-internal" href="#anydyce.viz.plot_burst"><c
 
       <details class="quote">
         <summary>Source code in <code>anydyce/viz.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">203</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">202</span>
+<span class="normal">203</span>
 <span class="normal">204</span>
 <span class="normal">205</span>
 <span class="normal">206</span>
@@ -552,8 +553,7 @@ value to <a class="autorefs autorefs-internal" href="#anydyce.viz.plot_burst"><c
 <span class="normal">226</span>
 <span class="normal">227</span>
 <span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
+<span class="normal">229</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
 <span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">cumulative_probability_formatter</span><span class="p">(</span>
     <span class="n">outcome</span><span class="p">:</span> <span class="n">RealLike</span><span class="p">,</span>
@@ -631,7 +631,8 @@ probabilities.</p>
 
       <details class="quote">
         <summary>Source code in <code>anydyce/viz.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">258</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
+<span class="normal">258</span>
 <span class="normal">259</span>
 <span class="normal">260</span>
 <span class="normal">261</span>
@@ -675,8 +676,7 @@ probabilities.</p>
 <span class="normal">299</span>
 <span class="normal">300</span>
 <span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
+<span class="normal">302</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
 <span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">limit_for_display</span><span class="p">(</span><span class="n">h</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">:</span> <span class="n">Fraction</span> <span class="o">=</span> <span class="n">_CUTOFF_LIM</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">H</span><span class="p">:</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -742,7 +742,8 @@ probabilities.</p>
 
       <details class="quote">
         <summary>Source code in <code>anydyce/viz.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">306</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">305</span>
+<span class="normal">306</span>
 <span class="normal">307</span>
 <span class="normal">308</span>
 <span class="normal">309</span>
@@ -755,8 +756,7 @@ probabilities.</p>
 <span class="normal">316</span>
 <span class="normal">317</span>
 <span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
+<span class="normal">319</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
 <span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">values_xy_for_graph_type</span><span class="p">(</span>
     <span class="n">h</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span> <span class="n">graph_type</span><span class="p">:</span> <span class="n">GraphType</span>
@@ -802,7 +802,8 @@ where <em>hs</em> contains a small number of histograms.</p>
 
       <details class="quote">
         <summary>Source code in <code>anydyce/viz.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">323</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">322</span>
+<span class="normal">323</span>
 <span class="normal">324</span>
 <span class="normal">325</span>
 <span class="normal">326</span>
@@ -848,8 +849,7 @@ where <em>hs</em> contains a small number of histograms.</p>
 <span class="normal">366</span>
 <span class="normal">367</span>
 <span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
+<span class="normal">369</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
 <span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">plot_bar</span><span class="p">(</span>
     <span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span>
@@ -930,7 +930,8 @@ plotted with a circle, the fourth will be plotted with a plus, and so on.</p>
 
       <details class="quote">
         <summary>Source code in <code>anydyce/viz.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">373</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">372</span>
+<span class="normal">373</span>
 <span class="normal">374</span>
 <span class="normal">375</span>
 <span class="normal">376</span>
@@ -968,8 +969,7 @@ plotted with a circle, the fourth will be plotted with a plus, and so on.</p>
 <span class="normal">408</span>
 <span class="normal">409</span>
 <span class="normal">410</span>
-<span class="normal">411</span>
-<span class="normal">412</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
+<span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
 <span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">plot_line</span><span class="p">(</span>
     <span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span>
@@ -1042,7 +1042,8 @@ plotted with a circle, the fourth will be plotted with a plus, and so on.</p>
 
       <details class="quote">
         <summary>Source code in <code>anydyce/viz.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">415</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">414</span>
+<span class="normal">415</span>
 <span class="normal">416</span>
 <span class="normal">417</span>
 <span class="normal">418</span>
@@ -1080,8 +1081,7 @@ plotted with a circle, the fourth will be plotted with a plus, and so on.</p>
 <span class="normal">450</span>
 <span class="normal">451</span>
 <span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
+<span class="normal">453</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
 <span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">plot_scatter</span><span class="p">(</span>
     <span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span>
@@ -1151,7 +1151,8 @@ useful for visualizing relative probability distributions. Examples can be found
 
       <details class="quote">
         <summary>Source code in <code>anydyce/viz.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">457</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">456</span>
+<span class="normal">457</span>
 <span class="normal">458</span>
 <span class="normal">459</span>
 <span class="normal">460</span>
@@ -1238,8 +1239,7 @@ useful for visualizing relative probability distributions. Examples can be found
 <span class="normal">541</span>
 <span class="normal">542</span>
 <span class="normal">543</span>
-<span class="normal">544</span>
-<span class="normal">545</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
+<span class="normal">544</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
 <span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">plot_burst</span><span class="p">(</span>
     <span class="n">ax</span><span class="p">:</span> <span class="n">AxesT</span><span class="p">,</span>
@@ -1358,7 +1358,8 @@ and returns the pair.</p>
 
       <details class="quote">
         <summary>Source code in <code>anydyce/viz.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">548</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">547</span>
+<span class="normal">548</span>
 <span class="normal">549</span>
 <span class="normal">550</span>
 <span class="normal">551</span>
@@ -1399,8 +1400,7 @@ and returns the pair.</p>
 <span class="normal">586</span>
 <span class="normal">587</span>
 <span class="normal">588</span>
-<span class="normal">589</span>
-<span class="normal">590</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
+<span class="normal">589</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
 <span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">plot_burst_subplot</span><span class="p">(</span>
     <span class="n">h_inner</span><span class="p">:</span> <span class="n">H</span><span class="p">,</span>
