@@ -15,6 +15,10 @@
 
 # ``anydyce`` release notes
 
+## [0.3.0](https://github.com/posita/anydyce/releases/tag/v0.3.0)
+
+* Migrates to ``ipywidgets~=8.0``.
+
 ## [0.2.0](https://github.com/posita/anydyce/releases/tag/v0.2.0)
 
 * Completes update to ``dyce~=0.6``.
