@@ -15,6 +15,10 @@
 
 # ``anydyce`` release notes
 
+## [0.3.2](https://github.com/posita/anydyce/releases/tag/v0.3.2)
+
+* Works around [jupyterlite/jupyterlite#838](https://github.com/jupyterlite/jupyterlite/issues/838) to fix docs.
+
 ## [0.3.1](https://github.com/posita/anydyce/releases/tag/v0.3.1)
 
 * Fixes badges in docs.
