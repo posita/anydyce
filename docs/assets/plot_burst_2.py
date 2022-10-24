@@ -25,6 +25,6 @@ def do_it(style: str) -> None:
         ax,
         df_4,
         d6_2,
-        inner_color="turbo",
+        inner_cmap="turbo",
         text_color=text_color,
     )

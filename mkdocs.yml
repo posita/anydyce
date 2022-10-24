@@ -69,12 +69,10 @@ plugins:
       default_handler: python
       handlers:
         python:
-          rendering:
+          options:
             show_if_no_docstring: true
             show_root_full_path: false
             show_signature_annotations: true
-      watch:
-        - anydyce
   - search
 
 theme:
@@ -89,3 +87,6 @@ theme:
     - scheme: default
       primary: teal
       accent: teal
+
+watch:
+  - anydyce

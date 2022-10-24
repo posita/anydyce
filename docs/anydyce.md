@@ -15,12 +15,12 @@
 
 # ``#!python anydyce`` package reference
 
-::: anydyce.viz.jupyter_visualize
-    rendering:
-      show_if_no_docstring: false
+::: anydyce.viz.HPlotterChooser
+    options:
+      show_if_no_docstring: true
       show_root_heading: true
 
-::: anydyce.viz.BreakoutType
-    rendering:
-      show_if_no_docstring: true
+::: anydyce.viz.jupyter_visualize
+    options:
+      show_if_no_docstring: false
       show_root_heading: true

@@ -23,14 +23,24 @@
     [Feedback, suggestions, and contributions](contrib.md) are welcome and appreciated.
 
 ::: anydyce.viz
-    rendering:
+    options:
       show_if_no_docstring: true
       show_root_heading: false
       show_root_toc_entry: false
-    selection:
       members:
+        - "HLikeT"
+        - "HPlotter"
+        - "BarHPlotter"
+        - "BurstHPlotter"
+        - "HorizontalBarHPlotter"
+        - "LineHPlotter"
+        - "ScatterHPlotter"
+        - "PlotWidgets"
         - "cumulative_probability_formatter"
+        - "outcome_name_formatter"
+        - "outcome_name_probability_formatter"
         - "limit_for_display"
+        - "probability_formatter"
         - "values_xy_for_graph_type"
         - "plot_bar"
         - "plot_line"

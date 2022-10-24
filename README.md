@@ -151,7 +151,7 @@ Well wonder no more!
 >>> plot_burst(
 ...   ax,
 ...   df_4, d6_2,
-...   inner_color="turbo",
+...   inner_cmap="turbo",
 ...   alpha=1.0,
 ... )
 >>> matplotlib.pyplot.show()  # doctest: +SKIP
@@ -192,7 +192,7 @@ Overrides apply counter-clockwise, starting from the 12 o’clock position.
 ...   -1: d20.within(2, 14)[0],
 ...   1: d20.within(15, 19)[0],
 ...   2: d20.ge(20)[1],
-... }), inner_color="RdYlBu_r", outer_formatter=d20formatter)
+... }), inner_cmap="RdYlBu_r", outer_formatter=d20formatter)
 >>> matplotlib.pyplot.show()  # doctest: +SKIP
 
 ```

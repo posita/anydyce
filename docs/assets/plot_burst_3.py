@@ -45,7 +45,7 @@ def do_it(style: str) -> None:
                 2: d20.ge(20)[1],
             }
         ),
-        inner_color="RdYlBu_r",
+        inner_cmap="RdYlBu_r",
         outer_formatter=d20formatter,
         text_color=text_color,
     )

@@ -15,6 +15,10 @@
 
 # ``anydyce`` release notes
 
+## [0.4.0](https://github.com/posita/anydyce/releases/tag/v0.4.0)
+
+* Adds [``HPlotterChooser``][anydyce.viz.HPlotterChooser] implementation and substantially refactors [``jupyter_visualize``][anydyce.viz.jupyter_visualize] in terms thereof.
+
 ## [0.3.2](https://github.com/posita/anydyce/releases/tag/v0.3.2)
 
 * Works around [jupyterlite/jupyterlite#838](https://github.com/jupyterlite/jupyterlite/issues/838) to fix docs.

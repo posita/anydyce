@@ -10,7 +10,7 @@
 /.coverage
 /.coverage.*
 /.tox/
-/.venv/
+/_output/
 /anydyce/_version.py
 /build/
 /dist/
