@@ -1,0 +1,1639 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Visualization tools for dyce">
+      
+      
+        <meta name="author" content="Matt Bogosian">
+      
+      
+        <link rel="canonical" href="https://posita.github.io/anydyce/0.4/anydyce/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
+    
+    
+      
+        <title>anydyce - anydyce</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.20d9efc8.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#anydyce-package-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="anydyce" class="md-header__button md-logo" aria-label="anydyce" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            anydyce
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              <tt>anydyce</tt>
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/posita/anydyce" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="anydyce" class="md-nav__button md-logo" aria-label="anydyce" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    anydyce
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/posita/anydyce" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../notes/" class="md-nav__link">
+        Release notes
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contrib/" class="md-nav__link">
+        Contributing
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../license/" class="md-nav__link">
+        License
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          API
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="API" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          API
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          <tt>anydyce</tt>
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        <tt>anydyce</tt>
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#anydyce.viz.HPlotterChooser" class="md-nav__link">
+    HPlotterChooser
+  </a>
+  
+    <nav class="md-nav" aria-label="HPlotterChooser">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#anydyce.viz.HPlotterChooser.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anydyce.viz.HPlotterChooser.interact" class="md-nav__link">
+    interact()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anydyce.viz.HPlotterChooser.plot" class="md-nav__link">
+    plot()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anydyce.viz.HPlotterChooser.update_hs" class="md-nav__link">
+    update_hs()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anydyce.viz.jupyter_visualize" class="md-nav__link">
+    jupyter_visualize()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../anydyce.viz/" class="md-nav__link">
+        <tt>anydyce.viz</tt>
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/posita/anydyce/edit/master/docs/anydyce.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<!---
+  Copyright and other protections apply. Please see the accompanying LICENSE file for
+  rights and restrictions governing use of this software. All rights not expressly
+  waived or licensed are reserved. If that file is missing or appears to be modified
+  from its original, then please contact the author before viewing or using this
+  software in any capacity.
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!! IMPORTANT: READ THIS BEFORE EDITING! !!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Please keep each sentence on its own unwrapped line.
+  It looks like crap in a text editor, but it has no effect on rendering, and it allows much more useful diffs.
+  Thank you!
+-->
+
+<h1 id="anydyce-package-reference"><code class="highlight"><span class="n">anydyce</span></code> package reference</h1>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="anydyce.viz.HPlotterChooser" class="doc doc-heading">
+        <code>HPlotterChooser</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+
+  
+      <div class="admonition warning">
+<p class="admonition-title">Experimental</p>
+<p>This class should be considered experimental and may change or disappear in
+future versions.</p>
+</div>
+<p>A controller for coordinating the display of a histogram data set and selection of
+one or more plotters as well as triggering updates in response to either control or
+data changes. All parameters for the
+<a class="autorefs autorefs-internal" href="#anydyce.viz.HPlotterChooser.__init__">initializer</a> are optional.</p>
+<p><em>histogram_specs</em> is the histogram data set which defaults to an empty tuple. The
+histogram data set can also be replaced vi the
+<a class="autorefs autorefs-internal" href="#anydyce.viz.HPlotterChooser.update_hs"><code>update_hs</code></a> method.</p>
+<p>Plotter controls (including the selection tabs) are contained within an accordion
+interface. If <em>controls_expanded</em> is <code class="highlight"><span class="kc">True</span></code>, the accordion is initially
+expanded for the user. If it is <code class="highlight"><span class="kc">False</span></code>, it is initially collapsed.</p>
+<p><em>plot_widgets</em> allows object creators to customize the available control widgets,
+including their initial values. It defaults to <code class="highlight"><span class="kc">None</span></code> which results in a
+fresh <a class="autorefs autorefs-internal" href="../anydyce.viz/#anydyce.viz.PlotWidgets"><code>PlotWidgets</code></a> object being created during
+construction.</p>
+<p><em>plotters_or_factories</em> allows overriding which plotters are available. The default
+is to provide factories for all plotters currently available in <code>anydyce</code>.</p>
+<p><em>selected_name</em> is the name of the plotter to be displayed initially. It must match
+the <a class="autorefs autorefs-internal" href="../anydyce.viz/#anydyce.viz.HPlotter.NAME"><code>HPlotter.NAME</code> property</a> of an available plotter
+provided by the <em>plotters_or_factories</em> parameter.</p>
+
+
+        <details class="quote">
+          <summary>Source code in <code>anydyce/viz.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 874</span>
+<span class="normal"> 875</span>
+<span class="normal"> 876</span>
+<span class="normal"> 877</span>
+<span class="normal"> 878</span>
+<span class="normal"> 879</span>
+<span class="normal"> 880</span>
+<span class="normal"> 881</span>
+<span class="normal"> 882</span>
+<span class="normal"> 883</span>
+<span class="normal"> 884</span>
+<span class="normal"> 885</span>
+<span class="normal"> 886</span>
+<span class="normal"> 887</span>
+<span class="normal"> 888</span>
+<span class="normal"> 889</span>
+<span class="normal"> 890</span>
+<span class="normal"> 891</span>
+<span class="normal"> 892</span>
+<span class="normal"> 893</span>
+<span class="normal"> 894</span>
+<span class="normal"> 895</span>
+<span class="normal"> 896</span>
+<span class="normal"> 897</span>
+<span class="normal"> 898</span>
+<span class="normal"> 899</span>
+<span class="normal"> 900</span>
+<span class="normal"> 901</span>
+<span class="normal"> 902</span>
+<span class="normal"> 903</span>
+<span class="normal"> 904</span>
+<span class="normal"> 905</span>
+<span class="normal"> 906</span>
+<span class="normal"> 907</span>
+<span class="normal"> 908</span>
+<span class="normal"> 909</span>
+<span class="normal"> 910</span>
+<span class="normal"> 911</span>
+<span class="normal"> 912</span>
+<span class="normal"> 913</span>
+<span class="normal"> 914</span>
+<span class="normal"> 915</span>
+<span class="normal"> 916</span>
+<span class="normal"> 917</span>
+<span class="normal"> 918</span>
+<span class="normal"> 919</span>
+<span class="normal"> 920</span>
+<span class="normal"> 921</span>
+<span class="normal"> 922</span>
+<span class="normal"> 923</span>
+<span class="normal"> 924</span>
+<span class="normal"> 925</span>
+<span class="normal"> 926</span>
+<span class="normal"> 927</span>
+<span class="normal"> 928</span>
+<span class="normal"> 929</span>
+<span class="normal"> 930</span>
+<span class="normal"> 931</span>
+<span class="normal"> 932</span>
+<span class="normal"> 933</span>
+<span class="normal"> 934</span>
+<span class="normal"> 935</span>
+<span class="normal"> 936</span>
+<span class="normal"> 937</span>
+<span class="normal"> 938</span>
+<span class="normal"> 939</span>
+<span class="normal"> 940</span>
+<span class="normal"> 941</span>
+<span class="normal"> 942</span>
+<span class="normal"> 943</span>
+<span class="normal"> 944</span>
+<span class="normal"> 945</span>
+<span class="normal"> 946</span>
+<span class="normal"> 947</span>
+<span class="normal"> 948</span>
+<span class="normal"> 949</span>
+<span class="normal"> 950</span>
+<span class="normal"> 951</span>
+<span class="normal"> 952</span>
+<span class="normal"> 953</span>
+<span class="normal"> 954</span>
+<span class="normal"> 955</span>
+<span class="normal"> 956</span>
+<span class="normal"> 957</span>
+<span class="normal"> 958</span>
+<span class="normal"> 959</span>
+<span class="normal"> 960</span>
+<span class="normal"> 961</span>
+<span class="normal"> 962</span>
+<span class="normal"> 963</span>
+<span class="normal"> 964</span>
+<span class="normal"> 965</span>
+<span class="normal"> 966</span>
+<span class="normal"> 967</span>
+<span class="normal"> 968</span>
+<span class="normal"> 969</span>
+<span class="normal"> 970</span>
+<span class="normal"> 971</span>
+<span class="normal"> 972</span>
+<span class="normal"> 973</span>
+<span class="normal"> 974</span>
+<span class="normal"> 975</span>
+<span class="normal"> 976</span>
+<span class="normal"> 977</span>
+<span class="normal"> 978</span>
+<span class="normal"> 979</span>
+<span class="normal"> 980</span>
+<span class="normal"> 981</span>
+<span class="normal"> 982</span>
+<span class="normal"> 983</span>
+<span class="normal"> 984</span>
+<span class="normal"> 985</span>
+<span class="normal"> 986</span>
+<span class="normal"> 987</span>
+<span class="normal"> 988</span>
+<span class="normal"> 989</span>
+<span class="normal"> 990</span>
+<span class="normal"> 991</span>
+<span class="normal"> 992</span>
+<span class="normal"> 993</span>
+<span class="normal"> 994</span>
+<span class="normal"> 995</span>
+<span class="normal"> 996</span>
+<span class="normal"> 997</span>
+<span class="normal"> 998</span>
+<span class="normal"> 999</span>
+<span class="normal">1000</span>
+<span class="normal">1001</span>
+<span class="normal">1002</span>
+<span class="normal">1003</span>
+<span class="normal">1004</span>
+<span class="normal">1005</span>
+<span class="normal">1006</span>
+<span class="normal">1007</span>
+<span class="normal">1008</span>
+<span class="normal">1009</span>
+<span class="normal">1010</span>
+<span class="normal">1011</span>
+<span class="normal">1012</span>
+<span class="normal">1013</span>
+<span class="normal">1014</span>
+<span class="normal">1015</span>
+<span class="normal">1016</span>
+<span class="normal">1017</span>
+<span class="normal">1018</span>
+<span class="normal">1019</span>
+<span class="normal">1020</span>
+<span class="normal">1021</span>
+<span class="normal">1022</span>
+<span class="normal">1023</span>
+<span class="normal">1024</span>
+<span class="normal">1025</span>
+<span class="normal">1026</span>
+<span class="normal">1027</span>
+<span class="normal">1028</span>
+<span class="normal">1029</span>
+<span class="normal">1030</span>
+<span class="normal">1031</span>
+<span class="normal">1032</span>
+<span class="normal">1033</span>
+<span class="normal">1034</span>
+<span class="normal">1035</span>
+<span class="normal">1036</span>
+<span class="normal">1037</span>
+<span class="normal">1038</span>
+<span class="normal">1039</span>
+<span class="normal">1040</span>
+<span class="normal">1041</span>
+<span class="normal">1042</span>
+<span class="normal">1043</span>
+<span class="normal">1044</span>
+<span class="normal">1045</span>
+<span class="normal">1046</span>
+<span class="normal">1047</span>
+<span class="normal">1048</span>
+<span class="normal">1049</span>
+<span class="normal">1050</span>
+<span class="normal">1051</span>
+<span class="normal">1052</span>
+<span class="normal">1053</span>
+<span class="normal">1054</span>
+<span class="normal">1055</span>
+<span class="normal">1056</span>
+<span class="normal">1057</span>
+<span class="normal">1058</span>
+<span class="normal">1059</span>
+<span class="normal">1060</span>
+<span class="normal">1061</span>
+<span class="normal">1062</span>
+<span class="normal">1063</span>
+<span class="normal">1064</span>
+<span class="normal">1065</span>
+<span class="normal">1066</span>
+<span class="normal">1067</span>
+<span class="normal">1068</span>
+<span class="normal">1069</span>
+<span class="normal">1070</span>
+<span class="normal">1071</span>
+<span class="normal">1072</span>
+<span class="normal">1073</span>
+<span class="normal">1074</span>
+<span class="normal">1075</span>
+<span class="normal">1076</span>
+<span class="normal">1077</span>
+<span class="normal">1078</span>
+<span class="normal">1079</span>
+<span class="normal">1080</span>
+<span class="normal">1081</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">HPlotterChooser</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    !!! warning &quot;Experimental&quot;</span>
+
+<span class="sd">        This class should be considered experimental and may change or disappear in</span>
+<span class="sd">        future versions.</span>
+
+<span class="sd">    A controller for coordinating the display of a histogram data set and selection of</span>
+<span class="sd">    one or more plotters as well as triggering updates in response to either control or</span>
+<span class="sd">    data changes. All parameters for the</span>
+<span class="sd">    [initializer][anydyce.viz.HPlotterChooser.__init__] are optional.</span>
+
+<span class="sd">    *histogram_specs* is the histogram data set which defaults to an empty tuple. The</span>
+<span class="sd">    histogram data set can also be replaced vi the</span>
+<span class="sd">    [``update_hs``][anydyce.viz.HPlotterChooser.update_hs] method.</span>
+
+<span class="sd">    Plotter controls (including the selection tabs) are contained within an accordion</span>
+<span class="sd">    interface. If *controls_expanded* is ``#!python True``, the accordion is initially</span>
+<span class="sd">    expanded for the user. If it is ``#!python False``, it is initially collapsed.</span>
+
+<span class="sd">    *plot_widgets* allows object creators to customize the available control widgets,</span>
+<span class="sd">    including their initial values. It defaults to ``#!python None`` which results in a</span>
+<span class="sd">    fresh [``PlotWidgets``][anydyce.viz.PlotWidgets] object being created during</span>
+<span class="sd">    construction.</span>
+
+<span class="sd">    *plotters_or_factories* allows overriding which plotters are available. The default</span>
+<span class="sd">    is to provide factories for all plotters currently available in ``anydyce``.</span>
+
+<span class="sd">    *selected_name* is the name of the plotter to be displayed initially. It must match</span>
+<span class="sd">    the [``HPlotter.NAME`` property][anydyce.viz.HPlotter.NAME] of an available plotter</span>
+<span class="sd">    provided by the *plotters_or_factories* parameter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span>
+            <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">controls_expanded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">plot_widgets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PlotWidgets</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">plotters_or_factories</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HPlotter</span><span class="p">,</span> <span class="n">HPlotterFactoryT</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">BurstHPlotter</span><span class="p">,</span>
+            <span class="n">LineHPlotter</span><span class="p">,</span>
+            <span class="n">BarHPlotter</span><span class="p">,</span>
+            <span class="n">ScatterHPlotter</span><span class="p">,</span>
+            <span class="n">HorizontalBarHPlotter</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">selected_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">plotters</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">plotter</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plotter</span><span class="p">,</span> <span class="n">HPlotter</span><span class="p">)</span> <span class="k">else</span> <span class="n">plotter</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">plotter</span> <span class="ow">in</span> <span class="n">plotters_or_factories</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plotters</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;must provide at least one plotter&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HPlotter</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">plotter</span><span class="o">.</span><span class="n">NAME</span><span class="p">:</span> <span class="n">plotter</span> <span class="k">for</span> <span class="n">plotter</span> <span class="ow">in</span> <span class="n">plotters</span>
+        <span class="p">}</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span>
+
+        <span class="k">if</span> <span class="n">selected_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">selected_name</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">selected_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">selected_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;selected_name </span><span class="si">{</span><span class="n">selected_name</span><span class="si">!r}</span><span class="s2"> does not match any plotter&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">plotters</span><span class="p">):</span>
+            <span class="n">duplicate_names</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="nb">repr</span><span class="p">(</span><span class="n">plotter_name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">plotter_name</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span>
+                    <span class="n">plotter</span><span class="o">.</span><span class="n">NAME</span> <span class="k">for</span> <span class="n">plotter</span> <span class="ow">in</span> <span class="n">plotters</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span>
+            <span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;ignoring redundant plotters with duplicate names </span><span class="si">{</span><span class="n">duplicate_names</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">plot_widgets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plot_widgets</span> <span class="o">=</span> <span class="n">PlotWidgets</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_widgets</span> <span class="o">=</span> <span class="n">plot_widgets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layouts_by_name</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Widget</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">plotter_name</span><span class="p">,</span> <span class="n">plotter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_layouts_by_name</span><span class="p">[</span><span class="n">plotter_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">layout</span><span class="p">(</span><span class="n">plot_widgets</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hs</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">H</span><span class="p">]],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hs_culled</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">H</span><span class="p">]],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cutoff</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_csv_download_link</span> <span class="o">=</span> <span class="n">HTML</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_hs</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selected_plotter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HPlotter</span><span class="p">]</span>
+
+        <span class="n">tab_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="n">chooser_tab</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Tab</span><span class="p">(</span>
+            <span class="n">children</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layouts_by_name</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
+            <span class="n">selected_index</span><span class="o">=</span><span class="mi">0</span>
+            <span class="k">if</span> <span class="n">selected_name</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">tab_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">selected_name</span><span class="p">),</span>
+            <span class="n">titles</span><span class="o">=</span><span class="n">tab_names</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_handle_tab</span><span class="p">(</span><span class="n">change</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;selected_index&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_selected_plotter</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="n">islice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_update</span><span class="p">()</span>
+
+        <span class="n">chooser_tab</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">_handle_tab</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;selected_index&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selected_plotter</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+            <span class="n">islice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">chooser_tab</span><span class="o">.</span><span class="n">selected_index</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_out</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">widgets</span><span class="o">.</span><span class="n">Accordion</span><span class="p">(</span>
+                    <span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="n">chooser_tab</span><span class="p">],</span>
+                    <span class="n">titles</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Plot Controls&quot;</span><span class="p">],</span>
+                    <span class="n">selected_index</span><span class="o">=</span><span class="mi">0</span> <span class="k">if</span> <span class="n">controls_expanded</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">widgets</span><span class="o">.</span><span class="n">interactive_output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_widgets</span><span class="o">.</span><span class="n">asdict</span><span class="p">()),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">interact</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Displays the container responsible for selecting which plotter is used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_out</span><span class="p">)</span>
+
+    <span class="nd">@beartype</span>
+    <span class="c1"># @debounce</span>
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Callback for updating the visualization in response to configuration or data</span>
+<span class="sd">        changes. *settings* are the current values from all control widgets. (See</span>
+<span class="sd">        [``PlotWidgets``][anydyce.viz.PlotWidgets].)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cutoff</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_widgets</span><span class="o">.</span><span class="n">cutoff</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_widgets</span><span class="o">.</span><span class="n">enable_cutoff</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cutoff</span> <span class="o">!=</span> <span class="n">cutoff</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cutoff</span> <span class="o">=</span> <span class="n">cutoff</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cull_data</span><span class="p">()</span>
+
+        <span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_csv_download_link</span><span class="p">)</span>
+        <span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParamsDefault</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;plot_style&quot;</span><span class="p">]):</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span>
+                <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">],</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">9</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected_plotter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_selected_plotter</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hs_culled</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="n">SettingsDict</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">update_hs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span>
+            <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+        <span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Triggers an update to the histogram data. *histogram_specs* is an iterable of either</span>
+<span class="sd">        a single [``HLikeT``][anydyce.viz.HLikeT] object, a two-tuple of a name and a</span>
+<span class="sd">        primary ``HLikeT`` object, or a three-tuple of a name, a primary ``HLikeT``</span>
+<span class="sd">        object, and an optional secondary ``HLikeT`` object (``#!python None`` if</span>
+<span class="sd">        omitted).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hs</span> <span class="o">=</span> <span class="n">_histogram_specs_to_h_tuples</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_csv_download_link</span> <span class="o">=</span> <span class="n">_csv_download_link</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_widgets</span><span class="o">.</span><span class="n">burst_swap</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="n">h_outer</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">h_inner</span> <span class="o">==</span> <span class="n">h_outer</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">h_inner</span><span class="p">,</span> <span class="n">h_outer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hs</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cull_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_update</span><span class="p">()</span>
+
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">_cull_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hs_culled</span> <span class="o">=</span> <span class="n">_histogram_specs_to_h_tuples</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cutoff</span><span class="p">)</span>
+
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">_trigger_update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_widgets</span><span class="o">.</span><span class="n">_rev_no</span><span class="o">.</span><span class="n">value</span> <span class="o">+=</span> <span class="mi">1</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="anydyce.viz.HPlotterChooser.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]]</span> <span class="o">=</span> <span class="p">(),</span> <span class="o">*</span><span class="p">,</span> <span class="n">controls_expanded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">plot_widgets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PlotWidgets</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">plotters_or_factories</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HPlotter</span><span class="p">,</span> <span class="n">HPlotterFactoryT</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">BurstHPlotter</span><span class="p">,</span> <span class="n">LineHPlotter</span><span class="p">,</span> <span class="n">BarHPlotter</span><span class="p">,</span> <span class="n">ScatterHPlotter</span><span class="p">,</span> <span class="n">HorizontalBarHPlotter</span><span class="p">),</span> <span class="n">selected_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+
+      <details class="quote">
+        <summary>Source code in <code>anydyce/viz.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 907</span>
+<span class="normal"> 908</span>
+<span class="normal"> 909</span>
+<span class="normal"> 910</span>
+<span class="normal"> 911</span>
+<span class="normal"> 912</span>
+<span class="normal"> 913</span>
+<span class="normal"> 914</span>
+<span class="normal"> 915</span>
+<span class="normal"> 916</span>
+<span class="normal"> 917</span>
+<span class="normal"> 918</span>
+<span class="normal"> 919</span>
+<span class="normal"> 920</span>
+<span class="normal"> 921</span>
+<span class="normal"> 922</span>
+<span class="normal"> 923</span>
+<span class="normal"> 924</span>
+<span class="normal"> 925</span>
+<span class="normal"> 926</span>
+<span class="normal"> 927</span>
+<span class="normal"> 928</span>
+<span class="normal"> 929</span>
+<span class="normal"> 930</span>
+<span class="normal"> 931</span>
+<span class="normal"> 932</span>
+<span class="normal"> 933</span>
+<span class="normal"> 934</span>
+<span class="normal"> 935</span>
+<span class="normal"> 936</span>
+<span class="normal"> 937</span>
+<span class="normal"> 938</span>
+<span class="normal"> 939</span>
+<span class="normal"> 940</span>
+<span class="normal"> 941</span>
+<span class="normal"> 942</span>
+<span class="normal"> 943</span>
+<span class="normal"> 944</span>
+<span class="normal"> 945</span>
+<span class="normal"> 946</span>
+<span class="normal"> 947</span>
+<span class="normal"> 948</span>
+<span class="normal"> 949</span>
+<span class="normal"> 950</span>
+<span class="normal"> 951</span>
+<span class="normal"> 952</span>
+<span class="normal"> 953</span>
+<span class="normal"> 954</span>
+<span class="normal"> 955</span>
+<span class="normal"> 956</span>
+<span class="normal"> 957</span>
+<span class="normal"> 958</span>
+<span class="normal"> 959</span>
+<span class="normal"> 960</span>
+<span class="normal"> 961</span>
+<span class="normal"> 962</span>
+<span class="normal"> 963</span>
+<span class="normal"> 964</span>
+<span class="normal"> 965</span>
+<span class="normal"> 966</span>
+<span class="normal"> 967</span>
+<span class="normal"> 968</span>
+<span class="normal"> 969</span>
+<span class="normal"> 970</span>
+<span class="normal"> 971</span>
+<span class="normal"> 972</span>
+<span class="normal"> 973</span>
+<span class="normal"> 974</span>
+<span class="normal"> 975</span>
+<span class="normal"> 976</span>
+<span class="normal"> 977</span>
+<span class="normal"> 978</span>
+<span class="normal"> 979</span>
+<span class="normal"> 980</span>
+<span class="normal"> 981</span>
+<span class="normal"> 982</span>
+<span class="normal"> 983</span>
+<span class="normal"> 984</span>
+<span class="normal"> 985</span>
+<span class="normal"> 986</span>
+<span class="normal"> 987</span>
+<span class="normal"> 988</span>
+<span class="normal"> 989</span>
+<span class="normal"> 990</span>
+<span class="normal"> 991</span>
+<span class="normal"> 992</span>
+<span class="normal"> 993</span>
+<span class="normal"> 994</span>
+<span class="normal"> 995</span>
+<span class="normal"> 996</span>
+<span class="normal"> 997</span>
+<span class="normal"> 998</span>
+<span class="normal"> 999</span>
+<span class="normal">1000</span>
+<span class="normal">1001</span>
+<span class="normal">1002</span>
+<span class="normal">1003</span>
+<span class="normal">1004</span>
+<span class="normal">1005</span>
+<span class="normal">1006</span>
+<span class="normal">1007</span>
+<span class="normal">1008</span>
+<span class="normal">1009</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span>
+        <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">controls_expanded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">plot_widgets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PlotWidgets</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">plotters_or_factories</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HPlotter</span><span class="p">,</span> <span class="n">HPlotterFactoryT</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">BurstHPlotter</span><span class="p">,</span>
+        <span class="n">LineHPlotter</span><span class="p">,</span>
+        <span class="n">BarHPlotter</span><span class="p">,</span>
+        <span class="n">ScatterHPlotter</span><span class="p">,</span>
+        <span class="n">HorizontalBarHPlotter</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">selected_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">plotters</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="n">plotter</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plotter</span><span class="p">,</span> <span class="n">HPlotter</span><span class="p">)</span> <span class="k">else</span> <span class="n">plotter</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">plotter</span> <span class="ow">in</span> <span class="n">plotters_or_factories</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plotters</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;must provide at least one plotter&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HPlotter</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">plotter</span><span class="o">.</span><span class="n">NAME</span><span class="p">:</span> <span class="n">plotter</span> <span class="k">for</span> <span class="n">plotter</span> <span class="ow">in</span> <span class="n">plotters</span>
+    <span class="p">}</span>
+
+    <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span>
+
+    <span class="k">if</span> <span class="n">selected_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">selected_name</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">selected_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">selected_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;selected_name </span><span class="si">{</span><span class="n">selected_name</span><span class="si">!r}</span><span class="s2"> does not match any plotter&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">plotters</span><span class="p">):</span>
+        <span class="n">duplicate_names</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="nb">repr</span><span class="p">(</span><span class="n">plotter_name</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">plotter_name</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span>
+                <span class="n">plotter</span><span class="o">.</span><span class="n">NAME</span> <span class="k">for</span> <span class="n">plotter</span> <span class="ow">in</span> <span class="n">plotters</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;ignoring redundant plotters with duplicate names </span><span class="si">{</span><span class="n">duplicate_names</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">plot_widgets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plot_widgets</span> <span class="o">=</span> <span class="n">PlotWidgets</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_plot_widgets</span> <span class="o">=</span> <span class="n">plot_widgets</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_layouts_by_name</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Widget</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">plotter_name</span><span class="p">,</span> <span class="n">plotter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layouts_by_name</span><span class="p">[</span><span class="n">plotter_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">layout</span><span class="p">(</span><span class="n">plot_widgets</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hs</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">H</span><span class="p">]],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hs_culled</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">H</span><span class="p">]],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_cutoff</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_csv_download_link</span> <span class="o">=</span> <span class="n">HTML</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">update_hs</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_selected_plotter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HPlotter</span><span class="p">]</span>
+
+    <span class="n">tab_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="n">chooser_tab</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Tab</span><span class="p">(</span>
+        <span class="n">children</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layouts_by_name</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
+        <span class="n">selected_index</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">if</span> <span class="n">selected_name</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="n">tab_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">selected_name</span><span class="p">),</span>
+        <span class="n">titles</span><span class="o">=</span><span class="n">tab_names</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_handle_tab</span><span class="p">(</span><span class="n">change</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;selected_index&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selected_plotter</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+            <span class="n">islice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_update</span><span class="p">()</span>
+
+    <span class="n">chooser_tab</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">_handle_tab</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;selected_index&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_selected_plotter</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="n">islice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plotters_by_name</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">chooser_tab</span><span class="o">.</span><span class="n">selected_index</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_out</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">widgets</span><span class="o">.</span><span class="n">Accordion</span><span class="p">(</span>
+                <span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="n">chooser_tab</span><span class="p">],</span>
+                <span class="n">titles</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Plot Controls&quot;</span><span class="p">],</span>
+                <span class="n">selected_index</span><span class="o">=</span><span class="mi">0</span> <span class="k">if</span> <span class="n">controls_expanded</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">widgets</span><span class="o">.</span><span class="n">interactive_output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_widgets</span><span class="o">.</span><span class="n">asdict</span><span class="p">()),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="anydyce.viz.HPlotterChooser.interact" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">interact</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Displays the container responsible for selecting which plotter is used.</p>
+
+      <details class="quote">
+        <summary>Source code in <code>anydyce/viz.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1011</span>
+<span class="normal">1012</span>
+<span class="normal">1013</span>
+<span class="normal">1014</span>
+<span class="normal">1015</span>
+<span class="normal">1016</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">interact</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Displays the container responsible for selecting which plotter is used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_out</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="anydyce.viz.HPlotterChooser.plot" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">settings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Callback for updating the visualization in response to configuration or data
+changes. <em>settings</em> are the current values from all control widgets. (See
+<a class="autorefs autorefs-internal" href="../anydyce.viz/#anydyce.viz.PlotWidgets"><code>PlotWidgets</code></a>.)</p>
+
+      <details class="quote">
+        <summary>Source code in <code>anydyce/viz.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1018</span>
+<span class="normal">1019</span>
+<span class="normal">1020</span>
+<span class="normal">1021</span>
+<span class="normal">1022</span>
+<span class="normal">1023</span>
+<span class="normal">1024</span>
+<span class="normal">1025</span>
+<span class="normal">1026</span>
+<span class="normal">1027</span>
+<span class="normal">1028</span>
+<span class="normal">1029</span>
+<span class="normal">1030</span>
+<span class="normal">1031</span>
+<span class="normal">1032</span>
+<span class="normal">1033</span>
+<span class="normal">1034</span>
+<span class="normal">1035</span>
+<span class="normal">1036</span>
+<span class="normal">1037</span>
+<span class="normal">1038</span>
+<span class="normal">1039</span>
+<span class="normal">1040</span>
+<span class="normal">1041</span>
+<span class="normal">1042</span>
+<span class="normal">1043</span>
+<span class="normal">1044</span>
+<span class="normal">1045</span>
+<span class="normal">1046</span>
+<span class="normal">1047</span>
+<span class="normal">1048</span>
+<span class="normal">1049</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="c1"># @debounce</span>
+<span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Callback for updating the visualization in response to configuration or data</span>
+<span class="sd">    changes. *settings* are the current values from all control widgets. (See</span>
+<span class="sd">    [``PlotWidgets``][anydyce.viz.PlotWidgets].)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cutoff</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_widgets</span><span class="o">.</span><span class="n">cutoff</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_widgets</span><span class="o">.</span><span class="n">enable_cutoff</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">else</span> <span class="kc">None</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cutoff</span> <span class="o">!=</span> <span class="n">cutoff</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cutoff</span> <span class="o">=</span> <span class="n">cutoff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cull_data</span><span class="p">()</span>
+
+    <span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_csv_download_link</span><span class="p">)</span>
+    <span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParamsDefault</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;plot_style&quot;</span><span class="p">]):</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span>
+            <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">],</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">9</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected_plotter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_selected_plotter</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hs_culled</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="n">SettingsDict</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="anydyce.viz.HPlotterChooser.update_hs" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">update_hs</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]])</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Triggers an update to the histogram data. <em>histogram_specs</em> is an iterable of either
+a single <a class="autorefs autorefs-internal" href="../anydyce.viz/#anydyce.viz.HLikeT"><code>HLikeT</code></a> object, a two-tuple of a name and a
+primary <code>HLikeT</code> object, or a three-tuple of a name, a primary <code>HLikeT</code>
+object, and an optional secondary <code>HLikeT</code> object (<code class="highlight"><span class="kc">None</span></code> if
+omitted).</p>
+
+      <details class="quote">
+        <summary>Source code in <code>anydyce/viz.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1051</span>
+<span class="normal">1052</span>
+<span class="normal">1053</span>
+<span class="normal">1054</span>
+<span class="normal">1055</span>
+<span class="normal">1056</span>
+<span class="normal">1057</span>
+<span class="normal">1058</span>
+<span class="normal">1059</span>
+<span class="normal">1060</span>
+<span class="normal">1061</span>
+<span class="normal">1062</span>
+<span class="normal">1063</span>
+<span class="normal">1064</span>
+<span class="normal">1065</span>
+<span class="normal">1066</span>
+<span class="normal">1067</span>
+<span class="normal">1068</span>
+<span class="normal">1069</span>
+<span class="normal">1070</span>
+<span class="normal">1071</span>
+<span class="normal">1072</span>
+<span class="normal">1073</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">update_hs</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span>
+        <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+    <span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Triggers an update to the histogram data. *histogram_specs* is an iterable of either</span>
+<span class="sd">    a single [``HLikeT``][anydyce.viz.HLikeT] object, a two-tuple of a name and a</span>
+<span class="sd">    primary ``HLikeT`` object, or a three-tuple of a name, a primary ``HLikeT``</span>
+<span class="sd">    object, and an optional secondary ``HLikeT`` object (``#!python None`` if</span>
+<span class="sd">    omitted).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hs</span> <span class="o">=</span> <span class="n">_histogram_specs_to_h_tuples</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_csv_download_link</span> <span class="o">=</span> <span class="n">_csv_download_link</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hs</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_plot_widgets</span><span class="o">.</span><span class="n">burst_swap</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span>
+        <span class="n">h_outer</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">h_inner</span> <span class="o">==</span> <span class="n">h_outer</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">h_inner</span><span class="p">,</span> <span class="n">h_outer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hs</span>
+    <span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_cull_data</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_update</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="anydyce.viz.jupyter_visualize" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">jupyter_visualize</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]],</span> <span class="o">*</span><span class="p">,</span> <span class="n">controls_expanded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">initial_alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_ALPHA</span><span class="p">,</span> <span class="n">initial_burst_cmap_inner</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_CMAP_BURST_INNER</span><span class="p">,</span> <span class="n">initial_burst_cmap_link</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">initial_burst_cmap_outer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_CMAP_BURST_OUTER</span><span class="p">,</span> <span class="n">initial_burst_color_bg</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">initial_burst_color_text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_COLOR_TEXT</span><span class="p">,</span> <span class="n">initial_burst_swap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initial_burst_zero_fill_normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initial_enable_cutoff</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initial_graph_type</span><span class="p">:</span> <span class="n">TraditionalPlotType</span> <span class="o">=</span> <span class="n">TraditionalPlotType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">,</span> <span class="n">initial_markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;oX^v&gt;&lt;dP&#39;</span><span class="p">,</span> <span class="n">initial_plot_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bmh&#39;</span><span class="p">,</span> <span class="n">initial_show_shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">selected_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <div class="admonition warning">
+<p class="admonition-title">Experimental</p>
+<p>This function should be considered experimental and may change or disappear in
+future versions.</p>
+</div>
+<p>Takes a list of one or more <em>histogram_specs</em> and produces an interactive
+visualization reminiscent of <a href="https://anydice.com/">AnyDice</a>, but with some extra
+goodies.</p>
+<p>Each item in <em>histogram_specs</em> can be a <code class="highlight"><span class="n">dyce</span><span class="o">.</span><span class="n">H</span></code> object, a 2-tuple, or a
+3-tuple. 2-tuples are in the format <code class="highlight"><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span></code>, where <code class="highlight"><span class="nb">str</span></code> is
+a name or description that will be used to identify the accompanying <code class="highlight"><span class="n">H</span></code>
+object where it appears in the visualization. 3-tuples are in the format <code class="highlight"><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span></code>. The second <code class="highlight"><span class="n">H</span></code> object is used for the interior ring in
+“burst” break-out graphs, but otherwise ignored.</p>
+<p>The “Powered by the <em>Apocalypse</em> (PbtA)” example in the introduction notebook should
+give an idea of the effect. (See <a href="..#interactive-quick-start">Interactive quick
+start</a>.)</p>
+<p>Parameters have the same meanings as with
+<a class="autorefs autorefs-internal" href="#anydyce.viz.HPlotterChooser"><code>HPlotterChooser</code></a> and
+<a class="autorefs autorefs-internal" href="../anydyce.viz/#anydyce.viz.PlotWidgets"><code>PlotWidgets</code></a>.</p>
+
+      <details class="quote">
+        <summary>Source code in <code>anydyce/viz.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1597</span>
+<span class="normal">1598</span>
+<span class="normal">1599</span>
+<span class="normal">1600</span>
+<span class="normal">1601</span>
+<span class="normal">1602</span>
+<span class="normal">1603</span>
+<span class="normal">1604</span>
+<span class="normal">1605</span>
+<span class="normal">1606</span>
+<span class="normal">1607</span>
+<span class="normal">1608</span>
+<span class="normal">1609</span>
+<span class="normal">1610</span>
+<span class="normal">1611</span>
+<span class="normal">1612</span>
+<span class="normal">1613</span>
+<span class="normal">1614</span>
+<span class="normal">1615</span>
+<span class="normal">1616</span>
+<span class="normal">1617</span>
+<span class="normal">1618</span>
+<span class="normal">1619</span>
+<span class="normal">1620</span>
+<span class="normal">1621</span>
+<span class="normal">1622</span>
+<span class="normal">1623</span>
+<span class="normal">1624</span>
+<span class="normal">1625</span>
+<span class="normal">1626</span>
+<span class="normal">1627</span>
+<span class="normal">1628</span>
+<span class="normal">1629</span>
+<span class="normal">1630</span>
+<span class="normal">1631</span>
+<span class="normal">1632</span>
+<span class="normal">1633</span>
+<span class="normal">1634</span>
+<span class="normal">1635</span>
+<span class="normal">1636</span>
+<span class="normal">1637</span>
+<span class="normal">1638</span>
+<span class="normal">1639</span>
+<span class="normal">1640</span>
+<span class="normal">1641</span>
+<span class="normal">1642</span>
+<span class="normal">1643</span>
+<span class="normal">1644</span>
+<span class="normal">1645</span>
+<span class="normal">1646</span>
+<span class="normal">1647</span>
+<span class="normal">1648</span>
+<span class="normal">1649</span>
+<span class="normal">1650</span>
+<span class="normal">1651</span>
+<span class="normal">1652</span>
+<span class="normal">1653</span>
+<span class="normal">1654</span>
+<span class="normal">1655</span>
+<span class="normal">1656</span>
+<span class="normal">1657</span>
+<span class="normal">1658</span>
+<span class="normal">1659</span>
+<span class="normal">1660</span>
+<span class="normal">1661</span>
+<span class="normal">1662</span>
+<span class="normal">1663</span>
+<span class="normal">1664</span>
+<span class="normal">1665</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
+<span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">jupyter_visualize</span><span class="p">(</span>
+    <span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span>
+        <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+    <span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">controls_expanded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">initial_alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_ALPHA</span><span class="p">,</span>
+    <span class="n">initial_burst_cmap_inner</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_CMAP_BURST_INNER</span><span class="p">,</span>
+    <span class="n">initial_burst_cmap_link</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">initial_burst_cmap_outer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_CMAP_BURST_OUTER</span><span class="p">,</span>
+    <span class="n">initial_burst_color_bg</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span>
+    <span class="n">initial_burst_color_text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_COLOR_TEXT</span><span class="p">,</span>
+    <span class="n">initial_burst_swap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">initial_burst_zero_fill_normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">initial_enable_cutoff</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">initial_graph_type</span><span class="p">:</span> <span class="n">TraditionalPlotType</span> <span class="o">=</span> <span class="n">TraditionalPlotType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">,</span>
+    <span class="n">initial_markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;oX^v&gt;&lt;dP&quot;</span><span class="p">,</span>
+    <span class="n">initial_plot_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bmh&quot;</span><span class="p">,</span>
+    <span class="n">initial_show_shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">selected_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    !!! warning &quot;Experimental&quot;</span>
+
+<span class="sd">        This function should be considered experimental and may change or disappear in</span>
+<span class="sd">        future versions.</span>
+
+<span class="sd">    Takes a list of one or more *histogram_specs* and produces an interactive</span>
+<span class="sd">    visualization reminiscent of [AnyDice](https://anydice.com/), but with some extra</span>
+<span class="sd">    goodies.</span>
+
+<span class="sd">    Each item in *histogram_specs* can be a ``#!python dyce.H`` object, a 2-tuple, or a</span>
+<span class="sd">    3-tuple. 2-tuples are in the format ``#!python (str, H)``, where ``#!python str`` is</span>
+<span class="sd">    a name or description that will be used to identify the accompanying ``#!python H``</span>
+<span class="sd">    object where it appears in the visualization. 3-tuples are in the format ``#!python</span>
+<span class="sd">    (str, H, H)``. The second ``#!python H`` object is used for the interior ring in</span>
+<span class="sd">    “burst” break-out graphs, but otherwise ignored.</span>
+
+<span class="sd">    The “Powered by the _Apocalypse_ (PbtA)” example in the introduction notebook should</span>
+<span class="sd">    give an idea of the effect. (See [Interactive quick</span>
+<span class="sd">    start](index.md#interactive-quick-start).)</span>
+
+<span class="sd">    Parameters have the same meanings as with</span>
+<span class="sd">    [``HPlotterChooser``][anydyce.viz.HPlotterChooser] and</span>
+<span class="sd">    [``PlotWidgets``][anydyce.viz.PlotWidgets].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plotter_chooser</span> <span class="o">=</span> <span class="n">HPlotterChooser</span><span class="p">(</span>
+        <span class="n">histogram_specs</span><span class="p">,</span>
+        <span class="n">plot_widgets</span><span class="o">=</span><span class="n">PlotWidgets</span><span class="p">(</span>
+            <span class="n">initial_alpha</span><span class="o">=</span><span class="n">initial_alpha</span><span class="p">,</span>
+            <span class="n">initial_burst_cmap_inner</span><span class="o">=</span><span class="n">initial_burst_cmap_inner</span><span class="p">,</span>
+            <span class="n">initial_burst_cmap_link</span><span class="o">=</span><span class="n">initial_burst_cmap_link</span><span class="p">,</span>
+            <span class="n">initial_burst_cmap_outer</span><span class="o">=</span><span class="n">initial_burst_cmap_outer</span><span class="p">,</span>
+            <span class="n">initial_burst_color_bg</span><span class="o">=</span><span class="n">initial_burst_color_bg</span><span class="p">,</span>
+            <span class="n">initial_burst_color_text</span><span class="o">=</span><span class="n">initial_burst_color_text</span><span class="p">,</span>
+            <span class="n">initial_burst_swap</span><span class="o">=</span><span class="n">initial_burst_swap</span><span class="p">,</span>
+            <span class="n">initial_burst_zero_fill_normalize</span><span class="o">=</span><span class="n">initial_burst_zero_fill_normalize</span><span class="p">,</span>
+            <span class="n">initial_enable_cutoff</span><span class="o">=</span><span class="n">initial_enable_cutoff</span><span class="p">,</span>
+            <span class="n">initial_graph_type</span><span class="o">=</span><span class="n">initial_graph_type</span><span class="p">,</span>
+            <span class="n">initial_markers</span><span class="o">=</span><span class="n">initial_markers</span><span class="p">,</span>
+            <span class="n">initial_plot_style</span><span class="o">=</span><span class="n">initial_plot_style</span><span class="p">,</span>
+            <span class="n">initial_show_shadow</span><span class="o">=</span><span class="n">initial_show_shadow</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">selected_name</span><span class="o">=</span><span class="n">selected_name</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">plotter_chooser</span><span class="o">.</span><span class="n">interact</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../license/" class="md-footer__link md-footer__link--prev" aria-label="Previous: License" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              License
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../anydyce.viz/" class="md-footer__link md-footer__link--next" aria-label="Next: &lt;tt&gt;anydyce.viz&lt;/tt&gt;" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <tt>anydyce.viz</tt>
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      <i>Copyright and other protections apply. Please see the accompanying <tt>LICENSE</tt> file for rights and restrictions governing use of this software. All rights not expressly waived or licensed are reserved. If that file is missing or appears to be modified from its original, then please contact the author before viewing or using this software in any capacity.</i>
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate", "content.tabs.link", "navigation.expand", "navigation.sections", "toc.integrate"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.8492ddcf.min.js"></script>
+      
+        <script src="../js/site.js"></script>
+      
+        <script src="../js/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
