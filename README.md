@@ -18,11 +18,11 @@ All rights not expressly waived or licensed are reserved.
 If that file is missing or appears to be modified from its original, then please contact the author before viewing or using this software in any capacity.*
 
 [![Tests](https://github.com/posita/anydyce/actions/workflows/on-push.yaml/badge.svg)](https://github.com/posita/anydyce/actions/workflows/on-push.yaml)
-[![Version](https://img.shields.io/pypi/v/anydyce/0.3.2.svg)](https://pypi.org/project/anydyce/0.3.2/)
-[![Development Stage](https://img.shields.io/pypi/status/anydyce/0.3.2.svg)](https://pypi.org/project/anydyce/0.3.2/)
-[![License](https://img.shields.io/pypi/l/anydyce/0.3.2.svg)](http://opensource.org/licenses/MIT)
-[![Supported Python Versions](https://img.shields.io/pypi/pyversions/anydyce/0.3.2.svg)](https://pypi.org/project/anydyce/0.3.2/)
-[![Supported Python Implementations](https://img.shields.io/pypi/implementation/anydyce/0.3.2.svg)](https://pypi.org/project/anydyce/0.3.2/)
+[![Version](https://img.shields.io/pypi/v/anydyce/0.4.0.svg)](https://pypi.org/project/anydyce/0.4.0/)
+[![Development Stage](https://img.shields.io/pypi/status/anydyce/0.4.0.svg)](https://pypi.org/project/anydyce/0.4.0/)
+[![License](https://img.shields.io/pypi/l/anydyce/0.4.0.svg)](http://opensource.org/licenses/MIT)
+[![Supported Python Versions](https://img.shields.io/pypi/pyversions/anydyce/0.4.0.svg)](https://pypi.org/project/anydyce/0.4.0/)
+[![Supported Python Implementations](https://img.shields.io/pypi/implementation/anydyce/0.4.0.svg)](https://pypi.org/project/anydyce/0.4.0/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![``dyce``-powered!](https://raw.githubusercontent.com/posita/dyce/latest/docs/dyce-powered.svg)](https://posita.github.io/dyce/)
 [![``numerary``-encumbered](https://raw.githubusercontent.com/posita/numerary/latest/docs/numerary-encumbered.svg)](https://posita.github.io/numerary/)
@@ -35,25 +35,25 @@ If that file is missing or appears to be modified from its original, then please
 ``anydyce`` is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 See the accompanying ``LICENSE`` file for details.
 Non-experimental features should be considered stable.
-See the [release notes](https://posita.github.io/anydyce/0.3/notes/) for a summary of version-to-version changes.
+See the [release notes](https://posita.github.io/anydyce/0.4/notes/) for a summary of version-to-version changes.
 Source code is [available on GitHub](https://github.com/posita/anydyce).
 
-If you find it lacking in any way, please don’t hesitate to [bring it to my attention](https://posita.github.io/anydyce/0.3/contrib/).
+If you find it lacking in any way, please don’t hesitate to [bring it to my attention](https://posita.github.io/anydyce/0.4/contrib/).
 
 ## Design philosophy
 
 ``anydyce`` (currently) targets Matplotlib (both alone and within Jupyter).
 Support for additional visualization tools may be added in the future.
 It is intended as a convenience layer for those who benefit from simple interfaces with reasonable defaults and limited configurability.
-If you find they are too restrictive, or have any requests or ideas for improvements, [let me know](https://posita.github.io/anydyce/0.3/contrib/#starting-discussions-and-filing-issues)![^1]
+If you find they are too restrictive, or have any requests or ideas for improvements, [let me know](https://posita.github.io/anydyce/0.4/contrib/#starting-discussions-and-filing-issues)![^1]
 
 [^1]:
 
     At some point this devolves into an exercise in chasing a diversity of very specific preferences.
     If you have a very specific need, [``dyce``](https://posita.github.io/dyce/) is fairly low level and should be able to integrate directly with whatever visualization context or package you prefer.
-    That being said, I am always on the lookout for more intuitive or accessible visualizations and will eagerly [explore ideas with you](https://posita.github.io/anydyce/0.3/contrib/#starting-discussions-and-filing-issues).
+    That being said, I am always on the lookout for more intuitive or accessible visualizations and will eagerly [explore ideas with you](https://posita.github.io/anydyce/0.4/contrib/#starting-discussions-and-filing-issues).
 
-If used within Jupyter, ``anydyce`` provides [a high-level, interactive interface](https://posita.github.io/anydyce/0.3/anydyce/#anydyce.viz.jupyter_visualize) with functionality that echos AnyDice.
+If used within Jupyter, ``anydyce`` provides [a high-level, interactive interface](https://posita.github.io/anydyce/0.4/anydyce/#anydyce.viz.jupyter_visualize) with functionality that echos AnyDice.
 
 ### Comparison to AnyDice
 
@@ -77,9 +77,9 @@ If used within Jupyter, ``anydyce`` provides [a high-level, interactive interfac
 ### Interactive quick start
 
 Probably the _easiest_ way to start tinkering with ``anydyce`` is with [JupyterLite](https://jupyterlite.readthedocs.io/):
-[![Try dyce](https://jupyterlite.readthedocs.io/en/latest/_static/badge.svg)](https://posita.github.io/anydyce/0.3/jupyter/lab/?path=anydyce_intro.ipynb)
+[![Try dyce](https://jupyterlite.readthedocs.io/en/latest/_static/badge.svg)](https://posita.github.io/anydyce/0.4/jupyter/lab/?path=anydyce_intro.ipynb)
 
-The [``quickstart-local.sh`` script](https://github.com/posita/anydyce/blob/v0.3.2/quickstart-local.sh) will create a local [virtual environment](https://docs.python.org/3/library/venv.html) to bootstrap a local Jupyter server with ``anydyce`` installed and open a web browser to the [introduction notebook](https://github.com/posita/anydyce/blob/v0.3.2/docs/notebooks/anydyce_intro-ipynb).
+The [``quickstart-local.sh`` script](https://github.com/posita/anydyce/blob/v0.4.0/quickstart-local.sh) will create a local [virtual environment](https://docs.python.org/3/library/venv.html) to bootstrap a local Jupyter server with ``anydyce`` installed and open a web browser to the [introduction notebook](https://github.com/posita/anydyce/blob/v0.4.0/docs/notebooks/anydyce_intro-ipynb).
 
 [Binder](https://mybinder.org/) is another great resource that you can use to share notebooks from your Git repositories (including [Gists](https://gist.github.com/)):
 [![Try dyce](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/posita/anydyce/HEAD?labpath=docs%2Fnotebooks%2Fanydyce_intro.ipynb)
@@ -113,7 +113,7 @@ with warnings.catch_warnings():
 
 ``anydyce`` is available [as a PyPI package](https://pypi.python.org/pypi/anydyce/) and [as source](https://github.com/posita/anydyce).
 
-[``anydyce.viz``](https://posita.github.io/anydyce/0.3/anydyce.viz/) provides some rudimentary conveniences such as “burst” charts (``anydyce``’s take on donut charts).
+[``anydyce.viz``](https://posita.github.io/anydyce/0.4/anydyce.viz/) provides some rudimentary conveniences such as “burst” charts (``anydyce``’s take on donut charts).
 
 ``` python
 >>> import matplotlib.pyplot
@@ -127,12 +127,12 @@ with warnings.catch_warnings():
 
 <!-- Should match any title of the corresponding plot title -->
 <picture>
-  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.3.2/docs/assets/plot_burst_1_dark.png" media="(prefers-color-scheme: dark)">
-  <img alt="Plot: Basic plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.3.2/docs/assets/plot_burst_1_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.3.2/docs/assets/plot_burst_1_dark.png#gh-dark-mode-only"></span>
+  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.4.0/docs/assets/plot_burst_1_dark.png" media="(prefers-color-scheme: dark)">
+  <img alt="Plot: Basic plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.4.0/docs/assets/plot_burst_1_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.4.0/docs/assets/plot_burst_1_dark.png#gh-dark-mode-only"></span>
 </picture>
 
 <details>
-<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.3.2/docs/assets/plot_burst_1.py"><code>plot_burst_1.py</code></a></summary>
+<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.4.0/docs/assets/plot_burst_1.py"><code>plot_burst_1.py</code></a></summary>
 
 ``` python
 --8<-- "docs/assets/plot_burst_1.py"
@@ -160,12 +160,12 @@ Well wonder no more!
 
 <!-- Should match any title of the corresponding plot title -->
 <picture>
-  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.3.2/docs/assets/plot_burst_2_dark.png" media="(prefers-color-scheme: dark)">
-  <img alt="Plot: 2d6 vs. 4dF plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.3.2/docs/assets/plot_burst_2_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.3.2/docs/assets/plot_burst_2_dark.png#gh-dark-mode-only"></span>
+  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.4.0/docs/assets/plot_burst_2_dark.png" media="(prefers-color-scheme: dark)">
+  <img alt="Plot: 2d6 vs. 4dF plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.4.0/docs/assets/plot_burst_2_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.4.0/docs/assets/plot_burst_2_dark.png#gh-dark-mode-only"></span>
 </picture>
 
 <details>
-<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.3.2/docs/assets/plot_burst_2.py"><code>plot_burst_2.py</code></a></summary>
+<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.4.0/docs/assets/plot_burst_2.py"><code>plot_burst_2.py</code></a></summary>
 
 ``` python
 --8<-- "docs/assets/plot_burst_2.py"
@@ -199,12 +199,12 @@ Overrides apply counter-clockwise, starting from the 12 o’clock position.
 
 <!-- Should match any title of the corresponding plot title -->
 <picture>
-  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.3.2/docs/assets/plot_burst_3_dark.png" media="(prefers-color-scheme: dark)">
-  <img alt="Plot: Advanced plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.3.2/docs/assets/plot_burst_3_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.3.2/docs/assets/plot_burst_3_dark.png#gh-dark-mode-only"></span>
+  <source srcset="https://raw.githubusercontent.com/posita/anydyce/v0.4.0/docs/assets/plot_burst_3_dark.png" media="(prefers-color-scheme: dark)">
+  <img alt="Plot: Advanced plot_burst example" src="https://raw.githubusercontent.com/posita/anydyce/v0.4.0/docs/assets/plot_burst_3_light.png#gh-light-mode-only"><span style="display: none"><img alt="Plot: Taking the lowest or highest die of 2d6" src="https://raw.githubusercontent.com/posita/anydyce/v0.4.0/docs/assets/plot_burst_3_dark.png#gh-dark-mode-only"></span>
 </picture>
 
 <details>
-<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.3.2/docs/assets/plot_burst_3.py"><code>plot_burst_3.py</code></a></summary>
+<summary>Source: <a href="https://raw.githubusercontent.com/posita/anydyce/v0.4.0/docs/assets/plot_burst_3.py"><code>plot_burst_3.py</code></a></summary>
 
 ``` python
 --8<-- "docs/assets/plot_burst_3.py"
@@ -226,12 +226,12 @@ It has the following runtime dependencies:
 
 ``anydyce`` (and ``dyce``) leverage ``numerary`` for its opportunistic use of ``beartype``. If you use ``beartype`` for type checking your code, but don’t want ``anydyce``, ``dyce``, or ``numerary`` to use it internally, disable it with [``numerary``’s ``NUMERARY_BEARTYPE`` environment variable](https://posita.github.io/numerary/latest/#requirements).
 
-See the [hacking quick-start](https://posita.github.io/anydyce/0.3/contrib/#hacking-quick-start) for additional development and testing dependencies.
+See the [hacking quick-start](https://posita.github.io/anydyce/0.4/contrib/#hacking-quick-start) for additional development and testing dependencies.
 
 ## License
 
 ``anydyce`` is licensed under the [MIT License](https://opensource.org/licenses/MIT).
-See the included [``LICENSE``](https://posita.github.io/anydyce/0.3/license/) file for details.
+See the included [``LICENSE``](https://posita.github.io/anydyce/0.4/license/) file for details.
 Source code is [available on GitHub](https://github.com/posita/anydyce).
 
 ## Customers [![``dyce``-powered!](https://raw.githubusercontent.com/posita/dyce/latest/docs/dyce-powered.svg)](https://posita.github.io/dyce/)
@@ -239,7 +239,7 @@ Source code is [available on GitHub](https://github.com/posita/anydyce).
 * This could be _you_! 👋
 
 Do you have a project that uses ``dyce``?
-[Let me know](https://posita.github.io/anydyce/0.3/contrib/#starting-discussions-and-filing-issues), and I’ll promote it here!
+[Let me know](https://posita.github.io/anydyce/0.4/contrib/#starting-discussions-and-filing-issues), and I’ll promote it here!
 
 And don’t forget to do your part in perpetuating gratuitous badge-ification!
 
