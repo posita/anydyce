@@ -26,6 +26,7 @@ from anydyce.viz import (
     BarHPlotter,
     BurstHPlotter,
     HorizontalBarHPlotter,
+    ImageType,
     LineHPlotter,
     PlotWidgets,
     ScatterHPlotter,
@@ -52,6 +53,7 @@ class TestPlotWidgets:
             initial_alpha=0.125,
             initial_enable_cutoff=True,
             initial_graph_type=TraditionalPlotType.AT_LEAST,
+            initial_img_type=ImageType.SVG,
             initial_markers="xo",
             initial_plot_style="default",
             initial_show_shadow=True,
@@ -59,6 +61,7 @@ class TestPlotWidgets:
         assert plot_widgets.alpha.value == 0.125
         assert plot_widgets.enable_cutoff.value is True
         assert plot_widgets.graph_type.value is TraditionalPlotType.AT_LEAST
+        assert plot_widgets.img_type.value is ImageType.SVG
         assert plot_widgets.markers.value == "xo"
         assert plot_widgets.plot_style.value == "default"
         assert plot_widgets.show_shadow.value is True
@@ -74,12 +77,14 @@ class TestPlotWidgets:
             "burst_cmap_link",
             "burst_cmap_outer",
             "burst_color_bg",
+            "burst_color_bg_trnsp",
             "burst_color_text",
             "burst_swap",
             "burst_zero_fill_normalize",
             "cutoff",
             "enable_cutoff",
             "graph_type",
+            "img_type",
             "markers",
             "plot_style",
             "scale",
@@ -417,30 +422,30 @@ def test_plot_burst_outer() -> None:
 def test_csv_download_link_emtpy() -> None:
     empty_csv_html = _csv_download_link(())
     assert (
-        empty_csv_html.data
-        == '\n<a download=".csv" href="data:text/csv;base64,T3V0Y29tZQ0K" target="_blank">\nDownload raw data as CSV\n</a>\n'
+        empty_csv_html
+        == '<a download=".csv" href="data:text/csv;base64,T3V0Y29tZQ0K" target="_blank">Download raw data as CSV</a>'
     )
 
 
 def test_csv_download_link_single_histogram() -> None:
     d6_csv_html = _csv_download_link([("d6", H(6), None)])
     assert (
-        d6_csv_html.data
-        == '\n<a download="d6.csv" href="data:text/csv;base64,T3V0Y29tZSxkNg0KMSwwLjE2NjY2NjY2NjY2NjY2NjY2DQoyLDAuMTY2NjY2NjY2NjY2NjY2NjYNCjMsMC4xNjY2NjY2NjY2NjY2NjY2Ng0KNCwwLjE2NjY2NjY2NjY2NjY2NjY2DQo1LDAuMTY2NjY2NjY2NjY2NjY2NjYNCjYsMC4xNjY2NjY2NjY2NjY2NjY2Ng0K" target="_blank">\nDownload raw data as CSV\n</a>\n'
+        d6_csv_html
+        == '<a download="d6.csv" href="data:text/csv;base64,T3V0Y29tZSxkNg0KMSwwLjE2NjY2NjY2NjY2NjY2NjY2DQoyLDAuMTY2NjY2NjY2NjY2NjY2NjYNCjMsMC4xNjY2NjY2NjY2NjY2NjY2Ng0KNCwwLjE2NjY2NjY2NjY2NjY2NjY2DQo1LDAuMTY2NjY2NjY2NjY2NjY2NjYNCjYsMC4xNjY2NjY2NjY2NjY2NjY2Ng0K" target="_blank">Download raw data as CSV</a>'
     )
 
 
 def test_csv_download_link_secondary_histogram_ignored() -> None:
     d8d12_csv_html = _csv_download_link([("d8d12", H(8) + H(12), None)])
     d8d12_vs_2d10_csv_html = _csv_download_link([("d8d12", H(8) + H(12), 2 @ H(10))])
-    assert d8d12_csv_html.data == d8d12_vs_2d10_csv_html.data
+    assert d8d12_csv_html == d8d12_vs_2d10_csv_html
 
 
 def test_csv_download_link_multiple_histograms() -> None:
     d6_and_d8_csv_html = _csv_download_link([("d6", H(6), None), ("d8", H(8), None)])
     assert (
-        d6_and_d8_csv_html.data
-        == '\n<a download="d6, d8.csv" href="data:text/csv;base64,T3V0Y29tZSxkNixkOA0KMSwwLjE2NjY2NjY2NjY2NjY2NjY2LDAuMTI1DQoyLDAuMTY2NjY2NjY2NjY2NjY2NjYsMC4xMjUNCjMsMC4xNjY2NjY2NjY2NjY2NjY2NiwwLjEyNQ0KNCwwLjE2NjY2NjY2NjY2NjY2NjY2LDAuMTI1DQo1LDAuMTY2NjY2NjY2NjY2NjY2NjYsMC4xMjUNCjYsMC4xNjY2NjY2NjY2NjY2NjY2NiwwLjEyNQ0KNywsMC4xMjUNCjgsLDAuMTI1DQo=" target="_blank">\nDownload raw data as CSV\n</a>\n'
+        d6_and_d8_csv_html
+        == '<a download="d6-d8.csv" href="data:text/csv;base64,T3V0Y29tZSxkNixkOA0KMSwwLjE2NjY2NjY2NjY2NjY2NjY2LDAuMTI1DQoyLDAuMTY2NjY2NjY2NjY2NjY2NjYsMC4xMjUNCjMsMC4xNjY2NjY2NjY2NjY2NjY2NiwwLjEyNQ0KNCwwLjE2NjY2NjY2NjY2NjY2NjY2LDAuMTI1DQo1LDAuMTY2NjY2NjY2NjY2NjY2NjYsMC4xMjUNCjYsMC4xNjY2NjY2NjY2NjY2NjY2NiwwLjEyNQ0KNywsMC4xMjUNCjgsLDAuMTI1DQo=" target="_blank">Download raw data as CSV</a>'
     )
 
 

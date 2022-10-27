@@ -15,6 +15,11 @@
 
 # ``anydyce`` release notes
 
+## [0.4.1](https://github.com/posita/anydyce/releases/tag/v0.4.1)
+
+* Adds transparency as well as PNG and SVG output and download selections.
+* Fixes display inconsistencies between Jupyter Lab and Jupyter Lite.
+
 ## [0.4.0](https://github.com/posita/anydyce/releases/tag/v0.4.0)
 
 * Adds [``HPlotterChooser``][anydyce.viz.HPlotterChooser] implementation and substantially refactors [``jupyter_visualize``][anydyce.viz.jupyter_visualize] in terms thereof.
