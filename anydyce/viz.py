@@ -841,6 +841,9 @@ class HorizontalBarHPlotter(BarHPlotter):
         first_ax = ax = None
 
         for i, (label, h, _) in enumerate(hs):
+            if not h:
+                continue
+
             outcomes, values = values_xy_for_graph_type(h, settings["graph_type"])
             rowspan = len(outcomes)
 
@@ -1068,9 +1071,7 @@ class HPlotterChooser:
         self._cutoff: Optional[float] = None
         self._csv_download_link = ""
         self.update_hs(histogram_specs)
-
         self._selected_plotter: Optional[HPlotter]
-
         tab_names = tuple(self._plotters_by_name.keys())
 
         chooser_tab = widgets.Tab(
@@ -1396,7 +1397,7 @@ def limit_for_display(h: H, cutoff) -> H:
 def values_xy_for_graph_type(
     h: H, graph_type: TraditionalPlotType
 ) -> Tuple[Tuple[RealLike, ...], Tuple[float, ...]]:
-    outcomes, probabilities = h.distribution_xy()
+    outcomes, probabilities = h.distribution_xy() if h else ((), ())
 
     if graph_type is TraditionalPlotType.AT_LEAST:
         probabilities = tuple(accumulate(probabilities, __sub__, initial=1.0))[:-1]
@@ -1452,7 +1453,12 @@ def plot_bar(
 
     if hs:
         ax.set_xticks(unique_outcomes)
-        ax.set_xlim((min(unique_outcomes) - 1.0, max(unique_outcomes) + 1.0))
+        ax.set_xlim(
+            (
+                min(unique_outcomes, default=0) - 1.0,
+                max(unique_outcomes, default=0) + 1.0,
+            )
+        )
 
     for i, (label, h) in enumerate(hs):
         # Orient to the middle of each bar ((i + 0.5) ... ) whose width is an even share
@@ -1509,7 +1515,12 @@ def plot_line(
 
     if hs:
         ax.set_xticks(unique_outcomes)
-        ax.set_xlim((min(unique_outcomes) - 0.5, max(unique_outcomes) + 0.5))
+        ax.set_xlim(
+            (
+                min(unique_outcomes, default=0) - 0.5,
+                max(unique_outcomes, default=0) + 0.5,
+            )
+        )
 
     for (label, h), marker in zip(hs, cycle(markers if markers else " ")):
         outcomes, values = values_xy_for_graph_type(h, graph_type)
@@ -1557,7 +1568,12 @@ def plot_scatter(
 
     if hs:
         ax.set_xticks(unique_outcomes)
-        ax.set_xlim((min(unique_outcomes) - 0.5, max(unique_outcomes) + 0.5))
+        ax.set_xlim(
+            (
+                min(unique_outcomes, default=0) - 0.5,
+                max(unique_outcomes, default=0) + 0.5,
+            )
+        )
 
     for (label, h), marker in zip(hs, cycle(markers if markers else " ")):
         outcomes, values = values_xy_for_graph_type(h, graph_type)
@@ -1606,10 +1622,10 @@ def plot_burst(
             else "",
             probability,
         )
-        for outcome, probability in (h_inner.distribution())
+        for outcome, probability in h_inner.distribution()
     )
 
-    inner_labels, inner_values = list(zip(*inner))
+    inner_labels, inner_values = tuple(zip(*inner)) if h_inner else ((), ())
     inner_colors = graph_colors(inner_cmap, inner_values, alpha)
 
     outer = (
@@ -1619,10 +1635,10 @@ def plot_burst(
             else "",
             probability,
         )
-        for outcome, probability in (h_outer.distribution())
+        for outcome, probability in h_outer.distribution()
     )
 
-    outer_labels, outer_values = list(zip(*outer))
+    outer_labels, outer_values = tuple(zip(*outer)) if h_outer else ((), ())
     outer_colors = graph_colors(outer_cmap, outer_values, alpha)
 
     if title:
