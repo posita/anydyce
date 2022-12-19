@@ -1242,7 +1242,7 @@ def outcome_name_formatter(outcome: RealLike, _, __) -> str:
     used.
     """
     if hasattr(outcome, "name"):
-        return f"{outcome.name}"  # type: ignore [attr-defined]
+        return f"{outcome.name}"
     else:
         return f"{str(outcome)}"
 
@@ -1268,7 +1268,7 @@ def outcome_name_probability_formatter(
     ``#!python float`` and formatted to two decimal places.
     """
     if hasattr(outcome, "name"):
-        return f"{outcome.name}\n{float(probability):.2%}"  # type: ignore [attr-defined]
+        return f"{outcome.name}\n{float(probability):.2%}"
     else:
         return f"{str(outcome)}\n{float(probability):.2%}"
 
