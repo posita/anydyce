@@ -29,6 +29,8 @@
       show_root_toc_entry: false
       members:
         - "HLikeT"
+        - "ImageType"
+        - "TraditionalPlotType"
         - "HPlotter"
         - "BarHPlotter"
         - "BurstHPlotter"
