@@ -56,6 +56,7 @@ from numerary.bt import beartype
 __all__ = (
     "jupyter_visualize",
     "HPlotterChooser",
+    "PlotWidgets",
 )
 
 
@@ -108,7 +109,6 @@ DEFAULT_COLOR_TEXT = "black"
 DEFAULT_COLOR_BG = "white"
 DEFAULT_ALPHA = 0.75
 _LABEL_LIM = Fraction(1, 2**5)
-_CUTOFF_LIM = Fraction(1, 2**13)
 _CUTOFF_BASE = 10
 _CUTOFF_EXP = 6
 
@@ -212,6 +212,16 @@ def debounce(
 class Image:
     @beartype
     def __init__(self, file_name: str, file_type: ImageType, data: bytes):
+        r"""
+        Abstraction to support downloading images of varying types. *file_name* is the name
+        of the file to be downloaded. *file_type* is the type of the image data. *data*
+        is the image data.
+
+        !!! warning
+
+        This is a relatively dumb class. It is left to the caller to ensure that
+        *file_type* accurately describes *data*.
+        """
         if file_type is ImageType.PNG:
             self._data = base64.b64encode(data).decode()
             self._mime_pfx = "data:image/png;base64,"
@@ -229,16 +239,8 @@ class Image:
         self._file_type = file_type
 
     @beartype
-    def _repr_png_(self):
-        return self._data if self._file_type is ImageType.PNG else None
-
-    @beartype
-    def _repr_svg_(self):
-        return self._data if self._file_type is ImageType.SVG else None
-
-    @beartype
     def download_link(self) -> str:
-        return f'<a download="{self._file_name}" href="{self._mime_pfx}{urllib.parse.quote(self._data)}" target="_blank">Download {self._file_type} image</a>'
+        return f'<a download="{self._file_name}" href="{self._mime_pfx}{urllib.parse.quote(self._data)}" target="_blank">Download {self._file_type.value} image</a>'
 
 
 @dataclass(frozen=True)
@@ -272,7 +274,7 @@ class _PlotWidgetsDataclass:
     )
 
     enable_cutoff: widgets.Checkbox = field(
-        init=False,
+        init=True,
         repr=False,
         default_factory=partial(
             widgets.Checkbox,
@@ -459,13 +461,6 @@ class _PlotWidgetsDataclass:
 
 
 class PlotWidgets(_PlotWidgetsDataclass):
-    r"""
-    !!! warning "Experimental"
-
-        This class should be considered experimental and may change or disappear in
-        future versions.
-    """
-
     @beartype
     def __init__(
         self,
@@ -479,13 +474,38 @@ class PlotWidgets(_PlotWidgetsDataclass):
         initial_burst_color_text: str = DEFAULT_COLOR_TEXT,
         initial_burst_swap: bool = False,
         initial_burst_zero_fill_normalize: bool = False,
-        initial_enable_cutoff: bool = False,
+        initial_enable_cutoff: bool = True,
         initial_graph_type: TraditionalPlotType = TraditionalPlotType.NORMAL,
         initial_img_type: ImageType = ImageType.PNG,
         initial_markers: str = "oX^v><dP",
         initial_plot_style: str = "bmh",
         initial_show_shadow: bool = False,
     ):
+        r"""
+        !!! warning "Experimental"
+
+            This class should be considered experimental and may change or disappear in
+            future versions.
+
+        Class to encapsulate interactive plot control widgets. *initial_alpha* is the
+        starting alpha value for graphs. *initial_burst_cmap_inner* is the initially
+        selected color map for inner burst graphs. *initial_burst_cmap_link* is the
+        starting value for linking the color maps for inner and outer burst graphs.
+        *initial_burst_cmap_outer* is the initially selected color map for outer burst
+        graphs. *initial_burst_color_bg* is the initially selected background color for
+        burst graphs. *initial_burst_color_bg_trnsp* is the initially selected
+        background transparency color burst graphs. *initial_burst_color_text* is the
+        initially selected text color for burst graphs. *initial_burst_swap* is whether
+        the inner and outer burst graphs should be swapped at first.
+        *initial_burst_zero_fill_normalize* is whether all burst graphs should share a
+        scale at first (i.e., so similar values share similar colors across burst
+        graphs). *initial_enable_cutoff* is whether small values should be omitted from
+        graphs at first. *initial_graph_type* is the type of graph first shown.
+        *initial_img_type* is the initially selected image type. *initial_markers* are
+        the starting set of markers for line and scatter plots. *initial_plot_style* is
+        the starting color style for non-burst graphs. *initial_show_shadow* is whether
+        shadows should be shown for non-burst graphs at first.
+        """
         super().__init__()
 
         if initial_plot_style not in matplotlib.style.available:
@@ -1720,7 +1740,7 @@ def jupyter_visualize(
         Union[HLikeT, Tuple[str, HLikeT], Tuple[str, HLikeT, Optional[HLikeT]]]
     ],
     *,
-    controls_expanded: bool = True,
+    controls_expanded: bool = False,
     initial_alpha: float = DEFAULT_ALPHA,
     initial_burst_cmap_inner: str = DEFAULT_CMAP_BURST_INNER,
     initial_burst_cmap_link: bool = True,
@@ -1730,7 +1750,7 @@ def jupyter_visualize(
     initial_burst_color_text: str = DEFAULT_COLOR_TEXT,
     initial_burst_swap: bool = False,
     initial_burst_zero_fill_normalize: bool = False,
-    initial_enable_cutoff: bool = False,
+    initial_enable_cutoff: bool = True,
     initial_graph_type: TraditionalPlotType = TraditionalPlotType.NORMAL,
     initial_img_type: ImageType = ImageType.PNG,
     initial_markers: str = "oX^v><dP",
@@ -1765,6 +1785,7 @@ def jupyter_visualize(
     """
     plotter_chooser = HPlotterChooser(
         histogram_specs,
+        controls_expanded=controls_expanded,
         plot_widgets=PlotWidgets(
             initial_alpha=initial_alpha,
             initial_burst_cmap_inner=initial_burst_cmap_inner,
@@ -1822,7 +1843,7 @@ def _histogram_specs_to_h_tuples(
     h_specs = []
 
     if cutoff is None:
-        cutoff_frac = _CUTOFF_LIM
+        cutoff_frac = Fraction(0, 1)
     else:
         cutoff_frac = Fraction(cutoff).limit_denominator(_CUTOFF_BASE**_CUTOFF_EXP)
 

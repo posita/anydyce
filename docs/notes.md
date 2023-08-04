@@ -17,6 +17,7 @@
 
 ## [0.4.1](https://github.com/posita/anydyce/releases/tag/v0.4.1)
 
+* Allows *true* cutoff disablement (not merely a small default).
 * Adds transparency as well as PNG and SVG output and download selections.
 * Fixes display inconsistencies between Jupyter Lab and Jupyter Lite.
 
