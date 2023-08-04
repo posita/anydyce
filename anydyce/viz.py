@@ -245,7 +245,6 @@ class Image:
 
 @dataclass(frozen=True)
 class _PlotWidgetsDataclass:
-
     # Widget to trigger updates (hack)
     _rev_no: widgets.IntText = field(
         init=False,
