@@ -89,6 +89,7 @@ class SettingsDict(TypedDict):
     burst_color_bg: str
     burst_color_bg_trnsp: bool
     burst_color_text: str
+    burst_columns: int
     burst_swap: bool
     burst_zero_fill_normalize: bool
     enable_cutoff: bool
@@ -96,7 +97,7 @@ class SettingsDict(TypedDict):
     img_type: ImageType
     markers: str
     plot_style: str
-    scale: int
+    resolution: int
     show_shadow: bool
 
 
@@ -108,8 +109,10 @@ DEFAULT_CMAP_BURST_INNER = "RdYlGn_r"
 DEFAULT_CMAP_BURST_OUTER = "RdYlBu_r"
 DEFAULT_COLOR_TEXT = "black"
 DEFAULT_COLOR_BG = "white"
+DEFAULT_COLS_BURST = 3
 DEFAULT_MARKERS = "oX^v><dP"
 DEFAULT_PLOT_STYLE = "bmh"
+DEFAULT_RESOLUTION = 12
 _LABEL_LIM = Fraction(1, 2**5)
 _CUTOFF_BASE = 10
 _CUTOFF_EXP = 6
@@ -306,17 +309,17 @@ class _PlotWidgetsDataclass:
     )
 
     # Generic display widgets
-    scale: widgets.FloatLogSlider = field(
+    resolution: widgets.IntSlider = field(
         init=False,
         repr=False,
         default_factory=partial(
             widgets.IntSlider,
-            value=12,
-            min=8,
-            max=16,
+            value=DEFAULT_RESOLUTION,
+            min=4,
+            max=32,
             step=1,
             continuous_update=False,
-            description="Scale",
+            description="Resolution",
         ),
     )
 
@@ -369,7 +372,7 @@ class _PlotWidgetsDataclass:
         repr=False,
         default_factory=partial(
             widgets.ColorPicker,
-            value="white",
+            value=DEFAULT_COLOR_BG,
             # options=sorted(sorted(matplotlib.colors.CSS4_COLORS.keys())),
             concise=False,
             description="Background",
@@ -391,10 +394,24 @@ class _PlotWidgetsDataclass:
         repr=False,
         default_factory=partial(
             widgets.ColorPicker,
-            value="black",
+            value=DEFAULT_COLOR_TEXT,
             # options=sorted(sorted(matplotlib.colors.CSS4_COLORS.keys())),
             concise=False,
             description="Text",
+        ),
+    )
+
+    burst_columns: widgets.IntSlider = field(
+        init=False,
+        repr=False,
+        default_factory=partial(
+            widgets.IntSlider,
+            value=DEFAULT_COLS_BURST,
+            min=1,
+            max=12,
+            step=1,
+            continuous_update=False,
+            description="Columns",
         ),
     )
 
@@ -452,7 +469,7 @@ class _PlotWidgetsDataclass:
         repr=False,
         default_factory=partial(
             widgets.Text,
-            value=" ",
+            value=DEFAULT_MARKERS,
             description="Markers",
         ),
     )
@@ -514,6 +531,9 @@ class PlotWidgets(_PlotWidgetsDataclass):
     - *initial_burst_color_text* is the initially selected text color for burst graphs
        (defaults to ``#!python "black"``).
 
+    - *initial_burst_columns* is the initially selected number of columns for displaying
+       burst graphs (defaults to ``#!python 3``).
+
     - *initial_burst_swap* is whether the inner and outer burst graphs should be swapped
        at first (defaults to ``#!python False``).
 
@@ -538,6 +558,9 @@ class PlotWidgets(_PlotWidgetsDataclass):
 
     - *initial_show_shadow* is whether shadows should be shown for non-burst graphs at
        first (defaults to ``#!python False``).
+
+    - *initial_resolution* is the starting value for the graph resolution (defaults to
+      ``#!python 12``).
     """
 
     @beartype
@@ -551,6 +574,7 @@ class PlotWidgets(_PlotWidgetsDataclass):
         initial_burst_color_bg: str = DEFAULT_COLOR_BG,
         initial_burst_color_bg_trnsp: bool = False,
         initial_burst_color_text: str = DEFAULT_COLOR_TEXT,
+        initial_burst_columns: int = DEFAULT_COLS_BURST,
         initial_burst_swap: bool = False,
         initial_burst_zero_fill_normalize: bool = False,
         initial_enable_cutoff: bool = True,
@@ -558,6 +582,7 @@ class PlotWidgets(_PlotWidgetsDataclass):
         initial_img_type: ImageType = ImageType.PNG,
         initial_markers: str = DEFAULT_MARKERS,
         initial_plot_style: str = DEFAULT_PLOT_STYLE,
+        initial_resolution: int = DEFAULT_RESOLUTION,
         initial_show_shadow: bool = False,
     ):
         super().__init__()
@@ -577,6 +602,7 @@ class PlotWidgets(_PlotWidgetsDataclass):
         self.burst_color_bg.value = initial_burst_color_bg
         self.burst_color_bg_trnsp.value = initial_burst_color_bg_trnsp
         self.burst_color_text.value = initial_burst_color_text
+        self.burst_columns.value = initial_burst_columns
         self.burst_swap.value = initial_burst_swap
         self.burst_zero_fill_normalize.value = initial_burst_zero_fill_normalize
         self.cutoff.disabled = not initial_enable_cutoff
@@ -585,6 +611,7 @@ class PlotWidgets(_PlotWidgetsDataclass):
         self.img_type.value = initial_img_type
         self.markers.value = initial_markers
         self.plot_style.value = initial_plot_style
+        self.resolution.value = initial_resolution
         self.show_shadow.value = initial_show_shadow
 
         def _handle_burst_cmap_link(change) -> None:
@@ -637,7 +664,7 @@ class HPlotter:
                 plot_widgets.enable_cutoff,
                 plot_widgets.cutoff,
                 plot_widgets.img_type,
-                plot_widgets.scale,
+                plot_widgets.resolution,
             ]
         )
 
@@ -710,8 +737,8 @@ class BarHPlotter(HPlotter):
     ) -> None:
         _, ax = matplotlib.pyplot.subplots(
             figsize=(
-                settings["scale"],
-                settings["scale"] / 16 * 9,
+                settings["resolution"],
+                settings["resolution"] / 16 * 9,
             )
         )
 
@@ -769,6 +796,7 @@ class BurstHPlotter(HPlotter):
                                 plot_widgets.burst_color_text,
                                 plot_widgets.burst_color_bg,
                                 plot_widgets.burst_color_bg_trnsp,
+                                plot_widgets.burst_columns,
                             ]
                         ),
                     ]
@@ -782,15 +810,18 @@ class BurstHPlotter(HPlotter):
         hs: Sequence[Tuple[str, H, Optional[H]]],
         settings: SettingsDict,
     ) -> None:
-        cols = 3
+        cols = settings["burst_columns"]
+        assert cols > 0
         logical_rows = len(hs) // cols + (len(hs) % cols != 0)
         # Height of row gaps in relation to height of figs
         gap_size_ratio = Fraction(1, 5)
         total_gaps = max(0, logical_rows - 1)
         figsize = (
-            settings["scale"],
+            settings["resolution"],
             float(
-                settings["scale"] * (logical_rows + total_gaps * gap_size_ratio) / cols
+                settings["resolution"]
+                * (logical_rows + total_gaps * gap_size_ratio)
+                / cols
             ),
         )
         matplotlib.pyplot.figure(facecolor=settings["burst_color_bg"], figsize=figsize)
@@ -876,9 +907,9 @@ class HorizontalBarHPlotter(BarHPlotter):
             1 for _ in chain.from_iterable(h.outcomes() for _, h, _ in hs)
         )
         total_height = total_outcomes + 1  # one extra to accommodate the axis
-        inches_per_height_unit = settings["scale"] / 64
+        inches_per_height_unit = settings["resolution"] / 64
         figsize = (
-            settings["scale"],
+            settings["resolution"],
             total_height * inches_per_height_unit,
         )
         matplotlib.pyplot.figure(figsize=figsize)
@@ -983,8 +1014,8 @@ class LineHPlotter(HPlotter):
     ) -> None:
         _, ax = matplotlib.pyplot.subplots(
             figsize=(
-                settings["scale"],
-                settings["scale"] / 16 * 9,
+                settings["resolution"],
+                settings["resolution"] / 16 * 9,
             )
         )
 
@@ -1023,8 +1054,8 @@ class ScatterHPlotter(LineHPlotter):
     ) -> None:
         _, ax = matplotlib.pyplot.subplots(
             figsize=(
-                settings["scale"],
-                settings["scale"] / 16 * 9,
+                settings["resolution"],
+                settings["resolution"] / 16 * 9,
             )
         )
 
@@ -1055,8 +1086,9 @@ class HPlotterChooser:
     [initializer][anydyce.viz.HPlotterChooser.__init__] are optional.
 
     *histogram_specs* is the histogram data set which defaults to an empty tuple. The
-    histogram data set can also be replaced vi the
-    [``update_hs``][anydyce.viz.HPlotterChooser.update_hs] method.
+    histogram data set can also be replaced via
+    [``update_hs``][anydyce.viz.HPlotterChooser.update_hs]. (See that method for a more
+    detailed explanation of this parameter.
 
     Plotter controls (including the selection tabs) are contained within an accordion
     interface. If *controls_expanded* is ``#!python True``, the accordion is initially
@@ -1079,7 +1111,9 @@ class HPlotterChooser:
     def __init__(
         self,
         histogram_specs: Iterable[
-            Union[HLikeT, Tuple[str, HLikeT], Tuple[str, HLikeT, Optional[HLikeT]]]
+            Optional[
+                Union[HLikeT, Tuple[str, HLikeT], Tuple[str, HLikeT, Optional[HLikeT]]]
+            ]
         ] = (),
         *,
         controls_expanded: bool = False,
@@ -1230,7 +1264,9 @@ class HPlotterChooser:
     def update_hs(
         self,
         histogram_specs: Iterable[
-            Union[HLikeT, Tuple[str, HLikeT], Tuple[str, HLikeT, Optional[HLikeT]]]
+            Optional[
+                Union[HLikeT, Tuple[str, HLikeT], Tuple[str, HLikeT, Optional[HLikeT]]]
+            ]
         ],
     ) -> None:
         r"""
@@ -1238,7 +1274,11 @@ class HPlotterChooser:
         a single [``HLikeT``][anydyce.viz.HLikeT] object, a two-tuple of a name and a
         primary ``HLikeT`` object, or a three-tuple of a name, a primary ``HLikeT``
         object, and an optional secondary ``HLikeT`` object (``#!python None`` if
-        omitted).
+        omitted). If a value is ``#!python None``, it is roughly synonymous with
+        ``#!python ("", H({}), None)``, with the exception that it does not advance the
+        automatic naming counter. This can be useful as a “blank” filler to achieve a
+        desired layout (e.g., where one wants to compare across burst graphs that don't
+        neatly fit into a particular row size).
         """
         self._hs = _histogram_specs_to_h_tuples(histogram_specs, cutoff=None)
         self._csv_download_link = _csv_download_link(self._hs)
@@ -1466,7 +1506,8 @@ def limit_for_display(h: H, cutoff) -> H:
 @experimental
 @beartype
 def values_xy_for_graph_type(
-    h: H, graph_type: TraditionalPlotType
+    h: H,
+    graph_type: TraditionalPlotType,
 ) -> Tuple[Tuple[RealLike, ...], Tuple[float, ...]]:
     outcomes, probabilities = h.distribution_xy() if h else ((), ())
 
@@ -1791,7 +1832,9 @@ def plot_burst_subplot(
 @beartype
 def jupyter_visualize(
     histogram_specs: Iterable[
-        Union[HLikeT, Tuple[str, HLikeT], Tuple[str, HLikeT, Optional[HLikeT]]]
+        Optional[
+            Union[HLikeT, Tuple[str, HLikeT], Tuple[str, HLikeT, Optional[HLikeT]]]
+        ]
     ],
     *,
     controls_expanded: bool = False,
@@ -1802,6 +1845,7 @@ def jupyter_visualize(
     initial_burst_color_bg: str = DEFAULT_COLOR_BG,
     initial_burst_color_bg_trnsp: bool = False,
     initial_burst_color_text: str = DEFAULT_COLOR_TEXT,
+    initial_burst_columns: int = DEFAULT_COLS_BURST,
     initial_burst_swap: bool = False,
     initial_burst_zero_fill_normalize: bool = False,
     initial_enable_cutoff: bool = True,
@@ -1809,6 +1853,7 @@ def jupyter_visualize(
     initial_img_type: ImageType = ImageType.PNG,
     initial_markers: str = DEFAULT_MARKERS,
     initial_plot_style: str = DEFAULT_PLOT_STYLE,
+    initial_resolution: int = DEFAULT_RESOLUTION,
     initial_show_shadow: bool = False,
     selected_name: Optional[str] = None,
 ):
@@ -1848,6 +1893,7 @@ def jupyter_visualize(
             initial_burst_color_bg=initial_burst_color_bg,
             initial_burst_color_bg_trnsp=initial_burst_color_bg_trnsp,
             initial_burst_color_text=initial_burst_color_text,
+            initial_burst_columns=initial_burst_columns,
             initial_burst_swap=initial_burst_swap,
             initial_burst_zero_fill_normalize=initial_burst_zero_fill_normalize,
             initial_enable_cutoff=initial_enable_cutoff,
@@ -1855,6 +1901,7 @@ def jupyter_visualize(
             initial_img_type=initial_img_type,
             initial_markers=initial_markers,
             initial_plot_style=initial_plot_style,
+            initial_resolution=initial_resolution,
             initial_show_shadow=initial_show_shadow,
         ),
         selected_name=selected_name,
@@ -1890,7 +1937,9 @@ def _csv_download_link(hs: Sequence[Tuple[str, H, Optional[H]]]) -> str:
 @beartype
 def _histogram_specs_to_h_tuples(
     histogram_specs: Iterable[
-        Union[HLikeT, Tuple[str, HLikeT], Tuple[str, HLikeT, Optional[HLikeT]]]
+        Optional[
+            Union[HLikeT, Tuple[str, HLikeT], Tuple[str, HLikeT, Optional[HLikeT]]]
+        ]
     ],
     cutoff: Optional[float] = None,
 ) -> Tuple[Tuple[str, H, Optional[H]], ...]:
@@ -1904,10 +1953,16 @@ def _histogram_specs_to_h_tuples(
     label: str
     first_h_like: HLikeT
     second_h_like: Optional[HLikeT]
+    num_blanks = 0
 
     for i, thing in enumerate(histogram_specs):
-        if isinstance(thing, (H, HableT)):
-            label = f"Histogram {i + 1}"
+        if thing is None:
+            label = ""
+            first_h_like = H({})
+            second_h_like = None
+            num_blanks += 1
+        elif isinstance(thing, (H, HableT)):
+            label = f"Histogram {i - num_blanks + 1}"
             first_h_like = thing
             second_h_like = None
         else:

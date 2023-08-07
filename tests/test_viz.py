@@ -91,6 +91,7 @@ class TestPlotWidgets:
             "burst_color_bg",
             "burst_color_bg_trnsp",
             "burst_color_text",
+            "burst_columns",
             "burst_swap",
             "burst_zero_fill_normalize",
             "cutoff",
@@ -99,7 +100,7 @@ class TestPlotWidgets:
             "img_type",
             "markers",
             "plot_style",
-            "scale",
+            "resolution",
             "show_shadow",
         }
         assert all(isinstance(widget, widgets.Widget) for widget in widget_map.values())
@@ -226,7 +227,7 @@ class TestHPlotterChooser:
                 selected_name="no such plotter",
             )
 
-    def test_update_hs(self) -> None:
+    def test_update_hs_minimal(self) -> None:
         chooser = HPlotterChooser()
         expected = (("Histogram 1", H(6), None),)
         assert chooser._hs != expected
@@ -486,4 +487,12 @@ def test_histogram_specs_to_h_tuples_three_tuple() -> None:
         ("d8d12", H(8), H(12)),
         ("d12d8", H(12), H(8)),
         ("d10", H(10), None),
+    )
+
+
+def test_histogram_specs_to_h_tuples_none() -> None:
+    assert _histogram_specs_to_h_tuples([H(6), None, H(6)]) == (
+        ("Histogram 1", H(6), None),
+        ("", H({}), None),
+        ("Histogram 2", H(6), None),
     )

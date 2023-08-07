@@ -15,6 +15,11 @@
 
 # ``anydyce`` release notes
 
+## [0.4.4](https://github.com/posita/anydyce/releases/tag/v0.4.4)
+
+* Added ``#!python SettingsDict["burst_columns"]`` and related widget.
+* Added ``#!python None`` as an acceptable item value for ``#!python histogram_specs`` parameter to [``HPlotterChooser`` initializer][anydyce.viz.HPlotterChooser], [``HPlotterChooser.update_hs``][anydyce.viz.HPlotterChooser.update_hs], and [``jupyter_visualize``][anydyce.viz.jupyter_visualize].
+
 ## [0.4.3](https://github.com/posita/anydyce/releases/tag/v0.4.3)
 
 * Restored [rich display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display) hook methods accidentally removed from ``#!python anydyce.viz.Image`` in [v0.4.2](#042).
