@@ -291,6 +291,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#043" class="md-nav__link">
+    0.4.3
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#042" class="md-nav__link">
     0.4.2
   </a>
@@ -520,7 +527,18 @@
 -->
 
 <h1 id="anydyce-release-notes"><code>anydyce</code> release notes</h1>
+<h2 id="043"><a href="https://github.com/posita/anydyce/releases/tag/v0.4.3">0.4.3</a></h2>
+<ul>
+<li>Restored <a href="https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display">rich display</a> hook methods accidentally removed from <code class="highlight"><span class="n">anydyce</span><span class="o">.</span><span class="n">viz</span><span class="o">.</span><span class="n">Image</span></code> in <a href="#042">v0.4.2</a>.</li>
+</ul>
 <h2 id="042"><a href="https://github.com/posita/anydyce/releases/tag/v0.4.2">0.4.2</a></h2>
+<div class="admonition bug">
+<p class="admonition-title">Bug</p>
+<p><strong><em>Do not use!</em></strong>
+This release inadvertently removed <a href="https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display">rich display</a> hook methods from <code class="highlight"><span class="n">anydyce</span><span class="o">.</span><span class="n">viz</span><span class="o">.</span><span class="n">Image</span></code>.
+That broke the ability to display interactive plots.
+(Fixed in <a href="#043">v0.4.3</a>.)</p>
+</div>
 <ul>
 <li>Allows <em>true</em> cutoff disablement (not merely a small default).</li>
 </ul>
