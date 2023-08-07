@@ -502,9 +502,18 @@ future versions.</p>
 one or more plotters as well as triggering updates in response to either control or
 data changes. All parameters for the
 <a class="autorefs autorefs-internal" href="#anydyce.viz.HPlotterChooser.__init__">initializer</a> are optional.</p>
-<p><em>histogram_specs</em> is the histogram data set which defaults to an empty tuple. The
-histogram data set can also be replaced vi the
-<a class="autorefs autorefs-internal" href="#anydyce.viz.HPlotterChooser.update_hs"><code>update_hs</code></a> method.</p>
+<p><em>histogram_specs</em> is the histogram data set which defaults to an empty tuple. If
+provided, each item therein can be a <code class="highlight"><span class="n">dyce</span><span class="o">.</span><span class="n">H</span></code> object, a 2-tuple, or a
+3-tuple. 2-tuples are in the format <code class="highlight"><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span></code>, where <code class="highlight"><span class="nb">str</span></code> is
+a name or description that will be used to identify the accompanying <code class="highlight"><span class="n">H</span></code>
+object where it appears in the visualization. 3-tuples are in the format <code class="highlight"><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span></code>. The second <code class="highlight"><span class="n">H</span></code> object is used for the interior ring in
+“burst” break-out graphs, but otherwise ignored. If an item is <code class="highlight"><span class="kc">None</span></code>, it
+is roughly synonymous with <code class="highlight"><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">H</span><span class="p">({}),</span> <span class="kc">None</span><span class="p">)</span></code>, with the exception that
+it does not advance the automatic naming counter. This can be useful as “blank”
+filler to achieve a desired layout (e.g., where one wants to compare across burst
+graphs that don't neatly fit into a particular row size).</p>
+<p>The histogram data set can also be replaced via
+<a class="autorefs autorefs-internal" href="#anydyce.viz.HPlotterChooser.update_hs"><code>update_hs</code></a>.</p>
 <p>Plotter controls (including the selection tabs) are contained within an accordion
 interface. If <em>controls_expanded</em> is <code class="highlight"><span class="kc">True</span></code>, the accordion is initially
 expanded for the user. If it is <code class="highlight"><span class="kc">False</span></code>, it is initially collapsed.</p>
@@ -520,38 +529,7 @@ provided by the <em>plotters_or_factories</em> parameter.</p>
 
             <details class="quote">
               <summary>Source code in <code>anydyce/viz.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1045</span>
-<span class="normal">1046</span>
-<span class="normal">1047</span>
-<span class="normal">1048</span>
-<span class="normal">1049</span>
-<span class="normal">1050</span>
-<span class="normal">1051</span>
-<span class="normal">1052</span>
-<span class="normal">1053</span>
-<span class="normal">1054</span>
-<span class="normal">1055</span>
-<span class="normal">1056</span>
-<span class="normal">1057</span>
-<span class="normal">1058</span>
-<span class="normal">1059</span>
-<span class="normal">1060</span>
-<span class="normal">1061</span>
-<span class="normal">1062</span>
-<span class="normal">1063</span>
-<span class="normal">1064</span>
-<span class="normal">1065</span>
-<span class="normal">1066</span>
-<span class="normal">1067</span>
-<span class="normal">1068</span>
-<span class="normal">1069</span>
-<span class="normal">1070</span>
-<span class="normal">1071</span>
-<span class="normal">1072</span>
-<span class="normal">1073</span>
-<span class="normal">1074</span>
-<span class="normal">1075</span>
-<span class="normal">1076</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1076</span>
 <span class="normal">1077</span>
 <span class="normal">1078</span>
 <span class="normal">1079</span>
@@ -734,7 +712,51 @@ provided by the <em>plotters_or_factories</em> parameter.</p>
 <span class="normal">1256</span>
 <span class="normal">1257</span>
 <span class="normal">1258</span>
-<span class="normal">1259</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">HPlotterChooser</span><span class="p">:</span>
+<span class="normal">1259</span>
+<span class="normal">1260</span>
+<span class="normal">1261</span>
+<span class="normal">1262</span>
+<span class="normal">1263</span>
+<span class="normal">1264</span>
+<span class="normal">1265</span>
+<span class="normal">1266</span>
+<span class="normal">1267</span>
+<span class="normal">1268</span>
+<span class="normal">1269</span>
+<span class="normal">1270</span>
+<span class="normal">1271</span>
+<span class="normal">1272</span>
+<span class="normal">1273</span>
+<span class="normal">1274</span>
+<span class="normal">1275</span>
+<span class="normal">1276</span>
+<span class="normal">1277</span>
+<span class="normal">1278</span>
+<span class="normal">1279</span>
+<span class="normal">1280</span>
+<span class="normal">1281</span>
+<span class="normal">1282</span>
+<span class="normal">1283</span>
+<span class="normal">1284</span>
+<span class="normal">1285</span>
+<span class="normal">1286</span>
+<span class="normal">1287</span>
+<span class="normal">1288</span>
+<span class="normal">1289</span>
+<span class="normal">1290</span>
+<span class="normal">1291</span>
+<span class="normal">1292</span>
+<span class="normal">1293</span>
+<span class="normal">1294</span>
+<span class="normal">1295</span>
+<span class="normal">1296</span>
+<span class="normal">1297</span>
+<span class="normal">1298</span>
+<span class="normal">1299</span>
+<span class="normal">1300</span>
+<span class="normal">1301</span>
+<span class="normal">1302</span>
+<span class="normal">1303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">HPlotterChooser</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    !!! warning &quot;Experimental&quot;</span>
 
@@ -746,9 +768,20 @@ provided by the <em>plotters_or_factories</em> parameter.</p>
 <span class="sd">    data changes. All parameters for the</span>
 <span class="sd">    [initializer][anydyce.viz.HPlotterChooser.__init__] are optional.</span>
 
-<span class="sd">    *histogram_specs* is the histogram data set which defaults to an empty tuple. The</span>
-<span class="sd">    histogram data set can also be replaced vi the</span>
-<span class="sd">    [``update_hs``][anydyce.viz.HPlotterChooser.update_hs] method.</span>
+<span class="sd">    *histogram_specs* is the histogram data set which defaults to an empty tuple. If</span>
+<span class="sd">    provided, each item therein can be a ``#!python dyce.H`` object, a 2-tuple, or a</span>
+<span class="sd">    3-tuple. 2-tuples are in the format ``#!python (str, H)``, where ``#!python str`` is</span>
+<span class="sd">    a name or description that will be used to identify the accompanying ``#!python H``</span>
+<span class="sd">    object where it appears in the visualization. 3-tuples are in the format ``#!python</span>
+<span class="sd">    (str, H, H)``. The second ``#!python H`` object is used for the interior ring in</span>
+<span class="sd">    “burst” break-out graphs, but otherwise ignored. If an item is ``#!python None``, it</span>
+<span class="sd">    is roughly synonymous with ``#!python (&quot;&quot;, H({}), None)``, with the exception that</span>
+<span class="sd">    it does not advance the automatic naming counter. This can be useful as “blank”</span>
+<span class="sd">    filler to achieve a desired layout (e.g., where one wants to compare across burst</span>
+<span class="sd">    graphs that don&#39;t neatly fit into a particular row size).</span>
+
+<span class="sd">    The histogram data set can also be replaced via</span>
+<span class="sd">    [``update_hs``][anydyce.viz.HPlotterChooser.update_hs].</span>
 
 <span class="sd">    Plotter controls (including the selection tabs) are contained within an accordion</span>
 <span class="sd">    interface. If *controls_expanded* is ``#!python True``, the accordion is initially</span>
@@ -771,7 +804,9 @@ provided by the <em>plotters_or_factories</em> parameter.</p>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span>
-            <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+            <span class="n">Optional</span><span class="p">[</span>
+                <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+            <span class="p">]</span>
         <span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">controls_expanded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -922,15 +957,15 @@ provided by the <em>plotters_or_factories</em> parameter.</p>
     <span class="k">def</span> <span class="nf">update_hs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span>
-            <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+            <span class="n">Optional</span><span class="p">[</span>
+                <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+            <span class="p">]</span>
         <span class="p">],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Triggers an update to the histogram data. *histogram_specs* is an iterable of either</span>
-<span class="sd">        a single [``HLikeT``][anydyce.viz.HLikeT] object, a two-tuple of a name and a</span>
-<span class="sd">        primary ``HLikeT`` object, or a three-tuple of a name, a primary ``HLikeT``</span>
-<span class="sd">        object, and an optional secondary ``HLikeT`` object (``#!python None`` if</span>
-<span class="sd">        omitted).</span>
+<span class="sd">        Triggers an update to the histogram data. See</span>
+<span class="sd">        [``HPlotterChooser``][anydyce.viz.HPlotterChooser] for a more detailed</span>
+<span class="sd">        explanation of *histogram_specs*.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hs</span> <span class="o">=</span> <span class="n">_histogram_specs_to_h_tuples</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_csv_download_link</span> <span class="o">=</span> <span class="n">_csv_download_link</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hs</span><span class="p">)</span>
@@ -970,7 +1005,7 @@ provided by the <em>plotters_or_factories</em> parameter.</p>
 
 
 <h3 id="anydyce.viz.HPlotterChooser.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]]</span> <span class="o">=</span> <span class="p">(),</span> <span class="o">*</span><span class="p">,</span> <span class="n">controls_expanded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">plot_widgets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PlotWidgets</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">plotters_or_factories</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HPlotter</span><span class="p">,</span> <span class="n">HPlotterFactoryT</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">BurstHPlotter</span><span class="p">,</span> <span class="n">LineHPlotter</span><span class="p">,</span> <span class="n">BarHPlotter</span><span class="p">,</span> <span class="n">ScatterHPlotter</span><span class="p">,</span> <span class="n">HorizontalBarHPlotter</span><span class="p">),</span> <span class="n">selected_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]]]</span> <span class="o">=</span> <span class="p">(),</span> <span class="o">*</span><span class="p">,</span> <span class="n">controls_expanded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">plot_widgets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PlotWidgets</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">plotters_or_factories</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HPlotter</span><span class="p">,</span> <span class="n">HPlotterFactoryT</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">BurstHPlotter</span><span class="p">,</span> <span class="n">LineHPlotter</span><span class="p">,</span> <span class="n">BarHPlotter</span><span class="p">,</span> <span class="n">ScatterHPlotter</span><span class="p">,</span> <span class="n">HorizontalBarHPlotter</span><span class="p">),</span> <span class="n">selected_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
 
 </h3>
 
@@ -979,49 +1014,7 @@ provided by the <em>plotters_or_factories</em> parameter.</p>
 
           <details class="quote">
             <summary>Source code in <code>anydyce/viz.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1078</span>
-<span class="normal">1079</span>
-<span class="normal">1080</span>
-<span class="normal">1081</span>
-<span class="normal">1082</span>
-<span class="normal">1083</span>
-<span class="normal">1084</span>
-<span class="normal">1085</span>
-<span class="normal">1086</span>
-<span class="normal">1087</span>
-<span class="normal">1088</span>
-<span class="normal">1089</span>
-<span class="normal">1090</span>
-<span class="normal">1091</span>
-<span class="normal">1092</span>
-<span class="normal">1093</span>
-<span class="normal">1094</span>
-<span class="normal">1095</span>
-<span class="normal">1096</span>
-<span class="normal">1097</span>
-<span class="normal">1098</span>
-<span class="normal">1099</span>
-<span class="normal">1100</span>
-<span class="normal">1101</span>
-<span class="normal">1102</span>
-<span class="normal">1103</span>
-<span class="normal">1104</span>
-<span class="normal">1105</span>
-<span class="normal">1106</span>
-<span class="normal">1107</span>
-<span class="normal">1108</span>
-<span class="normal">1109</span>
-<span class="normal">1110</span>
-<span class="normal">1111</span>
-<span class="normal">1112</span>
-<span class="normal">1113</span>
-<span class="normal">1114</span>
-<span class="normal">1115</span>
-<span class="normal">1116</span>
-<span class="normal">1117</span>
-<span class="normal">1118</span>
-<span class="normal">1119</span>
-<span class="normal">1120</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1120</span>
 <span class="normal">1121</span>
 <span class="normal">1122</span>
 <span class="normal">1123</span>
@@ -1079,11 +1072,57 @@ provided by the <em>plotters_or_factories</em> parameter.</p>
 <span class="normal">1175</span>
 <span class="normal">1176</span>
 <span class="normal">1177</span>
-<span class="normal">1178</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="normal">1178</span>
+<span class="normal">1179</span>
+<span class="normal">1180</span>
+<span class="normal">1181</span>
+<span class="normal">1182</span>
+<span class="normal">1183</span>
+<span class="normal">1184</span>
+<span class="normal">1185</span>
+<span class="normal">1186</span>
+<span class="normal">1187</span>
+<span class="normal">1188</span>
+<span class="normal">1189</span>
+<span class="normal">1190</span>
+<span class="normal">1191</span>
+<span class="normal">1192</span>
+<span class="normal">1193</span>
+<span class="normal">1194</span>
+<span class="normal">1195</span>
+<span class="normal">1196</span>
+<span class="normal">1197</span>
+<span class="normal">1198</span>
+<span class="normal">1199</span>
+<span class="normal">1200</span>
+<span class="normal">1201</span>
+<span class="normal">1202</span>
+<span class="normal">1203</span>
+<span class="normal">1204</span>
+<span class="normal">1205</span>
+<span class="normal">1206</span>
+<span class="normal">1207</span>
+<span class="normal">1208</span>
+<span class="normal">1209</span>
+<span class="normal">1210</span>
+<span class="normal">1211</span>
+<span class="normal">1212</span>
+<span class="normal">1213</span>
+<span class="normal">1214</span>
+<span class="normal">1215</span>
+<span class="normal">1216</span>
+<span class="normal">1217</span>
+<span class="normal">1218</span>
+<span class="normal">1219</span>
+<span class="normal">1220</span>
+<span class="normal">1221</span>
+<span class="normal">1222</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
 <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span>
-        <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+        <span class="n">Optional</span><span class="p">[</span>
+            <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+        <span class="p">]</span>
     <span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">controls_expanded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -1203,12 +1242,12 @@ provided by the <em>plotters_or_factories</em> parameter.</p>
 
           <details class="quote">
             <summary>Source code in <code>anydyce/viz.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1180</span>
-<span class="normal">1181</span>
-<span class="normal">1182</span>
-<span class="normal">1183</span>
-<span class="normal">1184</span>
-<span class="normal">1185</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1224</span>
+<span class="normal">1225</span>
+<span class="normal">1226</span>
+<span class="normal">1227</span>
+<span class="normal">1228</span>
+<span class="normal">1229</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">interact</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Displays the container responsible for selecting which plotter is used.</span>
@@ -1239,47 +1278,47 @@ changes. <em>settings</em> are the current values from all control widgets. (See
 
           <details class="quote">
             <summary>Source code in <code>anydyce/viz.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1187</span>
-<span class="normal">1188</span>
-<span class="normal">1189</span>
-<span class="normal">1190</span>
-<span class="normal">1191</span>
-<span class="normal">1192</span>
-<span class="normal">1193</span>
-<span class="normal">1194</span>
-<span class="normal">1195</span>
-<span class="normal">1196</span>
-<span class="normal">1197</span>
-<span class="normal">1198</span>
-<span class="normal">1199</span>
-<span class="normal">1200</span>
-<span class="normal">1201</span>
-<span class="normal">1202</span>
-<span class="normal">1203</span>
-<span class="normal">1204</span>
-<span class="normal">1205</span>
-<span class="normal">1206</span>
-<span class="normal">1207</span>
-<span class="normal">1208</span>
-<span class="normal">1209</span>
-<span class="normal">1210</span>
-<span class="normal">1211</span>
-<span class="normal">1212</span>
-<span class="normal">1213</span>
-<span class="normal">1214</span>
-<span class="normal">1215</span>
-<span class="normal">1216</span>
-<span class="normal">1217</span>
-<span class="normal">1218</span>
-<span class="normal">1219</span>
-<span class="normal">1220</span>
-<span class="normal">1221</span>
-<span class="normal">1222</span>
-<span class="normal">1223</span>
-<span class="normal">1224</span>
-<span class="normal">1225</span>
-<span class="normal">1226</span>
-<span class="normal">1227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1231</span>
+<span class="normal">1232</span>
+<span class="normal">1233</span>
+<span class="normal">1234</span>
+<span class="normal">1235</span>
+<span class="normal">1236</span>
+<span class="normal">1237</span>
+<span class="normal">1238</span>
+<span class="normal">1239</span>
+<span class="normal">1240</span>
+<span class="normal">1241</span>
+<span class="normal">1242</span>
+<span class="normal">1243</span>
+<span class="normal">1244</span>
+<span class="normal">1245</span>
+<span class="normal">1246</span>
+<span class="normal">1247</span>
+<span class="normal">1248</span>
+<span class="normal">1249</span>
+<span class="normal">1250</span>
+<span class="normal">1251</span>
+<span class="normal">1252</span>
+<span class="normal">1253</span>
+<span class="normal">1254</span>
+<span class="normal">1255</span>
+<span class="normal">1256</span>
+<span class="normal">1257</span>
+<span class="normal">1258</span>
+<span class="normal">1259</span>
+<span class="normal">1260</span>
+<span class="normal">1261</span>
+<span class="normal">1262</span>
+<span class="normal">1263</span>
+<span class="normal">1264</span>
+<span class="normal">1265</span>
+<span class="normal">1266</span>
+<span class="normal">1267</span>
+<span class="normal">1268</span>
+<span class="normal">1269</span>
+<span class="normal">1270</span>
+<span class="normal">1271</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
 <span class="c1"># @debounce</span>
 <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -1332,56 +1371,54 @@ changes. <em>settings</em> are the current values from all control widgets. (See
 
 
 <h3 id="anydyce.viz.HPlotterChooser.update_hs" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">update_hs</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]])</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+<code class="highlight language-python"><span class="n">update_hs</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]]])</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 </h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Triggers an update to the histogram data. <em>histogram_specs</em> is an iterable of either
-a single <a class="autorefs autorefs-internal" href="../anydyce.viz/#anydyce.viz.HLikeT"><code>HLikeT</code></a> object, a two-tuple of a name and a
-primary <code>HLikeT</code> object, or a three-tuple of a name, a primary <code>HLikeT</code>
-object, and an optional secondary <code>HLikeT</code> object (<code class="highlight"><span class="kc">None</span></code> if
-omitted).</p>
+      <p>Triggers an update to the histogram data. See
+<a class="autorefs autorefs-internal" href="#anydyce.viz.HPlotterChooser"><code>HPlotterChooser</code></a> for a more detailed
+explanation of <em>histogram_specs</em>.</p>
 
           <details class="quote">
             <summary>Source code in <code>anydyce/viz.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1229</span>
-<span class="normal">1230</span>
-<span class="normal">1231</span>
-<span class="normal">1232</span>
-<span class="normal">1233</span>
-<span class="normal">1234</span>
-<span class="normal">1235</span>
-<span class="normal">1236</span>
-<span class="normal">1237</span>
-<span class="normal">1238</span>
-<span class="normal">1239</span>
-<span class="normal">1240</span>
-<span class="normal">1241</span>
-<span class="normal">1242</span>
-<span class="normal">1243</span>
-<span class="normal">1244</span>
-<span class="normal">1245</span>
-<span class="normal">1246</span>
-<span class="normal">1247</span>
-<span class="normal">1248</span>
-<span class="normal">1249</span>
-<span class="normal">1250</span>
-<span class="normal">1251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1273</span>
+<span class="normal">1274</span>
+<span class="normal">1275</span>
+<span class="normal">1276</span>
+<span class="normal">1277</span>
+<span class="normal">1278</span>
+<span class="normal">1279</span>
+<span class="normal">1280</span>
+<span class="normal">1281</span>
+<span class="normal">1282</span>
+<span class="normal">1283</span>
+<span class="normal">1284</span>
+<span class="normal">1285</span>
+<span class="normal">1286</span>
+<span class="normal">1287</span>
+<span class="normal">1288</span>
+<span class="normal">1289</span>
+<span class="normal">1290</span>
+<span class="normal">1291</span>
+<span class="normal">1292</span>
+<span class="normal">1293</span>
+<span class="normal">1294</span>
+<span class="normal">1295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">update_hs</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span>
-        <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+        <span class="n">Optional</span><span class="p">[</span>
+            <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+        <span class="p">]</span>
     <span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Triggers an update to the histogram data. *histogram_specs* is an iterable of either</span>
-<span class="sd">    a single [``HLikeT``][anydyce.viz.HLikeT] object, a two-tuple of a name and a</span>
-<span class="sd">    primary ``HLikeT`` object, or a three-tuple of a name, a primary ``HLikeT``</span>
-<span class="sd">    object, and an optional secondary ``HLikeT`` object (``#!python None`` if</span>
-<span class="sd">    omitted).</span>
+<span class="sd">    Triggers an update to the histogram data. See</span>
+<span class="sd">    [``HPlotterChooser``][anydyce.viz.HPlotterChooser] for a more detailed</span>
+<span class="sd">    explanation of *histogram_specs*.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_hs</span> <span class="o">=</span> <span class="n">_histogram_specs_to_h_tuples</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_csv_download_link</span> <span class="o">=</span> <span class="n">_csv_download_link</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hs</span><span class="p">)</span>
@@ -1412,7 +1449,7 @@ omitted).</p>
 
 
 <h2 id="anydyce.viz.jupyter_visualize" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">jupyter_visualize</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]],</span> <span class="o">*</span><span class="p">,</span> <span class="n">controls_expanded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initial_alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_ALPHA</span><span class="p">,</span> <span class="n">initial_burst_cmap_inner</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_CMAP_BURST_INNER</span><span class="p">,</span> <span class="n">initial_burst_cmap_link</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">initial_burst_cmap_outer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_CMAP_BURST_OUTER</span><span class="p">,</span> <span class="n">initial_burst_color_bg</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_COLOR_BG</span><span class="p">,</span> <span class="n">initial_burst_color_bg_trnsp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initial_burst_color_text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_COLOR_TEXT</span><span class="p">,</span> <span class="n">initial_burst_swap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initial_burst_zero_fill_normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initial_enable_cutoff</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">initial_graph_type</span><span class="p">:</span> <span class="n">TraditionalPlotType</span> <span class="o">=</span> <span class="n">TraditionalPlotType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">,</span> <span class="n">initial_img_type</span><span class="p">:</span> <span class="n">ImageType</span> <span class="o">=</span> <span class="n">ImageType</span><span class="o">.</span><span class="n">PNG</span><span class="p">,</span> <span class="n">initial_markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_MARKERS</span><span class="p">,</span> <span class="n">initial_plot_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_PLOT_STYLE</span><span class="p">,</span> <span class="n">initial_show_shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">selected_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">jupyter_visualize</span><span class="p">(</span><span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]]],</span> <span class="o">*</span><span class="p">,</span> <span class="n">controls_expanded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initial_alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_ALPHA</span><span class="p">,</span> <span class="n">initial_burst_cmap_inner</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_CMAP_BURST_INNER</span><span class="p">,</span> <span class="n">initial_burst_cmap_link</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">initial_burst_cmap_outer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_CMAP_BURST_OUTER</span><span class="p">,</span> <span class="n">initial_burst_color_bg</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_COLOR_BG</span><span class="p">,</span> <span class="n">initial_burst_color_bg_trnsp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initial_burst_color_text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_COLOR_TEXT</span><span class="p">,</span> <span class="n">initial_burst_columns</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DEFAULT_COLS_BURST</span><span class="p">,</span> <span class="n">initial_burst_swap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initial_burst_zero_fill_normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initial_enable_cutoff</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">initial_graph_type</span><span class="p">:</span> <span class="n">TraditionalPlotType</span> <span class="o">=</span> <span class="n">TraditionalPlotType</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">,</span> <span class="n">initial_img_type</span><span class="p">:</span> <span class="n">ImageType</span> <span class="o">=</span> <span class="n">ImageType</span><span class="o">.</span><span class="n">PNG</span><span class="p">,</span> <span class="n">initial_markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_MARKERS</span><span class="p">,</span> <span class="n">initial_plot_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_PLOT_STYLE</span><span class="p">,</span> <span class="n">initial_resolution</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span> <span class="n">initial_show_shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">selected_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
 
 </h2>
 
@@ -1427,11 +1464,6 @@ future versions.</p>
 <p>Takes a list of one or more <em>histogram_specs</em> and produces an interactive
 visualization reminiscent of <a href="https://anydice.com/">AnyDice</a>, but with some extra
 goodies.</p>
-<p>Each item in <em>histogram_specs</em> can be a <code class="highlight"><span class="n">dyce</span><span class="o">.</span><span class="n">H</span></code> object, a 2-tuple, or a
-3-tuple. 2-tuples are in the format <code class="highlight"><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span></code>, where <code class="highlight"><span class="nb">str</span></code> is
-a name or description that will be used to identify the accompanying <code class="highlight"><span class="n">H</span></code>
-object where it appears in the visualization. 3-tuples are in the format <code class="highlight"><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span></code>. The second <code class="highlight"><span class="n">H</span></code> object is used for the interior ring in
-“burst” break-out graphs, but otherwise ignored.</p>
 <p>The “Powered by the <em>Apocalypse</em> (PbtA)” example in the introduction notebook should
 give an idea of the effect. (See <a href="../#interactive-quick-start">Interactive quick
 start</a>.)</p>
@@ -1441,52 +1473,7 @@ start</a>.)</p>
 
           <details class="quote">
             <summary>Source code in <code>anydyce/viz.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1790</span>
-<span class="normal">1791</span>
-<span class="normal">1792</span>
-<span class="normal">1793</span>
-<span class="normal">1794</span>
-<span class="normal">1795</span>
-<span class="normal">1796</span>
-<span class="normal">1797</span>
-<span class="normal">1798</span>
-<span class="normal">1799</span>
-<span class="normal">1800</span>
-<span class="normal">1801</span>
-<span class="normal">1802</span>
-<span class="normal">1803</span>
-<span class="normal">1804</span>
-<span class="normal">1805</span>
-<span class="normal">1806</span>
-<span class="normal">1807</span>
-<span class="normal">1808</span>
-<span class="normal">1809</span>
-<span class="normal">1810</span>
-<span class="normal">1811</span>
-<span class="normal">1812</span>
-<span class="normal">1813</span>
-<span class="normal">1814</span>
-<span class="normal">1815</span>
-<span class="normal">1816</span>
-<span class="normal">1817</span>
-<span class="normal">1818</span>
-<span class="normal">1819</span>
-<span class="normal">1820</span>
-<span class="normal">1821</span>
-<span class="normal">1822</span>
-<span class="normal">1823</span>
-<span class="normal">1824</span>
-<span class="normal">1825</span>
-<span class="normal">1826</span>
-<span class="normal">1827</span>
-<span class="normal">1828</span>
-<span class="normal">1829</span>
-<span class="normal">1830</span>
-<span class="normal">1831</span>
-<span class="normal">1832</span>
-<span class="normal">1833</span>
-<span class="normal">1834</span>
-<span class="normal">1835</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1835</span>
 <span class="normal">1836</span>
 <span class="normal">1837</span>
 <span class="normal">1838</span>
@@ -1514,11 +1501,57 @@ start</a>.)</p>
 <span class="normal">1860</span>
 <span class="normal">1861</span>
 <span class="normal">1862</span>
-<span class="normal">1863</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
+<span class="normal">1863</span>
+<span class="normal">1864</span>
+<span class="normal">1865</span>
+<span class="normal">1866</span>
+<span class="normal">1867</span>
+<span class="normal">1868</span>
+<span class="normal">1869</span>
+<span class="normal">1870</span>
+<span class="normal">1871</span>
+<span class="normal">1872</span>
+<span class="normal">1873</span>
+<span class="normal">1874</span>
+<span class="normal">1875</span>
+<span class="normal">1876</span>
+<span class="normal">1877</span>
+<span class="normal">1878</span>
+<span class="normal">1879</span>
+<span class="normal">1880</span>
+<span class="normal">1881</span>
+<span class="normal">1882</span>
+<span class="normal">1883</span>
+<span class="normal">1884</span>
+<span class="normal">1885</span>
+<span class="normal">1886</span>
+<span class="normal">1887</span>
+<span class="normal">1888</span>
+<span class="normal">1889</span>
+<span class="normal">1890</span>
+<span class="normal">1891</span>
+<span class="normal">1892</span>
+<span class="normal">1893</span>
+<span class="normal">1894</span>
+<span class="normal">1895</span>
+<span class="normal">1896</span>
+<span class="normal">1897</span>
+<span class="normal">1898</span>
+<span class="normal">1899</span>
+<span class="normal">1900</span>
+<span class="normal">1901</span>
+<span class="normal">1902</span>
+<span class="normal">1903</span>
+<span class="normal">1904</span>
+<span class="normal">1905</span>
+<span class="normal">1906</span>
+<span class="normal">1907</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@experimental</span>
 <span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">jupyter_visualize</span><span class="p">(</span>
     <span class="n">histogram_specs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span>
-        <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+        <span class="n">Optional</span><span class="p">[</span>
+            <span class="n">Union</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HLikeT</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">HLikeT</span><span class="p">]]]</span>
+        <span class="p">]</span>
     <span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">controls_expanded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -1529,6 +1562,7 @@ start</a>.)</p>
     <span class="n">initial_burst_color_bg</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_COLOR_BG</span><span class="p">,</span>
     <span class="n">initial_burst_color_bg_trnsp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">initial_burst_color_text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_COLOR_TEXT</span><span class="p">,</span>
+    <span class="n">initial_burst_columns</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DEFAULT_COLS_BURST</span><span class="p">,</span>
     <span class="n">initial_burst_swap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">initial_burst_zero_fill_normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">initial_enable_cutoff</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -1536,6 +1570,7 @@ start</a>.)</p>
     <span class="n">initial_img_type</span><span class="p">:</span> <span class="n">ImageType</span> <span class="o">=</span> <span class="n">ImageType</span><span class="o">.</span><span class="n">PNG</span><span class="p">,</span>
     <span class="n">initial_markers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_MARKERS</span><span class="p">,</span>
     <span class="n">initial_plot_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_PLOT_STYLE</span><span class="p">,</span>
+    <span class="n">initial_resolution</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
     <span class="n">initial_show_shadow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">selected_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
@@ -1548,13 +1583,6 @@ start</a>.)</p>
 <span class="sd">    Takes a list of one or more *histogram_specs* and produces an interactive</span>
 <span class="sd">    visualization reminiscent of [AnyDice](https://anydice.com/), but with some extra</span>
 <span class="sd">    goodies.</span>
-
-<span class="sd">    Each item in *histogram_specs* can be a ``#!python dyce.H`` object, a 2-tuple, or a</span>
-<span class="sd">    3-tuple. 2-tuples are in the format ``#!python (str, H)``, where ``#!python str`` is</span>
-<span class="sd">    a name or description that will be used to identify the accompanying ``#!python H``</span>
-<span class="sd">    object where it appears in the visualization. 3-tuples are in the format ``#!python</span>
-<span class="sd">    (str, H, H)``. The second ``#!python H`` object is used for the interior ring in</span>
-<span class="sd">    “burst” break-out graphs, but otherwise ignored.</span>
 
 <span class="sd">    The “Powered by the _Apocalypse_ (PbtA)” example in the introduction notebook should</span>
 <span class="sd">    give an idea of the effect. (See [Interactive quick</span>
@@ -1575,6 +1603,7 @@ start</a>.)</p>
             <span class="n">initial_burst_color_bg</span><span class="o">=</span><span class="n">initial_burst_color_bg</span><span class="p">,</span>
             <span class="n">initial_burst_color_bg_trnsp</span><span class="o">=</span><span class="n">initial_burst_color_bg_trnsp</span><span class="p">,</span>
             <span class="n">initial_burst_color_text</span><span class="o">=</span><span class="n">initial_burst_color_text</span><span class="p">,</span>
+            <span class="n">initial_burst_columns</span><span class="o">=</span><span class="n">initial_burst_columns</span><span class="p">,</span>
             <span class="n">initial_burst_swap</span><span class="o">=</span><span class="n">initial_burst_swap</span><span class="p">,</span>
             <span class="n">initial_burst_zero_fill_normalize</span><span class="o">=</span><span class="n">initial_burst_zero_fill_normalize</span><span class="p">,</span>
             <span class="n">initial_enable_cutoff</span><span class="o">=</span><span class="n">initial_enable_cutoff</span><span class="p">,</span>
@@ -1582,6 +1611,7 @@ start</a>.)</p>
             <span class="n">initial_img_type</span><span class="o">=</span><span class="n">initial_img_type</span><span class="p">,</span>
             <span class="n">initial_markers</span><span class="o">=</span><span class="n">initial_markers</span><span class="p">,</span>
             <span class="n">initial_plot_style</span><span class="o">=</span><span class="n">initial_plot_style</span><span class="p">,</span>
+            <span class="n">initial_resolution</span><span class="o">=</span><span class="n">initial_resolution</span><span class="p">,</span>
             <span class="n">initial_show_shadow</span><span class="o">=</span><span class="n">initial_show_shadow</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="n">selected_name</span><span class="o">=</span><span class="n">selected_name</span><span class="p">,</span>
