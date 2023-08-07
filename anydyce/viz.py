@@ -1085,10 +1085,20 @@ class HPlotterChooser:
     data changes. All parameters for the
     [initializer][anydyce.viz.HPlotterChooser.__init__] are optional.
 
-    *histogram_specs* is the histogram data set which defaults to an empty tuple. The
-    histogram data set can also be replaced via
-    [``update_hs``][anydyce.viz.HPlotterChooser.update_hs]. (See that method for a more
-    detailed explanation of this parameter.
+    *histogram_specs* is the histogram data set which defaults to an empty tuple. If
+    provided, each item therein can be a ``#!python dyce.H`` object, a 2-tuple, or a
+    3-tuple. 2-tuples are in the format ``#!python (str, H)``, where ``#!python str`` is
+    a name or description that will be used to identify the accompanying ``#!python H``
+    object where it appears in the visualization. 3-tuples are in the format ``#!python
+    (str, H, H)``. The second ``#!python H`` object is used for the interior ring in
+    “burst” break-out graphs, but otherwise ignored. If an item is ``#!python None``, it
+    is roughly synonymous with ``#!python ("", H({}), None)``, with the exception that
+    it does not advance the automatic naming counter. This can be useful as “blank”
+    filler to achieve a desired layout (e.g., where one wants to compare across burst
+    graphs that don't neatly fit into a particular row size).
+
+    The histogram data set can also be replaced via
+    [``update_hs``][anydyce.viz.HPlotterChooser.update_hs].
 
     Plotter controls (including the selection tabs) are contained within an accordion
     interface. If *controls_expanded* is ``#!python True``, the accordion is initially
@@ -1270,15 +1280,9 @@ class HPlotterChooser:
         ],
     ) -> None:
         r"""
-        Triggers an update to the histogram data. *histogram_specs* is an iterable of either
-        a single [``HLikeT``][anydyce.viz.HLikeT] object, a two-tuple of a name and a
-        primary ``HLikeT`` object, or a three-tuple of a name, a primary ``HLikeT``
-        object, and an optional secondary ``HLikeT`` object (``#!python None`` if
-        omitted). If a value is ``#!python None``, it is roughly synonymous with
-        ``#!python ("", H({}), None)``, with the exception that it does not advance the
-        automatic naming counter. This can be useful as a “blank” filler to achieve a
-        desired layout (e.g., where one wants to compare across burst graphs that don't
-        neatly fit into a particular row size).
+        Triggers an update to the histogram data. See
+        [``HPlotterChooser``][anydyce.viz.HPlotterChooser] for a more detailed
+        explanation of *histogram_specs*.
         """
         self._hs = _histogram_specs_to_h_tuples(histogram_specs, cutoff=None)
         self._csv_download_link = _csv_download_link(self._hs)
@@ -1866,13 +1870,6 @@ def jupyter_visualize(
     Takes a list of one or more *histogram_specs* and produces an interactive
     visualization reminiscent of [AnyDice](https://anydice.com/), but with some extra
     goodies.
-
-    Each item in *histogram_specs* can be a ``#!python dyce.H`` object, a 2-tuple, or a
-    3-tuple. 2-tuples are in the format ``#!python (str, H)``, where ``#!python str`` is
-    a name or description that will be used to identify the accompanying ``#!python H``
-    object where it appears in the visualization. 3-tuples are in the format ``#!python
-    (str, H, H)``. The second ``#!python H`` object is used for the interior ring in
-    “burst” break-out graphs, but otherwise ignored.
 
     The “Powered by the _Apocalypse_ (PbtA)” example in the introduction notebook should
     give an idea of the effect. (See [Interactive quick
