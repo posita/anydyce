@@ -15,8 +15,16 @@
 
 # ``anydyce`` release notes
 
+## [0.4.3](https://github.com/posita/anydyce/releases/tag/v0.4.3)
+
+* Restored [rich display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display) hook methods accidentally removed from [``Image``][anydyce.viz.Image] in [v0.4.2](#042).
+
 ## [0.4.2](https://github.com/posita/anydyce/releases/tag/v0.4.2)
 
+***Do not use!***
+
+# ***Inadvertently removed [rich display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display) hook methods from [``Image``][anydyce.viz.Image].***
+  (Fixed in [v0.4.3](#043).
 * Allows *true* cutoff disablement (not merely a small default).
 
 ## [0.4.1](https://github.com/posita/anydyce/releases/tag/v0.4.1)

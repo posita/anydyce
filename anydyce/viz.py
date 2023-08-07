@@ -244,6 +244,24 @@ class Image:
         self._file_type = file_type
 
     @beartype
+    def _repr_png_(self):
+        r"""
+        [Rich
+        display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display)
+        hook method used by IPython to display PNG images.
+        """
+        return self._data if self._file_type is ImageType.PNG else None
+
+    @beartype
+    def _repr_svg_(self):
+        r"""
+        [Rich
+        display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display)
+        hook method used by IPython to display SVG images.
+        """
+        return self._data if self._file_type is ImageType.SVG else None
+
+    @beartype
     def download_link(self) -> str:
         return f'<a download="{self._file_name}" href="{self._mime_pfx}{urllib.parse.quote(self._data)}" target="_blank">Download {self._file_type.value} image</a>'
 

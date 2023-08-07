@@ -6,6 +6,7 @@
 # software in any capacity.
 # ======================================================================================
 
+import base64
 import random
 import re
 from fractions import Fraction
@@ -24,6 +25,7 @@ from anydyce.viz import (
     BarHPlotter,
     BurstHPlotter,
     HorizontalBarHPlotter,
+    Image,
     ImageType,
     LineHPlotter,
     PlotWidgets,
@@ -42,6 +44,18 @@ __all__ = ()
 
 
 # ---- Tests ---------------------------------------------------------------------------
+
+
+class TestImage:
+    def test_rich_display_png(self) -> None:
+        img = Image("", ImageType.PNG, b"1234")
+        assert img._repr_png_() == base64.b64encode(b"1234").decode()
+        assert img._repr_svg_() is None
+
+    def test_rich_display_svg(self) -> None:
+        img = Image("", ImageType.SVG, b"1234")
+        assert img._repr_png_() is None
+        assert img._repr_svg_() == "1234"
 
 
 class TestPlotWidgets:
