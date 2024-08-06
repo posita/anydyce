@@ -24,14 +24,11 @@ from operator import __add__, __sub__, itemgetter
 from typing import (
     Any,
     Callable,
-    Dict,
     Iterable,
     Iterator,
     Mapping,
     Optional,
     Sequence,
-    Set,
-    Tuple,
     TypedDict,
     Union,
     cast,
@@ -63,8 +60,8 @@ __all__ = (
 # ---- Types ---------------------------------------------------------------------------
 
 
-ColorT = Sequence[float]
-ColorListT = Iterable[ColorT]
+ColorT = tuple[float, float, float, float]
+ColorListT = Sequence[ColorT]
 HLikeT = Union[H, HableT]
 HFormatterT = Callable[[RealLike, Fraction, H], str]
 HPlotterFactoryT = Callable[[], "HPlotter"]
@@ -630,7 +627,7 @@ class PlotWidgets(_PlotWidgetsDataclass):
         self.enable_cutoff.observe(_handle_cutoff, names="value")
 
     @beartype
-    def asdict(self) -> Dict[str, Any]:
+    def asdict(self) -> dict[str, Any]:
         return dict((field.name, getattr(self, field.name)) for field in fields(self))
 
 
@@ -671,7 +668,7 @@ class HPlotter:
     @abstractmethod
     def plot(
         self,
-        hs: Sequence[Tuple[str, H, Optional[H]]],
+        hs: Sequence[tuple[str, H, Optional[H]]],
         settings: SettingsDict,
     ):
         r"""
@@ -732,7 +729,7 @@ class BarHPlotter(HPlotter):
     @beartype
     def plot(
         self,
-        hs: Sequence[Tuple[str, H, Optional[H]]],
+        hs: Sequence[tuple[str, H, Optional[H]]],
         settings: SettingsDict,
     ) -> None:
         _, ax = matplotlib.pyplot.subplots(
@@ -807,7 +804,7 @@ class BurstHPlotter(HPlotter):
     @beartype
     def plot(
         self,
-        hs: Sequence[Tuple[str, H, Optional[H]]],
+        hs: Sequence[tuple[str, H, Optional[H]]],
         settings: SettingsDict,
     ) -> None:
         cols = settings["burst_columns"]
@@ -832,7 +829,7 @@ class BurstHPlotter(HPlotter):
         )
 
         def _zero_fill_normalize():
-            unique_outcomes: Set[RealLike] = set()
+            unique_outcomes: set[RealLike] = set()
 
             for i, (_, first_h, second_h) in enumerate(hs):
                 unique_outcomes.update(first_h)
@@ -851,12 +848,14 @@ class BurstHPlotter(HPlotter):
             hs = tuple(_zero_fill_normalize())
 
         for i, (label, h_inner, h_outer) in enumerate(hs):
-            plot_burst_kw: Dict[str, Any] = dict(
+            plot_burst_kw: dict[str, Any] = dict(
                 title=label,
                 inner_cmap=settings["burst_cmap_inner"],
-                outer_cmap=settings["burst_cmap_outer"]
-                if not settings["burst_cmap_link"]
-                else settings["burst_cmap_inner"],
+                outer_cmap=(
+                    settings["burst_cmap_outer"]
+                    if not settings["burst_cmap_link"]
+                    else settings["burst_cmap_inner"]
+                ),
                 text_color=settings["burst_color_text"],
                 alpha=settings["alpha"],
             )
@@ -900,7 +899,7 @@ class HorizontalBarHPlotter(BarHPlotter):
     @beartype
     def plot(
         self,
-        hs: Sequence[Tuple[str, H, Optional[H]]],
+        hs: Sequence[tuple[str, H, Optional[H]]],
         settings: SettingsDict,
     ) -> None:
         total_outcomes = sum(
@@ -913,7 +912,7 @@ class HorizontalBarHPlotter(BarHPlotter):
             total_height * inches_per_height_unit,
         )
         matplotlib.pyplot.figure(figsize=figsize)
-        barh_kw: Dict[str, Any] = dict(alpha=settings["alpha"])
+        barh_kw: dict[str, Any] = dict(alpha=settings["alpha"])
 
         if settings["show_shadow"]:
             barh_kw.update(
@@ -958,10 +957,10 @@ class HorizontalBarHPlotter(BarHPlotter):
                     (total_height, 1), (row_start, 0), rowspan=rowspan, sharex=first_ax
                 )
 
-            ax.set_yticks(outcomes)
+            ax.set_yticks(outcomes)  # type: ignore [arg-type]
             ax.tick_params(labelbottom=False)
             ax.set_ylim((max(outcomes) + 0.5, min(outcomes) - 0.5))
-            ax.barh(outcomes, values, color=next(color_iter), label=label, **barh_kw)
+            ax.barh(outcomes, values, color=next(color_iter), label=label, **barh_kw)  # type: ignore [arg-type]
             ax.legend(loc="upper right")
             row_start += rowspan
 
@@ -1009,7 +1008,7 @@ class LineHPlotter(HPlotter):
     @beartype
     def plot(
         self,
-        hs: Sequence[Tuple[str, H, Optional[H]]],
+        hs: Sequence[tuple[str, H, Optional[H]]],
         settings: SettingsDict,
     ) -> None:
         _, ax = matplotlib.pyplot.subplots(
@@ -1049,7 +1048,7 @@ class ScatterHPlotter(LineHPlotter):
     @beartype
     def plot(
         self,
-        hs: Sequence[Tuple[str, H, Optional[H]]],
+        hs: Sequence[tuple[str, H, Optional[H]]],
         settings: SettingsDict,
     ) -> None:
         _, ax = matplotlib.pyplot.subplots(
@@ -1122,7 +1121,7 @@ class HPlotterChooser:
         self,
         histogram_specs: Iterable[
             Optional[
-                Union[HLikeT, Tuple[str, HLikeT], Tuple[str, HLikeT, Optional[HLikeT]]]
+                Union[HLikeT, tuple[str, HLikeT], tuple[str, HLikeT, Optional[HLikeT]]]
             ]
         ] = (),
         *,
@@ -1181,8 +1180,8 @@ class HPlotterChooser:
         for plotter_name, plotter in self._plotters_by_name.items():
             self._layouts_by_name[plotter_name] = plotter.layout(plot_widgets)
 
-        self._hs: Tuple[Tuple[str, H, Optional[H]], ...] = ()
-        self._hs_culled: Tuple[Tuple[str, H, Optional[H]], ...] = ()
+        self._hs: tuple[tuple[str, H, Optional[H]], ...] = ()
+        self._hs_culled: tuple[tuple[str, H, Optional[H]], ...] = ()
         self._cutoff: Optional[float] = None
         self._csv_download_link = ""
         self.update_hs(histogram_specs)
@@ -1191,11 +1190,13 @@ class HPlotterChooser:
 
         chooser_tab = widgets.Tab(
             children=tuple(self._layouts_by_name.values()),
-            selected_index=0
-            if selected_name is None
-            else tab_names.index(selected_name),
-            titles=tab_names,
+            selected_index=(
+                0 if selected_name is None else tab_names.index(selected_name)
+            ),
         )
+
+        for i, tab_name in enumerate(tab_names):
+            chooser_tab.set_title(i, tab_name)
 
         def _handle_tab(change) -> None:
             assert change["name"] == "selected_index"
@@ -1275,7 +1276,7 @@ class HPlotterChooser:
         self,
         histogram_specs: Iterable[
             Optional[
-                Union[HLikeT, Tuple[str, HLikeT], Tuple[str, HLikeT, Optional[HLikeT]]]
+                Union[HLikeT, tuple[str, HLikeT], tuple[str, HLikeT, Optional[HLikeT]]]
             ]
         ],
     ) -> None:
@@ -1456,7 +1457,13 @@ def graph_colors(
     else:
         colors = cmap([v / (count - 1) for v in range(count - 1, -1, -1)])
 
-    return alphasize(colors, alpha)
+    color_list: list[ColorT] = []
+
+    for color in colors:
+        assert len(color) == 4
+        color_list.append(tuple(color))
+
+    return alphasize(color_list, alpha)
 
 
 @experimental
@@ -1495,7 +1502,7 @@ def limit_for_display(h: H, cutoff) -> H:
     if cutoff_count == 0:
         return h
 
-    def _cull() -> Iterator[Tuple[RealLike, int]]:
+    def _cull() -> Iterator[tuple[RealLike, int]]:
         so_far = 0
 
         for outcome, count in sorted(h.items(), key=itemgetter(1)):
@@ -1512,7 +1519,7 @@ def limit_for_display(h: H, cutoff) -> H:
 def values_xy_for_graph_type(
     h: H,
     graph_type: TraditionalPlotType,
-) -> Tuple[Tuple[RealLike, ...], Tuple[float, ...]]:
+) -> tuple[tuple[RealLike, ...], tuple[float, ...]]:
     outcomes, probabilities = h.distribution_xy() if h else ((), ())
 
     if graph_type is TraditionalPlotType.AT_LEAST:
@@ -1531,7 +1538,7 @@ def values_xy_for_graph_type(
 @beartype
 def plot_bar(
     ax: Axes,
-    hs: Sequence[Tuple[str, H]],
+    hs: Sequence[tuple[str, H]],
     graph_type: TraditionalPlotType = TraditionalPlotType.NORMAL,
     alpha: float = DEFAULT_ALPHA,
     shadow: bool = False,
@@ -1550,7 +1557,7 @@ def plot_bar(
     """
     ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(xmax=1))
     width = 0.8
-    bar_kw: Dict[str, Any] = dict(alpha=alpha)
+    bar_kw: dict[str, Any] = dict(alpha=alpha)
 
     if hs:
         bar_kw.update(dict(width=width / len(hs)))
@@ -1568,7 +1575,7 @@ def plot_bar(
     unique_outcomes = sorted(set(chain.from_iterable(h.outcomes() for _, h in hs)))
 
     if hs:
-        ax.set_xticks(unique_outcomes)
+        ax.set_xticks(unique_outcomes)  # type: ignore [arg-type]
         ax.set_xlim(
             (
                 min(unique_outcomes, default=0) - 1.0,
@@ -1594,7 +1601,7 @@ def plot_bar(
 @beartype
 def plot_line(
     ax: Axes,
-    hs: Sequence[Tuple[str, H]],
+    hs: Sequence[tuple[str, H]],
     graph_type: TraditionalPlotType = TraditionalPlotType.NORMAL,
     alpha: float = DEFAULT_ALPHA,
     shadow: bool = False,
@@ -1615,7 +1622,7 @@ def plot_line(
     plotted with a circle, the fourth will be plotted with a plus, and so on.
     """
     ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(xmax=1))
-    plot_kw: Dict[str, Any] = dict(alpha=alpha)
+    plot_kw: dict[str, Any] = dict(alpha=alpha)
 
     if shadow:
         plot_kw.update(
@@ -1630,7 +1637,7 @@ def plot_line(
     unique_outcomes = sorted(set(chain.from_iterable(h.outcomes() for _, h in hs)))
 
     if hs:
-        ax.set_xticks(unique_outcomes)
+        ax.set_xticks(unique_outcomes)  # type: ignore [arg-type]
         ax.set_xlim(
             (
                 min(unique_outcomes, default=0) - 0.5,
@@ -1640,14 +1647,14 @@ def plot_line(
 
     for (label, h), marker in zip(hs, cycle(markers if markers else " ")):
         outcomes, values = values_xy_for_graph_type(h, graph_type)
-        ax.plot(outcomes, values, label=label, marker=marker, **plot_kw)
+        ax.plot(outcomes, values, label=label, marker=marker, **plot_kw)  # type: ignore [arg-type]
 
 
 @experimental
 @beartype
 def plot_scatter(
     ax: Axes,
-    hs: Sequence[Tuple[str, H]],
+    hs: Sequence[tuple[str, H]],
     graph_type: TraditionalPlotType = TraditionalPlotType.NORMAL,
     alpha: float = DEFAULT_ALPHA,
     shadow: bool = False,
@@ -1668,7 +1675,7 @@ def plot_scatter(
     plotted with a circle, the fourth will be plotted with a plus, and so on.
     """
     ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(xmax=1))
-    scatter_kw: Dict[str, Any] = dict(alpha=alpha)
+    scatter_kw: dict[str, Any] = dict(alpha=alpha)
 
     if shadow:
         scatter_kw.update(
@@ -1683,7 +1690,7 @@ def plot_scatter(
     unique_outcomes = sorted(set(chain.from_iterable(h.outcomes() for _, h in hs)))
 
     if hs:
-        ax.set_xticks(unique_outcomes)
+        ax.set_xticks(unique_outcomes)  # type: ignore [arg-type]
         ax.set_xlim(
             (
                 min(unique_outcomes, default=0) - 0.5,
@@ -1693,7 +1700,7 @@ def plot_scatter(
 
     for (label, h), marker in zip(hs, cycle(markers if markers else " ")):
         outcomes, values = values_xy_for_graph_type(h, graph_type)
-        ax.scatter(outcomes, values, label=label, marker=marker, **scatter_kw)
+        ax.scatter(outcomes, values, label=label, marker=marker, **scatter_kw)  # type: ignore [arg-type]
 
 
 @experimental
@@ -1733,9 +1740,11 @@ def plot_burst(
 
     inner = (
         (
-            inner_formatter(outcome, probability, h_inner)
-            if probability >= _LABEL_LIM
-            else "",
+            (
+                inner_formatter(outcome, probability, h_inner)
+                if probability >= _LABEL_LIM
+                else ""
+            ),
             probability,
         )
         for outcome, probability in h_inner.distribution()
@@ -1746,9 +1755,11 @@ def plot_burst(
 
     outer = (
         (
-            outer_formatter(outcome, probability, h_outer)
-            if probability >= _LABEL_LIM
-            else "",
+            (
+                outer_formatter(outcome, probability, h_outer)
+                if probability >= _LABEL_LIM
+                else ""
+            ),
             probability,
         )
         for outcome, probability in h_outer.distribution()
@@ -1799,7 +1810,7 @@ def plot_burst_subplot(
     outer_cmap: Union[str, matplotlib.colors.Colormap, None] = None,
     text_color: str = DEFAULT_COLOR_TEXT,
     alpha: float = DEFAULT_ALPHA,
-) -> Tuple[Figure, Axes]:
+) -> tuple[Figure, Axes]:
     r"""
     !!! warning "Experimental"
 
@@ -1837,7 +1848,7 @@ def plot_burst_subplot(
 def jupyter_visualize(
     histogram_specs: Iterable[
         Optional[
-            Union[HLikeT, Tuple[str, HLikeT], Tuple[str, HLikeT, Optional[HLikeT]]]
+            Union[HLikeT, tuple[str, HLikeT], tuple[str, HLikeT, Optional[HLikeT]]]
         ]
     ],
     *,
@@ -1908,7 +1919,7 @@ def jupyter_visualize(
 
 
 @beartype
-def _csv_download_link(hs: Sequence[Tuple[str, H, Optional[H]]]) -> str:
+def _csv_download_link(hs: Sequence[tuple[str, H, Optional[H]]]) -> str:
     unique_outcomes = sorted(set(chain.from_iterable(h.outcomes() for _, h, _ in hs)))
     labels = [label for label, _, _ in hs]
     raw_buffer = io.BytesIO()
@@ -1935,11 +1946,11 @@ def _csv_download_link(hs: Sequence[Tuple[str, H, Optional[H]]]) -> str:
 def _histogram_specs_to_h_tuples(
     histogram_specs: Iterable[
         Optional[
-            Union[HLikeT, Tuple[str, HLikeT], Tuple[str, HLikeT, Optional[HLikeT]]]
+            Union[HLikeT, tuple[str, HLikeT], tuple[str, HLikeT, Optional[HLikeT]]]
         ]
     ],
     cutoff: Optional[float] = None,
-) -> Tuple[Tuple[str, H, Optional[H]], ...]:
+) -> tuple[tuple[str, H, Optional[H]], ...]:
     h_specs = []
 
     if cutoff is None:
@@ -1966,8 +1977,7 @@ def _histogram_specs_to_h_tuples(
             label, first_h_like = thing[:2]
 
             if len(thing) >= 3:
-                # TODO(posita): See <https://github.com/python/mypy/issues/1178>
-                second_h_like = thing[2]  # type: ignore [misc]
+                second_h_like = thing[2]
             else:
                 second_h_like = None
 
@@ -1981,9 +1991,11 @@ def _histogram_specs_to_h_tuples(
             second_h = None
         else:
             second_h = limit_for_display(
-                second_h_like.h()
-                if isinstance(second_h_like, HableT)
-                else second_h_like,
+                (
+                    second_h_like.h()
+                    if isinstance(second_h_like, HableT)
+                    else second_h_like
+                ),
                 cutoff_frac,
             )
 

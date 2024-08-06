@@ -7,7 +7,6 @@
 # ======================================================================================
 
 from fractions import Fraction
-from typing import Dict
 
 from dyce import H
 from numerary import RealLike
@@ -19,7 +18,7 @@ def do_it(style: str) -> None:
     import matplotlib.pyplot
 
     def d20formatter(outcome: RealLike, probability: Fraction, h: H) -> str:
-        vals: Dict[RealLike, str] = {
+        vals: dict[RealLike, str] = {
             -2: "crit. fail.",
             -1: "fail.",
             1: "succ.",

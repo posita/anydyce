@@ -15,6 +15,13 @@
 
 # ``anydyce`` release notes
 
+## [0.4.5](https://github.com/posita/anydyce/releases/tag/v0.4.5)
+
+* Stablized Jupyter Lite installation
+* Adjusted typing slightly
+* Defaulted to collapsed installation cells
+* Acknowledged removal of PyPy support ([beartype/beartype#324](https://github.com/beartype/beartype/issues/324))
+
 ## [0.4.4](https://github.com/posita/anydyce/releases/tag/v0.4.4)
 
 * Added ``#!python SettingsDict["burst_columns"]`` and related widget.

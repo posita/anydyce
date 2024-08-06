@@ -12,7 +12,6 @@ import re
 from fractions import Fraction
 from math import isclose
 from test.support.warnings_helper import check_warnings
-from typing import Tuple
 
 import matplotlib
 import pytest
@@ -237,7 +236,7 @@ class TestHPlotterChooser:
 
 def test_alphasize() -> None:
     colors = [
-        [r / 10, g / 10, b / 10, random.random()]
+        (r / 10, g / 10, b / 10, random.random())
         for r, g, b in zip(*(range(0, 10, 2), range(3, 9), range(10, 0, -2)))
     ]
     actual_colors = alphasize(colors, 0.8)
@@ -295,7 +294,7 @@ def test_values_xy_for_graph_type() -> None:
     lo = p_3d6.h(0)
     hi = p_3d6.h(-1)
 
-    def _tuples_close(a: Tuple[float, ...], b: Tuple[float, ...]) -> bool:
+    def _tuples_close(a: tuple[float, ...], b: tuple[float, ...]) -> bool:
         if len(a) != len(b):
             return False
 
