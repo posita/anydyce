@@ -15,6 +15,10 @@
 
 # ``anydyce`` release notes
 
+## [0.4.6](https://github.com/posita/anydyce/releases/tag/v0.4.6)
+
+* TODO
+
 ## [0.4.5](https://github.com/posita/anydyce/releases/tag/v0.4.5)
 
 * Stablized Jupyter Lite installation
