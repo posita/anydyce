@@ -17,7 +17,7 @@
 
 ## [0.4.6](https://github.com/posita/anydyce/releases/tag/v0.4.6)
 
-* TODO
+* Relaxed ``ipywidgets`` dependency to ``>=7.5,<9`` to better accommodate JupyterLite after prior version crashed and burned
 
 ## [0.4.5](https://github.com/posita/anydyce/releases/tag/v0.4.5)
 
