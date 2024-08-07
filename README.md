@@ -25,7 +25,7 @@ If that file is missing or appears to be modified from its original, then please
 [![Supported Python Implementations](https://img.shields.io/pypi/implementation/anydyce/0.4.6.svg)](https://pypi.org/project/anydyce/0.4.6/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![``dyce``-powered!](https://raw.githubusercontent.com/posita/dyce/latest/docs/dyce-powered.svg)](https://posita.github.io/dyce/)
-[![``numerary``-encumbered](https://raw.githubusercontent.com/posita/numerary/latest/docs/numerary-encumbered.svg)](https://posita.github.io/numerary/)
+[![``numerary``-encumbered](https://raw.githubusercontent.com/beartype/numerary/latest/docs/numerary-encumbered.svg)](https://beartype.github.io/numerary/)
 [![Bear-ified™](https://raw.githubusercontent.com/beartype/beartype-assets/main/badge/bear-ified.svg)](https://beartype.rtfd.io/)
 
 # ``anydyce`` – visualization tools for [``dyce``](https://posita.github.io/dyce/)
@@ -224,7 +224,7 @@ It has the following runtime dependencies:
 * [``ipywidgets``](https://ipywidgets.readthedocs.io/) for interactivity in Jupyter
 * [``matplotlib``](https://matplotlib.org/) for visualizing [histograms and pools](https://posita.github.io/dyce/latest/countin/)
 
-``anydyce`` (and ``dyce``) leverage ``numerary`` for its opportunistic use of ``beartype``. If you use ``beartype`` for type checking your code, but don’t want ``anydyce``, ``dyce``, or ``numerary`` to use it internally, disable it with [``numerary``’s ``NUMERARY_BEARTYPE`` environment variable](https://posita.github.io/numerary/latest/#requirements).
+``anydyce`` (and ``dyce``) leverage ``numerary`` for its opportunistic use of ``beartype``. If you use ``beartype`` for type checking your code, but don’t want ``anydyce``, ``dyce``, or ``numerary`` to use it internally, disable it with [``numerary``’s ``NUMERARY_BEARTYPE`` environment variable](https://beartype.github.io/numerary/latest/#requirements).
 
 See the [hacking quick-start](https://posita.github.io/anydyce/0.4/contrib/#hacking-quick-start) for additional development and testing dependencies.
 
