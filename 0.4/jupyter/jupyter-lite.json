@@ -16,14 +16,7 @@
       {
         "extension": "./extension",
         "liteExtension": false,
-        "load": "static/remoteEntry.d04be841d48ffe2a9bdd.js",
-        "name": "@jupyter-notebook/lab-extension",
-        "style": "./style"
-      },
-      {
-        "extension": "./extension",
-        "liteExtension": false,
-        "load": "static/remoteEntry.7d4b58ee405fa86b0e36.js",
+        "load": "static/remoteEntry.5586bbdee77c5d90dd3c.js",
         "name": "@jupyter-widgets/jupyterlab-manager"
       },
       {
