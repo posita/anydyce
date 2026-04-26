@@ -28,7 +28,7 @@ If that file is missing or appears to be modified from its original, then please
 [![``numerary``-encumbered](https://raw.githubusercontent.com/beartype/numerary/latest/docs/numerary-encumbered.svg)](https://beartype.github.io/numerary/)
 [![Bear-ified™](https://raw.githubusercontent.com/beartype/beartype-assets/main/badge/bear-ified.svg)](https://beartype.rtfd.io/)
 
-# ``anydyce`` – visualization tools for [``dyce``](https://posita.github.io/dyce/)
+# ``anydyce`` – Interactivity tools for [``dyce``](https://posita.github.io/dyce/)
 
 ``anydyce`` exposes an interactive interface to [``dyce``](https://posita.github.io/dyce/) (the dice mechanic modeling library) in [Jupyter](https://jupyter.org/) similar to [AnyDice](https://anydice.com/).
 
