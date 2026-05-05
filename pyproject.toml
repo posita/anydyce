@@ -18,6 +18,7 @@ requires-python = ">=3.11"
 dependencies = [
     "dyce[viz]~=0.7.0rc6",
     "ipywidgets",
+    "lark>=1.3.1",
     "typing_extensions>=4.5; python_version < '3.13'",  # back-port of deprecated decorator
 ]
 classifiers = [
@@ -120,7 +121,7 @@ tox = [
 ]
 
 [tool.codespell]
-ignore-words-list = "countin"
+ignore-words-list = "Nd,countin"
 skip = ["*.ipynb"]
 
 [tool.coverage.run]
@@ -203,6 +204,18 @@ docstring-code-line-length = "dynamic"
   "E402",  # Module level import not at top of file
   # Useful for cell display
   "B018",   # Found useless expression
+  "T201",  # `print` found (eglot-check)
+]
+"helpers/anydice-programs.py" = [
+  "T201",  # `print` found (eglot-check)
+]
+"helpers/validate-edge-cases.py" = [
+  "S404",  # `subprocess` module is possibly insecure
+  "S603",  # `subprocess` call: check for execution of untrusted input
+  "T201",  # `print` found (eglot-check)
+]
+"helpers/vet-test-expectations.py" = [
+  "C901",  # `...` is too complex
   "T201",  # `print` found (eglot-check)
 ]
 
