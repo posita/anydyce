@@ -1,0 +1,207 @@
+// =====================================================================================
+// Copyright and other protections apply. Please see the accompanying LICENSE file for
+// rights and restrictions governing use of this software. All rights not expressly
+// waived or licensed are reserved. If that file is missing or appears to be modified
+// from its original, then please contact the author before viewing or using this
+// software in any capacity.
+// =====================================================================================
+
+// AnyDice grammar for Lark LALR(1) + contextual lexer
+//
+// Operator precedence (tightest binding first):
+//   unary (#/!/−/+/d)  >  binary d  >  @  >  ^  >  */÷  >  +/-  >  comparisons  >  &  >  |
+//
+// All prefix unary operators bind at the same right-recursive level (tighter than
+// binary d):
+//   #d6 = #(d6)   #!1 = #(!1)   !#1 = !(#1)   -d6 = -(d6)
+// Binary d is left-recursive and looser than all prefix unaries:
+//   #3d6 = (#3)d6 = 1d6
+//
+// Key lexer notes:
+//   - "d" as a string literal beats LOWERNAME for the single char 'd' (same length,
+//     string literals win), but LOWERNAME wins for "double" etc. (longer match).
+//   - Reserved words are string literals and therefore always beat LOWERNAME.
+//   - All reserved words may appear as parts of function names and call patterns.
+
+// ---- Ignored ------------------------------------------------------------------------
+
+%ignore /\\((.|\n))*?\\/    // \ comment text \
+%ignore /[ \t\r\n]+/
+
+// ---- Terminals ----------------------------------------------------------------------
+
+NUMBER   : /\d+/
+UPPERNAME: /[A-Z][A-Z_]*/
+LOWERNAME: /[a-z][a-z]*/
+// Strings: capture everything between double-quotes (including [VAR] interpolation).
+// The transformer splits out [UPPERNAME] references.
+STRING   : /\"[^\"]*\"/
+
+// ---- Program ------------------------------------------------------------------------
+
+start: stmt*
+
+// ---- Top-level statements -----------------------------------------------------------
+// output and function_def are only valid at the top level.
+// result_stmt is only valid inside a function body (see body_stmt below).
+
+?stmt: output_named
+     | output_anon
+     | function_def
+     | loop_stmt
+     | if_stmt
+     | set_stmt
+     | var_assign
+
+output_named : "output" expr "named" expr
+output_anon  : "output" expr
+function_def : "function" ":" funcname _code_block
+loop_stmt    : "loop" UPPERNAME "over" expr "{" stmt* "}"
+set_stmt     : "set" STRING "to" expr
+var_assign   : UPPERNAME ":" expr
+
+if_stmt     : "if" expr "{" stmt* "}" elseif* else_clause?
+elseif      : "else" "if" expr "{" stmt* "}"
+else_clause : "else" "{" stmt* "}"
+
+// ---- Function body statements -------------------------------------------------------
+// No output statements, no nested function definitions.
+// `_code_block` is a filter rule (Lark `_` prefix inlines its children into the
+//   parent), so body statements + an optional trailing result_stmt slot directly
+//   into each parent rule's `*stmts` transformer arg. This mirrors the AnyDice
+//   EBNF's reusable "code block (inside function)" production:
+//     code block (inside function) = '{' , { statement } , [ result definition ] , '}' ;
+// `result_stmt` may appear ONLY as the last statement of a body block (verified
+//   via 2f5ce: `result: NIX` followed by `loop THROW` errors with "I was
+//   expecting a }").
+// Aliases map body variants to the same transformer methods as their top-level
+//   counterparts, so the transformer needs no changes.
+
+?body_stmt: body_loop_stmt
+          | body_if_stmt
+          | var_assign
+
+result_stmt      : "result" ":" expr
+_code_block      : "{" body_stmt* result_stmt? "}"
+body_loop_stmt   : "loop" UPPERNAME "over" expr _code_block -> loop_stmt
+body_if_stmt     : "if" expr _code_block body_elseif* body_else_clause? -> if_stmt
+body_elseif      : "else" "if" expr _code_block -> elseif
+body_else_clause : "else" _code_block -> else_clause
+
+// ---- Function name definition -------------------------------------------------------
+// A sequence of lowercase words (including reserved), typed params, and bare params.
+// Note: "d" cannot be part of a callable function name (it's always the dice operator
+//   in call context), but we allow it here since the definition may still be parsed.
+
+funcname   : fname_part*
+fname_part : fname_word | param
+// The ! prefix keeps all tokens (including anonymous string-literal terminals) so that
+//   fname_word always receives exactly one token.
+!fname_word : LOWERNAME
+            | "output" | "function" | "loop" | "over" | "named"
+            | "set" | "to" | "if" | "else" | "result"
+            | "d"
+param      : UPPERNAME ":" param_type   -> typed_param
+           | UPPERNAME                  -> bare_param
+param_type : /[nds?]/
+
+// ---- Operator terminals -------------------------------------------------------------
+// Define each operator as a named terminal so the contextual lexer always emits the
+//   same token type regardless of whether it appears in a unary or binary context.
+
+PLUS   : "+"
+MINUS  : "-"
+TIMES  : "*"
+SLASH  : "/"
+CARET  : "^"
+AT     : "@"
+PIPE   : "|"
+AMP    : "&"
+BANG   : "!"
+HASH   : "#"
+NEQ    : "!="
+LEQ    : "<="
+GEQ    : ">="
+LT     : "<"
+GT     : ">"
+EQ     : "="
+
+// ---- Expressions --------------------------------------------------------------------
+
+?expr: or_expr
+
+?or_expr  : or_expr  PIPE and_expr  -> binop
+          | and_expr
+
+?and_expr : and_expr AMP cmp_expr  -> binop
+          | cmp_expr
+
+?cmp_expr : cmp_expr NEQ add_expr -> binop
+          | cmp_expr LEQ add_expr -> binop
+          | cmp_expr GEQ add_expr -> binop
+          | cmp_expr LT  add_expr -> binop
+          | cmp_expr GT  add_expr -> binop
+          | cmp_expr EQ  add_expr -> binop
+          | add_expr
+
+?add_expr : add_expr PLUS  mul_expr -> binop
+          | add_expr MINUS mul_expr -> binop
+          | mul_expr
+
+?mul_expr : mul_expr TIMES pow_expr -> binop
+          | mul_expr SLASH pow_expr -> binop
+          | pow_expr
+
+?pow_expr : pow_expr CARET at_expr  -> binop
+          | at_expr
+
+?at_expr  : at_expr AT dice_expr -> binop
+          | dice_expr
+
+// binary d is left-recursive, tighter than @ but looser than all prefix unaries.
+// Its right operand is tight_expr so that it cannot steal the operand of a prefix unary
+//   on its right side.
+?dice_expr : dice_expr "d" tight_expr -> dice_binop
+           | tight_expr
+
+// All prefix unary operators share one right-recursive level, tighter than binary d.
+// tight_expr has NO left-recursive rules, so after reducing "HASH tight_expr" there is
+//   no possible SHIFT for "d" — LALR naturally reduces first, giving #3d6 = (#3)d6.
+// Other cases: #d6 = #(d6), #!1 = #(!1), !#1 = !(#1), -d6 = -(d6).
+?tight_expr : HASH  tight_expr -> hash_op
+            | MINUS tight_expr -> neg_op
+            | PLUS  tight_expr -> pos_op
+            | BANG  tight_expr -> not_op
+            | "d"   tight_expr -> dice_unary
+            | atom
+
+?atom: NUMBER                  -> number
+     | UPPERNAME               -> var
+     | "(" expr ")"
+     | "{" "}"                 -> empty_seq
+     | "{" seq_elems "}"       -> seq
+     | "[" call_expr "]"       -> call
+     | STRING                  -> string
+
+// ---- Sequences ----------------------------------------------------------------------
+
+seq_elems: seq_elem ("," seq_elem)*
+
+// Repetition syntax: {1:4} = four 1s; {1..3:2} = range 1..3 repeated twice.
+seq_elem: expr ".." expr ":" expr  -> range_repeat
+        | expr ".." expr           -> range
+        | expr ":" expr            -> value_repeat
+        | expr                     -> value
+
+// ---- Function calls -----------------------------------------------------------------
+// A call is a sequence of words (function name parts) and expressions (arguments).
+// Lowercase words (including reserved keywords) are always name parts.
+// Everything else is an argument expression.
+
+call_expr : call_part*
+call_part : call_word  -> call_word
+          | call_arg   -> call_arg
+!call_word : LOWERNAME
+           | "output" | "function" | "loop" | "over" | "named"
+           | "set" | "to" | "if" | "else" | "result"
+call_arg  : expr
