@@ -17,11 +17,10 @@ r"""AnyDice tree-walking interpreter backed by dyce primitives."""
 
 import operator
 from collections import Counter
-from collections.abc import Callable
-from functools import reduce
-from math import lcm
+from collections.abc import Callable, Iterator
 
 from dyce import H, P, RollT
+from dyce.h import aggregate_weighted
 
 from .ast_ import (
     BinOp,
@@ -581,27 +580,18 @@ class AnyDiceInterpreter:
     def _expand_dice_count(self, n_die: H[int], face_die: H[int]) -> H[int]:
         # For each outcome k of n_die with weight w_k, compute kd<face_die> and
         # combine. Inner distributions can have different totals (e.g. 1d6 has
-        # total 6 vs 2d6's 36), so we LCM-normalize them before merging to
-        # preserve the relative probabilities of each outer-outcome branch.
+        # total 6 vs 2d6's 36); aggregate_weighted LCM-normalizes them before
+        # merging to preserve the relative probabilities of each outer-outcome
+        # branch.
         if not n_die:
             return H({})
-        inner: list[tuple[int, int, H[int]]] = []  # (k, w_k, kd<face_die>)
-        for k, w_k in n_die.items():
-            sub = self._roll_n(k, face_die)
-            sub_h = sub.h() if isinstance(sub, P) else sub
-            inner.append((k, w_k, sub_h))
-        nonzero_totals = [sum(h.values()) for _, _, h in inner if h]
-        if not nonzero_totals:
-            return H({})
-        total_lcm = reduce(lcm, nonzero_totals)
-        result: dict[int, int] = {}
-        for _, w_k, h in inner:
-            if not h:
-                continue
-            scale = total_lcm // sum(h.values())
-            for o, c in h.items():
-                result[o] = result.get(o, 0) + c * scale * w_k
-        return H(result)
+
+        def _gen() -> Iterator[tuple[H[int], int]]:
+            for k, w_k in n_die.items():
+                sub = self._roll_n(k, face_die)
+                yield (sub.h() if isinstance(sub, P) else sub), w_k
+
+        return aggregate_weighted(_gen())
 
     # ---- Coercion ------------------------------------------------------------------------
 
@@ -847,34 +837,23 @@ class AnyDiceInterpreter:
         # as `_expand_dice_count`.
         from itertools import product
 
-        iterations: list[tuple[int, H[int]]] = []
-        for combo in product(*[items for _, items in expansion]):
-            weight = 1
-            for j, (idx, _) in enumerate(expansion):
-                value, w = combo[j]
-                bound[idx] = value
-                weight *= w
-            r = self._invoke_with_bound(func, params, bound)
-            # When a body iteration returns a sequence, AnyDice sum-coerces it to a
-            # single number rather than distributing seq elements as separate
-            # outcomes. (Verified against AnyDice via 405c6's `[roll 1d6 1d6]`
-            # which produces an H over A+B+C, not over {A+B, C} elements.)
-            if isinstance(r, tuple):
-                r = sum(r)
-            iterations.append((weight, self._coerce_to_h(r)))
+        def _gen() -> Iterator[tuple[H[int], int]]:
+            for combo in product(*[items for _, items in expansion]):
+                weight = 1
+                for j, (idx, _) in enumerate(expansion):
+                    value, w = combo[j]
+                    bound[idx] = value
+                    weight *= w
+                r = self._invoke_with_bound(func, params, bound)
+                # When a body iteration returns a sequence, AnyDice sum-coerces it to a
+                # single number rather than distributing seq elements as separate
+                # outcomes. (Verified against AnyDice via 405c6's `[roll 1d6 1d6]`
+                # which produces an H over A+B+C, not over {A+B, C} elements.)
+                if isinstance(r, tuple):
+                    r = sum(r)
+                yield self._coerce_to_h(r), weight
 
-        nonzero_totals = [sum(h.values()) for _, h in iterations if h]
-        if not nonzero_totals:
-            return H({})
-        total_lcm = reduce(lcm, nonzero_totals)
-        result: dict[int, int] = {}
-        for weight, r_h in iterations:
-            if not r_h:
-                continue
-            scale = total_lcm // sum(r_h.values())
-            for outcome, count in r_h.items():
-                result[outcome] = result.get(outcome, 0) + count * scale * weight
-        return H(result)
+        return aggregate_weighted(_gen())
 
     def _invoke_with_bound(
         self, func: FunctionDef, params: list[Param], bound: list[_Val]
@@ -974,28 +953,17 @@ class AnyDiceInterpreter:
         # variants, but will surface for any builtin returning a variable-total H).
         from itertools import product
 
-        iterations: list[tuple[int, H[int]]] = []
-        for combo in product(*[items for _, items in expansion]):
-            weight = 1
-            for j, (idx, _) in enumerate(expansion):
-                value, w = combo[j]
-                bound[idx] = value
-                weight *= w
-            r = impl(self._settings, *bound)
-            # Mirror `_invoke`: sum-coerce a tuple return to a single number.
-            if isinstance(r, tuple):
-                r = sum(r)
-            iterations.append((weight, self._coerce_to_h(r)))
+        def _gen() -> Iterator[tuple[H[int], int]]:
+            for combo in product(*[items for _, items in expansion]):
+                weight = 1
+                for j, (idx, _) in enumerate(expansion):
+                    value, w = combo[j]
+                    bound[idx] = value
+                    weight *= w
+                r = impl(self._settings, *bound)
+                # Mirror `_invoke`: sum-coerce a tuple return to a single number.
+                if isinstance(r, tuple):
+                    r = sum(r)
+                yield self._coerce_to_h(r), weight
 
-        nonzero_totals = [sum(h.values()) for _, h in iterations if h]
-        if not nonzero_totals:
-            return H({})
-        total_lcm = reduce(lcm, nonzero_totals)
-        result: dict[int, int] = {}
-        for weight, r_h in iterations:
-            if not r_h:
-                continue
-            scale = total_lcm // sum(r_h.values())
-            for outcome, count in r_h.items():
-                result[outcome] = result.get(outcome, 0) + count * scale * weight
-        return H(result)
+        return aggregate_weighted(_gen())
