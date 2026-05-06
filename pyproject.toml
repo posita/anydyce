@@ -209,15 +209,6 @@ docstring-code-line-length = "dynamic"
 "helpers/anydice-programs.py" = [
   "T201",  # `print` found (eglot-check)
 ]
-"helpers/validate-edge-cases.py" = [
-  "S404",  # `subprocess` module is possibly insecure
-  "S603",  # `subprocess` call: check for execution of untrusted input
-  "T201",  # `print` found (eglot-check)
-]
-"helpers/vet-test-expectations.py" = [
-  "C901",  # `...` is too complex
-  "T201",  # `print` found (eglot-check)
-]
 
 [tool.ruff.lint]
 preview = true
