@@ -205,6 +205,24 @@ def _open_db(path: Path) -> sqlite3.Connection:
         )
         conn.commit()
 
+    # Annotations table: tracks per-program metadata that's not derivable from the
+    # source. Today's only use is `kind='anydice-bug'` for programs whose AnyDice
+    # output is buggy and we deliberately don't reproduce; verify reclassifies
+    # those rows from `mismatch:values` to `divergence:anydice-bug`. Created on
+    # first open if missing -- migration is just a fresh CREATE TABLE.
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS annotations (
+            program_id  INTEGER NOT NULL,
+            kind        TEXT    NOT NULL,
+            note        TEXT,
+            PRIMARY KEY (program_id, kind),
+            FOREIGN KEY (program_id) REFERENCES programs(program_id)
+        )
+        """
+    )
+    conn.commit()
+
     return conn
 
 
@@ -215,22 +233,42 @@ def _rebuild_programs_table(
     # Deduplicate. For programs that parse, dedup by canonical form. For programs that
     # do not parse (canonical=None), dedup by raw program text since there is no
     # canonical key to compare. rows must arrive sorted by program_id DESC so
-    # first-seen wins.
+    # first-seen wins. We also build `kept_by_id`: for every input program_id, the
+    # program_id of the row that survives the dedup. This drives annotation
+    # migration after the rebuild so a discarded row's annotations follow the
+    # canonical content to the kept row.
     seen_canonical: dict[str, tuple[int, str, str | None]] = {}
     seen_unparseable: dict[str, tuple[int, str, str | None]] = {}
+    kept_by_id: dict[int, int] = {}
     for program_id, program, output in rows:
         canonical = _canonicalize(program)
         if canonical is not None:
             if canonical not in seen_canonical:
                 seen_canonical[canonical] = (program_id, program, output)
-        elif program not in seen_unparseable:
-            seen_unparseable[program] = (program_id, program, output)
+            kept_by_id[program_id] = seen_canonical[canonical][0]
+        else:
+            if program not in seen_unparseable:
+                seen_unparseable[program] = (program_id, program, output)
+            kept_by_id[program_id] = seen_unparseable[program][0]
 
     new_rows: list[tuple[int, str, str | None, str | None]] = [
         (pid, prog, can, out) for can, (pid, prog, out) in seen_canonical.items()
     ]
     for pid, prog, out in seen_unparseable.values():
         new_rows.append((pid, prog, None, out))
+
+    # Snapshot annotations before the DROP so we can re-insert them under the
+    # translated program_ids after the rebuild. INSERT OR IGNORE on the way back
+    # preserves whichever annotation is seen first when a discarded row's
+    # annotation collides with an existing annotation on the kept row at the
+    # same kind -- rare in practice; users can re-annotate if context drifts.
+    annotation_rows = conn.execute(
+        "SELECT program_id, kind, note FROM annotations"
+    ).fetchall()
+    new_annotations = [
+        (kept_by_id.get(old_id, old_id), kind, note)
+        for old_id, kind, note in annotation_rows
+    ]
 
     # Rename dance inside an explicit transaction so a partial failure leaves the
     # original table intact. isolation_level=None disables Python's own implicit
@@ -260,6 +298,13 @@ def _rebuild_programs_table(
             )
             conn.execute("DROP TABLE programs")
             conn.execute("ALTER TABLE programs_new RENAME TO programs")
+            # Re-establish annotations under the translated program_ids.
+            conn.execute("DELETE FROM annotations")
+            conn.executemany(
+                "INSERT OR IGNORE INTO annotations (program_id, kind, note)"
+                " VALUES (?, ?, ?)",
+                new_annotations,
+            )
             conn.execute("COMMIT")
             conn.execute("VACUUM")
         except Exception:
@@ -355,8 +400,14 @@ def _upsert_program(conn: sqlite3.Connection, program_id: int, program: str) -> 
     existing_id: int = row[0]
     if program_id > existing_id:
         # Update the ID but leave the original program text untouched.
+        # Annotations keyed by the old ID migrate alongside so the rationale
+        # stays attached to the (now upgraded) row.
         conn.execute(
             "UPDATE programs SET program_id = ? WHERE program_id = ?",
+            (program_id, existing_id),
+        )
+        conn.execute(
+            "UPDATE annotations SET program_id = ? WHERE program_id = ?",
             (program_id, existing_id),
         )
         conn.commit()
@@ -599,6 +650,115 @@ def cmd_recanon(db_path: Path, *, debug: bool) -> None:
             print(f"    old: {old_canonical!r}", file=sys.stderr)
             print(f"    new: {new_canonical!r}", file=sys.stderr)
 
+    conn.close()
+
+
+# ---- Annotations ---------------------------------------------------------------------
+
+# The set of annotation kinds we currently support. Extend here when adding new
+# divergence-classification categories. `verify` re-buckets `mismatch:values`
+# rows that have an `anydice-bug` annotation as `divergence:anydice-bug`.
+_ANNOTATION_KINDS: frozenset[str] = frozenset({"anydice-bug"})
+
+
+def _load_annotations(conn: sqlite3.Connection) -> dict[int, dict[str, str | None]]:
+    r"""Load all annotations into a `{program_id: {kind: note}}` dict.
+
+    Used by `verify` to reclassify rows in a single in-memory lookup rather
+    than per-row queries.
+    """
+    out: dict[int, dict[str, str | None]] = {}
+    for program_id, kind, note in conn.execute(
+        "SELECT program_id, kind, note FROM annotations"
+    ):
+        out.setdefault(program_id, {})[kind] = note
+    return out
+
+
+def cmd_annotate_add(
+    hex_id: str,
+    kind: str,
+    note: str | None,
+    db_path: Path,
+) -> None:
+    if kind not in _ANNOTATION_KINDS:
+        print(
+            f"error: unknown annotation kind {kind!r}; expected one of "
+            f"{sorted(_ANNOTATION_KINDS)}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    program_id = int(hex_id, 16)
+    conn = _open_db(db_path)
+    exists = conn.execute(
+        "SELECT 1 FROM programs WHERE program_id = ?", (program_id,)
+    ).fetchone()
+    if exists is None:
+        print(
+            f"error: no program with program_id={hex_id} in {db_path}",
+            file=sys.stderr,
+        )
+        conn.close()
+        sys.exit(1)
+    conn.execute(
+        "INSERT INTO annotations (program_id, kind, note) VALUES (?, ?, ?)"
+        " ON CONFLICT(program_id, kind) DO UPDATE SET note=excluded.note",
+        (program_id, kind, note),
+    )
+    conn.commit()
+    print(f"annotated program_id={hex_id} kind={kind}")
+    conn.close()
+
+
+def cmd_annotate_list(
+    ids: list[str],
+    kind_filter: str | None,
+    db_path: Path,
+) -> None:
+    conn = _open_db(db_path)
+    if ids:
+        int_ids = [int(h, 16) for h in ids]
+        placeholders = ",".join("?" * len(int_ids))
+        params: list[object] = list(int_ids)
+        where = f"program_id IN ({placeholders})"
+    else:
+        where = "1=1"
+        params = []
+    if kind_filter is not None:
+        where += " AND kind = ?"
+        params.append(kind_filter)
+    rows = conn.execute(
+        f"SELECT program_id, kind, note FROM annotations WHERE {where}"  # noqa: S608
+        " ORDER BY program_id, kind",
+        params,
+    ).fetchall()
+    if not rows:
+        print("(no annotations match)")
+    else:
+        for program_id, kind, note in rows:
+            print(f"  {program_id:x}  kind={kind}")
+            if note:
+                for line in note.splitlines():
+                    print(f"      {line}")
+    conn.close()
+
+
+def cmd_annotate_remove(
+    hex_id: str,
+    kind: str,
+    db_path: Path,
+) -> None:
+    program_id = int(hex_id, 16)
+    conn = _open_db(db_path)
+    cursor = conn.execute(
+        "DELETE FROM annotations WHERE program_id = ? AND kind = ?",
+        (program_id, kind),
+    )
+    conn.commit()
+    if cursor.rowcount == 0:
+        print(f"no annotation removed (program_id={hex_id} kind={kind} not found)")
+    else:
+        print(f"removed annotation: program_id={hex_id} kind={kind}")
     conn.close()
 
 
@@ -1284,11 +1444,22 @@ def cmd_verify(  # noqa: C901
         conn.close()
         return
 
+    annotations = _load_annotations(conn)
+
     buckets: dict[str, list[tuple[int, str, str | None]]] = {}
     for program_id, program, output_json in rows:
         if debug:
             print(f"debug: verifying program_id={program_id:x}", file=sys.stderr)
         bucket, detail = _classify(program, output_json, timeout_s=timeout_s)
+        # Reclassify based on annotations: a `mismatch:values` row with an
+        # `anydice-bug` annotation becomes `divergence:anydice-bug` and the
+        # annotation note (if any) is appended to the detail for context.
+        program_annotations = annotations.get(program_id, {})
+        if bucket == "mismatch:values" and "anydice-bug" in program_annotations:
+            bucket = "divergence:anydice-bug"
+            note = program_annotations["anydice-bug"]
+            if note:
+                detail = f"{detail} | reason: {note}" if detail else f"reason: {note}"
         buckets.setdefault(bucket, []).append((program_id, program, detail))
 
     total = sum(len(v) for v in buckets.values())
@@ -1324,7 +1495,7 @@ def cmd_verify(  # noqa: C901
 # ---- CLI -----------------------------------------------------------------------------
 
 
-def main() -> None:
+def main() -> None:  # noqa: C901
     parser = argparse.ArgumentParser(
         description="Manage a local SQLite cache of AnyDice programs and outputs."
     )
@@ -1515,6 +1686,67 @@ def main() -> None:
         help="print frequency of non-user-defined call shapes instead of verifying",
     )
 
+    # ---- annotate ----------------------------------------------------------------
+    annotate_parser = subparsers.add_parser(
+        "annotate",
+        help="Manage per-program annotations (e.g. mark programs as known "
+        "AnyDice-side bugs so verify can re-bucket them as "
+        "divergence:anydice-bug instead of mismatch:values).",
+    )
+    annotate_subparsers = annotate_parser.add_subparsers(
+        dest="annotate_command", required=True
+    )
+
+    annotate_add_parser = annotate_subparsers.add_parser(
+        "add",
+        help="Add or update an annotation on a program.",
+    )
+    annotate_add_parser.add_argument(
+        "hex_id", metavar="HEX_ID", help="hex program ID to annotate"
+    )
+    annotate_add_parser.add_argument(
+        "--kind",
+        default="anydice-bug",
+        choices=sorted(_ANNOTATION_KINDS),
+        help="annotation kind (default: anydice-bug)",
+    )
+    annotate_add_parser.add_argument(
+        "--note",
+        default=None,
+        help="free-text rationale; pass `-` to read from stdin",
+    )
+
+    annotate_list_parser = annotate_subparsers.add_parser(
+        "list",
+        help="List existing annotations.",
+    )
+    annotate_list_parser.add_argument(
+        "ids",
+        metavar="HEX_ID",
+        nargs="*",
+        help="hex program ID(s) to filter by (default: all)",
+    )
+    annotate_list_parser.add_argument(
+        "--kind",
+        default=None,
+        choices=sorted(_ANNOTATION_KINDS),
+        help="filter by annotation kind (default: all kinds)",
+    )
+
+    annotate_remove_parser = annotate_subparsers.add_parser(
+        "remove",
+        help="Remove an annotation.",
+    )
+    annotate_remove_parser.add_argument(
+        "hex_id", metavar="HEX_ID", help="hex program ID"
+    )
+    annotate_remove_parser.add_argument(
+        "--kind",
+        default="anydice-bug",
+        choices=sorted(_ANNOTATION_KINDS),
+        help="annotation kind (default: anydice-bug)",
+    )
+
     args = parser.parse_args()
 
     if args.command == "fetch":
@@ -1554,6 +1786,16 @@ def main() -> None:
             timeout_s=args.timeout,
             debug=args.debug,
         )
+    elif args.command == "annotate":
+        if args.annotate_command == "add":
+            note = args.note
+            if note == "-":
+                note = sys.stdin.read()
+            cmd_annotate_add(args.hex_id, args.kind, note, args.db)
+        elif args.annotate_command == "list":
+            cmd_annotate_list(args.ids, args.kind, args.db)
+        elif args.annotate_command == "remove":
+            cmd_annotate_remove(args.hex_id, args.kind, args.db)
 
 
 if __name__ == "__main__":
