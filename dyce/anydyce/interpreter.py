@@ -16,10 +16,11 @@
 r"""AnyDice tree-walking interpreter backed by dyce primitives."""
 
 import operator
+import warnings
 from collections import Counter
 from collections.abc import Callable, Iterator
 
-from dyce import H, P, RollT
+from dyce import H, P, RollT, TruncationWarning
 from dyce.h import aggregate_weighted
 
 from .ast_ import (
@@ -154,6 +155,18 @@ class AnyDiceInterpreter:
         self._settings = Settings()
         self._env: dict[str, _Val] = {}
         self._outputs: AnyDiceResultsT = []
+        # Outcomes pruned by `_truncate` during evaluation of the current
+        # output directive. Reset at the start of each `OutputStmt`; restored
+        # as zero-count entries on the displayed H to preserve AnyDice's
+        # "outcome was possible at some point" display semantic.
+        self._pruned_outcomes: set[int] = set()
+        # Per-binding pruning histories. When a `VarAssign` evaluates an RHS,
+        # we capture the prunings produced by that RHS into this dict, keyed
+        # by variable name. When the variable is later referenced, the stored
+        # pruning is re-merged into the active `_pruned_outcomes`. This keeps
+        # one output's prunings from leaking into another output that doesn't
+        # actually reference the same data.
+        self._env_pruning: dict[str, frozenset[int]] = {}
         # Functions are keyed by their pattern *shape* -- a tuple slotting fixed words
         # at fixed positions and `None` for each parameter slot regardless of type
         # annotation. AnyDice's user-visible "function name" is exactly this shape (e.g.
@@ -177,16 +190,31 @@ class AnyDiceInterpreter:
         self._outputs = []
         self._funcs = {}
         self._depth = 0
+        self._pruned_outcomes = set()
+        self._env_pruning = {}
         for stmt in program.stmts:
             self._exec(stmt)
         return list(self._outputs)
 
     # ---- Statement execution -------------------------------------------------------------
 
-    def _exec(self, stmt: Stmt) -> None:
+    def _exec(self, stmt: Stmt) -> None:  # noqa: C901
         if isinstance(stmt, OutputStmt):
+            # Reset to capture only this output's prunings. Var references
+            # during eval will merge stored per-var prunings (see Var
+            # handling in _eval).
+            self._pruned_outcomes = set()
             value = self._eval(stmt.expr)
             h = self._coerce_to_h(value)
+            # Restore zero-count entries for outcomes that were pruned during
+            # this output's evaluation (including those replayed from any
+            # vars it referenced). Matches AnyDice's display semantic where
+            # outcomes that were possible at some point during computation
+            # remain visible at zero rather than silently absent.
+            if self._pruned_outcomes:
+                missing = self._pruned_outcomes - set(h)
+                if missing:
+                    h = H({**dict(h), **dict.fromkeys(missing, 0)})
             label = self._eval_name(stmt.name)
             if label is None:
                 label = f"output {len(self._outputs) + 1}"
@@ -204,7 +232,18 @@ class AnyDiceInterpreter:
             # identity.
             self._funcs[_pattern_shape(stmt.pattern)] = stmt
         elif isinstance(stmt, VarAssign):
+            # Isolate this VarAssign's RHS prunings, capture them per-name,
+            # then merge into the outer set so any surrounding eval (e.g.
+            # an OutputStmt that contains intermediate VarAssigns inside a
+            # function call) sees them too. Top-level VarAssigns merge into
+            # the run-level set, but the OutputStmt handler resets that set
+            # before each output, so cross-output pollution is avoided.
+            saved = self._pruned_outcomes
+            self._pruned_outcomes = set()
             self._env[stmt.name] = self._eval(stmt.expr)
+            captured = frozenset(self._pruned_outcomes)
+            self._env_pruning[stmt.name] = captured
+            self._pruned_outcomes = saved | captured
         elif isinstance(stmt, IfStmt):
             self._exec_if(stmt)
         elif isinstance(stmt, LoopStmt):
@@ -286,6 +325,12 @@ class AnyDiceInterpreter:
         elif isinstance(node, Var):
             if node.name not in self._env:
                 raise NameError(f"undefined variable: {node.name!r}")
+            # Replay this var's stored pruning history into the active set.
+            # Loop variables and function parameters don't have stored
+            # prunings (they're scalar bindings), so the .get(...) is safe.
+            stored = self._env_pruning.get(node.name)
+            if stored:
+                self._pruned_outcomes |= stored
             return self._env[node.name]
         elif isinstance(node, BinOp):
             left = self._eval(node.left)
@@ -591,7 +636,7 @@ class AnyDiceInterpreter:
                 sub = self._roll_n(k, face_die)
                 yield (sub.h() if isinstance(sub, P) else sub), w_k
 
-        return aggregate_weighted(_gen())
+        return self._truncate(aggregate_weighted(_gen()))
 
     # ---- Coercion ------------------------------------------------------------------------
 
@@ -606,6 +651,45 @@ class AnyDiceInterpreter:
             return value
         else:
             raise TypeError(f"cannot coerce {type(value).__name__} to die")
+
+    def _truncate(self, h: H[int]) -> H[int]:
+        r"""Drop outcomes whose within-H probability falls below
+        `self._settings.precision`, then reduce the surviving counts to lowest
+        terms so subsequent operations don't compound the magnitude. Pruned
+        outcomes are recorded on `self._pruned_outcomes` so they can be
+        restored as zero-count entries at output time. Emits a
+        `TruncationWarning` when any outcome is dropped. No-op when precision
+        is 0 or the H is empty."""
+        precision = self._settings.precision
+        if precision <= 0 or not h:
+            return h
+        # Compare via cross-multiplication to avoid Fraction allocations per outcome.
+        # Drop iff count / total < precision  <==>  count * precision.denominator
+        # < total * precision.numerator.
+        num = h.total * precision.numerator
+        den = precision.denominator
+        kept: dict[int, int] = {}
+        dropped: list[int] = []
+        for outcome, count in h.items():
+            if count * den < num:
+                dropped.append(outcome)
+            else:
+                kept[outcome] = count
+        if dropped:
+            self._pruned_outcomes.update(dropped)
+            warnings.warn(
+                f"truncated {len(dropped)} outcome(s) below precision {precision!r}",
+                TruncationWarning,
+                stacklevel=2,
+            )
+        if not kept:
+            return H({})
+        # Reduce to lowest terms regardless of whether anything was pruned --
+        # the count magnitude is what matters for downstream big-int cost,
+        # not whether truncation just fired. For the deep-recursion case,
+        # this collapses single-surviving-outcome Hs from H({k: huge}) to
+        # H({k: 1}), bounding the magnitude across recursion levels.
+        return H(kept).lowest_terms()
 
     def _eval_name(self, name: Expr | None) -> str | None:
         if name is None:
@@ -827,7 +911,13 @@ class AnyDiceInterpreter:
                 raise NotImplementedError(f"unknown param type: {ptype!r}")
 
         if not expansion:
-            return self._invoke_with_bound(func, params, bound)
+            r = self._invoke_with_bound(func, params, bound)
+            # Truncate the return when it's an H, even on the no-expansion fast
+            # path. Important for deep-recursion programs whose recursive calls
+            # are all-passthrough (e.g. `function: f N:n D:d { ... [f N/2 D] ...
+            # }` -- both args bypass expansion, so the body's bigint-growing
+            # operations would otherwise propagate untruncated.
+            return self._truncate(r) if isinstance(r, H) else r
 
         # Cartesian product over expanded iterations. Per-iteration return values may
         # have differing internal totals (a body branch returning a die has sum>1; a
@@ -853,13 +943,15 @@ class AnyDiceInterpreter:
                     r = sum(r)
                 yield self._coerce_to_h(r), weight
 
-        return aggregate_weighted(_gen())
+        return self._truncate(aggregate_weighted(_gen()))
 
     def _invoke_with_bound(
         self, func: FunctionDef, params: list[Param], bound: list[_Val]
     ) -> _Val:
         saved_env = self._env
+        saved_env_pruning = self._env_pruning
         self._env = dict(saved_env)
+        self._env_pruning = dict(saved_env_pruning)
         for param, val in zip(params, bound, strict=True):
             self._env[param.name] = val
         self._depth += 1
@@ -875,6 +967,7 @@ class AnyDiceInterpreter:
         finally:
             self._depth -= 1
             self._env = saved_env
+            self._env_pruning = saved_env_pruning
 
     def _call_builtin(  # noqa: C901
         self,
@@ -966,4 +1059,4 @@ class AnyDiceInterpreter:
                     r = sum(r)
                 yield self._coerce_to_h(r), weight
 
-        return aggregate_weighted(_gen())
+        return self._truncate(aggregate_weighted(_gen()))

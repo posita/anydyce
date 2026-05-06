@@ -13,9 +13,19 @@
 # (This does not apply to code comments.) Thank you!
 # ======================================================================================
 
+from fractions import Fraction
 from typing import cast
 
 __all__ = ("Settings",)
+
+# Default truncation threshold for accumulator-level pruning. Outcomes whose
+# within-H probability falls below this bound are dropped (and tracked for
+# zero-count restoration at output time). Chosen to be conservative enough to
+# not affect normal AnyDice programs, but aggressive enough to bound deep-
+# recursion programs (e.g. `[highest of 10000000 x d6]`) whose tail
+# probabilities decay below any float-representable threshold. Roughly matches
+# the effective precision floor of AnyDice's float arithmetic.
+_DEFAULT_PRECISION: Fraction = Fraction(1, 10**13)
 
 _DEFAULTS: dict[str, int | str] = {
     "position order": "highest first",
@@ -38,6 +48,10 @@ _POSITIVE_INT_KEYS: frozenset[str] = frozenset(
 class Settings:
     def __init__(self) -> None:
         self._data: dict[str, int | str] = dict(_DEFAULTS)
+        # Python-only setting; not exposed via AnyDice's `set` directive since
+        # AnyDice has no native syntax for fractional values. Configure via the
+        # Python-level Settings object before invoking `run`.
+        self.precision: Fraction = _DEFAULT_PRECISION
 
     def get(self, key: str) -> int | str:
         if key in self._data:
