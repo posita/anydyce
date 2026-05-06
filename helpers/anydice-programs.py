@@ -68,6 +68,14 @@ from dyce.anydyce.interpreter import (
 
 _DB_DEFAULT = Path(__file__).parent / Path(__file__).with_suffix(".db").name
 _ANYDICE_HOST = "anydice.com"
+_DEFAULT_HEADERS = {
+    # RFC 9113 requires header keys to be lower case for HTTP/2, but HTTP/1.1 treats
+    # header keys as case insensitive. The default appears to be something like
+    # "User-agent: Python-urllib/<python-version>" (capital "U", lowercase "a"). Chrome
+    # and Firefox both use "User-Agent" (capital "U", capital "A"), so we're sticking
+    # with that.
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+}
 _CALCULATOR_URL = f"https://{_ANYDICE_HOST}/calculator_limited.php"
 _CREATE_LINK_URL = f"https://{_ANYDICE_HOST}/createLink.php"
 
@@ -299,6 +307,7 @@ def _fetch_html(url: str) -> str:
         url = Path(url).resolve().as_uri()
     jar = http.cookiejar.CookieJar()
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+    opener.addheaders = list(_DEFAULT_HEADERS.items())
     with opener.open(url) as resp:
         if urlparse(url).scheme in ("http", "https"):
             _check_response(resp, _ANYDICE_HOST)
@@ -361,7 +370,9 @@ def _upsert_program(conn: sqlite3.Connection, program_id: int, program: str) -> 
 
 def _create_link(program: str) -> int:
     data = urllib.parse.urlencode({"program": program}).encode()
-    req = urllib.request.Request(_CREATE_LINK_URL, data=data, method="POST")
+    req = urllib.request.Request(
+        _CREATE_LINK_URL, data=data, headers=_DEFAULT_HEADERS, method="POST"
+    )
     with urllib.request.urlopen(req) as resp:  # noqa: S310
         _check_response(resp, _ANYDICE_HOST)
         body = resp.read().decode("utf-8").strip()
@@ -374,7 +385,9 @@ def _create_link(program: str) -> int:
 
 def _post_program(program: str) -> str:
     data = urllib.parse.urlencode({"program": program}).encode()
-    req = urllib.request.Request(_CALCULATOR_URL, data=data, method="POST")
+    req = urllib.request.Request(
+        _CALCULATOR_URL, data=data, headers=_DEFAULT_HEADERS, method="POST"
+    )
     # AnyDice occasionally echoes raw request bytes back inside an error
     # response without re-encoding, producing invalid UTF-8. errors="replace"
     # lets us preserve the structural JSON and substitute U+FFFD for the bad
@@ -1035,6 +1048,26 @@ def _normalize_counts(counts: dict[int, int]) -> dict[int, int]:
     return {k: v // g for k, v in counts.items()}
 
 
+def _elide_one_sided_zeros(
+    ours: dict[int, int], theirs: dict[int, int]
+) -> tuple[dict[int, int], dict[int, int]]:
+    r"""Drop zero-count entries from each dict that don't appear on the other side.
+
+    Treats `{outcome: 0}` on one side as equivalent to outcome-absent on the
+    other. AnyDice's float arithmetic and our exact-rational truncation differ
+    in which low-probability outcomes survive as zero-count entries vs. are
+    elided entirely; both encode the same probabilistic content (zero
+    probability mass either way). Without this elision, 22432-class and
+    3d5e2-class precision-tail discrepancies bucket as `mismatch:values` even
+    though the actual distributions agree.
+    """
+    ours_filtered = {k: v for k, v in ours.items() if not (v == 0 and k not in theirs)}
+    theirs_filtered = {
+        k: v for k, v in theirs.items() if not (v == 0 and k not in ours)
+    }
+    return ours_filtered, theirs_filtered
+
+
 def _proportions_close(
     ours: dict[int, int],
     theirs: dict[int, int],
@@ -1156,6 +1189,11 @@ def _classify(  # noqa: C901
         )
     approximate_dists: list[int] = []
     for i, (oc, tc) in enumerate(zip(our_counts, their_counts, strict=True)):
+        # Drop one-sided zero-count entries before comparison: a `{k: 0}` on
+        # one side and outcome-absent on the other carry the same probabilistic
+        # content, just different representations. AnyDice's float arithmetic
+        # and our truncation diverge here harmlessly (see 22432, 3d5e2-class).
+        oc, tc = _elide_one_sided_zeros(oc, tc)  # noqa: PLW2901
         if oc == tc:
             continue
         # Distinguish a precision-recovery noise mismatch from a real divergence
