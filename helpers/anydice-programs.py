@@ -17,7 +17,10 @@
 import argparse
 import http.cookiejar
 import json
+import multiprocessing
+import os
 import re
+import resource
 import signal
 import sqlite3
 import sys
@@ -238,7 +241,7 @@ def _rebuild_programs_table(
     # migration after the rebuild so a discarded row's annotations follow the
     # canonical content to the kept row.
     seen_canonical: dict[str, tuple[int, str, str | None]] = {}
-    seen_unparseable: dict[str, tuple[int, str, str | None]] = {}
+    seen_unparsable: dict[str, tuple[int, str, str | None]] = {}
     kept_by_id: dict[int, int] = {}
     for program_id, program, output in rows:
         canonical = _canonicalize(program)
@@ -247,14 +250,14 @@ def _rebuild_programs_table(
                 seen_canonical[canonical] = (program_id, program, output)
             kept_by_id[program_id] = seen_canonical[canonical][0]
         else:
-            if program not in seen_unparseable:
-                seen_unparseable[program] = (program_id, program, output)
-            kept_by_id[program_id] = seen_unparseable[program][0]
+            if program not in seen_unparsable:
+                seen_unparsable[program] = (program_id, program, output)
+            kept_by_id[program_id] = seen_unparsable[program][0]
 
     new_rows: list[tuple[int, str, str | None, str | None]] = [
         (pid, prog, can, out) for can, (pid, prog, out) in seen_canonical.items()
     ]
-    for pid, prog, out in seen_unparseable.values():
+    for pid, prog, out in seen_unparsable.values():
         new_rows.append((pid, prog, None, out))
 
     # Snapshot annotations before the DROP so we can re-insert them under the
@@ -491,10 +494,28 @@ def _post_program(program: str) -> str:
     body = _extract_json(body)
     try:
         parsed = json.loads(body, strict=False)
-    except json.JSONDecodeError as exc:
-        raise _NetworkError(
-            f"non-JSON response from calculator_limited.php: {body[:200]!r}"
-        ) from exc
+    except json.JSONDecodeError:
+        # AnyDice can truncate mid-stream when its calculation times out
+        # *while* serializing results (vs. before, which produces a clean
+        # `error` JSON). The truncated body is unparsable. Synthesize a
+        # recognizable JSON marker so the row gets stored and `_classify`
+        # can bucket it as `anydice-bad-json` cleanly. Capture the first
+        # 200 chars of the raw body in the message for diagnosis. Verified
+        # via 321d9 which times out mid-stream when AnyDice is otherwise
+        # idle but produces a clean `Maximum execution time` error under
+        # parallel load.
+        return json.dumps(
+            {
+                "error": {
+                    "type": "BadJSON",
+                    "message": (
+                        "AnyDice response could not be parsed as JSON "
+                        "(likely truncated mid-stream). First 200 chars: "
+                        f"{body[:200]!r}"
+                    ),
+                }
+            }
+        )
     # AnyDice returns an empty object `{}` when a program runs to completion
     # without reaching any `output` statement (e.g. a guarded branch that
     # produces nothing). Treat that as a legitimate result. Non-empty dicts
@@ -1373,9 +1394,11 @@ def _classify(  # noqa: C901
 
     Returns `(bucket, detail)`. *bucket* is one of: `match`, `match:approximate`,
     `mismatch:dist-count`, `mismatch:values`, `parse-fail`, `interp-error:<ExcType>`,
-    `interp-timeout`, `anydice-error`, `anydice-503`, `anydice-empty`,
+    `interp-timeout`, `interp-oom`, `anydice-error`, `anydice-503`, `anydice-empty`,
     `anydice-resource`, `anydice-bad-json`, `anydice-bad-shape`, `unrun`. *detail*
-    is a short string for sample reporting, or `None`.
+    is a short string for sample reporting, or `None`. The `interp-killed` bucket
+    is added by `_verify_isolated` (worker died unexpectedly) and never returned
+    by `_classify` directly.
 
     `match:approximate` covers distributions whose integer counts differ but whose
     proportions agree within `_APPROX_TOLERANCE_PCT` -- typically the result of
@@ -1406,6 +1429,11 @@ def _classify(  # noqa: C901
         # side); the dedicated bucket lets verify show them clustered.
         if err_type == "Infrastructure503":
             return "anydice-503", msg
+        # BadJSON is also a synthetic marker (from `_post_program` when the
+        # response body fails to parse as JSON, typically from a mid-stream
+        # truncation). Routes to the existing `anydice-bad-json` bucket.
+        if err_type == "BadJSON":
+            return "anydice-bad-json", msg
         return "anydice-error", msg
     if not data:
         return "anydice-empty", None
@@ -1424,6 +1452,13 @@ def _classify(  # noqa: C901
         ours = AnyDiceInterpreter().run(program_ast)
     except _InterpTimeout:
         return "interp-timeout", f">{timeout_s}s"
+    except MemoryError as exc:
+        # Caught before the generic Exception handler so an `interp-oom`
+        # bucket surfaces (vs. interp-error:MemoryError). When running with
+        # `--isolate`, MemoryError is the typical signal that a worker
+        # exceeded its RLIMIT_AS cap; in-process MemoryErrors are rare but
+        # bucket the same way.
+        return "interp-oom", str(exc)
     except Exception as exc:  # noqa: BLE001
         return f"interp-error:{type(exc).__name__}", str(exc)
     finally:
@@ -1474,6 +1509,124 @@ def _classify(  # noqa: C901
     return "match", None
 
 
+# ---- Subprocess-isolated verify ------------------------------------------------------
+
+
+def _verify_worker(
+    args: "tuple[int, str, str | None, float]",
+) -> "tuple[int, str, str | None]":
+    r"""Pool worker entry point. Just calls `_classify` and returns the bucket
+    + detail along with the program_id so the parent can route results back
+    to their rows. Module-level so it pickles cleanly under `forkserver`.
+    """
+    program_id, program, output_json, timeout_s = args
+    bucket, detail = _classify(program, output_json, timeout_s=timeout_s)
+    return program_id, bucket, detail
+
+
+def _verify_isolated(
+    rows: "list[tuple[int, str, str | None]]",
+    *,
+    timeout_s: float,
+    workers: int,
+    maxtasksperchild: int,
+    debug: bool,
+) -> "tuple[dict[str, list[tuple[int, str, str | None]]], int]":
+    r"""Run `_classify` for each row in a `forkserver`-backed worker pool.
+
+    Workers inherit the parent's `RLIMIT_AS` at fork time (the parent applies
+    it in `cmd_verify`), so per-worker `setrlimit` is unnecessary. Buckets
+    surfaced by isolation:
+
+    - `interp-oom`: worker's `MemoryError` from hitting `RLIMIT_AS` (caught in
+      `_classify`).
+    - `interp-killed`: worker died unexpectedly (kernel SIGKILL via OOM-killer
+      or signal-9; segfault; etc.). Detected as a worker-side exception
+      surfacing on `AsyncResult.get()`.
+
+    `_classify` enforces its own `SIGALRM`-based wall-clock timeout in the
+    worker, so the parent's `get(timeout=...)` is just a safety buffer for
+    stuck workers.
+
+    Returns `(buckets, processed_count)`. On `KeyboardInterrupt`, returns the
+    partial buckets collected so far; the Pool's `__exit__` cleanly
+    terminates remaining workers.
+    """
+    ctx = multiprocessing.get_context("forkserver")
+
+    rows_by_id: dict[int, tuple[int, str, str | None]] = {
+        pid: (pid, prog, out) for pid, prog, out in rows
+    }
+    buckets: dict[str, list[tuple[int, str, str | None]]] = {}
+
+    if debug:
+        print(
+            f"debug: starting forkserver Pool: workers={workers}, "
+            f"maxtasksperchild={maxtasksperchild}, jobs={len(rows)}",
+            file=sys.stderr,
+        )
+
+    processed = 0
+    with ctx.Pool(
+        processes=workers,
+        maxtasksperchild=maxtasksperchild,
+    ) as pool:
+        async_results: list[tuple[int, multiprocessing.pool.AsyncResult]] = [
+            (
+                program_id,
+                pool.apply_async(
+                    _verify_worker,
+                    ((program_id, program, output_json, timeout_s),),
+                ),
+            )
+            for program_id, program, output_json in rows
+        ]
+
+        # Parent-side wait buffer: workers enforce SIGALRM at timeout_s, so the
+        # parent only needs enough slack for IPC/unwinding. 10s is generous.
+        parent_wait = timeout_s + 10.0
+        try:
+            for program_id, ar in async_results:
+                _, program, _ = rows_by_id[program_id]
+                if debug:
+                    print(
+                        f"debug: collecting program_id={program_id:x}",
+                        file=sys.stderr,
+                    )
+                try:
+                    _, bucket, detail = ar.get(timeout=parent_wait)
+                except multiprocessing.TimeoutError:
+                    # Worker hung past its own SIGALRM; rare, usually means a C
+                    # extension didn't honor the alarm. Bucket as timeout and
+                    # proceed; the worker will eventually be replaced.
+                    bucket, detail = (
+                        "interp-timeout",
+                        f">{timeout_s}s (parent wait of {parent_wait}s exceeded)",
+                    )
+                except MemoryError as exc:
+                    bucket, detail = "interp-oom", str(exc)
+                except Exception as exc:  # noqa: BLE001
+                    # Worker died from kernel kill (OOM-killer beyond rlimit,
+                    # SIGKILL, segfault) or another unexpected fault. Pool
+                    # automatically replaces the dead worker.
+                    bucket, detail = (
+                        "interp-killed",
+                        f"{type(exc).__name__}: {exc}",
+                    )
+                buckets.setdefault(bucket, []).append((program_id, program, detail))
+                processed += 1
+        except KeyboardInterrupt:
+            # Fall through to the with-block exit; Pool.__exit__ runs
+            # pool.terminate() + pool.join() to clean up workers and the
+            # forkserver. Buckets contain the partial state collected so far.
+            print(
+                f"\n*** interrupted after {processed}/{len(rows)} rows ***",
+                file=sys.stderr,
+            )
+
+    return buckets, processed
+
+
 def cmd_verify(  # noqa: C901
     ids: list[str],
     db_path: Path,
@@ -1484,7 +1637,19 @@ def cmd_verify(  # noqa: C901
     builtins_report: bool,
     timeout_s: float,
     debug: bool,
+    isolated_workers: int,
+    rlimit_mb: int,
+    maxtasksperchild: int,
 ) -> None:
+    # Apply RLIMIT_AS on the parent process. Forkserver-spawned workers
+    # inherit this limit at fork time, so workers don't need a separate
+    # setrlimit. The cap protects both in-process runs (a runaway program's
+    # MemoryError gets caught in `_classify` and bucketed as `interp-oom`)
+    # and isolated runs (same MemoryError handling, just inside a worker).
+    # Pass --rlimit-mb 0 to disable.
+    if rlimit_mb > 0:
+        rlimit_bytes = rlimit_mb * 1024 * 1024
+        resource.setrlimit(resource.RLIMIT_AS, (rlimit_bytes, rlimit_bytes))
     conn = _open_db(db_path)
 
     if ids:
@@ -1539,24 +1704,60 @@ def cmd_verify(  # noqa: C901
 
     annotations = _load_annotations(conn)
 
+    if isolated_workers > 0:
+        raw_buckets, processed = _verify_isolated(
+            rows,
+            timeout_s=timeout_s,
+            workers=isolated_workers,
+            maxtasksperchild=maxtasksperchild,
+            debug=debug,
+        )
+    else:
+        raw_buckets = {}
+        processed = 0
+        try:
+            for program_id, program, output_json in rows:
+                if debug:
+                    print(
+                        f"debug: verifying program_id={program_id:x}",
+                        file=sys.stderr,
+                    )
+                bucket, detail = _classify(program, output_json, timeout_s=timeout_s)
+                raw_buckets.setdefault(bucket, []).append((program_id, program, detail))
+                processed += 1
+        except KeyboardInterrupt:
+            print(
+                f"\n*** interrupted after {processed}/{len(rows)} rows ***",
+                file=sys.stderr,
+            )
+
+    interrupted = processed < len(rows)
+
+    # Apply annotation-based reclassification uniformly for both in-process
+    # and isolated paths: a `mismatch:values` row with an `anydice-bug`
+    # annotation becomes `divergence:anydice-bug`; the annotation note is
+    # appended to the detail for context.
     buckets: dict[str, list[tuple[int, str, str | None]]] = {}
-    for program_id, program, output_json in rows:
-        if debug:
-            print(f"debug: verifying program_id={program_id:x}", file=sys.stderr)
-        bucket, detail = _classify(program, output_json, timeout_s=timeout_s)
-        # Reclassify based on annotations: a `mismatch:values` row with an
-        # `anydice-bug` annotation becomes `divergence:anydice-bug` and the
-        # annotation note (if any) is appended to the detail for context.
-        program_annotations = annotations.get(program_id, {})
-        if bucket == "mismatch:values" and "anydice-bug" in program_annotations:
-            bucket = "divergence:anydice-bug"
-            note = program_annotations["anydice-bug"]
-            if note:
-                detail = f"{detail} | reason: {note}" if detail else f"reason: {note}"
-        buckets.setdefault(bucket, []).append((program_id, program, detail))
+    for bucket, entries in raw_buckets.items():
+        for program_id, program, detail in entries:
+            program_annotations = annotations.get(program_id, {})
+            new_bucket = bucket
+            if bucket == "mismatch:values" and "anydice-bug" in program_annotations:
+                new_bucket = "divergence:anydice-bug"
+                note = program_annotations["anydice-bug"]
+                if note:
+                    detail = (  # noqa: PLW2901
+                        f"{detail} | reason: {note}" if detail else f"reason: {note}"
+                    )
+            buckets.setdefault(new_bucket, []).append((program_id, program, detail))
 
     total = sum(len(v) for v in buckets.values())
-    print(f"=== verify summary ({total} rows) ===")
+    if interrupted:
+        print(
+            f"=== verify summary (PARTIAL: {total}/{len(rows)} rows processed before interrupt) ==="
+        )
+    else:
+        print(f"=== verify summary ({total} rows) ===")
     width = max((len(k) for k in buckets), default=0)
     for bucket in sorted(buckets):
         n = len(buckets[bucket])
@@ -1564,6 +1765,8 @@ def cmd_verify(  # noqa: C901
 
     if summary_only:
         conn.close()
+        if interrupted:
+            sys.exit(130)
         return
 
     print("\n=== samples ===")
@@ -1583,6 +1786,11 @@ def cmd_verify(  # noqa: C901
             print(f"  ... ({rest} more in {bucket})")
 
     conn.close()
+    if interrupted:
+        # Exit 130 (128 + SIGINT) so shell scripts can distinguish a
+        # Ctrl-C'd partial run from a normal completion. Partial summary
+        # was still printed above so the user sees what was collected.
+        sys.exit(130)
 
 
 # ---- CLI -----------------------------------------------------------------------------
@@ -1753,10 +1961,9 @@ def main() -> None:  # noqa: C901
     # ---- run ---------------------------------------------------------------------
     run_parser = subparsers.add_parser(
         "run",
-        help="Run an AnyDice program through the dyce.anydyce interpreter and "
-        "print each output's distribution. Source may be inline text, read from "
-        "a file via --file, or read from stdin (positional `-`). Useful for "
-        "ad-hoc debugging without round-tripping through the database.",
+        help="Run an AnyDice program through the dyce.anydyce interpreter and print each output's distribution. "
+        "Source may be inline text, read from a file via --file, or read from stdin (positional `-`). "
+        "Useful for ad-hoc debugging without round-tripping through the database.",
     )
     run_parser.add_argument(
         "source",
@@ -1795,8 +2002,9 @@ def main() -> None:  # noqa: C901
     verify_parser = subparsers.add_parser(
         "verify",
         help="Run each program through the dyce.anydyce interpreter and compare its result to the stored AnyDice output. "
-        "Buckets each row as match, mismatch, parse-fail, interp-error, or one of the AnyDice-side outcomes "
+        "Buckets each row as match, mismatch, parse-fail, interp-error, interp-timeout, or one of the AnyDice-side outcomes "
         "(error, 503 infrastructure failure, empty, resource exhaustion, unrun). "
+        "With --isolate, two more buckets surface: interp-oom (worker hit RLIMIT_AS) and interp-killed (worker died unexpectedly). "
         "Comparison normalizes both sides by dividing counts by their gcd. "
         "Programs annotated as known-AnyDice-bug (see `annotate`) re-bucket from mismatch:values to divergence:anydice-bug. "
         "Pass --builtins-report to skip verification and instead print a frequency table of non-user-defined call shapes across the corpus.",
@@ -1836,6 +2044,36 @@ def main() -> None:  # noqa: C901
         "--builtins-report",
         action="store_true",
         help="print frequency of non-user-defined call shapes instead of verifying",
+    )
+    verify_parser.add_argument(
+        "--isolated-workers",
+        metavar="N",
+        type=int,
+        default=None,
+        help="forkserver-backed worker pool size. 0 means in-process (the "
+        "default unless --all is passed). When --all is passed and this flag "
+        "is omitted, defaults to os.cpu_count(). Pass --isolated-workers 0 to "
+        "force in-process even with --all. Adds two buckets when N>0: "
+        "interp-oom (worker hit RLIMIT_AS, MemoryError caught) and "
+        "interp-killed (worker died from kernel kill or fault).",
+    )
+    verify_parser.add_argument(
+        "--rlimit-mb",
+        metavar="MB",
+        type=int,
+        default=4096,
+        help="memory cap (RLIMIT_AS) applied to both the parent process and "
+        "any isolated workers. Always applied (not isolation-specific) so the "
+        "default protects in-process runs from runaway allocations. "
+        "Default: 4096; pass 0 to disable.",
+    )
+    verify_parser.add_argument(
+        "--maxtasksperchild",
+        metavar="N",
+        type=int,
+        default=100,
+        help="recycle each isolated worker after N tasks to bound slow memory "
+        "creep (default: 100; no effect when --isolated-workers 0)",
     )
 
     # ---- annotate ----------------------------------------------------------------
@@ -1955,6 +2193,12 @@ def main() -> None:  # noqa: C901
     elif args.command == "verify":
         if args.ids and args.all_rows:
             parser.error("HEX_ID arguments and --all are mutually exclusive")
+        # Resolve isolated-workers default: explicit value wins; otherwise
+        # auto-default to os.cpu_count() with --all, 0 without.
+        if args.isolated_workers is None:
+            isolated_workers = (os.cpu_count() or 1) if args.all_rows else 0
+        else:
+            isolated_workers = args.isolated_workers
         cmd_verify(
             args.ids,
             args.db,
@@ -1964,6 +2208,9 @@ def main() -> None:  # noqa: C901
             builtins_report=args.builtins_report,
             timeout_s=args.timeout,
             debug=args.debug,
+            isolated_workers=isolated_workers,
+            rlimit_mb=args.rlimit_mb,
+            maxtasksperchild=args.maxtasksperchild,
         )
     elif args.command == "annotate":
         if args.annotate_command == "add":
