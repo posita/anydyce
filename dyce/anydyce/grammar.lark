@@ -31,7 +31,12 @@
 // ---- Terminals ----------------------------------------------------------------------
 
 NUMBER   : /\d+/
-UPPERNAME: /[A-Z][A-Z_]*/
+// Variable names per AnyDice's EBNF "variable word = ? uppercase character ?,
+// { ? uppercase character ? }". The "uppercase character" class includes
+// underscore in practice -- AnyDice accepts `_` and `_FOO` as valid variable
+// names (verified empirically). Function words ("lowercase character") do not
+// include underscore.
+UPPERNAME: /[A-Z_]+/
 LOWERNAME: /[a-z][a-z]*/
 // Strings: capture everything between double-quotes (including [VAR] interpolation).
 // The transformer splits out [UPPERNAME] references.
