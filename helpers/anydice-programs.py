@@ -591,19 +591,45 @@ def cmd_fetch(
     conn.close()
 
 
+def _next_fake_id(conn: sqlite3.Connection) -> int:
+    r"""Return the next auto-assigned fake program_id (a negative integer).
+
+    Negative IDs distinguish locally-stored programs from AnyDice-assigned
+    IDs (always positive). Each call returns one less than the current
+    minimum, so successive calls walk -1, -2, -3, ... regardless of whether
+    earlier fakes have since been merged away by `recanon` upgrades.
+    """
+    row = conn.execute("SELECT MIN(program_id) FROM programs").fetchone()
+    current_min = row[0] if row[0] is not None else 0
+    return min(current_min, 0) - 1
+
+
 def cmd_link(
-    programs: list[str], db_path: Path, *, debug: bool, allow_remote: bool
+    programs: list[str],
+    db_path: Path,
+    *,
+    debug: bool,
+    allow_remote: bool,
+    fake_auto: bool = False,
+    fake_id: int | None = None,
 ) -> None:
-    if not allow_remote:
+    is_fake = fake_auto or fake_id is not None
+    if not is_fake and not allow_remote:
         _abort_remote_disabled("link")
     conn = _open_db(db_path)
 
     for program in programs:
         if debug:
-            print(f"debug: linking {program!r}", file=sys.stderr)
+            verb = "fake-linking" if is_fake else "linking"
+            print(f"debug: {verb} {program!r}", file=sys.stderr)
 
         try:
-            program_id = _create_link(program)
+            if fake_auto:
+                program_id = _next_fake_id(conn)
+            elif fake_id is not None:
+                program_id = fake_id
+            else:
+                program_id = _create_link(program)
             status = _upsert_program(conn, program_id, program)
             hex_id = f"{program_id:x}"
             print(f"{status}: program_id={hex_id}")
@@ -1544,7 +1570,11 @@ def main() -> None:  # noqa: C901
         "link",
         help="POST each program text to https://anydice.com/createLink.php to obtain a permanent program ID, then insert the program and ID into the database as if "
         "fetched independently. "
-        "On duplicate program text the higher program_id wins.",
+        "On duplicate program text the higher program_id wins. "
+        "Pass --fake to skip the network call and assign a locally-unique negative ID. "
+        "Pass --fake-id N to assign a specific negative ID. "
+        "Useful when AnyDice's link service is unavailable. "
+        "If AnyDice later assigns a real (positive) ID, `recanon` will merge the local row away on the next rebuild since the real ID is higher.",
     )
     link_parser.add_argument(
         "programs", metavar="PROGRAM", nargs="+", help="AnyDice program text(s)"
@@ -1552,7 +1582,23 @@ def main() -> None:  # noqa: C901
     link_parser.add_argument(
         "--allow-remote",
         action="store_true",
-        help=f"required to run; this command always contacts {_ANYDICE_HOST}",
+        help=f"required for the network path; ignored when --fake or --fake-id is set (no network call is made). "
+        f"Without --fake/--fake-id, the command contacts {_ANYDICE_HOST}.",
+    )
+    link_fake_group = link_parser.add_mutually_exclusive_group()
+    link_fake_group.add_argument(
+        "--fake",
+        action="store_true",
+        help="auto-assign each program the next available negative ID (skips the network call). "
+        "Multiple programs each get their own fake ID.",
+    )
+    link_fake_group.add_argument(
+        "--fake-id",
+        metavar="N",
+        type=int,
+        default=None,
+        help="assign the specified negative ID (must be < 0; collides with existing rows are upserted via the standard higher-ID-wins rule). "
+        "Requires exactly one program argument.",
     )
 
     # ---- recanon -----------------------------------------------------------------
@@ -1605,8 +1651,7 @@ def main() -> None:  # noqa: C901
     # ---- show --------------------------------------------------------------------
     show_parser = subparsers.add_parser(
         "show",
-        help="Translate the stored AnyDice output for one or more programs into Python "
-        "H expressions suitable for test assertions. "
+        help="Translate the stored AnyDice output for one or more programs into Python H expressions suitable for test assertions. "
         "Each argument may be a hex program ID, a full URL, or raw program text. "
         "Warns to stderr if percentage-to-count round-trip error exceeds 1e-6.",
     )
@@ -1620,10 +1665,9 @@ def main() -> None:  # noqa: C901
     # ---- compare -----------------------------------------------------------------
     compare_parser = subparsers.add_parser(
         "compare",
-        help="Side-by-side dump of every distribution from our interpreter vs "
-        "the stored AnyDice output for one or more programs. Unlike `verify`, "
-        "this does NOT short-circuit on the first mismatch -- all dists are "
-        "printed in order with a per-dist match indicator.",
+        help="Side-by-side dump of every distribution from our interpreter vs the stored AnyDice output for one or more programs. "
+        "Unlike `verify`, this does NOT short-circuit on the first mismatch. "
+        "All dists are  printed in order with a per-dist match indicator.",
     )
     compare_parser.add_argument(
         "ids",
@@ -1642,12 +1686,10 @@ def main() -> None:  # noqa: C901
     # ---- verify ------------------------------------------------------------------
     verify_parser = subparsers.add_parser(
         "verify",
-        help="Run each program through the dyce.anydyce interpreter and compare its "
-        "result to the stored AnyDice output. Buckets each row as match, mismatch, "
-        "parse-fail, interp-error, or one of the AnyDice-side outcomes (error, empty, "
-        "resource exhaustion, unrun). Comparison normalizes both sides by dividing "
-        "counts by their gcd. Pass --builtins-report to skip verification and instead "
-        "print a frequency table of non-user-defined call shapes across the corpus.",
+        help="Run each program through the dyce.anydyce interpreter and compare its result to the stored AnyDice output. "
+        "Buckets each row as match, mismatch, parse-fail, interp-error, or one of the AnyDice-side outcomes (error, empty, resource exhaustion, unrun). "
+        "Comparison normalizes both sides by dividing counts by their gcd. "
+        "Pass --builtins-report to skip verification and instead print a frequency table of non-user-defined call shapes across the corpus.",
     )
     verify_parser.add_argument(
         "ids",
@@ -1689,9 +1731,7 @@ def main() -> None:  # noqa: C901
     # ---- annotate ----------------------------------------------------------------
     annotate_parser = subparsers.add_parser(
         "annotate",
-        help="Manage per-program annotations (e.g. mark programs as known "
-        "AnyDice-side bugs so verify can re-bucket them as "
-        "divergence:anydice-bug instead of mismatch:values).",
+        help="Manage per-program annotations (e.g. mark programs as known AnyDice-side bugs so verify can re-bucket them as divergence:anydice-bug instead of mismatch:values).",
     )
     annotate_subparsers = annotate_parser.add_subparsers(
         dest="annotate_command", required=True
@@ -1752,8 +1792,20 @@ def main() -> None:  # noqa: C901
     if args.command == "fetch":
         cmd_fetch(args.urls, args.db, debug=args.debug, allow_remote=args.allow_remote)
     elif args.command == "link":
+        if args.fake_id is not None:
+            if args.fake_id >= 0:
+                parser.error(
+                    "--fake-id must be < 0 to avoid colliding with AnyDice-assigned IDs"
+                )
+            if len(args.programs) != 1:
+                parser.error("--fake-id requires exactly one program argument")
         cmd_link(
-            args.programs, args.db, debug=args.debug, allow_remote=args.allow_remote
+            args.programs,
+            args.db,
+            debug=args.debug,
+            allow_remote=args.allow_remote,
+            fake_auto=args.fake,
+            fake_id=args.fake_id,
         )
     elif args.command == "recanon":
         cmd_recanon(args.db, debug=args.debug)
