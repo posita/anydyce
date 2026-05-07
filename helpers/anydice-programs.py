@@ -450,11 +450,30 @@ def _post_program(program: str) -> str:
             body = resp.read().decode("utf-8", errors="replace")
     except urllib.error.HTTPError as exc:
         # AnyDice returns 500 with a structured JSON error body for execution
-        # errors such as timeouts. Preserve the body as a legitimate result.
-        if exc.code != 500:
+        # errors such as timeouts. AnyDice returns 503 with an HTML body when
+        # certain programs crash its infrastructure (e.g. very large d-face
+        # counts trigger an OOM). Preserve both as legitimate results so the
+        # row records the failure mode and we don't keep retrying. Other HTTP
+        # codes propagate.
+        if exc.code not in (500, 503):
             raise
         if urlparse(exc.url or "").netloc != _ANYDICE_HOST:
             raise _NetworkError(f"unexpected redirect on error: {exc.url}") from exc
+        if exc.code == 503:
+            # 503 body is HTML, not JSON. Synthesize a recognizable JSON marker
+            # so the output column stays JSON-shaped and `_classify` can bucket
+            # the row as `anydice-503` via the error.type field.
+            return json.dumps(
+                {
+                    "error": {
+                        "type": "Infrastructure503",
+                        "message": (
+                            "AnyDice returned 503 Service Unavailable "
+                            "(likely OOM or infrastructure timeout on AnyDice's end)"
+                        ),
+                    }
+                }
+            )
         body = exc.read().decode("utf-8", errors="replace")
         saw_http_error = True
     # AnyDice can return 500 with an empty body when the request exhausts
@@ -1315,9 +1334,9 @@ def _classify(  # noqa: C901
 
     Returns `(bucket, detail)`. *bucket* is one of: `match`, `match:approximate`,
     `mismatch:dist-count`, `mismatch:values`, `parse-fail`, `interp-error:<ExcType>`,
-    `interp-timeout`, `anydice-error`, `anydice-empty`, `anydice-resource`,
-    `anydice-bad-json`, `anydice-bad-shape`, `unrun`. *detail* is a short string for
-    sample reporting, or `None`.
+    `interp-timeout`, `anydice-error`, `anydice-503`, `anydice-empty`,
+    `anydice-resource`, `anydice-bad-json`, `anydice-bad-shape`, `unrun`. *detail*
+    is a short string for sample reporting, or `None`.
 
     `match:approximate` covers distributions whose integer counts differ but whose
     proportions agree within `_APPROX_TOLERANCE_PCT` -- typically the result of
@@ -1337,8 +1356,17 @@ def _classify(  # noqa: C901
         return "anydice-bad-shape", None
     if "error" in data:
         msg = ""
+        err_type = ""
         if isinstance(data["error"], dict):
             msg = str(data["error"].get("message", ""))
+            err_type = str(data["error"].get("type", ""))
+        # Distinguish AnyDice infrastructure failures (HTTP 503 turned into a
+        # synthetic JSON marker by `_post_program`) from semantic AnyDice
+        # errors. 503s are typically reproducible and tied to specific
+        # programs (e.g. `output d123456789106` triggers an OOM on AnyDice's
+        # side); the dedicated bucket lets verify show them clustered.
+        if err_type == "Infrastructure503":
+            return "anydice-503", msg
         return "anydice-error", msg
     if not data:
         return "anydice-empty", None
@@ -1687,8 +1715,10 @@ def main() -> None:  # noqa: C901
     verify_parser = subparsers.add_parser(
         "verify",
         help="Run each program through the dyce.anydyce interpreter and compare its result to the stored AnyDice output. "
-        "Buckets each row as match, mismatch, parse-fail, interp-error, or one of the AnyDice-side outcomes (error, empty, resource exhaustion, unrun). "
+        "Buckets each row as match, mismatch, parse-fail, interp-error, or one of the AnyDice-side outcomes "
+        "(error, 503 infrastructure failure, empty, resource exhaustion, unrun). "
         "Comparison normalizes both sides by dividing counts by their gcd. "
+        "Programs annotated as known-AnyDice-bug (see `annotate`) re-bucket from mismatch:values to divergence:anydice-bug. "
         "Pass --builtins-report to skip verification and instead print a frequency table of non-user-defined call shapes across the corpus.",
     )
     verify_parser.add_argument(
