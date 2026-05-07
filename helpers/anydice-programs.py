@@ -1165,6 +1165,45 @@ def cmd_compare(  # noqa: C901
     conn.close()
 
 
+def cmd_run(source: str, *, timeout_s: float, short: bool, width: int) -> None:
+    r"""Run *source* through the anydyce interpreter and print each output's
+    distribution. Bounded by `timeout_s` via SIGALRM. Exits 1 on parse error,
+    2 on interpreter error or timeout. Output formatting mirrors `H.format()`
+    by default (multi-line with avg/std/var and per-outcome bars); `--short`
+    switches to `H.format_short()`.
+    """
+    try:
+        program_ast = anydyce_parse(source)
+    except Exception as exc:  # noqa: BLE001
+        print(f"parse error: {type(exc).__name__}: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    prev_handler = signal.signal(signal.SIGALRM, _alarm_handler)
+    signal.setitimer(signal.ITIMER_REAL, timeout_s)
+    try:
+        results = AnyDiceInterpreter().run(program_ast)
+    except _InterpTimeout:
+        print(f"interpreter timeout (>{timeout_s}s)", file=sys.stderr)
+        sys.exit(2)
+    except Exception as exc:  # noqa: BLE001
+        print(f"interpreter error: {type(exc).__name__}: {exc}", file=sys.stderr)
+        sys.exit(2)
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, prev_handler)
+
+    for i, (label, h) in enumerate(results):
+        if i > 0:
+            print()
+        print(f"=== {label} ===")
+        if not h:
+            print("(empty distribution)")
+        elif short:
+            print(h.format_short())
+        else:
+            print(h.format(width=width))
+
+
 # ---- Verify helpers ------------------------------------------------------------------
 
 
@@ -1711,6 +1750,47 @@ def main() -> None:  # noqa: C901
         help="per-program interpreter wall-clock budget (default: 5.0)",
     )
 
+    # ---- run ---------------------------------------------------------------------
+    run_parser = subparsers.add_parser(
+        "run",
+        help="Run an AnyDice program through the dyce.anydyce interpreter and "
+        "print each output's distribution. Source may be inline text, read from "
+        "a file via --file, or read from stdin (positional `-`). Useful for "
+        "ad-hoc debugging without round-tripping through the database.",
+    )
+    run_parser.add_argument(
+        "source",
+        nargs="?",
+        default=None,
+        help="program text (or `-` to read from stdin); omit if --file is given",
+    )
+    run_parser.add_argument(
+        "--file",
+        dest="file",
+        metavar="FILE",
+        default=None,
+        help="read program text from FILE (mutually exclusive with positional source)",
+    )
+    run_parser.add_argument(
+        "--timeout",
+        metavar="SECONDS",
+        type=float,
+        default=5.0,
+        help="interpreter wall-clock budget in seconds (default: 5.0)",
+    )
+    run_parser.add_argument(
+        "--short",
+        action="store_true",
+        help="print each distribution via H.format_short() instead of the multi-line H.format()",
+    )
+    run_parser.add_argument(
+        "--width",
+        metavar="N",
+        type=int,
+        default=65,
+        help="width passed to H.format() (default: 65; ignored when --short is set)",
+    )
+
     # ---- verify ------------------------------------------------------------------
     verify_parser = subparsers.add_parser(
         "verify",
@@ -1855,6 +1935,23 @@ def main() -> None:  # noqa: C901
         cmd_show(args.programs, args.db)
     elif args.command == "compare":
         cmd_compare(args.ids, args.db, timeout_s=args.timeout)
+    elif args.command == "run":
+        if args.file is not None and args.source is not None:
+            parser.error("--file and SOURCE are mutually exclusive")
+        if args.file is None and args.source is None:
+            parser.error("provide a SOURCE argument or --file FILE")
+        if args.file is not None:
+            source = Path(args.file).read_text(encoding="utf-8")
+        elif args.source == "-":
+            source = sys.stdin.read()
+        else:
+            source = args.source
+        cmd_run(
+            source,
+            timeout_s=args.timeout,
+            short=args.short,
+            width=args.width,
+        )
     elif args.command == "verify":
         if args.ids and args.all_rows:
             parser.error("HEX_ID arguments and --all are mutually exclusive")
