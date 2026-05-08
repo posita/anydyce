@@ -299,7 +299,15 @@ class AnyDiceInterpreter:
         elif isinstance(node, SeqExpr):
             return self._eval_seq(node.elems)
         elif isinstance(node, DiceUnary):
-            return self._make_die(self._eval(node.faces))
+            faces = self._eval(node.faces)
+            # Unary `d` on an already-die-like value (H or P) is identity.
+            # Critical for preserving pool positional info through `dDIE` when
+            # DIE = NdX is a pool: collapsing via `_make_die` (which would
+            # call `P.h()`) loses the N-die structure that downstream
+            # `[highest K of dDIE]`-style builtins need to operate over.
+            # Verified necessary by program 178 (`[highest H of dDIE]` where
+            # DIE = 4d100; AnyDice's `d` on a pool is a no-op).
+            return faces if isinstance(faces, (H, P)) else self._make_die(faces)
         elif isinstance(node, DiceBinOp):
             n = self._eval(node.n)
             if isinstance(n, tuple):
