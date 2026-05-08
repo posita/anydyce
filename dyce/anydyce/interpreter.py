@@ -616,8 +616,14 @@ class AnyDiceInterpreter:
         if not die:
             # Empty die regardless of n
             return H({})
-        elif n <= 0:
+        elif n == 0:
             return H({0: 1})
+        elif n < 0:
+            # AnyDice convention: `(-N)dX = -(NdX)` -- roll |N| dice and negate the
+            # sum. Verified via 6585 (`1d6 - (-1d6)` yields 2d6's distribution).
+            # Returns an H since negation collapses the pool's positional info,
+            # which the negative-count case can't preserve anyway.
+            return -((-n) @ P(die)).h()
         else:
             # Use a Pool so that @ can select positions. Arithmetic/output sums via .h().
             return n @ P(die)
