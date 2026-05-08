@@ -349,6 +349,16 @@ def _program_id_from_url(url: str) -> int | None:
     return int(m.group(1), 16)
 
 
+def _try_program_id(arg: str) -> int | None:
+    # Bare hex ID -- handles positives ("42b06") and the negative IDs used by
+    # `link --fake` ("-1", "-2", ...). `int(s, 16)` accepts a leading sign.
+    try:
+        return int(arg, 16)
+    except ValueError:
+        pass
+    return _program_id_from_url(arg)
+
+
 def _fetch_html(url: str) -> str:
     # Treat bare paths as file:// URLs.
     if not urlparse(url).scheme:
@@ -1054,8 +1064,7 @@ def cmd_show(args: list[str], db_path: Path) -> None:
 
     for arg in args:
         row = None
-        normalized = _normalize_fetch_arg(arg)
-        program_id = _program_id_from_url(normalized)
+        program_id = _try_program_id(arg)
         if program_id is not None:
             row = conn.execute(
                 "SELECT program, output FROM programs WHERE program_id = ?",
