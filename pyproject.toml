@@ -207,6 +207,7 @@ docstring-code-line-length = "dynamic"
   "T201",  # `print` found (eglot-check)
 ]
 "helpers/anydice-programs.py" = [
+  "C901",  # `...` is too complex
   "T201",  # `print` found (eglot-check)
 ]
 
