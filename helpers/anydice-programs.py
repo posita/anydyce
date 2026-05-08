@@ -1393,12 +1393,12 @@ def _classify(  # noqa: C901
     r"""Bucket a row.
 
     Returns `(bucket, detail)`. *bucket* is one of: `match`, `match:approximate`,
-    `mismatch:dist-count`, `mismatch:values`, `parse-fail`, `interp-error:<ExcType>`,
-    `interp-timeout`, `interp-oom`, `anydice-error`, `anydice-503`, `anydice-empty`,
-    `anydice-resource`, `anydice-bad-json`, `anydice-bad-shape`, `unrun`. *detail*
-    is a short string for sample reporting, or `None`. The `interp-killed` bucket
-    is added by `_verify_isolated` (worker died unexpectedly) and never returned
-    by `_classify` directly.
+    `mismatch:dist-count`, `mismatch:values`, `parse-fail`, `parse-fail:legacy`,
+    `interp-error:<ExcType>`, `interp-timeout`, `interp-oom`, `anydice-error`,
+    `anydice-503`, `anydice-empty`, `anydice-resource`, `anydice-bad-json`,
+    `anydice-bad-shape`, `unrun`. *detail* is a short string for sample reporting,
+    or `None`. The `interp-killed` bucket is added by `_verify_isolated` (worker
+    died unexpectedly) and never returned by `_classify` directly.
 
     `match:approximate` covers distributions whose integer counts differ but whose
     proportions agree within `_APPROX_TOLERANCE_PCT` -- typically the result of
@@ -1441,7 +1441,16 @@ def _classify(  # noqa: C901
     try:
         program_ast = anydyce_parse(program)
     except Exception as exc:  # noqa: BLE001
-        return "parse-fail", f"{type(exc).__name__}: {exc}"
+        detail = f"{type(exc).__name__}: {exc}"
+        # Sub-bucket parse-fails for AnyDice features we deliberately don't
+        # support but want to cluster in verify summaries (vs. real parser
+        # bugs in our grammar). The Lark error shape `Token('LOWERNAME',
+        # 'legacy')` is the unambiguous signature of `output legacy "..."`-
+        # style programs; AnyDice's `legacy` notation is a separate
+        # mini-language we don't implement.
+        if "Token('LOWERNAME', 'legacy')" in detail:
+            return "parse-fail:legacy", detail
+        return "parse-fail", detail
 
     # Bound interpreter wall-clock time per program. setitimer accepts floats so we
     # don't have to round timeout up to a whole second. Linux/macOS only; the helper
