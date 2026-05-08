@@ -437,7 +437,15 @@ def _create_link(program: str) -> int:
     return program_id
 
 
-def _post_program(program: str) -> str:
+def _print_timeout_retry(timeout: float, attempt: int, retries: int) -> None:
+    print(
+        f"warning: request timed out after {timeout}s, retrying "
+        f"(attempt {attempt + 1}/{retries + 1})",
+        file=sys.stderr,
+    )
+
+
+def _post_program(program: str, *, timeout: float = 30.0, retries: int = 1) -> str:
     data = urllib.parse.urlencode({"program": program}).encode()
     req = urllib.request.Request(
         _CALCULATOR_URL, data=data, headers=_DEFAULT_HEADERS, method="POST"
@@ -447,38 +455,63 @@ def _post_program(program: str) -> str:
     # lets us preserve the structural JSON and substitute U+FFFD for the bad
     # bytes inside string values rather than crashing the helper.
     saw_http_error = False
-    try:
-        with urllib.request.urlopen(req) as resp:  # noqa: S310
-            _check_response(resp, _ANYDICE_HOST)
-            body = resp.read().decode("utf-8", errors="replace")
-    except urllib.error.HTTPError as exc:
-        # AnyDice returns 500 with a structured JSON error body for execution
-        # errors such as timeouts. AnyDice returns 503 with an HTML body when
-        # certain programs crash its infrastructure (e.g. very large d-face
-        # counts trigger an OOM). Preserve both as legitimate results so the
-        # row records the failure mode and we don't keep retrying. Other HTTP
-        # codes propagate.
-        if exc.code not in (500, 503):
-            raise
-        if urlparse(exc.url or "").netloc != _ANYDICE_HOST:
-            raise _NetworkError(f"unexpected redirect on error: {exc.url}") from exc
-        if exc.code == 503:
-            # 503 body is HTML, not JSON. Synthesize a recognizable JSON marker
-            # so the output column stays JSON-shaped and `_classify` can bucket
-            # the row as `anydice-503` via the error.type field.
-            return json.dumps(
-                {
-                    "error": {
-                        "type": "Infrastructure503",
-                        "message": (
-                            "AnyDice returned 503 Service Unavailable "
-                            "(likely OOM or infrastructure timeout on AnyDice's end)"
-                        ),
+    attempt = 0
+    while True:
+        attempt += 1
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
+                _check_response(resp, _ANYDICE_HOST)
+                body = resp.read().decode("utf-8", errors="replace")
+            break
+        except urllib.error.HTTPError as exc:
+            # AnyDice returns 500 with a structured JSON error body for execution
+            # errors such as timeouts. AnyDice returns 503 with an HTML body when
+            # certain programs crash its infrastructure (e.g. very large d-face
+            # counts trigger an OOM). Preserve both as legitimate results so the
+            # row records the failure mode and we don't keep retrying. Other HTTP
+            # codes propagate.
+            if exc.code not in (500, 503):
+                raise
+            if urlparse(exc.url or "").netloc != _ANYDICE_HOST:
+                raise _NetworkError(f"unexpected redirect on error: {exc.url}") from exc
+            if exc.code == 503:
+                # 503 body is HTML, not JSON. Synthesize a recognizable JSON
+                # marker so the output column stays JSON-shaped and `_classify`
+                # can bucket the row as `anydice-503` via the error.type field.
+                return json.dumps(
+                    {
+                        "error": {
+                            "type": "Infrastructure503",
+                            "message": (
+                                "AnyDice returned 503 Service Unavailable "
+                                "(likely OOM or infrastructure timeout on "
+                                "AnyDice's end)"
+                            ),
+                        }
                     }
-                }
-            )
-        body = exc.read().decode("utf-8", errors="replace")
-        saw_http_error = True
+                )
+            body = exc.read().decode("utf-8", errors="replace")
+            saw_http_error = True
+            break
+        except urllib.error.URLError as exc:
+            # Connect-time timeouts surface as URLError(reason=TimeoutError).
+            # Retry once before raising so a single stuck request doesn't fail
+            # the row outright. On final exhaustion we re-raise rather than
+            # synthesizing a marker -- a stuck request is a transient condition,
+            # not a property of the program, so `cmd_compute`'s except-clause
+            # prints an error and the row stays NULL for natural pickup on the
+            # next `compute --all`.
+            if isinstance(exc.reason, TimeoutError) and attempt <= retries:
+                _print_timeout_retry(timeout, attempt, retries)
+                continue
+            raise
+        except TimeoutError:
+            # Read-time timeouts propagate bare from the socket layer (vs the
+            # URLError wrap on connect-time timeouts). Same retry policy.
+            if attempt <= retries:
+                _print_timeout_retry(timeout, attempt, retries)
+                continue
+            raise
     # AnyDice can return 500 with an empty body when the request exhausts
     # server-side resources (e.g. memory for `1d200000000`). Treat that as a
     # legitimate-but-opaque outcome and store the empty string.
@@ -828,7 +861,7 @@ def cmd_annotate_remove(
     conn.close()
 
 
-def cmd_compute(  # noqa: C901
+def cmd_compute(
     ids: list[str],
     db_path: Path,
     *,
@@ -837,6 +870,7 @@ def cmd_compute(  # noqa: C901
     delay: float,
     debug: bool,
     allow_remote: bool,
+    timeout: float,
 ) -> None:
     if not allow_remote:
         _abort_remote_disabled("compute")
@@ -877,7 +911,7 @@ def cmd_compute(  # noqa: C901
             print(f"debug: computing program_id={hex_id}", file=sys.stderr)
 
         try:
-            output = _post_program(program)
+            output = _post_program(program, timeout=timeout)
             status, old_output = _store_output(conn, program_id, output, force=force)
             print(f"{status}: program_id={hex_id}")
             if status == "changed":
@@ -947,7 +981,7 @@ def _try_total(
     return counts
 
 
-def _pct_to_counts(outcomes: list[list]) -> tuple[dict[int, int], list[str]]:  # noqa: C901
+def _pct_to_counts(outcomes: list[list]) -> tuple[dict[int, int], list[str]]:
     r"""Convert `#!python [[outcome, pct], ...]` to `#!python {outcome: count}`.
 
     Returns the count dict and a list of precision-warning strings (empty if all
@@ -1015,7 +1049,7 @@ def _h_expr(counts: dict[int, int]) -> str:
     return f"H({{{items}}})"
 
 
-def cmd_show(args: list[str], db_path: Path) -> None:  # noqa: C901
+def cmd_show(args: list[str], db_path: Path) -> None:
     conn = _open_db(db_path)
 
     for arg in args:
@@ -1096,9 +1130,7 @@ def cmd_show(args: list[str], db_path: Path) -> None:  # noqa: C901
 # ---- Compare ------------------------------------------------------------------------
 
 
-def cmd_compare(  # noqa: C901
-    ids: list[str], db_path: Path, *, timeout_s: float
-) -> None:
+def cmd_compare(ids: list[str], db_path: Path, *, timeout_s: float) -> None:
     r"""Side-by-side dump of every distribution from our interpreter vs the stored
     AnyDice output for one or more programs. Unlike `verify`, this does NOT
     short-circuit on the first mismatch -- all dists are printed in order, with
@@ -1228,7 +1260,7 @@ def cmd_run(source: str, *, timeout_s: float, short: bool, width: int) -> None:
 # ---- Verify helpers ------------------------------------------------------------------
 
 
-def _walk_calls(node: object) -> "Iterator[Call]":  # noqa: C901
+def _walk_calls(node: object) -> "Iterator[Call]":
     r"""Yield every `Call` reachable from *node*. Recurses into stmt bodies and exprs."""
     if isinstance(node, Call):
         yield node
@@ -1384,7 +1416,7 @@ def _alarm_handler(signum: int, frame: object) -> None:  # noqa: ARG001
     raise _InterpTimeout
 
 
-def _classify(  # noqa: C901
+def _classify(
     program: str,
     output_json: str | None,
     *,
@@ -1636,7 +1668,7 @@ def _verify_isolated(
     return buckets, processed
 
 
-def cmd_verify(  # noqa: C901
+def cmd_verify(
     ids: list[str],
     db_path: Path,
     *,
@@ -1668,6 +1700,10 @@ def cmd_verify(  # noqa: C901
             f"({','.join('?' * len(int_ids))})",
             int_ids,
         ).fetchall()
+        found_ids = {r[0] for r in rows}
+        for h, i in zip(ids, int_ids, strict=True):
+            if i not in found_ids:
+                print(f"warning: program_id={h} not found in database")
     elif all_rows:
         rows = conn.execute(
             "SELECT program_id, program, output FROM programs"
@@ -1805,7 +1841,7 @@ def cmd_verify(  # noqa: C901
 # ---- CLI -----------------------------------------------------------------------------
 
 
-def main() -> None:  # noqa: C901
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Manage a local SQLite cache of AnyDice programs and outputs."
     )
@@ -1919,6 +1955,13 @@ def main() -> None:  # noqa: C901
         type=float,
         default=0.0,
         help="pause between requests (default: 0)",
+    )
+    compute_parser.add_argument(
+        "--timeout",
+        metavar="SECONDS",
+        type=float,
+        default=30.0,
+        help="per-request HTTP timeout (default: 30); on timeout the request is retried once, then the row is left untouched for natural pickup on the next run",
     )
     compute_parser.add_argument(
         "ids",
@@ -2177,6 +2220,7 @@ def main() -> None:  # noqa: C901
             delay=args.delay,
             debug=args.debug,
             allow_remote=args.allow_remote,
+            timeout=args.timeout,
         )
     elif args.command == "show":
         cmd_show(args.programs, args.db)
