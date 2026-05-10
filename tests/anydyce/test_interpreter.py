@@ -779,6 +779,68 @@ class TestPow:
     def test_die_pow_empty_die(self) -> None:
         assert run("output 2d6 ^ d{}") == [("output 1", H({}))]
 
+    # AnyDice's `^` truncates fractional results toward zero rather than
+    # returning floats. Per-outcome:
+    #   2^-2 = 0.25  -> int  0
+    #   2^-1 = 0.5   -> int  0
+    #   2^0  = 1
+    #   2^1  = 2
+    #   2^2  = 4
+    # Verified against AnyDice (probe -9 in the small corpus).
+    def test_num_pow_die_with_negative_exponents(self) -> None:
+        # 2 ^ d{-2,-1,0,1,2}
+        assert run("output 2 ^ d{-2,-1,0,1,2}") == [
+            ("output 1", H({0: 2, 1: 1, 2: 1, 4: 1}))
+        ]
+
+    def test_negative_num_pow_die_with_negative_exponents(self) -> None:
+        # `-2 ^ d{-2,-1,0,1,2}` -- unary `-` binds tighter than `^` (verified
+        # by AnyDice's `-2^2 = 4`), so this is `(-2) ^ d{-2,-1,0,1,2}`.
+        # Per-outcome: (-2)^-2=0.25->0, (-2)^-1=-0.5->0, (-2)^0=1,
+        # (-2)^1=-2, (-2)^2=4 -> H({-2:1, 0:2, 1:1, 4:1}).
+        assert run("output -2 ^ d{-2,-1,0,1,2}") == [
+            ("output 1", H({-2: 1, 0: 2, 1: 1, 4: 1}))
+        ]
+
+    def test_zero_pow_negative_scalar_raises(self) -> None:
+        # 0 ^ negative is mathematically undefined. In a SCALAR^SCALAR
+        # context, we raise (matching AnyDice's "explicit error" behavior
+        # for deterministic math). The error message should NOT reference
+        # floats, since our values are integers.
+        with pytest.raises(ZeroDivisionError, match=r"negative exponent"):
+            run("output 0 ^ -1")
+
+    # In an H-iterated context, AnyDice does NOT raise -- erroring on one
+    # outcome would kill the whole distribution. Instead it substitutes a
+    # sentinel value (-9223372036854776000 = -(2^63 + 192) = -0x80000000000000C0)
+    # for every `0^negative` outcome, regardless of the exponent magnitude.
+    # Likely an artifact of PHP's `(int)(-INF)` cast. Verified empirically:
+    #   output 0^d{-1}    -> -9223372036854776000
+    #   output 0^d{-2}    -> -9223372036854776000
+    #   output 0^d{-100}  -> -9223372036854776000
+    _POW_NEG_INF_SENTINEL = -9223372036854776000
+
+    def test_zero_pow_die_with_one_negative_outcome(self) -> None:
+        assert run("output 0 ^ d{-1}") == [
+            ("output 1", H({self._POW_NEG_INF_SENTINEL: 1}))
+        ]
+
+    def test_sentinel_is_constant_across_exponents(self) -> None:
+        # Different negative exponents should all map to the same sentinel
+        # (AnyDice's substitution is a single magic value, not a
+        # computed-per-outcome quantity).
+        assert run("output 0 ^ d{-1, -2, -100}") == [
+            ("output 1", H({self._POW_NEG_INF_SENTINEL: 3}))
+        ]
+
+    def test_zero_in_die_pow_negative_in_die(self) -> None:
+        # Both sides are H. The cross-product hits `0^-1` for one pair;
+        # that outcome substitutes the sentinel, the other (1^-1=1) does
+        # not.
+        assert run("output d{0, 1} ^ d{-1}") == [
+            ("output 1", H({self._POW_NEG_INF_SENTINEL: 1, 1: 1}))
+        ]
+
 
 # ---- Position selection (@) --------------------------------------------------------------
 
