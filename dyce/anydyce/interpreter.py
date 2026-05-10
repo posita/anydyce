@@ -81,6 +81,40 @@ _Val = NumT | H[int] | DieT | SeqT | str
 
 # ---- Operator tables ---------------------------------------------------------------------
 
+# `0^negative` is mathematically undefined. AnyDice's behavior splits by
+# context: in scalar^scalar form it raises an explicit error; in any
+# H-iterated form (one or both operands are dice/pools) it substitutes the
+# sentinel value below for every offending per-outcome result, so the
+# overall distribution survives. The principle is "errors don't compose
+# probabilistically" -- raising on one outcome would kill the entire
+# computation. We mirror this split. The exact sentinel value matches what
+# AnyDice emits empirically; it is `-(2**63 + 192) = -0x80000000000000C0`,
+# likely an artifact of PHP's `(int)(-INF)` cast.
+_POW_NEG_INF_SENTINEL = -9223372036854776000
+
+
+def _anydice_pow_strict(a: int, b: int) -> int:
+    # AnyDice truncates fractional power results toward zero so `^` always
+    # produces integer outcomes (e.g. `2^-1 = 0`, `(-2)^-1 = 0`, `(-1)^-1 =
+    # -1`). Python's `**` returns a float for negative integer exponents;
+    # wrapping in `int()` recovers truncation-toward-zero for all cases.
+    if a == 0 and b < 0:
+        raise ZeroDivisionError(
+            f"cannot raise 0 to negative exponent ({b}); result is undefined"
+        )
+    return int(a**b)
+
+
+def _anydice_pow_lenient(a: int, b: int) -> int:
+    # Same truncation as the strict variant, but `0^negative` returns the
+    # AnyDice sentinel instead of raising. Used in the H-iteration loop of
+    # `_h_binop` so a single undefined per-outcome computation doesn't kill
+    # the surrounding distribution.
+    if a == 0 and b < 0:
+        return _POW_NEG_INF_SENTINEL
+    return int(a**b)
+
+
 _OP_FUNCS: dict[str, Callable[[int, int], int]] = {
     "+": operator.add,
     "-": operator.sub,
@@ -89,7 +123,7 @@ _OP_FUNCS: dict[str, Callable[[int, int], int]] = {
     # by zero rather than raising; the substitution applies per-outcome inside H/H or
     # H/int dispatch via the cross-product in `_h_binop`.
     "/": lambda a, b: 0 if b == 0 else int(a / b),
-    "^": operator.pow,
+    "^": _anydice_pow_strict,
     "=": lambda a, b: int(a == b),
     "!=": lambda a, b: int(a != b),
     "<": lambda a, b: int(a < b),
@@ -98,6 +132,14 @@ _OP_FUNCS: dict[str, Callable[[int, int], int]] = {
     ">=": lambda a, b: int(a >= b),
     "&": lambda a, b: int(bool(a) and bool(b)),
     "|": lambda a, b: int(bool(a) or bool(b)),
+}
+
+# Per-outcome dispatch for H-iteration. Identical to `_OP_FUNCS` except `^`
+# uses the lenient variant (sentinel substitution instead of raising). Other
+# ops behave the same in scalar vs probabilistic contexts.
+_OP_FUNCS_H_ITER: dict[str, Callable[[int, int], int]] = {
+    **_OP_FUNCS,
+    "^": _anydice_pow_lenient,
 }
 
 # Raw comparison ops for use on heterogeneous Python operands (e.g., tuples in lex
@@ -462,9 +504,10 @@ class AnyDiceInterpreter:
         left_h = left if isinstance(left, H) else H({left: 1})
         right_h = right if isinstance(right, H) else H({right: 1})
         result: dict[int, int] = {}
+        op_func = _OP_FUNCS_H_ITER[op]
         for lo, lw in left_h.items():
             for ro, rw in right_h.items():
-                outcome = _OP_FUNCS[op](lo, ro)
+                outcome = op_func(lo, ro)
                 result[outcome] = result.get(outcome, 0) + lw * rw
         return H(result)
 
