@@ -111,6 +111,70 @@ class TestLogicalPrecedence:
         ]
 
 
+# ---- STRING is not a value type ------------------------------------------------------
+
+
+class TestStringNotAValue:
+    # STRING is only syntactically valid in two positions:
+    #   1. `set <STRING> to <STRING|operation>` (key and optional value)
+    #   2. `output <operation> named <STRING>` (named clause)
+    # Anywhere else `expr`/`operation` is allowed, STRING is a parse error.
+    # AnyDice has no string type; treating STRING as a general value form
+    # would be a real semantic divergence. (Empirically verified: AnyDice
+    # rejects `output 1 named 1` and similar shape errors at the named slot.)
+
+    def test_output_named_requires_string_literal(self) -> None:
+        # `output X named <non-STRING>` should be a parse error. AnyDice
+        # rejects `output 1 named 1` (number in the named slot).
+        with pytest.raises(UnexpectedInput):
+            parse("output 1 named 1")
+
+    def test_string_rejected_in_var_assign_value(self) -> None:
+        # X: "foo" is not a valid assignment in AnyDice (STRING isn't a value).
+        with pytest.raises(UnexpectedInput):
+            parse('X: "foo"')
+
+    def test_string_rejected_in_function_argument(self) -> None:
+        # Functions can't take STRING as an argument; only operations.
+        with pytest.raises(UnexpectedInput):
+            parse('output [foo "bar"]')
+
+    def test_string_rejected_in_arithmetic(self) -> None:
+        # No string concatenation or other operator semantics.
+        with pytest.raises(UnexpectedInput):
+            parse('output "a" + "b"')
+
+    def test_string_rejected_in_seq_literal(self) -> None:
+        # Sequence elements are operations only, not STRING.
+        with pytest.raises(UnexpectedInput):
+            parse('output {"a", "b"}')
+
+    # The valid positions still parse normally:
+
+    def test_output_named_string_still_parses(self) -> None:
+        # Smoke test: the legitimate `output X named "..."` form still works.
+        assert parse('output 1 named "label"').stmts == [
+            OutputStmt(expr=Number(1), name=StringExpr(parts=[StrLit("label")]))
+        ]
+
+    def test_set_to_string_still_parses(self) -> None:
+        # Smoke test: `set "x" to "y"` is the canonical AnyDice form for
+        # string-valued settings.
+        assert parse('set "position order" to "highest first"').stmts == [
+            SetStmt(
+                key="position order",
+                value=StringExpr(parts=[StrLit("highest first")]),
+            )
+        ]
+
+    def test_set_to_expr_still_parses(self) -> None:
+        # Smoke test: `set "x" to <number>` and arbitrary expressions remain
+        # valid (per user's empirical probe with `set "max ..." to (2@{1..3})`).
+        assert parse('set "maximum function depth" to 5').stmts == [
+            SetStmt(key="maximum function depth", value=Number(5))
+        ]
+
+
 # ---- Dice operator -------------------------------------------------------------------
 
 

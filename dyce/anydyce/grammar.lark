@@ -63,12 +63,23 @@ start: stmt*
      | set_stmt
      | var_assign
 
-output_named : "output" expr "named" expr
+// STRING is NOT a value type in AnyDice -- it is only syntactically valid in
+// two positions: the `set` value clause (either STRING or operation) and the
+// `output named` clause (STRING only). Anywhere else, STRING is a parse
+// error. See `string` rule below; do not add STRING to the `atom` rule.
+
+output_named : "output" expr "named" string -> output_named
 output_anon  : "output" expr
 function_def : "function" ":" funcname _code_block
 loop_stmt    : "loop" UPPERNAME "over" expr "{" stmt* "}"
-set_stmt     : "set" STRING "to" expr
+// `set` value: either an operation OR a STRING literal (e.g. `set "position
+// order" to "highest first"`). Two alternatives; the transformer's
+// `set_stmt` handles both since StringExpr is an Expr.
+set_stmt     : "set" STRING "to" expr   -> set_stmt
+             | "set" STRING "to" string -> set_stmt
 var_assign   : UPPERNAME ":" expr
+
+string       : STRING -> string
 
 if_stmt     : "if" expr "{" stmt* "}" elseif* else_clause?
 elseif      : "else" "if" expr "{" stmt* "}"
@@ -188,13 +199,14 @@ EQ     : "="
             | "d"   tight_expr -> dice_unary
             | atom
 
+// STRING is intentionally NOT in `atom`. See the comment above `output_named`
+// for why -- it's a syntactic form, not a value.
 ?atom: NUMBER                  -> number
      | UPPERNAME               -> var
      | "(" expr ")"
      | "{" "}"                 -> empty_seq
      | "{" seq_elems "}"       -> seq
      | "[" call_expr "]"       -> call
-     | STRING                  -> string
 
 // ---- Sequences ----------------------------------------------------------------------
 
