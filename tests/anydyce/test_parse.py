@@ -111,6 +111,22 @@ class TestLogicalPrecedence:
         ]
 
 
+# ---- Operator precedence - power -----------------------------------------------------
+
+
+class TestPowerAssociativity:
+    def test_power_is_left_associative(self) -> None:
+        # AnyDice's `^` is left-associative (verified empirically: `2^3^2`
+        # produces 64 = (2^3)^2, NOT 512 = 2^(3^2)). Most programming
+        # languages have power as right-associative, so this is a divergence
+        # from common convention. Our grammar's `pow_expr` is left-recursive,
+        # matching AnyDice. Lock that in with a parse-shape test so we don't
+        # accidentally flip it later.
+        assert parse("output 2^3^2").stmts == [
+            OutputStmt(expr=BinOp("^", BinOp("^", Number(2), Number(3)), Number(2)))
+        ]
+
+
 # ---- STRING is not a value type ------------------------------------------------------
 
 
