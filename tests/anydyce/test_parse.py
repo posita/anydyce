@@ -111,6 +111,55 @@ class TestLogicalPrecedence:
         ]
 
 
+# ---- Lexer: case-change token boundaries ---------------------------------------------
+
+
+class TestCaseChangeTokenBarrier:
+    # AnyDice's tokenizer treats case changes between adjacent characters as
+    # token boundaries (no whitespace required). `_` is in the uppercase
+    # character class (and thus a valid UPPERNAME by itself); transitions
+    # between lowercase and uppercase/underscore split into separate tokens.
+    # Verified by the user via:
+    #   function: test_name { result: _ } output [test 3 name]
+    # producing H({3: 1}) -- equivalent to `function: testVARname { result:
+    # VAR }` with VAR=3.
+    # Our regex-based lexer SHOULD handle this correctly since LOWERNAME and
+    # UPPERNAME have disjoint character classes (`[a-z]` vs `[A-Z_]`), so
+    # greedy match terminates at every case transition. This test locks
+    # that in.
+
+    def test_function_param_underscore_between_lowercase_words(self) -> None:
+        # `test_name` -> ["test", UPPERNAME("_"), "name"], so the function
+        # signature is [word("test"), param(name="_"), word("name")].
+        assert parse("function: test_name { result: _ }").stmts == [
+            FunctionDef(
+                pattern=["test", Param(name="_", type=None), "name"],
+                body=[ResultStmt(expr=Var("_"))],
+            )
+        ]
+
+    def test_function_param_mixed_case_between_lowercase_words(self) -> None:
+        # `testVARname` -> ["test", UPPERNAME("VAR"), "name"].
+        assert parse("function: testVARname { result: VAR }").stmts == [
+            FunctionDef(
+                pattern=["test", Param(name="VAR", type=None), "name"],
+                body=[ResultStmt(expr=Var("VAR"))],
+            )
+        ]
+
+    def test_uppername_greedy_through_trailing_underscore(self) -> None:
+        # `_NAME_` is a single UPPERNAME (no case change inside since `_` is
+        # in the uppercase class). `_NAME_name` would split as
+        # UPPERNAME("_NAME_") + LOWERNAME("name") because of the case
+        # transition between `_` and `n`.
+        assert parse("function: TEST_NAME_name { result: TEST_NAME_ }").stmts == [
+            FunctionDef(
+                pattern=[Param(name="TEST_NAME_", type=None), "name"],
+                body=[ResultStmt(expr=Var("TEST_NAME_"))],
+            )
+        ]
+
+
 # ---- Operator precedence - power -----------------------------------------------------
 
 
