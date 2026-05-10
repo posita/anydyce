@@ -89,6 +89,28 @@ class TestUnaryPrecedence:
         assert parse("output -#1").stmts == [OutputStmt(expr=NegOp(HashOp(Number(1))))]
 
 
+# ---- Operator precedence - logical & and | -------------------------------------------
+
+
+class TestLogicalPrecedence:
+    def test_and_or_same_precedence_left_associative(self) -> None:
+        # Per AnyDice's EBNF and verified empirically: `&` and `|` are at the
+        # SAME precedence level (level 7) and left-associative.
+        # `1 | 1 & 0` must parse as `(1 | 1) & 0`, which evaluates to 0.
+        # (Verified against AnyDice's calculator.)
+        # NOT C-style `1 | (1 & 0) = 1`.
+        assert parse("output 1 | 1 & 0").stmts == [
+            OutputStmt(expr=BinOp("&", BinOp("|", Number(1), Number(1)), Number(0)))
+        ]
+
+    def test_or_after_and_same_precedence_left_associative(self) -> None:
+        # `1 & 0 | 1` parses as `(1 & 0) | 1` (same answer under either model
+        # because of left-assoc, but the AST shape differs).
+        assert parse("output 1 & 0 | 1").stmts == [
+            OutputStmt(expr=BinOp("|", BinOp("&", Number(1), Number(0)), Number(1)))
+        ]
+
+
 # ---- Dice operator -------------------------------------------------------------------
 
 
