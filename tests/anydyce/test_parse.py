@@ -158,6 +158,25 @@ class TestSequences:
             )
         ]
 
+    def test_range_with_whitespace_between_dots(self) -> None:
+        # AnyDice's "smart tokenizer" allows whitespace between the two dots
+        # of the `..` range operator. Verified empirically against AnyDice.
+        expected_range = [
+            OutputStmt(expr=SeqExpr(elems=[RangeElem(Number(2), Number(3))]))
+        ]
+        assert parse("output {2..3}").stmts == expected_range
+        assert parse("output {2. .3}").stmts == expected_range
+        assert parse("output {2 . . 3}").stmts == expected_range
+        assert parse("output {2.  .3}").stmts == expected_range
+
+        expected_range_repeat = [
+            OutputStmt(
+                expr=SeqExpr(elems=[RangeRepeatElem(Number(2), Number(3), Number(4))])
+            )
+        ]
+        assert parse("output {2..3:4}").stmts == expected_range_repeat
+        assert parse("output {2 . . 3 : 4}").stmts == expected_range_repeat
+
     def test_value_repeat(self) -> None:
         assert parse("output {1:4}").stmts == [
             OutputStmt(expr=SeqExpr(elems=[ValueRepeatElem(Number(1), Number(4))]))

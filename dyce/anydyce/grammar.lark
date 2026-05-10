@@ -41,6 +41,11 @@ LOWERNAME: /[a-z][a-z]*/
 // Strings: capture everything between double-quotes (including [VAR] interpolation).
 // The transformer splits out [UPPERNAME] references.
 STRING   : /\"[^\"]*\"/
+// AnyDice's range operator allows whitespace between the two dots: `{2..3}`,
+// `{2 . . 3}`, `{2.  .3}` are all valid (per "Whitespaces are not specified,
+// this is handled by a smart tokenizer" in the EBNF). Match dot + optional
+// whitespace + dot as a single token so the parser sees it uniformly.
+DOTDOT   : /\.[ \t\r\n]*\./
 
 // ---- Program ------------------------------------------------------------------------
 
@@ -193,10 +198,10 @@ EQ     : "="
 seq_elems: seq_elem ("," seq_elem)*
 
 // Repetition syntax: {1:4} = four 1s; {1..3:2} = range 1..3 repeated twice.
-seq_elem: expr ".." expr ":" expr  -> range_repeat
-        | expr ".." expr           -> range
-        | expr ":" expr            -> value_repeat
-        | expr                     -> value
+seq_elem: expr DOTDOT expr ":" expr  -> range_repeat
+        | expr DOTDOT expr           -> range
+        | expr ":" expr              -> value_repeat
+        | expr                       -> value
 
 // ---- Function calls -----------------------------------------------------------------
 // A call is a sequence of words (function name parts) and expressions (arguments).
