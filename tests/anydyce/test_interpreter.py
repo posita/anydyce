@@ -2359,6 +2359,16 @@ class TestFunctionDispatchShapes:
         with pytest.raises(NameError, match=r"undefined function"):
             run(prog)
 
+    def test_case_change_token_barrier_in_signature(self) -> None:
+        # AnyDice tokenizes `test_name` (no whitespace) as three tokens because
+        # of the case change between `t`/`_` and `_`/`n`: word("test"),
+        # UPPERNAME("_"), word("name"). The function signature is thus
+        # [word, param(_), word], and `[test 3 name]` calls it with the bare
+        # param `_` bound to 3. Verified against AnyDice (user probe:
+        # produces H({3: 1})).
+        prog = "function: test_name { result: _ }\noutput [test 3 name]"
+        assert run(prog) == [("output 1", H({3: 1}))]
+
 
 # ---- Conditionals (if / else if / else) --------------------------------------------------
 
