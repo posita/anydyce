@@ -138,13 +138,16 @@ EQ     : "="
 
 // ---- Expressions --------------------------------------------------------------------
 
-?expr: or_expr
+?expr: bool_expr
 
-?or_expr  : or_expr  PIPE and_expr  -> binop
-          | and_expr
-
-?and_expr : and_expr AMP cmp_expr  -> binop
-          | cmp_expr
+// `&` and `|` share a single precedence level (EBNF level 7) and are
+// left-associative across both operators. So `1 | 1 & 0` parses as
+// `(1 | 1) & 0` (= 0), NOT C-style `1 | (1 & 0)` (= 1). Verified empirically
+// against AnyDice. Both operators reduce to `cmp_expr` so `==` etc. bind
+// tighter than either.
+?bool_expr : bool_expr PIPE cmp_expr -> binop
+           | bool_expr AMP  cmp_expr -> binop
+           | cmp_expr
 
 ?cmp_expr : cmp_expr NEQ add_expr -> binop
           | cmp_expr LEQ add_expr -> binop
