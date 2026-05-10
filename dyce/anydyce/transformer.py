@@ -196,10 +196,12 @@ class AnyDiceTransformer(Transformer):
     def seq_elems(self, *elems: SeqElem) -> SeqExpr:
         return SeqExpr(elems=list(elems))
 
-    def range(self, start: Expr, stop: Expr) -> RangeElem:
+    def range(self, start: Expr, _dotdot: Token, stop: Expr) -> RangeElem:
         return RangeElem(start=start, stop=stop)
 
-    def range_repeat(self, start: Expr, stop: Expr, repeat: Expr) -> RangeRepeatElem:
+    def range_repeat(
+        self, start: Expr, _dotdot: Token, stop: Expr, repeat: Expr
+    ) -> RangeRepeatElem:
         return RangeRepeatElem(start=start, stop=stop, repeat=repeat)
 
     def value(self, expr: Expr) -> ValueElem:
