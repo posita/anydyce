@@ -2359,6 +2359,64 @@ class TestFunctionScoping:
         assert run(prog) == [("output 1", H({15: 1}))]
 
 
+# ---- Function signature: duplicate parameter names ---------------------------------------
+
+
+class TestFunctionDuplicateParamNames:
+    # AnyDice allows a function signature to declare multiple parameters with
+    # the same name (potentially with different `:n`/`:d`/`:s` annotations).
+    # The FIRST occurrence wins -- subsequent same-named params are bound to
+    # values that are simply discarded; the body sees only the first binding.
+    # This is the rule by positional order, NOT type-aware resolution.
+    # Verified empirically against AnyDice via two probes:
+    #   1. `function: dup A:n and A:d { result: A } output [dup 7 and 1d6]`
+    #      produces H({7: 1}) -- the :n value wins for identity use.
+    #   2. `function: dup A:n and A:d { if A = 7 { result: 1dA } result: 999 }
+    #      output [dup 7 and 1d6]` produces H({1:1,...,7:1}) -- `1dA` uses
+    #      A=7 (the :n binding), not A=1d6 (the :d binding). So the body
+    #      consistently sees the first-occurrence value regardless of usage
+    #      context.
+    # Surfaced by corpus program 26018, which has `R:n save vs D:n dc
+    # against D:d dicepool for S:n damage modifier`; under our old
+    # last-wins binding, the body's `R >= D` saw `H >= H` -> H-as-bool ->
+    # TypeError.
+
+    def test_duplicate_param_simple_identity(self) -> None:
+        # The simplest case: `result: A` returns the first-bound A.
+        prog = "function: dup A:n and A:d { result: A } output [dup 7 and 1d6]"
+        assert run(prog) == [("output 1", H({7: 1}))]
+
+    def test_duplicate_param_dice_context_uses_first_binding(self) -> None:
+        # `1dA` in a dice-operator context resolves A to the FIRST binding
+        # (:n value 7), not the :d value 1d6. So `1dA` = 1d7.
+        prog = (
+            "function: dup A:n and A:d {\n"
+            "  if A = 7 { result: 1dA }\n"
+            "  result: 999\n"
+            "}\n"
+            "output [dup 7 and 1d6]"
+        )
+        assert run(prog) == [
+            ("output 1", H({1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1}))
+        ]
+
+    def test_duplicate_param_with_h_expansion(self) -> None:
+        # Mirrors corpus 26018's pattern: an :n-expanding arg combined with
+        # duplicate-named :n and :d params. Body's `R >= X` must see scalar
+        # X (the first/:n binding), not H X.
+        prog = (
+            "function: f R:n threshold X:n damage X:d {\n"
+            "  if R >= X { result: X }\n"
+            "  result: 0\n"
+            "}\n"
+            "output [f 1d20 threshold 15 damage 1d8]"
+        )
+        # X resolves to :n 15. Per d20 outcome r:
+        #   r >= 15 (r in 15..20, 6 outcomes): contribute 15.
+        #   r <  15 (r in  1..14, 14 outcomes): contribute 0.
+        assert run(prog) == [("output 1", H({0: 14, 15: 6}))]
+
+
 # ---- Function dispatch: multi-word and multi-shape patterns ------------------------------
 
 
