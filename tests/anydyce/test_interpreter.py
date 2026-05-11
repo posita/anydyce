@@ -3007,6 +3007,108 @@ class TestBuiltinHighestNOf:
         assert run("output [highest 3 of (4d6 + 4d6)]") == [("output 1", expected)]
 
 
+# ---- Builtin: [highest N of A and B [and C]] / [lowest N of A and B [and C]] -------
+#
+# These are undocumented but present in AnyDice: they construct a
+# heterogeneous pool from the two or three dice (and there is NO four-or-
+# more variant) and select the N highest / N lowest from it. Scalar
+# arguments are valid; they coerce to single-face dice via `:d` semantics.
+#
+# Equivalent dyce expressions (per the user's specification):
+#   [highest N of A and B]          == P(A, B).h(slice(-N, None))
+#   [lowest  N of A and B]          == P(A, B).h(slice(0, N))
+#   [highest N of A and B and C]    == P(A, B, C).h(slice(-N, None))
+#   [lowest  N of A and B and C]    == P(A, B, C).h(slice(0, N))
+
+
+class TestBuiltinHighestNOfAnd:
+    def test_highest_1_of_two_scalars(self) -> None:
+        # `[highest 1 of 3 and 5]` = max(3, 5) = 5.
+        assert run("output [highest 1 of 3 and 5]") == [("output 1", H({5: 1}))]
+
+    def test_highest_2_of_two_scalars(self) -> None:
+        # `[highest 2 of 3 and 5]` = 3 + 5 = 8 (sum of both, since N=K).
+        assert run("output [highest 2 of 3 and 5]") == [("output 1", H({8: 1}))]
+
+    def test_highest_1_of_two_dice(self) -> None:
+        # Max of d2 and d2. Pool of 2 d2s; outcomes (1,1)->1, (1,2)->2,
+        # (2,1)->2, (2,2)->2 -> H({1:1, 2:3}).
+        assert run("output [highest 1 of d2 and d2]") == [("output 1", H({1: 1, 2: 3}))]
+
+    def test_highest_1_of_three_scalars(self) -> None:
+        # `[highest 1 of 3 and 5 and 7]` = max = 7.
+        assert run("output [highest 1 of 3 and 5 and 7]") == [("output 1", H({7: 1}))]
+
+    def test_highest_2_of_three_scalars(self) -> None:
+        # `[highest 2 of 3 and 5 and 7]` = 5 + 7 = 12 (top 2 summed).
+        assert run("output [highest 2 of 3 and 5 and 7]") == [("output 1", H({12: 1}))]
+
+    def test_highest_3_of_three_scalars(self) -> None:
+        # `[highest 3 of 3 and 5 and 7]` = 3 + 5 + 7 = 15 (all summed).
+        assert run("output [highest 3 of 3 and 5 and 7]") == [("output 1", H({15: 1}))]
+
+    def test_highest_1_of_three_dice(self) -> None:
+        # Max of three d2s. 1 only if all three rolled 1 (count 1);
+        # otherwise 2 (count 7).
+        assert run("output [highest 1 of d2 and d2 and d2]") == [
+            ("output 1", H({1: 1, 2: 7}))
+        ]
+
+    def test_highest_1_of_mixed_die_and_scalar(self) -> None:
+        # max(d6, 0) per outcome = d6 unchanged since d6's min (1) > 0.
+        assert run("output [highest 1 of d6 and 0]") == [
+            ("output 1", H({1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1}))
+        ]
+
+    def test_highest_2_of_two_single_die_pools(self) -> None:
+        # `[highest 2 of 1d6 and 1d6]` is equivalent to summing 2d6 -- the
+        # two single-die pools combine into a pool of 2 d6s, and N=K=2
+        # selects all of them. dyce's P() flattens pool args automatically.
+        expected = P(H(6), H(6)).h()
+        assert run("output [highest 2 of 1d6 and 1d6]") == [("output 1", expected)]
+
+    def test_highest_2_of_two_multi_die_pools(self) -> None:
+        # `[highest 2 of 2d6 and 1d4]` -- combined pool of 3 dice, take top 2.
+        expected = P(H(6), H(6), H(4)).h(slice(-2, None))
+        assert run("output [highest 2 of 2d6 and 1d4]") == [("output 1", expected)]
+
+    def test_highest_4_of_three_multi_die_pools(self) -> None:
+        # `[highest 4 of 3d4 and 3d6 and 3d8]` -- combined pool of 9 dice,
+        # take top 4. Matches program -a in the small corpus.
+        expected = P(H(4), H(4), H(4), H(6), H(6), H(6), H(8), H(8), H(8)).h(
+            slice(-4, None)
+        )
+        assert run("output [highest 4 of 3d4 and 3d6 and 3d8]") == [
+            ("output 1", expected)
+        ]
+
+
+class TestBuiltinLowestNOfAnd:
+    def test_lowest_1_of_two_scalars(self) -> None:
+        # `[lowest 1 of 3 and 5]` = min(3, 5) = 3.
+        assert run("output [lowest 1 of 3 and 5]") == [("output 1", H({3: 1}))]
+
+    def test_lowest_2_of_two_scalars(self) -> None:
+        # `[lowest 2 of 3 and 5]` = 3 + 5 = 8 (sum, since N=K=2).
+        assert run("output [lowest 2 of 3 and 5]") == [("output 1", H({8: 1}))]
+
+    def test_lowest_1_of_two_dice(self) -> None:
+        # Min of d2 and d2. (1,1)->1, (1,2)->1, (2,1)->1, (2,2)->2.
+        assert run("output [lowest 1 of d2 and d2]") == [("output 1", H({1: 3, 2: 1}))]
+
+    def test_lowest_1_of_three_scalars(self) -> None:
+        # `[lowest 1 of 3 and 5 and 7]` = min = 3.
+        assert run("output [lowest 1 of 3 and 5 and 7]") == [("output 1", H({3: 1}))]
+
+    def test_lowest_2_of_three_scalars(self) -> None:
+        # `[lowest 2 of 3 and 5 and 7]` = 3 + 5 = 8 (bottom 2 summed).
+        assert run("output [lowest 2 of 3 and 5 and 7]") == [("output 1", H({8: 1}))]
+
+    def test_lowest_1_of_mixed_die_and_scalar(self) -> None:
+        # min(d6, 0) per outcome = 0 for every roll. H({0: 6}).
+        assert run("output [lowest 1 of d6 and 0]") == [("output 1", H({0: 6}))]
+
+
 # ---- Builtin: [count A in B] -------------------------------------------------------
 
 
