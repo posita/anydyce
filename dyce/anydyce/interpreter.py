@@ -16,6 +16,7 @@
 r"""AnyDice tree-walking interpreter backed by dyce primitives."""
 
 import operator
+import sys
 import warnings
 from collections import Counter
 from collections.abc import Callable, Iterator
@@ -220,9 +221,26 @@ class AnyDiceInterpreter:
         self._outputs = []
         self._funcs = {}
         self._depth = 0
-        for stmt in program.stmts:
-            self._exec(stmt)
-        return list(self._outputs)
+        # Bump Python's recursion limit for the duration of this run. Both
+        # `dyce.p`'s pool-selection (recurses ~4 Python frames per distinct
+        # outcome of the underlying H, via `lowest_terms` / `__hash__` in
+        # the inner loop) and our own interpreter call chain (~7 Python
+        # frames per AnyDice call) can hit the default ~1000 limit on
+        # otherwise reasonable programs. Empirically 5000 covers
+        # pool-selection on dies up to ~d1250 and user-function recursion
+        # up to ~`set "maximum function depth" to 700`, while staying well
+        # below the C-stack overflow risk zone (a Python frame is a few
+        # hundred bytes, default Linux thread stack is 8MB).
+        prev_limit = sys.getrecursionlimit()
+        if prev_limit < 5000:
+            sys.setrecursionlimit(5000)
+        try:
+            for stmt in program.stmts:
+                self._exec(stmt)
+            return list(self._outputs)
+        finally:
+            if prev_limit < 5000:
+                sys.setrecursionlimit(prev_limit)
 
     # ---- Statement execution -------------------------------------------------------------
 
