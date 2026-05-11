@@ -962,6 +962,19 @@ class AnyDiceInterpreter:
         # Combos iterate in cartesian-product (lexicographic) order.
         from itertools import product
 
+        # Duplicate-named params: AnyDice's rule is FIRST-OCCURRENCE WINS
+        # (positional, regardless of `:n`/`:d`/`:s` annotation). Subsequent
+        # same-named params are bound but their values are discarded -- the
+        # body sees only the first binding. Verified empirically:
+        #   function: dup A:n and A:d { result: A } output [dup 7 and 1d6]
+        #     -> H({7: 1})
+        #   function: dup A:n and A:d { if A=7 {result: 1dA} result: 999 }
+        #     output [dup 7 and 1d6] -> H({1:1,...,7:1}) i.e. 1dA = 1d7.
+        # Surfaced by corpus program 26018 (signature has `D:n` and `D:d`).
+        first_idx_for_name: dict[str, int] = {}
+        for i, param in enumerate(params):
+            first_idx_for_name.setdefault(param.name, i)
+
         saved_env = self._env
         self._env = dict(saved_env)
         self._depth += 1
@@ -972,14 +985,20 @@ class AnyDiceInterpreter:
                     weight = 1
                     # Reset ALL params to their entry-bound values per iter.
                     # Non-param env vars persist their mutations from the
-                    # previous iter.
+                    # previous iter. Skip duplicate-named param positions so
+                    # only the first-occurrence binding takes effect.
                     for i, param in enumerate(params):
-                        self._env[param.name] = bound[i]
-                    # Override expanding params with this iteration's combo.
+                        if first_idx_for_name[param.name] == i:
+                            self._env[param.name] = bound[i]
+                    # Override expanding params with this iteration's combo,
+                    # again only at the first-occurrence position so a
+                    # duplicate that happens to expand doesn't clobber the
+                    # earlier binding.
                     for j, (idx, _) in enumerate(expansion):
                         value, w = combo[j]
-                        self._env[params[idx].name] = value
                         weight *= w
+                        if first_idx_for_name[params[idx].name] == idx:
+                            self._env[params[idx].name] = value
                     r = self._execute_body(func)
                     # When a body iteration returns a sequence, AnyDice sum-coerces it
                     # to a single number rather than distributing seq elements as
@@ -1012,8 +1031,13 @@ class AnyDiceInterpreter:
     ) -> _Val:
         saved_env = self._env
         self._env = dict(saved_env)
+        # First-occurrence wins for duplicate-named params (see `_invoke`'s
+        # expansion path for the full rationale + AnyDice verification).
+        seen: set[str] = set()
         for param, val in zip(params, bound, strict=True):
-            self._env[param.name] = val
+            if param.name not in seen:
+                self._env[param.name] = val
+                seen.add(param.name)
         self._depth += 1
         try:
             return self._execute_body(func)
