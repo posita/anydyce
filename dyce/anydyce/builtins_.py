@@ -210,6 +210,33 @@ BUILTINS: list[tuple[list[str | None], list[str | None], Callable[..., Any]]] = 
         ["n", "d"],
         lambda _s, n, pool: _lowest_n_of(n, pool if isinstance(pool, P) else P(pool)),
     ),
+    # `[highest N of A and B]` / `[lowest N of A and B]` -- undocumented but
+    # present in AnyDice. Combines the two `:d` args (any pool/die/scalar
+    # mix) into a heterogeneous pool and selects the N highest/lowest. P()
+    # flattens nested pools so `P(2d6, 1d4)` correctly produces a 3-die
+    # pool.
+    (
+        ["highest", None, "of", None, "and", None],
+        ["n", "d", "d"],
+        lambda _s, n, a, b: _highest_n_of(n, P(a, b)),
+    ),
+    (
+        ["lowest", None, "of", None, "and", None],
+        ["n", "d", "d"],
+        lambda _s, n, a, b: _lowest_n_of(n, P(a, b)),
+    ),
+    # Three-die variants. AnyDice has these but NO four-or-more form, so we
+    # stop here.
+    (
+        ["highest", None, "of", None, "and", None, "and", None],
+        ["n", "d", "d", "d"],
+        lambda _s, n, a, b, c: _highest_n_of(n, P(a, b, c)),
+    ),
+    (
+        ["lowest", None, "of", None, "and", None, "and", None],
+        ["n", "d", "d", "d"],
+        lambda _s, n, a, b, c: _lowest_n_of(n, P(a, b, c)),
+    ),
     # Empty H wrapped as a 1-pool would otherwise sum to H({0:1}) via dyce's
     # P.h(); AnyDice instead propagates H({}) for `[middle N of d{}]`.
     # Detect the empty H input here before wrapping.
