@@ -765,8 +765,11 @@ def cmd_recanon(db_path: Path, *, debug: bool) -> None:
 # ---- Annotations ---------------------------------------------------------------------
 
 # The set of annotation kinds we currently support. Extend here when adding new
-# divergence-classification categories. `verify` re-buckets `mismatch:values`
-# rows that have an `anydice-bug` annotation as `divergence:anydice-bug`.
+# divergence-classification categories. `verify` re-buckets ANY non-match row
+# that has an `anydice-bug` annotation as `divergence:anydice-bug` -- AnyDice
+# being wrong can manifest as `mismatch:values`, `interp-error:*`,
+# `interp-timeout`, etc., and the annotation is the user's explicit assertion
+# that the divergence is on AnyDice's side regardless of symptom shape.
 _ANNOTATION_KINDS: frozenset[str] = frozenset({"anydice-bug"})
 
 
@@ -1788,15 +1791,22 @@ def cmd_verify(
     interrupted = processed < len(rows)
 
     # Apply annotation-based reclassification uniformly for both in-process
-    # and isolated paths: a `mismatch:values` row with an `anydice-bug`
-    # annotation becomes `divergence:anydice-bug`; the annotation note is
-    # appended to the detail for context.
+    # and isolated paths: any non-match row with an `anydice-bug` annotation
+    # becomes `divergence:anydice-bug`; the annotation note is appended to
+    # the detail for context. The reclassification spans all symptom shapes
+    # because AnyDice being wrong can manifest as `mismatch:values`,
+    # `interp-error:*`, `interp-timeout`, etc. The `match`/`match:approximate`
+    # buckets are excluded as a guard against an erroneously-placed
+    # annotation hiding a real match.
     buckets: dict[str, list[tuple[int, str, str | None]]] = {}
     for bucket, entries in raw_buckets.items():
         for program_id, program, detail in entries:
             program_annotations = annotations.get(program_id, {})
             new_bucket = bucket
-            if bucket == "mismatch:values" and "anydice-bug" in program_annotations:
+            if (
+                bucket not in ("match", "match:approximate")
+                and "anydice-bug" in program_annotations
+            ):
                 new_bucket = "divergence:anydice-bug"
                 note = program_annotations["anydice-bug"]
                 if note:
