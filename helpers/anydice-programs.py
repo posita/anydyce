@@ -1850,8 +1850,31 @@ def cmd_verify(
 # ---- CLI -----------------------------------------------------------------------------
 
 
+_HEX_NEG_RE = re.compile(r"^-[0-9a-fA-F]+$")
+
+
+class _ArgumentParser(argparse.ArgumentParser):
+    r"""Extends argparse's built-in negative-number heuristic to hex-shaped IDs.
+
+    Standard argparse already treats `-1`, `-42`, etc. as positional when no
+    registered option starts with `-<digit>`. We extend that to any
+    `-<hex-chars>` (e.g. `-a`, `-DEAD`) so the fake/local-only program IDs
+    introduced by `link --fake` can be passed as positional arguments without
+    needing a `--` separator. Only `^-[0-9a-fA-F]+$` patterns are intercepted;
+    long flags (`--debug` etc.) and conventional short flags with non-hex
+    characters are unaffected.
+    """
+
+    def _parse_optional(
+        self, arg_string: str
+    ) -> tuple[argparse.Action | None, str, str | None] | None:
+        if _HEX_NEG_RE.match(arg_string):
+            return None  # treat as positional
+        return super()._parse_optional(arg_string)
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(
+    parser = _ArgumentParser(
         description="Manage a local SQLite cache of AnyDice programs and outputs."
     )
     parser.add_argument(
