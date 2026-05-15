@@ -1,5 +1,5 @@
 # ======================================================================================
-# Copyright other protections apply. Please see the accompanying LICENSE file for
+# Copyright and other protections apply. Please see the accompanying LICENSE file for
 # rights and restrictions governing use of this software. All rights not expressly
 # waived or licensed are reserved. If that file is missing or appears to be modified
 # from its original, then please contact the author before viewing or using this
@@ -13,8 +13,9 @@ import io
 import math
 import urllib.parse
 import warnings
-from abc import abstractmethod, abstractproperty
+from abc import abstractmethod
 from collections import Counter
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field, fields
 from enum import Enum
 from fractions import Fraction
@@ -23,12 +24,6 @@ from itertools import accumulate, chain, cycle, islice
 from operator import __add__, __sub__, itemgetter
 from typing import (
     Any,
-    Callable,
-    Iterable,
-    Iterator,
-    Mapping,
-    Optional,
-    Sequence,
     TypedDict,
     Union,
     cast,
@@ -51,9 +46,9 @@ from numerary import RealLike
 from numerary.bt import beartype
 
 __all__ = (
-    "jupyter_visualize",
     "HPlotterChooser",
     "PlotWidgets",
+    "jupyter_visualize",
 )
 
 
@@ -161,7 +156,7 @@ _MARKERS = {
 
 
 def debounce(
-    f: Optional[Callable] = None,
+    f: Callable | None = None,
     *,
     wait_seconds: float = 0.2,
 ):
@@ -173,12 +168,11 @@ def debounce(
 
     ``` python
     @debounce
-    def debounced_func():
-        ...
+    def debounced_func(): ...
+
 
     @debounce(wait_seconds=0.5)  # wait half a second
-    def debounced_with_custom_time_func():
-        ...
+    def debounced_with_custom_time_func(): ...
     ```
     """
 
@@ -643,7 +637,8 @@ class HPlotter:
     [*plot* method][anydyce.viz.HPlotter.plot].)
     """
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def NAME(self) -> str:
         r"""
         The display name of the plotter.
@@ -668,7 +663,7 @@ class HPlotter:
     @abstractmethod
     def plot(
         self,
-        hs: Sequence[tuple[str, H, Optional[H]]],
+        hs: Sequence[tuple[str, H, H | None]],
         settings: SettingsDict,
     ):
         r"""
@@ -729,7 +724,7 @@ class BarHPlotter(HPlotter):
     @beartype
     def plot(
         self,
-        hs: Sequence[tuple[str, H, Optional[H]]],
+        hs: Sequence[tuple[str, H, H | None]],
         settings: SettingsDict,
     ) -> None:
         _, ax = matplotlib.pyplot.subplots(
@@ -804,7 +799,7 @@ class BurstHPlotter(HPlotter):
     @beartype
     def plot(
         self,
-        hs: Sequence[tuple[str, H, Optional[H]]],
+        hs: Sequence[tuple[str, H, H | None]],
         settings: SettingsDict,
     ) -> None:
         cols = settings["burst_columns"]
@@ -860,9 +855,8 @@ class BurstHPlotter(HPlotter):
                 alpha=settings["alpha"],
             )
 
-            if h_outer is not None:
-                if settings["burst_swap"]:
-                    h_inner, h_outer = h_outer, h_inner
+            if h_outer is not None and settings["burst_swap"]:
+                h_inner, h_outer = h_outer, h_inner
 
             logical_row = i // cols
             actual_row_start = logical_row * (actual_rows_per_gap + actual_rows_per_fig)
@@ -899,7 +893,7 @@ class HorizontalBarHPlotter(BarHPlotter):
     @beartype
     def plot(
         self,
-        hs: Sequence[tuple[str, H, Optional[H]]],
+        hs: Sequence[tuple[str, H, H | None]],
         settings: SettingsDict,
     ) -> None:
         total_outcomes = sum(
@@ -1008,7 +1002,7 @@ class LineHPlotter(HPlotter):
     @beartype
     def plot(
         self,
-        hs: Sequence[tuple[str, H, Optional[H]]],
+        hs: Sequence[tuple[str, H, H | None]],
         settings: SettingsDict,
     ) -> None:
         _, ax = matplotlib.pyplot.subplots(
@@ -1048,7 +1042,7 @@ class ScatterHPlotter(LineHPlotter):
     @beartype
     def plot(
         self,
-        hs: Sequence[tuple[str, H, Optional[H]]],
+        hs: Sequence[tuple[str, H, H | None]],
         settings: SettingsDict,
     ) -> None:
         _, ax = matplotlib.pyplot.subplots(
@@ -1120,21 +1114,19 @@ class HPlotterChooser:
     def __init__(
         self,
         histogram_specs: Iterable[
-            Optional[
-                Union[HLikeT, tuple[str, HLikeT], tuple[str, HLikeT, Optional[HLikeT]]]
-            ]
+            HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None
         ] = (),
         *,
         controls_expanded: bool = False,
-        plot_widgets: Optional[PlotWidgets] = None,
-        plotters_or_factories: Iterable[Union[HPlotter, HPlotterFactoryT]] = (
+        plot_widgets: PlotWidgets | None = None,
+        plotters_or_factories: Iterable[HPlotter | HPlotterFactoryT] = (
             BurstHPlotter,
             LineHPlotter,
             BarHPlotter,
             ScatterHPlotter,
             HorizontalBarHPlotter,
         ),
-        selected_name: Optional[str] = None,
+        selected_name: str | None = None,
     ):
         plotters = tuple(
             plotter if isinstance(plotter, HPlotter) else plotter()
@@ -1180,12 +1172,12 @@ class HPlotterChooser:
         for plotter_name, plotter in self._plotters_by_name.items():
             self._layouts_by_name[plotter_name] = plotter.layout(plot_widgets)
 
-        self._hs: tuple[tuple[str, H, Optional[H]], ...] = ()
-        self._hs_culled: tuple[tuple[str, H, Optional[H]], ...] = ()
-        self._cutoff: Optional[float] = None
+        self._hs: tuple[tuple[str, H, H | None], ...] = ()
+        self._hs_culled: tuple[tuple[str, H, H | None], ...] = ()
+        self._cutoff: float | None = None
         self._csv_download_link = ""
         self.update_hs(histogram_specs)
-        self._selected_plotter: Optional[HPlotter]
+        self._selected_plotter: HPlotter | None
         tab_names = tuple(self._plotters_by_name.keys())
 
         chooser_tab = widgets.Tab(
@@ -1237,7 +1229,7 @@ class HPlotterChooser:
         changes. *settings* are the current values from all control widgets. (See
         [``PlotWidgets``][anydyce.viz.PlotWidgets].)
         """
-        settings = cast(SettingsDict, kw)
+        settings = cast("SettingsDict", kw)
         cutoff = (
             self._plot_widgets.cutoff.value
             if self._plot_widgets.enable_cutoff.value
@@ -1275,9 +1267,7 @@ class HPlotterChooser:
     def update_hs(
         self,
         histogram_specs: Iterable[
-            Optional[
-                Union[HLikeT, tuple[str, HLikeT], tuple[str, HLikeT, Optional[HLikeT]]]
-            ]
+            HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None
         ],
     ) -> None:
         r"""
@@ -1360,7 +1350,7 @@ def outcome_name_formatter(outcome: RealLike, _, __) -> str:
     if hasattr(outcome, "name"):
         return f"{outcome.name}"
     else:
-        return f"{str(outcome)}"
+        return f"{outcome!s}"
 
 
 _formatter = outcome_name_formatter
@@ -1386,7 +1376,7 @@ def outcome_name_probability_formatter(
     if hasattr(outcome, "name"):
         return f"{outcome.name}\n{float(probability):.2%}"
     else:
-        return f"{str(outcome)}\n{float(probability):.2%}"
+        return f"{outcome!s}\n{float(probability):.2%}"
 
 
 _formatter = outcome_name_probability_formatter
@@ -1433,7 +1423,7 @@ def alphasize(colors: ColorListT, alpha: float) -> ColorListT:
 @experimental
 @beartype
 def graph_colors(
-    cmap: Union[str, matplotlib.colors.Colormap],
+    cmap: str | matplotlib.colors.Colormap,
     vals: Iterable,
     alpha: float = -1.0,
 ) -> ColorListT:
@@ -1645,7 +1635,7 @@ def plot_line(
             )
         )
 
-    for (label, h), marker in zip(hs, cycle(markers if markers else " ")):
+    for (label, h), marker in zip(hs, cycle(markers or " ")):
         outcomes, values = values_xy_for_graph_type(h, graph_type)
         ax.plot(outcomes, values, label=label, marker=marker, **plot_kw)  # type: ignore [arg-type]
 
@@ -1698,7 +1688,7 @@ def plot_scatter(
             )
         )
 
-    for (label, h), marker in zip(hs, cycle(markers if markers else " ")):
+    for (label, h), marker in zip(hs, cycle(markers or " ")):
         outcomes, values = values_xy_for_graph_type(h, graph_type)
         ax.scatter(outcomes, values, label=label, marker=marker, **scatter_kw)  # type: ignore [arg-type]
 
@@ -1708,12 +1698,12 @@ def plot_scatter(
 def plot_burst(
     ax: Axes,
     h_inner: H,
-    h_outer: Optional[H] = None,
-    title: Optional[str] = None,
+    h_outer: H | None = None,
+    title: str | None = None,
     inner_formatter: HFormatterT = outcome_name_formatter,
-    inner_cmap: Union[str, matplotlib.colors.Colormap] = DEFAULT_CMAP_BURST_INNER,
-    outer_formatter: Optional[HFormatterT] = None,
-    outer_cmap: Union[str, matplotlib.colors.Colormap, None] = None,
+    inner_cmap: str | matplotlib.colors.Colormap = DEFAULT_CMAP_BURST_INNER,
+    outer_formatter: HFormatterT | None = None,
+    outer_cmap: str | matplotlib.colors.Colormap | None = None,
     text_color: str = DEFAULT_COLOR_TEXT,
     alpha: float = DEFAULT_ALPHA,
 ) -> None:
@@ -1802,12 +1792,12 @@ def plot_burst(
 @beartype
 def plot_burst_subplot(
     h_inner: H,
-    h_outer: Optional[H] = None,
-    title: Optional[str] = None,
+    h_outer: H | None = None,
+    title: str | None = None,
     inner_formatter: HFormatterT = outcome_name_formatter,
-    inner_cmap: Union[str, matplotlib.colors.Colormap] = DEFAULT_CMAP_BURST_INNER,
-    outer_formatter: Optional[HFormatterT] = None,
-    outer_cmap: Union[str, matplotlib.colors.Colormap, None] = None,
+    inner_cmap: str | matplotlib.colors.Colormap = DEFAULT_CMAP_BURST_INNER,
+    outer_formatter: HFormatterT | None = None,
+    outer_cmap: str | matplotlib.colors.Colormap | None = None,
     text_color: str = DEFAULT_COLOR_TEXT,
     alpha: float = DEFAULT_ALPHA,
 ) -> tuple[Figure, Axes]:
@@ -1847,9 +1837,7 @@ def plot_burst_subplot(
 @beartype
 def jupyter_visualize(
     histogram_specs: Iterable[
-        Optional[
-            Union[HLikeT, tuple[str, HLikeT], tuple[str, HLikeT, Optional[HLikeT]]]
-        ]
+        HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None
     ],
     *,
     controls_expanded: bool = False,
@@ -1870,7 +1858,7 @@ def jupyter_visualize(
     initial_plot_style: str = DEFAULT_PLOT_STYLE,
     initial_resolution: int = DEFAULT_RESOLUTION,
     initial_show_shadow: bool = False,
-    selected_name: Optional[str] = None,
+    selected_name: str | None = None,
 ):
     r"""
     !!! warning "Experimental"
@@ -1919,7 +1907,7 @@ def jupyter_visualize(
 
 
 @beartype
-def _csv_download_link(hs: Sequence[tuple[str, H, Optional[H]]]) -> str:
+def _csv_download_link(hs: Sequence[tuple[str, H, H | None]]) -> str:
     unique_outcomes = sorted(set(chain.from_iterable(h.outcomes() for _, h, _ in hs)))
     labels = [label for label, _, _ in hs]
     raw_buffer = io.BytesIO()
@@ -1945,12 +1933,10 @@ def _csv_download_link(hs: Sequence[tuple[str, H, Optional[H]]]) -> str:
 @beartype
 def _histogram_specs_to_h_tuples(
     histogram_specs: Iterable[
-        Optional[
-            Union[HLikeT, tuple[str, HLikeT], tuple[str, HLikeT, Optional[HLikeT]]]
-        ]
+        HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None
     ],
-    cutoff: Optional[float] = None,
-) -> tuple[tuple[str, H, Optional[H]], ...]:
+    cutoff: float | None = None,
+) -> tuple[tuple[str, H, H | None], ...]:
     h_specs = []
 
     if cutoff is None:
@@ -1960,7 +1946,7 @@ def _histogram_specs_to_h_tuples(
 
     label: str
     first_h_like: HLikeT
-    second_h_like: Optional[HLikeT]
+    second_h_like: HLikeT | None
     num_blanks = 0
 
     for i, thing in enumerate(histogram_specs):
