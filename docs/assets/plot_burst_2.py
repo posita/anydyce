@@ -6,23 +6,32 @@
 # software in any capacity.
 # ======================================================================================
 
-from dyce import H
 
-from anydyce.viz import plot_burst
+def fig_callback(line_color: str) -> None:
+    # NOTE: Changes to this section should be propagated to docs/assets/TODO.py
+    # --8<-- [start:core]
+    from dyce import H
+    from dyce.d import h2d6
+    from dyce.viz import plot_burst
 
+    df = H((-1, 0, 1))
+    h4df = 4 @ df
 
-def do_it(style: str) -> None:
-    import matplotlib.pyplot
-
-    df_4 = 4 @ H((-1, 0, 1))
-    d6_2 = 2 @ H(6)
-
-    ax = matplotlib.pyplot.axes()
-    text_color = "white" if style == "dark" else "black"
-    plot_burst(
-        ax,
-        df_4,
-        d6_2,
-        inner_cmap="turbo",
-        text_color=text_color,
+    ax = plot_burst(
+        h4df,
+        h2d6,
+        cmap="turbo",
     )
+    # --8<-- [end:core]
+
+    ax.title.set_color(line_color)
+    for text in ax.texts:
+        text.set_color(line_color)  # wedge labels (both rings)
+    for patch in ax.patches:
+        patch.set_edgecolor(line_color)  # wedge edges (both rings)
+
+
+if __name__ == "__main__":
+    from _plot import main  # pyrefly: ignore[missing-import]
+
+    main(fig_callback)
