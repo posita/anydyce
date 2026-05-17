@@ -672,7 +672,7 @@ class AnyDiceInterpreter:
                 sub = self._roll_n(k, face_die)
                 yield (sub.h() if isinstance(sub, P) else sub), w_k
 
-        return self._truncate(aggregate_weighted(_gen()))
+        return self._truncate(aggregate_weighted(_gen()))  # ty: ignore[invalid-argument-type]
 
     # ---- Coercion ------------------------------------------------------------------------
 
@@ -1027,7 +1027,7 @@ class AnyDiceInterpreter:
                         r = sum(r)
                     yield self._coerce_to_h(r), weight
 
-            return self._truncate(aggregate_weighted(_gen()))
+            return self._truncate(aggregate_weighted(_gen()))  # ty: ignore[invalid-argument-type]
         finally:
             self._depth -= 1
             self._env = saved_env
@@ -1153,4 +1153,4 @@ class AnyDiceInterpreter:
                     r = sum(r)
                 yield self._coerce_to_h(r), weight
 
-        return self._truncate(aggregate_weighted(_gen()))
+        return self._truncate(aggregate_weighted(_gen()))  # ty: ignore[invalid-argument-type]

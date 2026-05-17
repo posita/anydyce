@@ -34,13 +34,17 @@ _PARSER = Lark(_GRAMMAR, parser="lalr", transformer=AnyDiceTransformer())
 
 
 def run(source: str) -> AnyDiceResultsT:
-    r"""Run AnyDice source text and return `(name, distribution)` pairs, one per `output` statement."""
+    r"""
+    Run AnyDice source text and return `(name, distribution)` pairs, one per `output` statement.
+    """
     program = parse(source)
     return AnyDiceInterpreter().run(program)
 
 
 def parse(source: str) -> Program:
-    r"""Parse AnyDice source text and return an AST [`Program`][dyce.anydyce.ast_.Program]."""
+    r"""
+    Parse AnyDice source text and return an AST [`Program`][anydyce.anydice.ast_.Program].
+    """
     # The cast is necessary because, despite its type hint, parse will return an
     # instance of whatever is created by the provided transformer. Since we provide one,
     # and we know what its output should be, we check and then safely cast it.
