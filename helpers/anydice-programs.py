@@ -15,15 +15,18 @@
 # ======================================================================================
 
 import argparse
+import gzip
 import http.cookiejar
 import json
 import multiprocessing.pool
 import os
 import re
 import resource
+import shutil
 import signal
 import sqlite3
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.parse
@@ -177,7 +180,39 @@ def _canonical_is_notnull(conn: sqlite3.Connection) -> bool:
     return False
 
 
+def _ensure_db(path: Path) -> None:
+    r"""
+    Reconstitute *path* from a sibling gzip file when the database is absent.
+
+    The ``.db`` file is a derived, gitignored artifact.
+    The committed (or fetched) source of truth is the compressed ``<path>.gz``.
+    Inflation is atomic.
+    The archive is decompressed into a temporary file in the same directory and
+    then ``os.replace``d into place, so an interrupted run never leaves a partial
+    ``.db`` that would satisfy a bare existence check.
+    This is a no-op when *path* already exists or when no ``<path>.gz`` is
+    present (the latter leaves database creation or failure to the caller, for
+    example when starting a brand new database).
+    """
+    if path.exists():
+        return
+    gz_path = path.with_name(path.name + ".gz")
+    if not gz_path.is_file():
+        return
+    fd, tmp_name = tempfile.mkstemp(
+        dir=path.parent, prefix=f"{path.name}.", suffix=".tmp"
+    )
+    tmp_path = Path(tmp_name)
+    try:
+        with os.fdopen(fd, "wb") as tmp_file, gzip.open(gz_path, "rb") as gz_file:
+            shutil.copyfileobj(gz_file, tmp_file)
+        Path(tmp_path).replace(path)
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+
 def _open_db(path: Path) -> sqlite3.Connection:
+    _ensure_db(path)
     conn = sqlite3.connect(path)
     has_table = (
         conn.execute(
