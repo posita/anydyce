@@ -16,12 +16,13 @@
 import importlib.metadata
 import logging
 import os
-import pathlib
 import re
 import shutil
 import subprocess  # noqa: S404
 import sys
+import tomllib
 from collections.abc import Sequence
+from pathlib import Path
 
 _LOGGER = logging.getLogger("mkdocs.hooks")
 
@@ -45,7 +46,7 @@ def on_page_markdown(markdown: str, **_kwargs: object) -> str:
 
 
 def on_pre_build(**_kwargs: object) -> None:
-    readme = pathlib.Path("README.md").read_text("utf_8")
+    readme = Path("README.md").read_text("utf_8")
     index = readme
     # Replace 'main' with the version-specific git ref in GitHub source URLs
     index = re.sub(
@@ -70,7 +71,7 @@ def on_pre_build(**_kwargs: object) -> None:
             rf"\g<1>{_RAW_VERSION}/",
             index,
         )
-    index_path = pathlib.Path("docs/index.md")
+    index_path = Path("docs/index.md")
     # Only write if changed to avoid a feedback loop with `mkdocs serve --livereload`
     if not index_path.exists() or index_path.read_text("utf_8") != index:
         index_path.write_text(index, "utf_8")
@@ -95,17 +96,38 @@ def on_post_build(config: dict, **_kwargs: object) -> None:
         "--output-dir",
         f"{config['site_dir']}/jupyter",
     ]
-    wheels: list[pathlib.Path] = []
-    wheels.extend(pathlib.Path("dist").glob("anydyce*.whl"))
+    wheels: list[Path | str] = []
+    _, optype_urls = _version_wheel_urls(Path("uv.lock"), "optype")
+    wheels.extend(optype_urls)
+    dist_dir_path = Path("dist")
+    for pattern in ("anydyce*.whl", "dyce*.whl"):
+        try:
+            latest = max(dist_dir_path.glob(pattern), key=os.path.getmtime)
+        except ValueError:
+            pass
+        else:
+            wheels.append(latest)  # ty: ignore[invalid-argument-type]
+    # Fuck you, Jupyter Lite, for costing me hours to work through your lies. (See
+    # <https://github.com/jupyterlite/jupyterlite/issues/1563>.)
     for wheel in wheels:
-        cmd.extend(("--piplite-wheel", str(wheel)))
+        cmd.extend(("--piplite-wheels", str(wheel)))
     _uv_run(cmd)
+
+
+def _version_wheel_urls(
+    uv_lock_path: Path, name: str, url_contains: str = r"\bnone-any\b"
+) -> tuple[str, list[str]]:
+    with uv_lock_path.open("rb") as f:
+        uv_lock = tomllib.load(f)
+    pkg = next(p for p in uv_lock["package"] if p["name"] == name)
+    wheels = [w for w in pkg.get("wheels", []) if re.search(url_contains, w["url"])]
+    return pkg["version"], [wheel["url"] for wheel in wheels]
 
 
 def _uv_run(cmd: Sequence[str]) -> None:
     uv_cmd = ["uv", "run", "--group", "docs"]
-    venv_path = pathlib.Path(os.getenv("VIRTUAL_ENV", "")).resolve()
-    mkdocs_path = pathlib.Path(sys.argv[0]).resolve()
+    venv_path = Path(os.getenv("VIRTUAL_ENV", "")).resolve()
+    mkdocs_path = Path(sys.argv[0]).resolve()
     if venv_path.stem.startswith(".venv") and mkdocs_path.is_relative_to(venv_path):
         uv_cmd.append("--active")
     uv_cmd.extend(cmd)

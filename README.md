@@ -125,45 +125,17 @@ If you find the existing set too restrictive, or have any requests or ideas for 
 
 [`anydyce.viz`](https://posita.github.io/anydyce/latest/anydyce.viz/) provides some rudimentary conveniences such as “burst” charts (`anydyce`’s take on donut charts).
 
+The following compares two mechanics with similar distributions via `dyce`’s take on a bar chart (`dyce.viz.plot_bar`), a line chart (`dyce.viz.plot_line`), and a “burst” chart (`dyce.viz.plot_burst` which is `dyce`’s take on a donut chart).
+
 ```python
---8<-- "docs/assets/plot_burst_1.py:core"
+--8<-- "docs/assets/plot_anydyce_intro.py:core"
 ```
 
 <!-- Should match any title of the corresponding plot title -->
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="/assets/plot_burst_1_dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="/assets/plot_burst_1_light.svg">
-  <img alt="Plot: Taking the lowest or highest die of 2d6" src="/assets/plot_burst_1_light.svg">
-</picture>
-
-The outer ring can also be used to compare two histograms directly.
-Ever been curious how your four shiny new fudge dice stack up against your trusty ol’ double six-siders?
-Well wonder no more!
-`anydyce` abides.
-
-```python
---8<-- "docs/assets/plot_burst_2.py:core"
-```
-
-<!-- Should match any title of the corresponding plot title -->
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="/assets/plot_burst_2_dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="/assets/plot_burst_2_light.svg">
-  <img alt="Plot: 2d6 vs. 4dF plot_burst example" src="/assets/plot_burst_2_light.svg">
-</picture>
-
-Labels can even be overridden for interesting, at-a-glance displays.
-Overrides apply counter-clockwise, starting from the 12 o’clock position.
-
-```python
---8<-- "docs/assets/plot_burst_3.py:core"
-```
-
-<!-- Should match any title of the corresponding plot title -->
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="/assets/plot_burst_3_dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="/assets/plot_burst_3_light.svg">
-  <img alt="Plot: Advanced plot_burst example" src="/assets/plot_burst_3_light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="/assets/plot_anydyce_intro_dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="/assets/plot_anydyce_intro_light.svg">
+  <img alt="Plot: 2d10 vs. d8+d12, bar, line, and burst charts" src="/assets/plot_anydyce_intro_light.svg">
 </picture>
 
 ## Customers [![`dyce`-powered!](https://raw.githubusercontent.com/posita/dyce/latest/docs/dyce-powered.svg)](https://posita.github.io/dyce/)
