@@ -7,17 +7,15 @@
 # ======================================================================================
 
 import base64
-import random
-import re
+import warnings
 from fractions import Fraction
 from math import isclose
-from test.support.warnings_helper import check_warnings
 
-import matplotlib
+import matplotlib as mpl
 import pytest
 from dyce import H, P
-from ipywidgets import widgets
-from matplotlib import patches, pyplot
+from dyce.lifecycle import ExperimentalWarning
+from ipywidgets import widgets  # type: ignore[import-untyped]
 
 from anydyce import HPlotterChooser
 from anydyce.viz import (
@@ -27,19 +25,22 @@ from anydyce.viz import (
     Image,
     ImageType,
     LineHPlotter,
+    PlotWarning,
     PlotWidgets,
-    ScatterHPlotter,
-    TraditionalPlotType,
     _csv_download_link,
     _histogram_specs_to_h_tuples,
-    alphasize,
-    cumulative_probability_formatter,
     limit_for_display,
-    plot_burst,
     values_xy_for_graph_type,
 )
 
 __all__ = ()
+
+
+@pytest.fixture(autouse=True)
+def _suppress_experimental() -> None:
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    warnings.filterwarnings("ignore", category=ExperimentalWarning)
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
 # ---- Tests ---------------------------------------------------------------------------
@@ -59,34 +60,33 @@ class TestImage:
 
 class TestPlotWidgets:
     def test_construction(self) -> None:
-        matplotlib.use("agg")
+        mpl.use("agg")
         plot_widgets = PlotWidgets(
             initial_alpha=0.125,
             initial_enable_cutoff=True,
-            initial_graph_type=TraditionalPlotType.AT_LEAST,
+            initial_graph_type="at_least",
             initial_img_type=ImageType.SVG,
             initial_markers="xo",
             initial_plot_style="default",
-            initial_show_shadow=True,
         )
-        assert plot_widgets.alpha.value == 0.125
+        assert plot_widgets.alpha.value == 0.125  # 1/(2**3) # noqa: RUF069
         assert plot_widgets.enable_cutoff.value is True
-        assert plot_widgets.graph_type.value is TraditionalPlotType.AT_LEAST
+        assert plot_widgets.graph_type.value == "at_least"
         assert plot_widgets.img_type.value is ImageType.SVG
         assert plot_widgets.markers.value == "xo"
         assert plot_widgets.plot_style.value == "default"
-        assert plot_widgets.show_shadow.value is True
 
     def test_construction_defaults(self) -> None:
-        matplotlib.use("agg")
+        mpl.use("agg")
         plot_widgets = PlotWidgets()
         widget_map = plot_widgets.asdict()
         assert set(widget_map) == {
-            "_rev_no",
+            "rev_no",
             "alpha",
             "burst_cmap_inner",
             "burst_cmap_link",
             "burst_cmap_outer",
+            "burst_cmap_use_mpts",
             "burst_color_bg",
             "burst_color_bg_trnsp",
             "burst_color_text",
@@ -100,24 +100,13 @@ class TestPlotWidgets:
             "markers",
             "plot_style",
             "resolution",
-            "show_shadow",
         }
         assert all(isinstance(widget, widgets.Widget) for widget in widget_map.values())
 
     def test_construction_warns_on_nonexistant_plot_type(self) -> None:
-        matplotlib.use("agg")
-
-        with check_warnings(quiet=True) as w:
+        mpl.use("agg")
+        with pytest.warns(PlotWarning, match=r"\bunrecognized plot style\b"):
             PlotWidgets(initial_plot_style="does not exist")
-            assert any(
-                isinstance(warning.message, RuntimeWarning)
-                and warning.message.args
-                and re.search(
-                    r"\Aunrecognized plot style .*; reverting to .default.\Z",
-                    warning.message.args[0],
-                )
-                for warning in w.warnings
-            )
 
 
 class TestBarHPlotter:
@@ -152,27 +141,20 @@ class TestLineHPlotter:
         assert isinstance(layout_widget, widgets.Widget)
 
 
-class TestScatterHPlotter:
-    def test_layouts(self) -> None:
-        plot_widgets = PlotWidgets()
-        scatter_plotter = ScatterHPlotter()
-        layout_widget = scatter_plotter.layout(plot_widgets)
-        assert isinstance(layout_widget, widgets.Widget)
-
-
 class TestHPlotterChooser:
     def test_construction(self) -> None:
         plot_widgets = PlotWidgets()
         chooser = HPlotterChooser(plot_widgets=plot_widgets)
-        assert chooser._hs == ()
-        assert set(chooser._plotters_by_name.keys()) == {
+        assert chooser.hs == ()
+        assert set(
+            chooser._plotters_by_name.keys()  # noqa: SLF001
+        ) == {
             "Line Plot",
             "Bar Plot",
             "Horizontal Bar Plots",
             "Burst Plots",
-            "Scatter Plot",
         }
-        accordion_widget = chooser._out.children[0]
+        accordion_widget = chooser._out.children[0]  # noqa: SLF001
         assert isinstance(accordion_widget, widgets.Accordion)
         assert accordion_widget.selected_index is None
         tab_widget = accordion_widget.children[0]
@@ -181,46 +163,37 @@ class TestHPlotterChooser:
 
     def test_construction_histogram_specs(self) -> None:
         chooser = HPlotterChooser([H(6)])
-        assert chooser._hs == (("Histogram 1", H(6), None),)
+        assert chooser.hs == (("Histogram 1", H(6), None),)
 
     def test_construction_controls_expanded(self) -> None:
         chooser = HPlotterChooser(controls_expanded=True)
-        accordion_widget = chooser._out.children[0]
+        accordion_widget = chooser._out.children[0]  # noqa: SLF001
         assert isinstance(accordion_widget, widgets.Accordion)
         assert accordion_widget.selected_index == 0
 
     def test_construction_selected_name(self) -> None:
         chooser = HPlotterChooser(
-            plotters_or_factories=(LineHPlotter, ScatterHPlotter),
-            selected_name="Scatter Plot",
+            plotters_or_factories=(BarHPlotter, LineHPlotter),
+            selected_name="Line Plot",
         )
-        accordion_widget = chooser._out.children[0]
+        accordion_widget = chooser._out.children[0]  # noqa: SLF001
         assert isinstance(accordion_widget, widgets.Accordion)
         tab_widget = accordion_widget.children[0]
         assert isinstance(tab_widget, widgets.Tab)
         assert tab_widget.selected_index == 1
 
     def test_construction_warns_on_duplicate_plotter_name(self) -> None:
-        with check_warnings(quiet=True) as w:
-            plotters = LineHPlotter(), LineHPlotter()
+        plotters = LineHPlotter(), LineHPlotter()
+        with pytest.warns(PlotWarning, match=r"\bignoring\b.*\bduplicate names\b"):
             HPlotterChooser(plotters_or_factories=plotters)
-            assert any(
-                isinstance(warning.message, RuntimeWarning)
-                and warning.message.args
-                and re.search(
-                    r"^ignoring redundant plotters with duplicate names 'Line Plot'$",
-                    warning.message.args[0],
-                )
-                for warning in w.warnings
-            )
 
     def test_construction_fails_on_no_plotters(self) -> None:
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"^must provide at least one plotter$"):
             HPlotterChooser(plotters_or_factories=())
 
     def test_construction_fails_on_bad_selected_name(self) -> None:
-        with pytest.raises(ValueError):
-            plotters = (LineHPlotter(),)
+        plotters = (LineHPlotter(),)
+        with pytest.raises(ValueError, match=r"\bdoes not match any plotter$"):
             HPlotterChooser(
                 plotters_or_factories=plotters,
                 selected_name="no such plotter",
@@ -229,41 +202,9 @@ class TestHPlotterChooser:
     def test_update_hs_minimal(self) -> None:
         chooser = HPlotterChooser()
         expected = (("Histogram 1", H(6), None),)
-        assert chooser._hs != expected
+        assert chooser.hs != expected
         chooser.update_hs([H(6)])
-        assert chooser._hs == expected
-
-
-def test_alphasize() -> None:
-    colors = [
-        (r / 10, g / 10, b / 10, random.random())
-        for r, g, b in zip(*(range(0, 10, 2), range(3, 9), range(10, 0, -2)))
-    ]
-    actual_colors = alphasize(colors, 0.8)
-    expected_colors = [(r, g, b, 0.8) for r, g, b, _ in colors]
-    assert actual_colors == expected_colors
-    assert alphasize(colors, -1.0) == colors
-
-
-def test_cumulative_probability_formatter() -> None:
-    h = 2 @ H(6)
-    labels = tuple(
-        cumulative_probability_formatter(outcome, probability, h)
-        for outcome, probability in h.distribution()
-    )
-    assert labels == (
-        "2 2.78%; ≥2.78%; ≤100.00%",
-        "3 5.56%; ≥8.33%; ≤97.22%",
-        "4 8.33%; ≥16.67%; ≤91.67%",
-        "5 11.11%; ≥27.78%; ≤83.33%",
-        "6 13.89%; ≥41.67%; ≤72.22%",
-        "7 16.67%; ≥58.33%; ≤58.33%",
-        "8 13.89%; ≥72.22%; ≤41.67%",
-        "9 11.11%; ≥83.33%; ≤27.78%",
-        "10 8.33%; ≥91.67%; ≤16.67%",
-        "11 5.56%; ≥97.22%; ≤8.33%",
-        "12 2.78%; ≥100.00%; ≤2.78%",
-    )
+        assert chooser.hs == expected
 
 
 def test_limit_for_display_identity() -> None:
@@ -280,10 +221,10 @@ def test_limit_for_display_cull_everything() -> None:
 
 
 def test_limit_for_display_out_of_bounds() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"\bmust be between zero and one\b"):
         assert limit_for_display(H(6), Fraction(-1))
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"\bmust be between zero and one\b"):
         assert limit_for_display(H(6), Fraction(2))
 
 
@@ -298,14 +239,10 @@ def test_values_xy_for_graph_type() -> None:
         if len(a) != len(b):
             return False
 
-        return all(isclose(a_val, b_val) for a_val, b_val in zip(a, b))
+        return all(map(isclose, a, b))
 
-    lo_outcomes_normal, lo_values_normal = values_xy_for_graph_type(
-        lo, TraditionalPlotType.NORMAL
-    )
-    hi_outcomes_normal, hi_values_normal = values_xy_for_graph_type(
-        hi, TraditionalPlotType.NORMAL
-    )
+    lo_outcomes_normal, lo_values_normal = values_xy_for_graph_type(lo, "normal")
+    _, hi_values_normal = values_xy_for_graph_type(hi, "normal")
     assert lo_outcomes_normal == d6_outcomes
     assert _tuples_close(
         lo_values_normal,
@@ -320,12 +257,8 @@ def test_values_xy_for_graph_type() -> None:
     )
     assert _tuples_close(hi_values_normal, lo_values_normal[::-1])
 
-    lo_outcomes_at_least, lo_values_at_least = values_xy_for_graph_type(
-        lo, TraditionalPlotType.AT_LEAST
-    )
-    hi_outcomes_at_least, hi_values_at_least = values_xy_for_graph_type(
-        hi, TraditionalPlotType.AT_LEAST
-    )
+    lo_outcomes_at_least, lo_values_at_least = values_xy_for_graph_type(lo, "at_least")
+    _, hi_values_at_least = values_xy_for_graph_type(hi, "at_least")
     assert lo_outcomes_at_least == d6_outcomes
     assert _tuples_close(
         lo_values_at_least,
@@ -350,85 +283,11 @@ def test_values_xy_for_graph_type() -> None:
         ),
     )
 
-    lo_outcomes_at_most, lo_values_at_most = values_xy_for_graph_type(
-        lo, TraditionalPlotType.AT_MOST
-    )
-    hi_outcomes_at_most, hi_values_at_most = values_xy_for_graph_type(
-        hi, TraditionalPlotType.AT_MOST
-    )
+    lo_outcomes_at_most, lo_values_at_most = values_xy_for_graph_type(lo, "at_most")
+    _, hi_values_at_most = values_xy_for_graph_type(hi, "at_most")
     assert lo_outcomes_at_most == d6_outcomes
     assert _tuples_close(lo_values_at_most, hi_values_at_least[::-1])
     assert _tuples_close(hi_values_at_most, lo_values_at_least[::-1])
-
-
-def test_plot_burst() -> None:
-    matplotlib.use("agg")
-    _, ax = pyplot.subplots()
-    d6_2 = 2 @ H(6)
-    plot_burst(ax, d6_2)
-    wedge_labels = [
-        w.get_label() for w in ax.get_children() if isinstance(w, patches.Wedge)
-    ]
-    assert len(wedge_labels) == 22
-    assert wedge_labels == [
-        "",  # 2 is hidden
-        "5.56%",
-        "8.33%",
-        "11.11%",
-        "13.89%",
-        "16.67%",
-        "13.89%",
-        "11.11%",
-        "8.33%",
-        "5.56%",
-        "",  # 12 is hidden
-        "",  # 2 is hidden
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "11",
-        "",  # 12 is hidden
-    ]
-
-
-def test_plot_burst_outer() -> None:
-    matplotlib.use("agg")
-    _, ax = pyplot.subplots()
-    d6_2 = 2 @ H(6)
-    plot_burst(ax, d6_2, outer_formatter=cumulative_probability_formatter)
-    wedge_labels = [
-        w.get_label() for w in ax.get_children() if isinstance(w, patches.Wedge)
-    ]
-    assert len(wedge_labels) == 22
-    assert wedge_labels == [
-        "",  # 2 is hidden
-        "3 5.56%; ≥8.33%; ≤97.22%",
-        "4 8.33%; ≥16.67%; ≤91.67%",
-        "5 11.11%; ≥27.78%; ≤83.33%",
-        "6 13.89%; ≥41.67%; ≤72.22%",
-        "7 16.67%; ≥58.33%; ≤58.33%",
-        "8 13.89%; ≥72.22%; ≤41.67%",
-        "9 11.11%; ≥83.33%; ≤27.78%",
-        "10 8.33%; ≥91.67%; ≤16.67%",
-        "11 5.56%; ≥97.22%; ≤8.33%",
-        "",  # 12 is hidden
-        "",  # 2 is hidden
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "11",
-        "",  # 12 is hidden
-    ]
 
 
 def test_csv_download_link_emtpy() -> None:
