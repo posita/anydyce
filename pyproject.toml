@@ -92,6 +92,11 @@ lint = [
     "ty",
     {include-group = "docs"},
 ]
+# Only what's needed for quickstart-local.sh
+quickstart = [
+    "uv",
+    {include-group = "docs"},
+]
 # Only what's needed for uv run pytest --cov
 test = [
     "beartype",
