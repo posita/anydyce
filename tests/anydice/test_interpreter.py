@@ -14,10 +14,10 @@
 # ======================================================================================
 
 import pytest
+from dyce import H, P
 from lark.exceptions import UnexpectedInput
 
-from dyce import H, P
-from dyce.anydyce import run
+from anydyce.anydice import run
 
 __all__ = ()
 
