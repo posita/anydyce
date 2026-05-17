@@ -17,7 +17,7 @@
 import argparse
 import http.cookiejar
 import json
-import multiprocessing
+import multiprocessing.pool
 import os
 import re
 import resource
@@ -37,9 +37,10 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from dyce import H
-from dyce.anydyce import parse as anydyce_parse
-from dyce.anydyce import unparse as anydyce_unparse
-from dyce.anydyce.ast_ import (
+
+from anydyce.anydice import parse as anydyce_parse
+from anydyce.anydice import unparse as anydyce_unparse
+from anydyce.anydice.ast_ import (
     BinOp,
     Call,
     DiceBinOp,
@@ -63,8 +64,9 @@ from dyce.anydyce.ast_ import (
     ValueRepeatElem,
     VarAssign,
 )
-from dyce.anydyce.interpreter import (
+from anydyce.anydice.interpreter import (
     AnyDiceInterpreter,
+    AnyDiceResultsT,
     _call_shape,
     _pattern_shape,
 )
@@ -466,6 +468,7 @@ def _post_program(program: str, *, timeout: float = 30.0, retries: int = 1) -> s
     # bytes inside string values rather than crashing the helper.
     saw_http_error = False
     attempt = 0
+    body = ""
     while True:
         attempt += 1
         try:
@@ -1034,9 +1037,11 @@ def _pct_to_counts(outcomes: list[list]) -> tuple[dict[int, int], list[str]]:
                     total = t_est_base * k
                     if total > _PCT_RECOVERY_T_BOUND:
                         break
-                    counts = _try_total(filtered, total, _PCT_RECOVERY_TIGHT_TOL)
-                    if counts is not None:
-                        return counts, []
+                    recovered_total = _try_total(
+                        filtered, total, _PCT_RECOVERY_TIGHT_TOL
+                    )
+                    if recovered_total is not None:
+                        return recovered_total, []
 
     counts: dict[int, int] = {}
     for max_denom in _PCT_RECOVERY_DENOMS:
@@ -1148,7 +1153,7 @@ def cmd_compare(ids: list[str], db_path: Path, *, timeout_s: float) -> None:
     short-circuit on the first mismatch -- all dists are printed in order, with
     a per-dist match indicator.
     """
-    from dyce.anydyce import run
+    from anydyce.anydice import run
 
     conn = _open_db(db_path)
     for arg in ids:
@@ -1402,7 +1407,7 @@ def _proportions_close(
 
 
 def _our_results_to_counts(
-    results: "list[tuple[str, object]]",
+    results: AnyDiceResultsT,
 ) -> list[dict[int, int]]:
     out: list[dict[int, int]] = []
     for _label, h in results:
@@ -1752,10 +1757,10 @@ def cmd_verify(
         )
         if builtin_counts:
             width = max(len(s) for s in builtin_counts)
-            for shape, n in sorted(
+            for shape_display, n in sorted(
                 builtin_counts.items(), key=lambda kv: (-kv[1], kv[0])
             ):
-                print(f"  {shape:<{width}}  {n}")
+                print(f"  {shape_display:<{width}}  {n}")
         conn.close()
         return
 
@@ -2055,7 +2060,7 @@ def main() -> None:
     # ---- run ---------------------------------------------------------------------
     run_parser = subparsers.add_parser(
         "run",
-        help="Run an AnyDice program through the dyce.anydyce interpreter and print each output's distribution. "
+        help="Run an AnyDice program through the anydyce.anydice interpreter and print each output's distribution. "
         "Source may be inline text, read from a file via --file, or read from stdin (positional `-`). "
         "Useful for ad-hoc debugging without round-tripping through the database.",
     )
@@ -2095,7 +2100,7 @@ def main() -> None:
     # ---- verify ------------------------------------------------------------------
     verify_parser = subparsers.add_parser(
         "verify",
-        help="Run each program through the dyce.anydyce interpreter and compare its result to the stored AnyDice output. "
+        help="Run each program through the anydyce.anydice interpreter and compare its result to the stored AnyDice output. "
         "Buckets each row as match, mismatch, parse-fail, interp-error, interp-timeout, or one of the AnyDice-side outcomes "
         "(error, 503 infrastructure failure, empty, resource exhaustion, unrun). "
         "With --isolate, two more buckets surface: interp-oom (worker hit RLIMIT_AS) and interp-killed (worker died unexpectedly). "
@@ -2269,16 +2274,18 @@ def main() -> None:
     elif args.command == "compare":
         cmd_compare(args.ids, args.db, timeout_s=args.timeout)
     elif args.command == "run":
-        if args.file is not None and args.source is not None:
-            parser.error("--file and SOURCE are mutually exclusive")
-        if args.file is None and args.source is None:
-            parser.error("provide a SOURCE argument or --file FILE")
         if args.file is not None:
-            source = Path(args.file).read_text(encoding="utf-8")
-        elif args.source == "-":
-            source = sys.stdin.read()
+            if args.source is not None:
+                parser.error("--file and SOURCE are mutually exclusive")
+            else:
+                source = Path(args.file).read_text(encoding="utf-8")
         else:
-            source = args.source
+            if args.source is None:
+                parser.error("provide a SOURCE argument or --file FILE")
+            elif args.source == "-":
+                source = sys.stdin.read()
+            else:
+                source = args.source
         cmd_run(
             source,
             timeout_s=args.timeout,
