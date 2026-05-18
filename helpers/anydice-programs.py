@@ -180,31 +180,73 @@ def _canonical_is_notnull(conn: sqlite3.Connection) -> bool:
     return False
 
 
+_GZIP_MAGIC = b"\x1f\x8b"
+
+
+def _resolve_gz_source(gz_path: Path) -> Path | None:
+    r"""
+    Return the actual gzip archive for *gz_path*, following a flattened symlink.
+
+    The committed canonical `<name>.db.gz` is a relative symlink to a
+    timestamped archive in the same directory.
+    On POSIX checkouts that symlink works and the gzip read transparently
+    follows it.
+    On checkouts or exports that do not preserve symlinks (a Windows clone
+    without `core.symlinks`, a GitHub "Download ZIP"), git materializes the
+    symlink as a small text file whose contents are the link target's
+    same-directory filename.
+    We detect that by the absence of the gzip magic number and follow the
+    pointer manually, exactly one level.
+    Returns `None` when no usable gzip archive can be found.
+    """
+    if not gz_path.is_file():
+        return None
+    with gz_path.open("rb") as probe:
+        if probe.read(2) == _GZIP_MAGIC:
+            return gz_path
+    try:
+        pointer = gz_path.read_bytes()[:4096].decode("utf-8").strip()
+    except UnicodeDecodeError:
+        return None
+    if not pointer or "/" in pointer or "\\" in pointer:
+        return None
+    target = gz_path.with_name(pointer)
+    if not target.is_file():
+        return None
+    with target.open("rb") as probe:
+        if probe.read(2) != _GZIP_MAGIC:
+            return None
+    return target
+
+
 def _ensure_db(path: Path) -> None:
     r"""
-    Reconstitute *path* from a sibling gzip file when the database is absent.
+    Reconstitute *path* from a sibling gzip archive when the database is absent.
 
-    The ``.db`` file is a derived, gitignored artifact.
-    The committed (or fetched) source of truth is the compressed ``<path>.gz``.
+    The `.db` file is a derived, gitignored artifact.
+    The committed (or fetched) source of truth is the compressed `<path>.gz`
+    (a relative symlink to a timestamped archive; see
+    [`_resolve_gz_source`][_resolve_gz_source] for the
+    non-symlink-preserving-checkout fallback).
     Inflation is atomic.
     The archive is decompressed into a temporary file in the same directory and
-    then ``os.replace``d into place, so an interrupted run never leaves a partial
-    ``.db`` that would satisfy a bare existence check.
-    This is a no-op when *path* already exists or when no ``<path>.gz`` is
-    present (the latter leaves database creation or failure to the caller, for
-    example when starting a brand new database).
+    then `os.replace`d into place, so an interrupted run never leaves a partial
+    `.db` that would satisfy a bare existence check.
+    This is a no-op when *path* already exists or when no usable `<path>.gz`
+    archive is present (the latter leaves database creation or failure to the
+    caller, for example when starting a brand new database).
     """
     if path.exists():
         return
-    gz_path = path.with_name(path.name + ".gz")
-    if not gz_path.is_file():
+    gz_source = _resolve_gz_source(path.with_name(path.name + ".gz"))
+    if gz_source is None:
         return
     fd, tmp_name = tempfile.mkstemp(
         dir=path.parent, prefix=f"{path.name}.", suffix=".tmp"
     )
     tmp_path = Path(tmp_name)
     try:
-        with os.fdopen(fd, "wb") as tmp_file, gzip.open(gz_path, "rb") as gz_file:
+        with os.fdopen(fd, "wb") as tmp_file, gzip.open(gz_source, "rb") as gz_file:
             shutil.copyfileobj(gz_file, tmp_file)
         Path(tmp_path).replace(path)
     finally:
