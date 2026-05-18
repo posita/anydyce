@@ -16,6 +16,7 @@
 
 import argparse
 import gzip
+import hashlib
 import http.cookiejar
 import json
 import multiprocessing.pool
@@ -180,6 +181,37 @@ def _canonical_is_notnull(conn: sqlite3.Connection) -> bool:
     return False
 
 
+class _IntegrityError(RuntimeError):
+    r"""Raised when a database archive or its inflation fails its recorded SHA-256."""
+
+
+def _sha256_file(p: Path) -> str:
+    r"""Return the hex SHA-256 of *p*, read in chunks (suitable for large files)."""
+    digest = hashlib.sha256()
+    with p.open("rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _load_sha256_sidecar(sidecar: Path) -> dict[str, str]:
+    r"""
+    Parse a `sha256sum`-format file into a `{basename: hexdigest}` map.
+
+    Tolerates both the GNU text form (`HASH  name`) and binary form
+    (`HASH *name`).
+    Lines that do not parse are ignored.
+    """
+    result: dict[str, str] = {}
+    for line in sidecar.read_text(encoding="utf-8").splitlines():
+        parts = line.split(None, 1)
+        if len(parts) != 2 or len(parts[0]) != 64:
+            continue
+        name = parts[1].strip().removeprefix("*")
+        result[name] = parts[0].lower()
+    return result
+
+
 _GZIP_MAGIC = b"\x1f\x8b"
 
 
@@ -228,6 +260,11 @@ def _ensure_db(path: Path) -> None:
     (a relative symlink to a timestamped archive; see
     [`_resolve_gz_source`][_resolve_gz_source] for the
     non-symlink-preserving-checkout fallback).
+    Integrity is verified against the sibling `<path>.sha256` sidecar (the
+    `sha256sum`-format file `pack-programs-db.sh` writes): the archive is
+    checked before inflation and the result is checked after.
+    A missing sidecar degrades to a warning and best-effort inflation; a
+    recorded-hash mismatch is fatal and leaves no `.db` behind.
     Inflation is atomic.
     The archive is decompressed into a temporary file in the same directory and
     then `os.replace`d into place, so an interrupted run never leaves a partial
@@ -241,6 +278,29 @@ def _ensure_db(path: Path) -> None:
     gz_source = _resolve_gz_source(path.with_name(path.name + ".gz"))
     if gz_source is None:
         return
+    sidecar = path.with_name(path.name + ".sha256")
+    recorded = _load_sha256_sidecar(sidecar) if sidecar.is_file() else None
+    if recorded is None:
+        # Two customers consume this: the project dev (a db *writer*,
+        # augmenting the corpus) and the third-party verifier (a db *reader*,
+        # no edits). For both, a missing sidecar degrades to best-effort -- we
+        # still inflate, just without the integrity gate this run. Deleting
+        # the .sha256 is therefore the deliberate escape hatch out of the
+        # hard-fail-on-mismatch behavior below, for someone who knows what
+        # they are doing.
+        print(
+            f"warning: {sidecar.name} missing; "
+            f"inflating {path.name} without integrity verification",
+            file=sys.stderr,
+        )
+    else:
+        gz_expected = recorded.get(path.name + ".gz")
+        if gz_expected is not None and _sha256_file(gz_source) != gz_expected:
+            raise _IntegrityError(
+                f"{path.name}.gz failed its recorded SHA-256 "
+                f"(corrupt or wrong archive); refusing to inflate -- "
+                f"delete {sidecar.name} to bypass if you are certain"
+            )
     fd, tmp_name = tempfile.mkstemp(
         dir=path.parent, prefix=f"{path.name}.", suffix=".tmp"
     )
@@ -249,6 +309,15 @@ def _ensure_db(path: Path) -> None:
         with os.fdopen(fd, "wb") as tmp_file, gzip.open(gz_source, "rb") as gz_file:
             shutil.copyfileobj(gz_file, tmp_file)
         Path(tmp_path).replace(path)
+        if recorded is not None:
+            db_expected = recorded.get(path.name)
+            if db_expected is not None and _sha256_file(path) != db_expected:
+                path.unlink(missing_ok=True)
+                raise _IntegrityError(
+                    f"{path.name} failed its recorded SHA-256 after inflation "
+                    f"(unfaithful decompression or stale sidecar); removed -- "
+                    f"delete {sidecar.name} to bypass if you are certain"
+                )
     finally:
         tmp_path.unlink(missing_ok=True)
 
