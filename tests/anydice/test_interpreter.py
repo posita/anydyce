@@ -3917,3 +3917,133 @@ class TestBuiltinMiddleNOf:
         assert run(
             'set "position order" to "lowest first"\noutput [middle 1 of 5d6]'
         ) == [("output 1", H({1: 23, 2: 113, 3: 188, 4: 188, 5: 113, 6: 23}))]
+
+
+# ---- Corpus 0x1102: AnyDice :s-expanded-call aggregation divergence -------------------
+
+
+class TestCorpus1102SExpansionAggregationDivergence:
+    # Program 0x1102 ("pentastar dice with penalty dice") diverges from
+    # AnyDice. The two programs below differ ONLY by the
+    # `P: [remove index I from P]` line, and AnyDice's distributions for
+    # them differ -- so a correct implementation's must too.
+    #
+    # This is NOT a `:s`-parameter-mutation bug (an earlier diagnosis,
+    # since disconfirmed): probes U1-U4 and -18/-19 confirm our
+    # loop/in-body-mutation/expansion semantics match AnyDice exactly in
+    # isolation. The unresolved root is AnyDice's aggregation model for a
+    # `:s`-expanded function call: at #P=1 the `P:` line is runtime-dead
+    # (the I-loop runs once, it is the last statement, nothing later reads
+    # P) yet its mere presence changes AnyDice's output. That model has
+    # not been derived; see project_dyce_cleanroom_todos.md.
+    #
+    # `test_r7_no_p_mutation_matches_anydice` is the no-mutation control
+    # (R7) and passes. `test_r8_diverges` is R8: a strict-xfail SENTINEL.
+    # The AnyDice oracle value is valid, so if a future change makes it
+    # pass the suite fails loudly and this marker should be removed.
+    _REMOVE = (
+        "function: remove index I:n from SEQ:s{\n"
+        " NEWSET: {}\n"
+        " loop N over {1..#SEQ}{\n"
+        "  if N!=I{\n"
+        "   NEWSET: {NEWSET,N@SEQ}\n"
+        "  }\n"
+        " }\n"
+        " result: NEWSET\n"
+        "}\n"
+    )
+
+    def test_r7_no_p_mutation_matches_anydice(self) -> None:
+        # R7: the no-`P`-mutation control. Matches AnyDice.
+        prog = self._REMOVE + (
+            "function: S:s foo with P:s bar {\n"
+            " R: S\n"
+            " loop I over {1..#P}{\n"
+            "  loop J over {1..#R}{\n"
+            "   if I@P = J@R { R: [remove index J from R] }\n"
+            "  }\n"
+            " }\n"
+            " SIXES: R=6\n"
+            " if SIXES>0 { result: 5+SIXES }\n"
+            " else { result: 1@[sort R] }\n"
+            "}\n"
+            "output [1d6 foo with 1d6 bar]"
+        )
+        assert run(prog) == [
+            ("output 1", H({0: 6, 1: 5, 2: 5, 3: 5, 4: 5, 5: 5, 6: 5}))
+        ]
+
+    @pytest.mark.xfail(
+        strict=True,
+        reason=(
+            "Corpus 0x1102: R7->R8 diverges from AnyDice. NOT a :s-param "
+            "mutation bug (U1-U4 + probes -18/-19 confirm our "
+            "loop/mutation/expansion semantics match AnyDice). Root = "
+            "AnyDice's :s-expanded-call aggregation: a runtime-dead "
+            "P-mutation line changes AnyDice output at #P=1. Model not yet "
+            "derived. AnyDice oracle value is valid; this is a sentinel. "
+            "Tracked in project_dyce_cleanroom_todos.md."
+        ),
+    )
+    def test_r8_diverges(self) -> None:
+        # R8 == R7 plus `P: [remove index I from P]`.
+        # AnyDice ground truth: {0:1, 1:5, 2:6, 3:6, 4:6, 5:6, 6:6} (/36).
+        # Ours currently: {0:6, 1:5, 2:5, 3:5, 4:5, 5:5, 6:5} (R7-shaped).
+        prog = self._REMOVE + (
+            "function: S:s foo with P:s bar {\n"
+            " R: S\n"
+            " loop I over {1..#P}{\n"
+            "  loop J over {1..#R}{\n"
+            "   if I@P = J@R {\n"
+            "    R: [remove index J from R]\n"
+            "    P: [remove index I from P]\n"
+            "   }\n"
+            "  }\n"
+            " }\n"
+            " SIXES: R=6\n"
+            " if SIXES>0 { result: 5+SIXES }\n"
+            " else { result: 1@[sort R] }\n"
+            "}\n"
+            "output [1d6 foo with 1d6 bar]"
+        )
+        assert run(prog) == [
+            ("output 1", H({0: 1, 1: 5, 2: 6, 3: 6, 4: 6, 5: 6, 6: 6}))
+        ]
+
+
+# ---- Regression: parameter-expansion enumeration order (corpus 0x40389) -----------------
+
+
+class TestExpansionEnumerationOrder:
+    # When a function with multiple expanding `:n` params is called and a
+    # NON-parameter variable persists across expansion iterations (todo-53:
+    # non-params are call-local and accumulate), the enumeration order of
+    # the parameter combinations is observable in the result. AnyDice
+    # enumerates the FIRST argument as the lowest-order term (it varies
+    # fastest / is the innermost loop); our interpreter's `product(...)`
+    # makes the first param the OUTERMOST loop (big-endian), which is
+    # wrong. Reproducer is corpus program 0x40389.
+    #
+    # `[add 1d2 times 1d{0,1}]` -> four calls; module `N` persists.
+    # AnyDice (first arg innermost): (1,0),(2,0),(1,1),(2,1)
+    #   N: 0 -> 0 -> 0 -> 1 -> 3   => {0:2, 1:1, 3:1}
+    # Ours  (first arg outermost): (1,0),(1,1),(2,0),(2,1)
+    #   N: 0 -> 0 -> 1 -> 1 -> 3   => {0:1, 1:2, 3:1}   (WRONG)
+    # `output N` reads the top-level N (function scope does not leak) and
+    # already matches at {0:1}.
+    def test_corpus_0x40389_first_arg_varies_fastest(self) -> None:
+        prog = (
+            "N: 0\n"
+            "\n"
+            "function: add V:n times W:n {\n"
+            "  N: V * W + N\n"
+            "  result: N\n"
+            "}\n"
+            "\n"
+            "output [add 1d2 times 1d{0,1}]\n"
+            "output N"
+        )
+        assert run(prog) == [
+            ("output 1", H({0: 2, 1: 1, 3: 1})),
+            ("output 2", H({0: 1})),
+        ]
