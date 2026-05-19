@@ -999,7 +999,15 @@ class AnyDiceInterpreter:
         try:
 
             def _gen() -> Iterator[tuple[H[int], int]]:
-                for combo in product(*[items for _, items in expansion]):
+                # AnyDice enumerates the first argument as the lowest-order
+                # term (it varies fastest / innermost loop); `product`
+                # would make the first param the outermost loop. Iterate
+                # the reversed expansion and un-reverse each combo to
+                # restore positional alignment. Observable only when a
+                # non-param variable persists across iterations (todo-53);
+                # see corpus 0x40389.
+                for combo in product(*[items for _, items in reversed(expansion)]):
+                    combo = combo[::-1]  # noqa: PLW2901
                     weight = 1
                     # Reset ALL params to their entry-bound values per iter.
                     # Non-param env vars persist their mutations from the
