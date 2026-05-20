@@ -15,37 +15,52 @@
 
 import pytest
 from dyce import H, P
+from dyce.d import d0 as dempty
+from dyce.d import d1, d2
+from dyce.h import aggregate_weighted
 from lark.exceptions import UnexpectedInput
 
 from anydyce.anydice import run
 
+try:
+    import warnings
+
+    from dyce.d import (  # type: ignore[attr-defined]
+        dzero,  # pyrefly: ignore[missing-module-attribute] # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[unresolved-import]
+    )
+
+    warnings.warn("dyce is sane now, remove this guard", stacklevel=0)
+except ImportError:
+    dzero = H({0: 1})
+
 __all__ = ()
+
 
 # ---- Literals and output -----------------------------------------------------------------
 
 
 class TestLiterals:
     def test_zero_output(self) -> None:
-        assert run("output 0") == [("output 1", H({0: 1}))]
+        assert run("output 0") == [("output 1", dzero)]
 
     def test_num_output(self) -> None:
-        assert run("output 1") == [("output 1", H({1: 1}))]
+        assert run("output 1") == [("output 1", d1)]
 
     def test_negative_output(self) -> None:
         assert run("output -3") == [("output 1", H({-3: 1}))]
 
     def test_named_output(self) -> None:
-        assert run('output 1 named "one"') == [("one", H({1: 1}))]
+        assert run('output 1 named "one"') == [("one", d1)]
 
     def test_multiple_outputs(self) -> None:
         assert run("output 1\noutput 2") == [
-            ("output 1", H({1: 1})),
+            ("output 1", d1),
             ("output 2", H({2: 1})),
         ]
 
     def test_multiple_named_outputs(self) -> None:
         assert run('output 1 named "a"\noutput 2 named "b"') == [
-            ("a", H({1: 1})),
+            ("a", d1),
             ("b", H({2: 1})),
         ]
 
@@ -55,10 +70,10 @@ class TestLiterals:
 
 class TestDieUnary:
     def test_d_empty_seq(self) -> None:
-        assert run("output d{}") == [("output 1", H({}))]
+        assert run("output d{}") == [("output 1", dempty)]
 
     def test_d_num_zero(self) -> None:
-        assert run("output d0") == [("output 1", H({0: 1}))]
+        assert run("output d0") == [("output 1", dzero)]
 
     def test_d_num_one(self) -> None:
         assert run("output d1") == [("output 1", H(1))]
@@ -80,14 +95,14 @@ class TestDieUnary:
 
 class TestDieBinary:
     def test_zero_d_empty_seq(self) -> None:
-        assert run("output 0d{}") == [("output 1", H({}))]
+        assert run("output 0d{}") == [("output 1", dempty)]
 
     def test_num_d_empty_seq(self) -> None:
-        assert run("output 2d{}") == [("output 1", H({}))]
+        assert run("output 2d{}") == [("output 1", dempty)]
 
     def test_zero_d_num(self) -> None:
         # 0 dice: AnyDice yields 0
-        assert run("output 0d6") == [("output 1", H({0: 1}))]
+        assert run("output 0d6") == [("output 1", dzero)]
 
     def test_one_d_num(self) -> None:
         assert run("output 1d6") == [("output 1", H(6))]
@@ -169,6 +184,22 @@ class TestDieBinary:
             ("output 1", H({1: 36, 2: 21, 3: 6, 4: 1}))
         ]
 
+    def test_die_d_empty_die(self) -> None:
+        assert run("output d0d{}") == [("output 1", dempty)]
+        assert run("output d0d{}") == [("output 1", dempty)]
+        assert run("output d2d{}") == [("output 1", dempty)]
+        assert run("output d2d{}") == [("output 1", dempty)]
+
+    def test_empty_die_d_die(self) -> None:
+        assert run("output d{}d0") == [("output 1", dempty)]
+        assert run("output d{}d0") == [("output 1", dempty)]
+        assert run("output d{}d2") == [("output 1", dempty)]
+        assert run("output d{}d2") == [("output 1", dempty)]
+
+    def test_empty_die_d_empty_die(self) -> None:
+        assert run("output d{}d{}") == [("output 1", dempty)]
+        assert run("output d{}d{}") == [("output 1", dempty)]
+
 
 # ---- Variables ---------------------------------------------------------------------------
 
@@ -220,14 +251,14 @@ class TestSequences:
 
 class TestSequencesAdvanced:
     def test_empty_sequence_literal(self) -> None:
-        assert run("output {}") == [("output 1", H({}))]
+        assert run("output {}") == [("output 1", dempty)]
 
     def test_descending_range_is_empty(self) -> None:
         # .. ranges are always ascending; {4..1} is empty
-        assert run("output {4..1}") == [("output 1", H({}))]
+        assert run("output {4..1}") == [("output 1", dempty)]
 
     def test_descending_repeat_range_is_empty(self) -> None:
-        assert run("output {4..1:2}") == [("output 1", H({}))]
+        assert run("output {4..1:2}") == [("output 1", dempty)]
 
     def test_die_in_sequence(self) -> None:
         # {die} yields the die's distinct outcomes once each, ascending
@@ -257,7 +288,7 @@ class TestSequencesAdvanced:
         # AnyDice (program 42971) returns 1 for `5 @ {d4:2, d8}`. That requires
         # the d4:2 expansion to be (1,2,3,4,1,2,3,4) -- block-repeat of the
         # outcome list -- not (1,1,2,2,3,3,4,4) (interleaved).
-        assert run("output 5 @ {d4:2, d8}") == [("output 1", H({1: 1}))]
+        assert run("output 5 @ {d4:2, d8}") == [("output 1", d1)]
 
     def test_die_repeat_block_position_in_first_block(self) -> None:
         # Program 42974: position 2 lands in the first block of d4:2 -> 2.
@@ -333,7 +364,7 @@ class TestSequencesAdvanced:
         # equivalent.
         die_form = run("output 5 @ {d4:2, d8}")
         seq_form = run("output 5 @ {{1, 2, 3, 4}:2, d8}")
-        assert die_form == seq_form == [("output 1", H({1: 1}))]
+        assert die_form == seq_form == [("output 1", d1)]
 
     # AnyDice flattens nested sequences in a sequence literal (i.e. concatenates
     # the inner seq's elements into the outer one) rather than sum-coercing the
@@ -552,17 +583,17 @@ class TestMul:
 
     def test_empty_seq_mul_num(self) -> None:
         # sum 0 * 5 = 0
-        assert run("output {} * 5") == [("output 1", H({0: 1}))]
+        assert run("output {} * 5") == [("output 1", dzero)]
 
     def test_num_mul_empty_seq(self) -> None:
-        assert run("output 5 * {}") == [("output 1", H({0: 1}))]
+        assert run("output 5 * {}") == [("output 1", dzero)]
 
     def test_empty_seq_mul_seq(self) -> None:
         # 0 * 15 = 0
-        assert run("output {} * {1..5}") == [("output 1", H({0: 1}))]
+        assert run("output {} * {1..5}") == [("output 1", dzero)]
 
     def test_seq_mul_empty_seq(self) -> None:
-        assert run("output {1..5} * {}") == [("output 1", H({0: 1}))]
+        assert run("output {1..5} * {}") == [("output 1", dzero)]
 
     def test_empty_seq_mul_die(self) -> None:
         # 0 * each-2d6-outcome = 0; total weight from 2d6 (36).
@@ -573,22 +604,22 @@ class TestMul:
 
     def test_empty_die_mul_num(self) -> None:
         # *, /, ^ propagate empty-die emptiness (UNLIKE +/-)
-        assert run("output d{} * 5") == [("output 1", H({}))]
+        assert run("output d{} * 5") == [("output 1", dempty)]
 
     def test_num_mul_empty_die(self) -> None:
-        assert run("output 5 * d{}") == [("output 1", H({}))]
+        assert run("output 5 * d{}") == [("output 1", dempty)]
 
     def test_empty_die_mul_seq(self) -> None:
-        assert run("output d{} * {1..5}") == [("output 1", H({}))]
+        assert run("output d{} * {1..5}") == [("output 1", dempty)]
 
     def test_seq_mul_empty_die(self) -> None:
-        assert run("output {1..5} * d{}") == [("output 1", H({}))]
+        assert run("output {1..5} * d{}") == [("output 1", dempty)]
 
     def test_empty_die_mul_die(self) -> None:
-        assert run("output d{} * 2d6") == [("output 1", H({}))]
+        assert run("output d{} * 2d6") == [("output 1", dempty)]
 
     def test_die_mul_empty_die(self) -> None:
-        assert run("output 2d6 * d{}") == [("output 1", H({}))]
+        assert run("output 2d6 * d{}") == [("output 1", dempty)]
 
 
 # ---- Division (/) ------------------------------------------------------------------------
@@ -634,10 +665,10 @@ class TestDiv:
     # AnyDice substitutes 0 for division by zero at the smallest expression that
     # triggers it; outer arithmetic propagates normally.
     def test_num_div_zero(self) -> None:
-        assert run("output 1 / 0") == [("output 1", H({0: 1}))]
+        assert run("output 1 / 0") == [("output 1", dzero)]
 
     def test_zero_div_zero(self) -> None:
-        assert run("output 0 / 0") == [("output 1", H({0: 1}))]
+        assert run("output 0 / 0") == [("output 1", dzero)]
 
     def test_div_zero_propagates_through_outer_arith(self) -> None:
         assert run("output (1 / 0) + 5") == [("output 1", H({5: 1}))]
@@ -656,19 +687,19 @@ class TestDiv:
 
     def test_empty_seq_div_num(self) -> None:
         # sum 0 / 5 = 0
-        assert run("output {} / 5") == [("output 1", H({0: 1}))]
+        assert run("output {} / 5") == [("output 1", dzero)]
 
     def test_num_div_empty_seq(self) -> None:
         # Empty seq sum-coerces to 0; AnyDice substitutes 0 for division by zero.
-        assert run("output 5 / {}") == [("output 1", H({0: 1}))]
+        assert run("output 5 / {}") == [("output 1", dzero)]
 
     def test_empty_seq_div_seq(self) -> None:
         # 0 / 15 = 0
-        assert run("output {} / {1..5}") == [("output 1", H({0: 1}))]
+        assert run("output {} / {1..5}") == [("output 1", dzero)]
 
     def test_seq_div_empty_seq(self) -> None:
         # Empty seq sum-coerces to 0; sum {1..5}=15; 15/0=0.
-        assert run("output {1..5} / {}") == [("output 1", H({0: 1}))]
+        assert run("output {1..5} / {}") == [("output 1", dzero)]
 
     def test_empty_seq_div_die(self) -> None:
         # 0 / each-2d6-outcome = 0; total weight from 2d6 (36).
@@ -681,22 +712,22 @@ class TestDiv:
 
     def test_empty_die_div_num(self) -> None:
         # *, /, ^ propagate empty-die emptiness
-        assert run("output d{} / 5") == [("output 1", H({}))]
+        assert run("output d{} / 5") == [("output 1", dempty)]
 
     def test_num_div_empty_die(self) -> None:
-        assert run("output 5 / d{}") == [("output 1", H({}))]
+        assert run("output 5 / d{}") == [("output 1", dempty)]
 
     def test_empty_die_div_seq(self) -> None:
-        assert run("output d{} / {1..5}") == [("output 1", H({}))]
+        assert run("output d{} / {1..5}") == [("output 1", dempty)]
 
     def test_seq_div_empty_die(self) -> None:
-        assert run("output {1..5} / d{}") == [("output 1", H({}))]
+        assert run("output {1..5} / d{}") == [("output 1", dempty)]
 
     def test_empty_die_div_die(self) -> None:
-        assert run("output d{} / 2d6") == [("output 1", H({}))]
+        assert run("output d{} / 2d6") == [("output 1", dempty)]
 
     def test_die_div_empty_die(self) -> None:
-        assert run("output 2d6 / d{}") == [("output 1", H({}))]
+        assert run("output 2d6 / d{}") == [("output 1", dempty)]
 
 
 # ---- Exponentiation (^) ------------------------------------------------------------------
@@ -738,19 +769,19 @@ class TestPow:
 
     def test_empty_seq_pow_num(self) -> None:
         # sum 0 ^ 5 = 0
-        assert run("output {} ^ 5") == [("output 1", H({0: 1}))]
+        assert run("output {} ^ 5") == [("output 1", dzero)]
 
     def test_num_pow_empty_seq(self) -> None:
         # 5 ^ sum 0 = 1
-        assert run("output 5 ^ {}") == [("output 1", H({1: 1}))]
+        assert run("output 5 ^ {}") == [("output 1", d1)]
 
     def test_empty_seq_pow_seq(self) -> None:
         # 0 ^ 15 = 0
-        assert run("output {} ^ {1..5}") == [("output 1", H({0: 1}))]
+        assert run("output {} ^ {1..5}") == [("output 1", dzero)]
 
     def test_seq_pow_empty_seq(self) -> None:
         # 15 ^ 0 = 1
-        assert run("output {1..5} ^ {}") == [("output 1", H({1: 1}))]
+        assert run("output {1..5} ^ {}") == [("output 1", d1)]
 
     def test_empty_seq_pow_die(self) -> None:
         # 0 ^ each-positive-2d6-outcome = 0; total weight 36
@@ -762,22 +793,22 @@ class TestPow:
 
     def test_empty_die_pow_num(self) -> None:
         # *, /, ^ propagate empty-die emptiness
-        assert run("output d{} ^ 5") == [("output 1", H({}))]
+        assert run("output d{} ^ 5") == [("output 1", dempty)]
 
     def test_num_pow_empty_die(self) -> None:
-        assert run("output 5 ^ d{}") == [("output 1", H({}))]
+        assert run("output 5 ^ d{}") == [("output 1", dempty)]
 
     def test_empty_die_pow_seq(self) -> None:
-        assert run("output d{} ^ {1..5}") == [("output 1", H({}))]
+        assert run("output d{} ^ {1..5}") == [("output 1", dempty)]
 
     def test_seq_pow_empty_die(self) -> None:
-        assert run("output {1..5} ^ d{}") == [("output 1", H({}))]
+        assert run("output {1..5} ^ d{}") == [("output 1", dempty)]
 
     def test_empty_die_pow_die(self) -> None:
-        assert run("output d{} ^ 2d6") == [("output 1", H({}))]
+        assert run("output d{} ^ 2d6") == [("output 1", dempty)]
 
     def test_die_pow_empty_die(self) -> None:
-        assert run("output 2d6 ^ d{}") == [("output 1", H({}))]
+        assert run("output 2d6 ^ d{}") == [("output 1", dempty)]
 
     # AnyDice's `^` truncates fractional results toward zero rather than
     # returning floats. Per-outcome:
@@ -851,7 +882,7 @@ class TestAt:
         assert run("output 2 @ 4567") == [("output 1", H({5: 1}))]
 
     def test_num_at_num_out_of_range(self) -> None:
-        assert run("output 3 @ 42") == [("output 1", H({0: 1}))]
+        assert run("output 3 @ 42") == [("output 1", dzero)]
 
     def test_num_at_num_negative(self) -> None:
         # sign is retained for all digit positions
@@ -873,10 +904,10 @@ class TestAt:
         )
 
     def test_num_at_seq_out_of_range(self) -> None:
-        assert run("output 5 @ {3,1,4,2}") == [("output 1", H({0: 1}))]
+        assert run("output 5 @ {3,1,4,2}") == [("output 1", dzero)]
 
     def test_num_at_empty_seq(self) -> None:
-        assert run("output 2 @ {}") == [("output 1", H({0: 1}))]
+        assert run("output 2 @ {}") == [("output 1", dzero)]
 
     def test_num_at_pool(self) -> None:
         # 1 @ 3d6: pool sorted highest-first by default; position 1 = highest die
@@ -933,13 +964,13 @@ class TestAt:
         ]
 
     def test_num_at_pool_out_of_range_high(self) -> None:
-        # Scalar `N @ pool` with N > len(pool) returns H({0: 1}).
-        assert run("output 5 @ 3d6") == [("output 1", H({0: 1}))]
+        # Scalar `N @ pool` with N > len(pool) returns dzero.
+        assert run("output 5 @ 3d6") == [("output 1", dzero)]
 
     def test_num_at_pool_out_of_range_zero(self) -> None:
-        # Scalar `N @ pool` with N < 1 returns H({0: 1}) (the other half of
+        # Scalar `N @ pool` with N < 1 returns dzero (the other half of
         # the `left < 1 or left > size` guard).
-        assert run("output 0 @ 3d6") == [("output 1", H({0: 1}))]
+        assert run("output 0 @ 3d6") == [("output 1", dzero)]
 
     def test_seq_at_pool_with_some_out_of_range_positions(self) -> None:
         # Out-of-range positions in the seq are silently dropped; result is
@@ -954,10 +985,8 @@ class TestAt:
         )
 
     def test_seq_at_pool_all_out_of_range(self) -> None:
-        # Every position out of range -> no selectors -> H({0: 1}).
-        assert run("output {-2, -1, -1, 99, 100, 99} @ 3d6") == [
-            ("output 1", H({0: 1}))
-        ]
+        # Every position out of range -> no selectors -> dzero.
+        assert run("output {-2, -1, -1, 99, 100, 99} @ 3d6") == [("output 1", dzero)]
 
     def test_die_at_seq(self) -> None:
         with pytest.raises(
@@ -967,14 +996,16 @@ class TestAt:
 
     def test_empty_seq_at_num(self) -> None:
         # left empty seq sums to 0; position 0 is out-of-range -> 0
-        assert run("output {} @ 123") == [("output 1", H({0: 1}))]
+        assert run("output {} @ 123") == [("output 1", dzero)]
 
     def test_empty_seq_at_seq(self) -> None:
-        assert run("output {} @ {1,2,3}") == [("output 1", H({0: 1}))]
+        assert run("output {} @ {1,2,3}") == [("output 1", dzero)]
 
     def test_num_at_empty_die(self) -> None:
         # @ propagates empty-die emptiness on right operand
-        assert run("output 1 @ d{}") == [("output 1", H({}))]
+        assert run("output 0 @ d{}") == [("output 1", dempty)]
+        assert run("output 1 @ d{}") == [("output 1", dempty)]
+        assert run("output 2 @ d{}") == [("output 1", dempty)]
 
     # AnyDice treats a non-empty H as a 1-element pool for `@`. `1@H` returns the
     # die's distribution; `N@H` for N != 1 returns 0 (out-of-range on a 1-pool).
@@ -989,11 +1020,40 @@ class TestAt:
 
     def test_num_at_die_position_two(self) -> None:
         # 2 @ <die> on a 1-position pool is out of range -> 0.
-        assert run("output 2 @ d6") == [("output 1", H({0: 1}))]
+        assert run("output 2 @ d6") == [("output 1", dzero)]
 
     def test_num_at_die_position_zero(self) -> None:
         # 0 @ <die>: pos < 1 -> 0.
-        assert run("output 0 @ d6") == [("output 1", H({0: 1}))]
+        assert run("output 0 @ d6") == [("output 1", dzero)]
+
+    def test_num_at_die_d_die(self) -> None:
+        d2d2 = aggregate_weighted(
+            (n_outcome @ d2, n_count) for n_outcome, n_count in d2.items()
+        )
+        assert run("output 1 @ d2d2") == [("output 1", d2d2)]
+        # d2d2 is flattened, so 2 is out of range
+        assert run("output 2 @ d2d2") == [("output 1", dzero)]
+
+    def test_num_at_die_d_empty_die(self) -> None:
+        assert run("output 0 @ d0d{}") == [("output 1", dzero)]
+        assert run("output 1 @ d0d{}") == [("output 1", dempty)]
+        assert run("output 2 @ d0d{}") == [("output 1", dzero)]
+        assert run("output 0 @ d2d{}") == [("output 1", dzero)]
+        assert run("output 1 @ d2d{}") == [("output 1", dempty)]
+        assert run("output 2 @ d2d{}") == [("output 1", dzero)]
+
+    def test_num_at_empty_die_d_die(self) -> None:
+        assert run("output 0 @ d{}d0") == [("output 1", dzero)]
+        assert run("output 1 @ d{}d0") == [("output 1", dempty)]
+        assert run("output 2 @ d{}d0") == [("output 1", dzero)]
+        assert run("output 0 @ d{}d2") == [("output 1", dzero)]
+        assert run("output 1 @ d{}d2") == [("output 1", dempty)]
+        assert run("output 2 @ d{}d2") == [("output 1", dzero)]
+
+    def test_num_at_empty_die_d_empty_die(self) -> None:
+        assert run("output 0 @ d{}d{}") == [("output 1", dzero)]
+        assert run("output 1 @ d{}d{}") == [("output 1", dempty)]
+        assert run("output 2 @ d{}d{}") == [("output 1", dzero)]
 
 
 # ---- Equality (=) ------------------------------------------------------------------------
@@ -1001,18 +1061,18 @@ class TestAt:
 
 class TestEq:
     def test_num_eq_num(self) -> None:
-        assert run("output 2 = 2") == [("output 1", H({1: 1}))]
+        assert run("output 2 = 2") == [("output 1", d1)]
 
     def test_num_eq_seq(self) -> None:
         # right-side seq: counts elements satisfying 6 = elem; none -> 0
-        assert run("output 6 = {1,2,3}") == [("output 1", H({0: 1}))]
+        assert run("output 6 = {1,2,3}") == [("output 1", dzero)]
 
     def test_num_eq_die(self) -> None:
         assert run("output 3 = d6") == [("output 1", H({0: 5, 1: 1}))]
 
     def test_seq_eq_num(self) -> None:
         # left seq: counts elements satisfying the condition
-        assert run("output {1,2,3} = 2") == [("output 1", H({1: 1}))]
+        assert run("output {1,2,3} = 2") == [("output 1", d1)]
 
     def test_seq_eq_num_multiple(self) -> None:
         assert run("output {2,2,4} = 2") == [("output 1", H({2: 1}))]
@@ -1020,16 +1080,16 @@ class TestEq:
     def test_seq_eq_seq(self) -> None:
         # seq-vs-seq is lexicographic tuple comparison (after position-order sorting),
         # NOT sum-coercion. {1,2,3}=(3,2,1), {1,2}=(2,1); different lengths -> not equal
-        assert run("output {1,2,3} = {1,2}") == [("output 1", H({0: 1}))]
+        assert run("output {1,2,3} = {1,2}") == [("output 1", dzero)]
 
     def test_seq_eq_seq_lex_distinguishes(self) -> None:
         # {1,3} sorted=(3,1), {2,2}=(2,2); tuples differ even though sums match (4=4).
         # Sum-coercion would yield true; lex yields false.
-        assert run("output {1,3} = {2,2}") == [("output 1", H({0: 1}))]
+        assert run("output {1,3} = {2,2}") == [("output 1", dzero)]
 
     def test_seq_eq_die(self) -> None:
         # seq-on-left with die-on-right: seq coerces to sum (6); 6 = d{2,3} always false
-        assert run("output {1,2,3} = d{2,3}") == [("output 1", H({0: 1}))]
+        assert run("output {1,2,3} = d{2,3}") == [("output 1", dzero)]
 
     def test_die_eq_num(self) -> None:
         assert run("output d6 = 3") == [("output 1", H({0: 5, 1: 1}))]
@@ -1043,17 +1103,17 @@ class TestEq:
 
     def test_empty_seq_eq_num(self) -> None:
         # left empty seq counts elements equal to num; 0 elements
-        assert run("output {} = 5") == [("output 1", H({0: 1}))]
+        assert run("output {} = 5") == [("output 1", dzero)]
 
     def test_num_eq_empty_seq(self) -> None:
-        assert run("output 5 = {}") == [("output 1", H({0: 1}))]
+        assert run("output 5 = {}") == [("output 1", dzero)]
 
     def test_empty_seq_eq_seq(self) -> None:
         # lex tuple compare: () = (5,4,3,2,1) -> false
-        assert run("output {} = {1..5}") == [("output 1", H({0: 1}))]
+        assert run("output {} = {1..5}") == [("output 1", dzero)]
 
     def test_seq_eq_empty_seq(self) -> None:
-        assert run("output {1..5} = {}") == [("output 1", H({0: 1}))]
+        assert run("output {1..5} = {}") == [("output 1", dzero)]
 
     def test_empty_seq_eq_die(self) -> None:
         # die-vs-seq sum-coerces seq to 0; 0 = each-2d6-outcome always false
@@ -1064,22 +1124,22 @@ class TestEq:
 
     def test_empty_die_eq_num(self) -> None:
         # comparisons propagate empty-die emptiness on either side
-        assert run("output d{} = 5") == [("output 1", H({}))]
+        assert run("output d{} = 5") == [("output 1", dempty)]
 
     def test_num_eq_empty_die(self) -> None:
-        assert run("output 5 = d{}") == [("output 1", H({}))]
+        assert run("output 5 = d{}") == [("output 1", dempty)]
 
     def test_empty_die_eq_seq(self) -> None:
-        assert run("output d{} = {1..5}") == [("output 1", H({}))]
+        assert run("output d{} = {1..5}") == [("output 1", dempty)]
 
     def test_seq_eq_empty_die(self) -> None:
-        assert run("output {1..5} = d{}") == [("output 1", H({}))]
+        assert run("output {1..5} = d{}") == [("output 1", dempty)]
 
     def test_empty_die_eq_die(self) -> None:
-        assert run("output d{} = 2d6") == [("output 1", H({}))]
+        assert run("output d{} = 2d6") == [("output 1", dempty)]
 
     def test_die_eq_empty_die(self) -> None:
-        assert run("output 2d6 = d{}") == [("output 1", H({}))]
+        assert run("output 2d6 = d{}") == [("output 1", dempty)]
 
 
 # ---- Inequality (!=) ---------------------------------------------------------------------
@@ -1087,7 +1147,7 @@ class TestEq:
 
 class TestNeq:
     def test_num_neq_num(self) -> None:
-        assert run("output 2 != 3") == [("output 1", H({1: 1}))]
+        assert run("output 2 != 3") == [("output 1", d1)]
 
     def test_num_neq_seq(self) -> None:
         # right-side seq: counts elements satisfying 5 != elem; all 3
@@ -1102,15 +1162,15 @@ class TestNeq:
 
     def test_seq_neq_seq(self) -> None:
         # lex tuple compare: (3,2,1) != (2,1) (different lengths) -> true
-        assert run("output {1,2,3} != {1,2}") == [("output 1", H({1: 1}))]
+        assert run("output {1,2,3} != {1,2}") == [("output 1", d1)]
 
     def test_seq_neq_seq_lex_distinguishes(self) -> None:
         # {1,3}=(3,1), {2,2}=(2,2); lex says not-equal even though sums match (4=4)
-        assert run("output {1,3} != {2,2}") == [("output 1", H({1: 1}))]
+        assert run("output {1,3} != {2,2}") == [("output 1", d1)]
 
     def test_seq_neq_die(self) -> None:
         # seq-on-left with die-on-right: seq coerces to sum (6); 6 != d{2,3} always true
-        assert run("output {1,2,3} != d{2,3}") == [("output 1", H({1: 1}))]
+        assert run("output {1,2,3} != d{2,3}") == [("output 1", d1)]
 
     def test_die_neq_num(self) -> None:
         assert run("output d6 != 3") == [("output 1", H({0: 1, 1: 5}))]
@@ -1124,17 +1184,17 @@ class TestNeq:
 
     def test_empty_seq_neq_num(self) -> None:
         # left empty seq counts elements != num; 0 elements
-        assert run("output {} != 5") == [("output 1", H({0: 1}))]
+        assert run("output {} != 5") == [("output 1", dzero)]
 
     def test_num_neq_empty_seq(self) -> None:
-        assert run("output 5 != {}") == [("output 1", H({0: 1}))]
+        assert run("output 5 != {}") == [("output 1", dzero)]
 
     def test_empty_seq_neq_seq(self) -> None:
         # lex tuple compare: () != (5,4,3,2,1) -> true
-        assert run("output {} != {1..5}") == [("output 1", H({1: 1}))]
+        assert run("output {} != {1..5}") == [("output 1", d1)]
 
     def test_seq_neq_empty_seq(self) -> None:
-        assert run("output {1..5} != {}") == [("output 1", H({1: 1}))]
+        assert run("output {1..5} != {}") == [("output 1", d1)]
 
     def test_empty_seq_neq_die(self) -> None:
         # sum 0; 0 != each-2d6-outcome always true
@@ -1145,22 +1205,22 @@ class TestNeq:
 
     def test_empty_die_neq_num(self) -> None:
         # comparisons propagate empty-die emptiness on either side
-        assert run("output d{} != 5") == [("output 1", H({}))]
+        assert run("output d{} != 5") == [("output 1", dempty)]
 
     def test_num_neq_empty_die(self) -> None:
-        assert run("output 5 != d{}") == [("output 1", H({}))]
+        assert run("output 5 != d{}") == [("output 1", dempty)]
 
     def test_empty_die_neq_seq(self) -> None:
-        assert run("output d{} != {1..5}") == [("output 1", H({}))]
+        assert run("output d{} != {1..5}") == [("output 1", dempty)]
 
     def test_seq_neq_empty_die(self) -> None:
-        assert run("output {1..5} != d{}") == [("output 1", H({}))]
+        assert run("output {1..5} != d{}") == [("output 1", dempty)]
 
     def test_empty_die_neq_die(self) -> None:
-        assert run("output d{} != 2d6") == [("output 1", H({}))]
+        assert run("output d{} != 2d6") == [("output 1", dempty)]
 
     def test_die_neq_empty_die(self) -> None:
-        assert run("output 2d6 != d{}") == [("output 1", H({}))]
+        assert run("output 2d6 != d{}") == [("output 1", dempty)]
 
 
 # ---- Less than (<) -----------------------------------------------------------------------
@@ -1168,11 +1228,11 @@ class TestNeq:
 
 class TestLt:
     def test_num_lt_num(self) -> None:
-        assert run("output 2 < 3") == [("output 1", H({1: 1}))]
+        assert run("output 2 < 3") == [("output 1", d1)]
 
     def test_num_lt_seq(self) -> None:
         # 2<{1,2,3}=6 -> true
-        assert run("output 2 < {1,2,3}") == [("output 1", H({1: 1}))]
+        assert run("output 2 < {1,2,3}") == [("output 1", d1)]
 
     def test_num_lt_die(self) -> None:
         # 1<d6: outcome 1 fails, rest pass
@@ -1184,15 +1244,15 @@ class TestLt:
 
     def test_seq_lt_seq(self) -> None:
         # lex tuple compare: (3,2,1) < (4,3) -> 3<4 -> true
-        assert run("output {1,2,3} < {3,4}") == [("output 1", H({1: 1}))]
+        assert run("output {1,2,3} < {3,4}") == [("output 1", d1)]
 
     def test_seq_lt_seq_lex_distinguishes(self) -> None:
         # {4,1}=(4,1), {3,3}=(3,3); lex: 4>3 -> false. Sum-coercion would say 5<6 -> true.
-        assert run("output {4,1} < {3,3}") == [("output 1", H({0: 1}))]
+        assert run("output {4,1} < {3,3}") == [("output 1", dzero)]
 
     def test_seq_lt_die(self) -> None:
         # seq-on-left with die-on-right: seq coerces to sum (6); 6 < d{3,5} always false
-        assert run("output {1,2,3} < d{3,5}") == [("output 1", H({0: 1}))]
+        assert run("output {1,2,3} < d{3,5}") == [("output 1", dzero)]
 
     def test_die_lt_num(self) -> None:
         # d6<3: outcomes 1,2 qualify
@@ -1208,17 +1268,17 @@ class TestLt:
 
     def test_empty_seq_lt_num(self) -> None:
         # left empty seq counts elements < num; 0 elements
-        assert run("output {} < 5") == [("output 1", H({0: 1}))]
+        assert run("output {} < 5") == [("output 1", dzero)]
 
     def test_num_lt_empty_seq(self) -> None:
-        assert run("output 5 < {}") == [("output 1", H({0: 1}))]
+        assert run("output 5 < {}") == [("output 1", dzero)]
 
     def test_empty_seq_lt_seq(self) -> None:
         # lex tuple compare: () < (5,4,3,2,1) -> true (empty < non-empty)
-        assert run("output {} < {1..5}") == [("output 1", H({1: 1}))]
+        assert run("output {} < {1..5}") == [("output 1", d1)]
 
     def test_seq_lt_empty_seq(self) -> None:
-        assert run("output {1..5} < {}") == [("output 1", H({0: 1}))]
+        assert run("output {1..5} < {}") == [("output 1", dzero)]
 
     def test_empty_seq_lt_die(self) -> None:
         # sum 0; 0 < each positive 2d6 outcome -> always true
@@ -1230,22 +1290,22 @@ class TestLt:
 
     def test_empty_die_lt_num(self) -> None:
         # comparisons propagate empty-die emptiness on either side
-        assert run("output d{} < 5") == [("output 1", H({}))]
+        assert run("output d{} < 5") == [("output 1", dempty)]
 
     def test_num_lt_empty_die(self) -> None:
-        assert run("output 5 < d{}") == [("output 1", H({}))]
+        assert run("output 5 < d{}") == [("output 1", dempty)]
 
     def test_empty_die_lt_seq(self) -> None:
-        assert run("output d{} < {1..5}") == [("output 1", H({}))]
+        assert run("output d{} < {1..5}") == [("output 1", dempty)]
 
     def test_seq_lt_empty_die(self) -> None:
-        assert run("output {1..5} < d{}") == [("output 1", H({}))]
+        assert run("output {1..5} < d{}") == [("output 1", dempty)]
 
     def test_empty_die_lt_die(self) -> None:
-        assert run("output d{} < 2d6") == [("output 1", H({}))]
+        assert run("output d{} < 2d6") == [("output 1", dempty)]
 
     def test_die_lt_empty_die(self) -> None:
-        assert run("output 2d6 < d{}") == [("output 1", H({}))]
+        assert run("output 2d6 < d{}") == [("output 1", dempty)]
 
 
 # ---- Greater than (>) --------------------------------------------------------------------
@@ -1253,7 +1313,7 @@ class TestLt:
 
 class TestGt:
     def test_num_gt_num(self) -> None:
-        assert run("output 3 > 2") == [("output 1", H({1: 1}))]
+        assert run("output 3 > 2") == [("output 1", d1)]
 
     def test_num_gt_seq(self) -> None:
         # right-side seq: counts elements satisfying 7 > elem; all 3
@@ -1269,17 +1329,17 @@ class TestGt:
 
     def test_seq_gt_seq(self) -> None:
         # lex tuple compare: (4,3) > (2,1) -> 4>2 -> true
-        assert run("output {3,4} > {1,2}") == [("output 1", H({1: 1}))]
+        assert run("output {3,4} > {1,2}") == [("output 1", d1)]
 
     def test_seq_gt_seq_lex_distinguishes(self) -> None:
         # {2,2,2}=(2,2,2), {2,2}=(2,2); prefix-equal, longer is greater under lex.
         # Sum-coercion would say 6>4 (also true) but the longer-vs-shorter case is the
         # one only lex explains.
-        assert run("output {2,2,2} > {2,2}") == [("output 1", H({1: 1}))]
+        assert run("output {2,2,2} > {2,2}") == [("output 1", d1)]
 
     def test_seq_gt_die(self) -> None:
         # seq-on-left with die-on-right: seq coerces to sum (6); 6 > d{1,2} always true
-        assert run("output {1,2,3} > d{1,2}") == [("output 1", H({1: 1}))]
+        assert run("output {1,2,3} > d{1,2}") == [("output 1", d1)]
 
     def test_die_gt_num(self) -> None:
         # d6>3: outcomes 4,5,6 qualify
@@ -1295,17 +1355,17 @@ class TestGt:
 
     def test_empty_seq_gt_num(self) -> None:
         # left empty seq counts elements > num; 0 elements
-        assert run("output {} > 5") == [("output 1", H({0: 1}))]
+        assert run("output {} > 5") == [("output 1", dzero)]
 
     def test_num_gt_empty_seq(self) -> None:
-        assert run("output 5 > {}") == [("output 1", H({0: 1}))]
+        assert run("output 5 > {}") == [("output 1", dzero)]
 
     def test_empty_seq_gt_seq(self) -> None:
         # lex tuple compare: () > (5,4,3,2,1) -> false
-        assert run("output {} > {1..5}") == [("output 1", H({0: 1}))]
+        assert run("output {} > {1..5}") == [("output 1", dzero)]
 
     def test_seq_gt_empty_seq(self) -> None:
-        assert run("output {1..5} > {}") == [("output 1", H({1: 1}))]
+        assert run("output {1..5} > {}") == [("output 1", d1)]
 
     def test_empty_seq_gt_die(self) -> None:
         # sum 0; 0 > each positive 2d6 outcome -> always false
@@ -1317,22 +1377,22 @@ class TestGt:
 
     def test_empty_die_gt_num(self) -> None:
         # comparisons propagate empty-die emptiness on either side
-        assert run("output d{} > 5") == [("output 1", H({}))]
+        assert run("output d{} > 5") == [("output 1", dempty)]
 
     def test_num_gt_empty_die(self) -> None:
-        assert run("output 5 > d{}") == [("output 1", H({}))]
+        assert run("output 5 > d{}") == [("output 1", dempty)]
 
     def test_empty_die_gt_seq(self) -> None:
-        assert run("output d{} > {1..5}") == [("output 1", H({}))]
+        assert run("output d{} > {1..5}") == [("output 1", dempty)]
 
     def test_seq_gt_empty_die(self) -> None:
-        assert run("output {1..5} > d{}") == [("output 1", H({}))]
+        assert run("output {1..5} > d{}") == [("output 1", dempty)]
 
     def test_empty_die_gt_die(self) -> None:
-        assert run("output d{} > 2d6") == [("output 1", H({}))]
+        assert run("output d{} > 2d6") == [("output 1", dempty)]
 
     def test_die_gt_empty_die(self) -> None:
-        assert run("output 2d6 > d{}") == [("output 1", H({}))]
+        assert run("output 2d6 > d{}") == [("output 1", dempty)]
 
 
 # ---- Less than or equal (<=) -------------------------------------------------------------
@@ -1340,11 +1400,11 @@ class TestGt:
 
 class TestLeq:
     def test_num_leq_num(self) -> None:
-        assert run("output 2 <= 2") == [("output 1", H({1: 1}))]
+        assert run("output 2 <= 2") == [("output 1", d1)]
 
     def test_num_leq_seq(self) -> None:
         # right-side seq: counts elements satisfying 6 <= elem; none
-        assert run("output 6 <= {1,2,3}") == [("output 1", H({0: 1}))]
+        assert run("output 6 <= {1,2,3}") == [("output 1", dzero)]
 
     def test_num_leq_die(self) -> None:
         # 3<=d6: outcomes 3,4,5,6 qualify
@@ -1356,15 +1416,15 @@ class TestLeq:
 
     def test_seq_leq_seq(self) -> None:
         # lex tuple compare: (3,2,1) <= (4,3) -> 3<4 -> true
-        assert run("output {1,2,3} <= {3,4}") == [("output 1", H({1: 1}))]
+        assert run("output {1,2,3} <= {3,4}") == [("output 1", d1)]
 
     def test_seq_leq_seq_lex_distinguishes(self) -> None:
         # {4,1}=(4,1), {3,3}=(3,3); lex: 4>3 -> false. Sum would give 5<=6 -> true.
-        assert run("output {4,1} <= {3,3}") == [("output 1", H({0: 1}))]
+        assert run("output {4,1} <= {3,3}") == [("output 1", dzero)]
 
     def test_seq_leq_die(self) -> None:
         # seq-on-left with die-on-right: seq coerces to sum (6); 6 <= d{2,3} always false
-        assert run("output {1,2,3} <= d{2,3}") == [("output 1", H({0: 1}))]
+        assert run("output {1,2,3} <= d{2,3}") == [("output 1", dzero)]
 
     def test_die_leq_num(self) -> None:
         # d6<=3: outcomes 1,2,3 qualify
@@ -1383,17 +1443,17 @@ class TestLeq:
 
     def test_empty_seq_leq_num(self) -> None:
         # left empty seq counts elements <= num; 0 elements
-        assert run("output {} <= 5") == [("output 1", H({0: 1}))]
+        assert run("output {} <= 5") == [("output 1", dzero)]
 
     def test_num_leq_empty_seq(self) -> None:
-        assert run("output 5 <= {}") == [("output 1", H({0: 1}))]
+        assert run("output 5 <= {}") == [("output 1", dzero)]
 
     def test_empty_seq_leq_seq(self) -> None:
         # lex tuple compare: () <= (5,4,3,2,1) -> true
-        assert run("output {} <= {1..5}") == [("output 1", H({1: 1}))]
+        assert run("output {} <= {1..5}") == [("output 1", d1)]
 
     def test_seq_leq_empty_seq(self) -> None:
-        assert run("output {1..5} <= {}") == [("output 1", H({0: 1}))]
+        assert run("output {1..5} <= {}") == [("output 1", dzero)]
 
     def test_empty_seq_leq_die(self) -> None:
         # sum 0; 0 <= each positive 2d6 outcome -> always true
@@ -1405,22 +1465,22 @@ class TestLeq:
 
     def test_empty_die_leq_num(self) -> None:
         # comparisons propagate empty-die emptiness on either side
-        assert run("output d{} <= 5") == [("output 1", H({}))]
+        assert run("output d{} <= 5") == [("output 1", dempty)]
 
     def test_num_leq_empty_die(self) -> None:
-        assert run("output 5 <= d{}") == [("output 1", H({}))]
+        assert run("output 5 <= d{}") == [("output 1", dempty)]
 
     def test_empty_die_leq_seq(self) -> None:
-        assert run("output d{} <= {1..5}") == [("output 1", H({}))]
+        assert run("output d{} <= {1..5}") == [("output 1", dempty)]
 
     def test_seq_leq_empty_die(self) -> None:
-        assert run("output {1..5} <= d{}") == [("output 1", H({}))]
+        assert run("output {1..5} <= d{}") == [("output 1", dempty)]
 
     def test_empty_die_leq_die(self) -> None:
-        assert run("output d{} <= 2d6") == [("output 1", H({}))]
+        assert run("output d{} <= 2d6") == [("output 1", dempty)]
 
     def test_die_leq_empty_die(self) -> None:
-        assert run("output 2d6 <= d{}") == [("output 1", H({}))]
+        assert run("output 2d6 <= d{}") == [("output 1", dempty)]
 
 
 # ---- Greater than or equal (>=) ----------------------------------------------------------
@@ -1428,7 +1488,7 @@ class TestLeq:
 
 class TestGeq:
     def test_num_geq_num(self) -> None:
-        assert run("output 2 >= 2") == [("output 1", H({1: 1}))]
+        assert run("output 2 >= 2") == [("output 1", d1)]
 
     def test_num_geq_seq(self) -> None:
         # right-side seq: counts elements satisfying 6 >= elem; all 3
@@ -1444,15 +1504,15 @@ class TestGeq:
 
     def test_seq_geq_seq(self) -> None:
         # lex tuple compare: (4,3) >= (2,1) -> 4>2 -> true
-        assert run("output {3,4} >= {1,2}") == [("output 1", H({1: 1}))]
+        assert run("output {3,4} >= {1,2}") == [("output 1", d1)]
 
     def test_seq_geq_seq_lex_distinguishes(self) -> None:
         # {3,3}=(3,3), {4,1}=(4,1); lex: 3<4 -> false. Sum would give 6>=5 -> true.
-        assert run("output {3,3} >= {4,1}") == [("output 1", H({0: 1}))]
+        assert run("output {3,3} >= {4,1}") == [("output 1", dzero)]
 
     def test_seq_geq_die(self) -> None:
         # seq-on-left with die-on-right: seq coerces to sum (6); 6 >= d{1,3} always true
-        assert run("output {1,2,3} >= d{1,3}") == [("output 1", H({1: 1}))]
+        assert run("output {1,2,3} >= d{1,3}") == [("output 1", d1)]
 
     def test_die_geq_num(self) -> None:
         # d6>=3: outcomes 3,4,5,6 qualify
@@ -1468,17 +1528,17 @@ class TestGeq:
 
     def test_empty_seq_geq_num(self) -> None:
         # left empty seq counts elements >= num; 0 elements
-        assert run("output {} >= 5") == [("output 1", H({0: 1}))]
+        assert run("output {} >= 5") == [("output 1", dzero)]
 
     def test_num_geq_empty_seq(self) -> None:
-        assert run("output 5 >= {}") == [("output 1", H({0: 1}))]
+        assert run("output 5 >= {}") == [("output 1", dzero)]
 
     def test_empty_seq_geq_seq(self) -> None:
         # lex tuple compare: () >= (5,4,3,2,1) -> false
-        assert run("output {} >= {1..5}") == [("output 1", H({0: 1}))]
+        assert run("output {} >= {1..5}") == [("output 1", dzero)]
 
     def test_seq_geq_empty_seq(self) -> None:
-        assert run("output {1..5} >= {}") == [("output 1", H({1: 1}))]
+        assert run("output {1..5} >= {}") == [("output 1", d1)]
 
     def test_empty_seq_geq_die(self) -> None:
         # sum 0; 0 >= each positive 2d6 outcome -> always false
@@ -1490,22 +1550,22 @@ class TestGeq:
 
     def test_empty_die_geq_num(self) -> None:
         # comparisons propagate empty-die emptiness on either side
-        assert run("output d{} >= 5") == [("output 1", H({}))]
+        assert run("output d{} >= 5") == [("output 1", dempty)]
 
     def test_num_geq_empty_die(self) -> None:
-        assert run("output 5 >= d{}") == [("output 1", H({}))]
+        assert run("output 5 >= d{}") == [("output 1", dempty)]
 
     def test_empty_die_geq_seq(self) -> None:
-        assert run("output d{} >= {1..5}") == [("output 1", H({}))]
+        assert run("output d{} >= {1..5}") == [("output 1", dempty)]
 
     def test_seq_geq_empty_die(self) -> None:
-        assert run("output {1..5} >= d{}") == [("output 1", H({}))]
+        assert run("output {1..5} >= d{}") == [("output 1", dempty)]
 
     def test_empty_die_geq_die(self) -> None:
-        assert run("output d{} >= 2d6") == [("output 1", H({}))]
+        assert run("output d{} >= 2d6") == [("output 1", dempty)]
 
     def test_die_geq_empty_die(self) -> None:
-        assert run("output 2d6 >= d{}") == [("output 1", H({}))]
+        assert run("output 2d6 >= d{}") == [("output 1", dempty)]
 
 
 # ---- Logical and (&) ---------------------------------------------------------------------
@@ -1513,11 +1573,11 @@ class TestGeq:
 
 class TestAnd:
     def test_num_and_num(self) -> None:
-        assert run("output 1 & 1") == [("output 1", H({1: 1}))]
+        assert run("output 1 & 1") == [("output 1", d1)]
 
     def test_num_and_seq(self) -> None:
         # {1,2,3}=6, nonzero; 1 & 6 -> 1
-        assert run("output 1 & {1,2,3}") == [("output 1", H({1: 1}))]
+        assert run("output 1 & {1,2,3}") == [("output 1", d1)]
 
     def test_num_and_die(self) -> None:
         # 1 & d{0,1}: 1&0=0, 1&1=1
@@ -1525,11 +1585,11 @@ class TestAnd:
 
     def test_seq_and_num(self) -> None:
         # {1,2,3}=6, nonzero; 6 & 1 -> 1
-        assert run("output {1,2,3} & 1") == [("output 1", H({1: 1}))]
+        assert run("output {1,2,3} & 1") == [("output 1", d1)]
 
     def test_seq_and_seq(self) -> None:
         # {1,2,3}=6, {0}=0; 6 & 0 -> 0
-        assert run("output {1,2,3} & {0}") == [("output 1", H({0: 1}))]
+        assert run("output {1,2,3} & {0}") == [("output 1", dzero)]
 
     def test_seq_and_die(self) -> None:
         # {1,2,3}=6, nonzero; 6 & d{0,1}: 0, 1
@@ -1549,18 +1609,18 @@ class TestAnd:
 
     def test_empty_seq_and_num(self) -> None:
         # sum 0; 0 & 5 = 0
-        assert run("output {} & 5") == [("output 1", H({0: 1}))]
+        assert run("output {} & 5") == [("output 1", dzero)]
 
     def test_num_and_empty_seq(self) -> None:
         # 5 & sum 0 = 0
-        assert run("output 5 & {}") == [("output 1", H({0: 1}))]
+        assert run("output 5 & {}") == [("output 1", dzero)]
 
     def test_empty_seq_and_seq(self) -> None:
         # sum 0; 0 & 15 = 0
-        assert run("output {} & {1..5}") == [("output 1", H({0: 1}))]
+        assert run("output {} & {1..5}") == [("output 1", dzero)]
 
     def test_seq_and_empty_seq(self) -> None:
-        assert run("output {1..5} & {}") == [("output 1", H({0: 1}))]
+        assert run("output {1..5} & {}") == [("output 1", dzero)]
 
     def test_empty_seq_and_die(self) -> None:
         # 0 & each-2d6-outcome = 0; total weight 36
@@ -1571,22 +1631,22 @@ class TestAnd:
 
     def test_empty_die_and_num(self) -> None:
         # & propagates empty-die emptiness on either side
-        assert run("output d{} & 5") == [("output 1", H({}))]
+        assert run("output d{} & 5") == [("output 1", dempty)]
 
     def test_num_and_empty_die(self) -> None:
-        assert run("output 5 & d{}") == [("output 1", H({}))]
+        assert run("output 5 & d{}") == [("output 1", dempty)]
 
     def test_empty_die_and_seq(self) -> None:
-        assert run("output d{} & {1..5}") == [("output 1", H({}))]
+        assert run("output d{} & {1..5}") == [("output 1", dempty)]
 
     def test_seq_and_empty_die(self) -> None:
-        assert run("output {1..5} & d{}") == [("output 1", H({}))]
+        assert run("output {1..5} & d{}") == [("output 1", dempty)]
 
     def test_empty_die_and_die(self) -> None:
-        assert run("output d{} & 2d6") == [("output 1", H({}))]
+        assert run("output d{} & 2d6") == [("output 1", dempty)]
 
     def test_die_and_empty_die(self) -> None:
-        assert run("output 2d6 & d{}") == [("output 1", H({}))]
+        assert run("output 2d6 & d{}") == [("output 1", dempty)]
 
 
 # ---- Logical or (|) ----------------------------------------------------------------------
@@ -1594,11 +1654,11 @@ class TestAnd:
 
 class TestOr:
     def test_num_or_num(self) -> None:
-        assert run("output 1 | 0") == [("output 1", H({1: 1}))]
+        assert run("output 1 | 0") == [("output 1", d1)]
 
     def test_num_or_seq(self) -> None:
         # {1,2,3}=6, nonzero; 0 | 6 -> 1
-        assert run("output 0 | {1,2,3}") == [("output 1", H({1: 1}))]
+        assert run("output 0 | {1,2,3}") == [("output 1", d1)]
 
     def test_num_or_die(self) -> None:
         # 0 | d{0,1}: 0|0=0, 0|1=1
@@ -1606,11 +1666,11 @@ class TestOr:
 
     def test_seq_or_num(self) -> None:
         # {0}=0; 0 | 1 -> 1
-        assert run("output {0} | 1") == [("output 1", H({1: 1}))]
+        assert run("output {0} | 1") == [("output 1", d1)]
 
     def test_seq_or_seq(self) -> None:
         # {0}=0, {0}=0; 0 | 0 -> 0
-        assert run("output {0} | {0}") == [("output 1", H({0: 1}))]
+        assert run("output {0} | {0}") == [("output 1", dzero)]
 
     def test_seq_or_die(self) -> None:
         # {0}=0; 0 | d{0,1}: 0, 1
@@ -1630,17 +1690,17 @@ class TestOr:
 
     def test_empty_seq_or_num(self) -> None:
         # sum 0 | 5 = 1
-        assert run("output {} | 5") == [("output 1", H({1: 1}))]
+        assert run("output {} | 5") == [("output 1", d1)]
 
     def test_num_or_empty_seq(self) -> None:
-        assert run("output 5 | {}") == [("output 1", H({1: 1}))]
+        assert run("output 5 | {}") == [("output 1", d1)]
 
     def test_empty_seq_or_seq(self) -> None:
         # sum 0 | sum 15 = 1
-        assert run("output {} | {1..5}") == [("output 1", H({1: 1}))]
+        assert run("output {} | {1..5}") == [("output 1", d1)]
 
     def test_seq_or_empty_seq(self) -> None:
-        assert run("output {1..5} | {}") == [("output 1", H({1: 1}))]
+        assert run("output {1..5} | {}") == [("output 1", d1)]
 
     def test_empty_seq_or_die(self) -> None:
         # 0 | each-2d6-outcome (all truthy) -> 1; total weight 36
@@ -1651,18 +1711,18 @@ class TestOr:
 
     def test_empty_die_or_num(self) -> None:
         # | typically treats empty die as scalar 0; 0 | 5 = 1
-        assert run("output d{} | 5") == [("output 1", H({1: 1}))]
+        assert run("output d{} | 5") == [("output 1", d1)]
 
     def test_num_or_empty_die(self) -> None:
         # 5 | 0 = 1
-        assert run("output 5 | d{}") == [("output 1", H({1: 1}))]
+        assert run("output 5 | d{}") == [("output 1", d1)]
 
     def test_empty_die_or_seq(self) -> None:
         # 0 | sum 15 = 1
-        assert run("output d{} | {1..5}") == [("output 1", H({1: 1}))]
+        assert run("output d{} | {1..5}") == [("output 1", d1)]
 
     def test_seq_or_empty_die(self) -> None:
-        assert run("output {1..5} | d{}") == [("output 1", H({1: 1}))]
+        assert run("output {1..5} | d{}") == [("output 1", d1)]
 
     def test_empty_die_or_die(self) -> None:
         # 0 | each-2d6-outcome (all truthy) -> 1; total weight 36
@@ -1675,20 +1735,20 @@ class TestOr:
 
     def test_empty_seq_or_empty_seq(self) -> None:
         # sum 0 | sum 0 = 0
-        assert run("output {} | {}") == [("output 1", H({0: 1}))]
+        assert run("output {} | {}") == [("output 1", dzero)]
 
     def test_empty_seq_or_empty_die(self) -> None:
         # sum 0 | (right empty die acts as 0) = 0
-        assert run("output {} | d{}") == [("output 1", H({0: 1}))]
+        assert run("output {} | d{}") == [("output 1", dzero)]
 
     def test_empty_die_or_empty_seq(self) -> None:
-        # AnyDice anomaly: d{} | {} returns H({}) even though d{} | 5 returns H({1:1}).
+        # AnyDice anomaly: d{} | {} returns dempty even though d{} | 5 returns H({1:1}).
         # We match AnyDice's actual output for this specific corner case.
-        assert run("output d{} | {}") == [("output 1", H({}))]
+        assert run("output d{} | {}") == [("output 1", dempty)]
 
     def test_empty_die_or_empty_die(self) -> None:
         # Both sides empty die -> propagate.
-        assert run("output d{} | d{}") == [("output 1", H({}))]
+        assert run("output d{} | d{}") == [("output 1", dempty)]
 
 
 # ---- Negation (unary -) ------------------------------------------------------------------
@@ -1707,10 +1767,10 @@ class TestNeg:
 
     def test_neg_empty_seq(self) -> None:
         # sum 0 -> -0 -> 0
-        assert run("output -{}") == [("output 1", H({0: 1}))]
+        assert run("output -{}") == [("output 1", dzero)]
 
     def test_neg_empty_die(self) -> None:
-        assert run("output -d{}") == [("output 1", H({}))]
+        assert run("output -d{}") == [("output 1", dempty)]
 
 
 # ---- Unary plus (unary +) ----------------------------------------------------------------
@@ -1728,11 +1788,11 @@ class TestPos:
         assert run("output +d6") == [("output 1", H(6))]
 
     def test_pos_empty_seq(self) -> None:
-        # unary + is identity; empty seq is H({})
-        assert run("output +{}") == [("output 1", H({}))]
+        # unary + is identity; empty seq is dempty
+        assert run("output +{}") == [("output 1", dempty)]
 
     def test_pos_empty_die(self) -> None:
-        assert run("output +d{}") == [("output 1", H({}))]
+        assert run("output +d{}") == [("output 1", dempty)]
 
 
 # ---- Length / digit count (#) ------------------------------------------------------------
@@ -1740,7 +1800,7 @@ class TestPos:
 
 class TestHash:
     def test_hash_num(self) -> None:
-        assert run("output #5") == [("output 1", H({1: 1}))]
+        assert run("output #5") == [("output 1", d1)]
 
     def test_hash_num_two_digits(self) -> None:
         assert run("output #42") == [("output 1", H({2: 1}))]
@@ -1750,7 +1810,7 @@ class TestHash:
         assert run("output #-23") == [("output 1", H({2: 1}))]
 
     def test_hash_zero(self) -> None:
-        assert run("output #0") == [("output 1", H({1: 1}))]
+        assert run("output #0") == [("output 1", d1)]
 
     def test_hash_seq(self) -> None:
         assert run("output #{1,2,3}") == [("output 1", H({3: 1}))]
@@ -1759,23 +1819,8 @@ class TestHash:
         # duplicate elements each count as one position
         assert run("output #{2,2,4}") == [("output 1", H({3: 1}))]
 
-    def test_hash_empty_seq(self) -> None:
-        assert run("output #{}") == [("output 1", H({0: 1}))]
-
-    def test_hash_empty_die(self) -> None:
-        # # of an empty die is 0 (not H({}) -- # does NOT propagate emptiness)
-        assert run("output #d{}") == [("output 1", H({0: 1}))]
-
-    def test_hash_empty_pool(self) -> None:
-        # #(3d{}) is 0 too
-        assert run("output #(3d{})") == [("output 1", H({0: 1}))]
-
-    # Per AnyDice (program 42af3), `#` on a non-empty die or pool returns the
-    # number of positions. A bare die (H) is a 1-position pool. A multi-die
-    # pool (P) returns its length. Empty H/P still propagate 0 (above).
-
     def test_hash_die(self) -> None:
-        assert run("output #d6") == [("output 1", H({1: 1}))]
+        assert run("output #d6") == [("output 1", d1)]
 
     def test_hash_pool(self) -> None:
         assert run("output #(2d6)") == [("output 1", H({2: 1}))]
@@ -1783,23 +1828,87 @@ class TestHash:
     def test_hash_pool_three(self) -> None:
         assert run("output #(3d6)") == [("output 1", H({3: 1}))]
 
+    def test_hash_empty_seq(self) -> None:
+        assert run("output #{}") == [("output 1", dzero)]
+
+    # Per AnyDice (program 42af3), `#` on a non-empty die or pool returns the length of
+    # the pool, with a bare die (H) being a 1-position pool. *However*, a pool of empty
+    # dice is somehow of length 0. Watch out for the exception to the exception below,
+    # though.
+
+    def test_hash_empty_die(self) -> None:
+        # # of an empty die is 0 (not dempty -- # does NOT propagate emptiness)
+        assert run("output #d{}") == [("output 1", dzero)]
+
+    def test_hash_empty_pool(self) -> None:
+        # #(3d{}) is 0 too
+        assert run("output #(3d{})") == [("output 1", dzero)]
+
+    # Neat! Got it figured out yet? Nope. No you don't. This is where things get
+    # *weird*. (With weird being par for the course with AnyDice, apparently,
+    # so...not...weird...I guess?) Where one is looking at the length of a <die> d <die>
+    # pool, it's 1. Seriously, it's one. *Yes, even if that pool was created with one or
+    # more empty dice.*
+
+    def test_hash_die_d_die_is_one(self) -> None:
+        its_always_one = [("output 1", d1)]
+        assert run("output #(d2d0)") == its_always_one
+        assert run("output #(d0d2)") == its_always_one
+        assert run("output #(d2d2)") == its_always_one
+        i_said_its_always_one = its_always_one
+        assert run("output #(3d2d0)") == i_said_its_always_one
+        assert run("output #(3d0d2)") == i_said_its_always_one
+        assert run("output #(3d2d2)") == i_said_its_always_one
+        assert run("output #(d2d(3d0))") == i_said_its_always_one
+        assert run("output #(d0d(3d2))") == i_said_its_always_one
+        assert run("output #(d2d(3d2))") == i_said_its_always_one
+        seriously_its_one_why_wont_anyone_listen = i_said_its_always_one
+        assert run("output #(3d2d(3d0))") == seriously_its_one_why_wont_anyone_listen
+        assert run("output #(3d0d(3d2))") == seriously_its_one_why_wont_anyone_listen
+        assert run("output #(3d2d(3d2))") == seriously_its_one_why_wont_anyone_listen
+        assert run("output #(3d(2d3)d0)") == seriously_its_one_why_wont_anyone_listen
+        assert run("output #(3d(0d3)d2)") == seriously_its_one_why_wont_anyone_listen
+        assert run("output #(3d(2d3)d2)") == seriously_its_one_why_wont_anyone_listen
+        oh_my_god_i_give_up = seriously_its_one_why_wont_anyone_listen
+        assert run("output #((3d(2d3))d0)") == oh_my_god_i_give_up
+        assert run("output #((3d(0d3))d2)") == oh_my_god_i_give_up
+        assert run("output #((3d(2d3))d2)") == oh_my_god_i_give_up
+
+    def test_hash_die_d_empty_die(self) -> None:
+        assert run("output #(d0d{})") == [("output 1", d1)]
+        assert run("output #(d2d{})") == [("output 1", d1)]
+
+    def test_hash_empty_die_d_die(self) -> None:
+        assert run("output #(d{}d0)") == [("output 1", d1)]
+        assert run("output #(d{}d2)") == [("output 1", d1)]
+
+    def test_hash_empty_die_d_empty_die(self) -> None:
+        assert run("output #(d{}d{})") == [("output 1", d1)]
+
+    # Yup! Like we said before, `#(dMdN)` is *always* one. You can bank on it. Except
+    # you can't. Because if this.
+    def test_hash_die_d_die_is_one_except_when_it_isnt(self) -> None:
+        assert run("output #(1d(3d{}))") == [("output 1", dzero)]
+        assert run("output #(1d(3d0))") == [("output 1", H({3: 1}))]
+        assert run("output #(1d(3d2))") == [("output 1", H({3: 1}))]
+
 
 # ---- Logical not (!) ---------------------------------------------------------------------
 
 
 class TestNot:
     def test_not_num_zero(self) -> None:
-        assert run("output !0") == [("output 1", H({1: 1}))]
+        assert run("output !0") == [("output 1", d1)]
 
     def test_not_num_nonzero(self) -> None:
-        assert run("output !5") == [("output 1", H({0: 1}))]
+        assert run("output !5") == [("output 1", dzero)]
 
     def test_not_seq_nonzero_sum(self) -> None:
         # seq coerces to sum before !: sum({1,2,3})=6, !6=0
-        assert run("output !{1,2,3}") == [("output 1", H({0: 1}))]
+        assert run("output !{1,2,3}") == [("output 1", dzero)]
 
     def test_not_seq_zero_sum(self) -> None:
-        assert run("output !{0,0,0}") == [("output 1", H({1: 1}))]
+        assert run("output !{0,0,0}") == [("output 1", d1)]
 
     def test_not_die(self) -> None:
         # ! expands over die outcomes; all d6 outcomes are nonzero -> all map to 0
@@ -1807,10 +1916,10 @@ class TestNot:
 
     def test_not_empty_seq(self) -> None:
         # sum 0; !0 = 1
-        assert run("output !{}") == [("output 1", H({1: 1}))]
+        assert run("output !{}") == [("output 1", d1)]
 
     def test_not_empty_die(self) -> None:
-        assert run("output !d{}") == [("output 1", H({}))]
+        assert run("output !d{}") == [("output 1", dempty)]
 
 
 # ---- Error handling ----------------------------------------------------------------------
@@ -1840,9 +1949,7 @@ class TestFunctionBasic:
     _F_ADD_An_Bn = "function: add A:n B:n { result: A + B }"
 
     def test_no_arg_function(self) -> None:
-        assert run("function: one { result: 1 }\noutput [one]") == [
-            ("output 1", H({1: 1}))
-        ]
+        assert run("function: one { result: 1 }\noutput [one]") == [("output 1", d1)]
 
     def test_num_param_with_num(self) -> None:
         assert run(f"{self._F_DOUBLE_Xn}\noutput [double 3]") == [
@@ -1867,8 +1974,8 @@ class TestFunctionBasic:
         ]
 
     def test_no_result_returns_empty(self) -> None:
-        # function with no result: statement returns H({})
-        assert run("function: nothing { }\noutput [nothing]") == [("output 1", H({}))]
+        # function with no result: statement returns dempty
+        assert run("function: nothing { }\noutput [nothing]") == [("output 1", dempty)]
 
     def test_maximum_recursion_depth_default(self) -> None:
         assert run("function: { result: 1 + [] }\noutput []") == [
@@ -1881,7 +1988,7 @@ class TestFunctionBasic:
         ) == [("output 1", H({5: 1}))]
 
     def test_value_returned_after_maxium_recursion_depth_is_empty_die(self) -> None:
-        assert run("function: { result: 1 / [] }\noutput []") == [("output 1", H({}))]
+        assert run("function: { result: 1 / [] }\noutput []") == [("output 1", dempty)]
 
     def test_wildcard_param_type_equivalent_to_bare(self) -> None:
         # `:?` is AnyDice's explicit "any type" marker; identical to a bare param.
@@ -1989,7 +2096,7 @@ class TestFunctionSeqParam:
 
     def test_seq_param_with_num(self) -> None:
         # int becomes a 1-element seq; #X = 1
-        assert run(f"{self._F_COUNT}\noutput [count 5]") == [("output 1", H({1: 1}))]
+        assert run(f"{self._F_COUNT}\noutput [count 5]") == [("output 1", d1)]
 
     def test_seq_param_with_seq(self) -> None:
         assert run(f"{self._F_COUNT}\noutput [count {{1,2,3,4}}]") == [
@@ -1999,8 +2106,8 @@ class TestFunctionSeqParam:
     def test_seq_param_with_die(self) -> None:
         # die-as-:s treats the die opaquely as a 1-element seq (NOT as distinct
         # outcomes). The body still expands over the die's outcomes, but every
-        # outcome yields #X = 1, so the result is H({1: 1}).
-        assert run(f"{self._F_COUNT}\noutput [count d6]") == [("output 1", H({1: 1}))]
+        # outcome yields #X = 1, so the result is d1.
+        assert run(f"{self._F_COUNT}\noutput [count d6]") == [("output 1", d1)]
 
     def test_seq_param_with_die_each_outcome_in_one_elem_seq(self) -> None:
         # The body runs once per die outcome o with X = (o,); 1@X = o, 2@X = 0
@@ -2270,7 +2377,7 @@ output [roll 1d6 1d6]
         #   (1) bare param `ex A` -> A is bound to the H from [roll]
         #   (2) `2 @ <die>` returns 0 (1-element-pool out-of-range)
         #   (3) [roll]'s seq-returning iterations sum-coerce
-        # AnyDice oracle: H({0: 1}).
+        # AnyDice oracle: dzero.
         src = """
 function: roll A:n B:n {
  C: 0
@@ -2522,7 +2629,7 @@ class TestFunctionDispatchShapes:
 
 class TestIfStmt:
     def test_if_true_runs_body(self) -> None:
-        assert run("if 1 { output 1 }") == [("output 1", H({1: 1}))]
+        assert run("if 1 { output 1 }") == [("output 1", d1)]
 
     def test_if_false_no_body(self) -> None:
         # No outputs are emitted when the condition is false and there is no else
@@ -2537,7 +2644,7 @@ class TestIfStmt:
         assert run("if 0 { output 1 } else {}") == []
 
     def test_if_else_true(self) -> None:
-        assert run("if 1 { output 1 } else { output 2 }") == [("output 1", H({1: 1}))]
+        assert run("if 1 { output 1 } else { output 2 }") == [("output 1", d1)]
 
     def test_if_else_false(self) -> None:
         assert run("if 0 { output 1 } else { output 2 }") == [("output 1", H({2: 1}))]
@@ -2576,9 +2683,7 @@ class TestIfStmt:
             run("if {} { output 1 } else { output 2 }")
 
     def test_var_condition(self) -> None:
-        assert run("X: 5\nif X { output 1 } else { output 2 }") == [
-            ("output 1", H({1: 1}))
-        ]
+        assert run("X: 5\nif X { output 1 } else { output 2 }") == [("output 1", d1)]
 
     def test_nested_if(self) -> None:
         assert run("if 1 { if 1 { output 99 } }") == [("output 1", H({99: 1}))]
@@ -2617,7 +2722,7 @@ class TestLoopStmt:
 
     def test_loop_outputs_per_iteration(self) -> None:
         assert run("loop X over {1..3} { output X }") == [
-            ("output 1", H({1: 1})),
+            ("output 1", d1),
             ("output 2", H({2: 1})),
             ("output 3", H({3: 1})),
         ]
@@ -2741,7 +2846,7 @@ class TestStatementContextRestrictions:
         )
         result = run(src)
         assert len(result) == 3
-        assert result[0] == ("factor 1", H({1: 1}))
+        assert result[0] == ("factor 1", d1)
         assert result[1] == ("factor 2", H({2: 1}))
         assert result[2] == ("factor 3", H({3: 1}))
 
@@ -2840,7 +2945,7 @@ class TestLoopStmtInFunctionBody:
             "}\n"
             "output [f]"
         )
-        assert run(prog) == [("output 1", H({1: 1}))]
+        assert run(prog) == [("output 1", d1)]
 
     def test_loop_inside_if_inside_function(self) -> None:
         prog = (
@@ -2869,9 +2974,7 @@ class TestStringInterpolation:
     # `[A-Z][A-Z_]*` is preserved verbatim, including the brackets.
 
     def test_interpolation_replaces_var_with_int_value(self) -> None:
-        assert run('X: 42\noutput 1 named "answer is [X]"') == [
-            ("answer is 42", H({1: 1}))
-        ]
+        assert run('X: 42\noutput 1 named "answer is [X]"') == [("answer is 42", d1)]
 
     def test_interpolation_at_start(self) -> None:
         assert run('N: 5\noutput Nd6 named "[N]d6"') == [
@@ -2879,29 +2982,27 @@ class TestStringInterpolation:
         ]
 
     def test_interpolation_at_end(self) -> None:
-        assert run('X: 7\noutput 1 named "value: [X]"') == [("value: 7", H({1: 1}))]
+        assert run('X: 7\noutput 1 named "value: [X]"') == [("value: 7", d1)]
 
     def test_interpolation_only_no_literal_text(self) -> None:
-        assert run('X: 9\noutput 1 named "[X]"') == [("9", H({1: 1}))]
+        assert run('X: 9\noutput 1 named "[X]"') == [("9", d1)]
 
     def test_multiple_interpolations(self) -> None:
-        assert run('A: 1\nB: 2\noutput 1 named "[A] and [B]"') == [
-            ("1 and 2", H({1: 1}))
-        ]
+        assert run('A: 1\nB: 2\noutput 1 named "[A] and [B]"') == [("1 and 2", d1)]
 
     def test_loop_var_interpolated_per_iteration(self) -> None:
         # The classic AnyDice idiom: emit a labeled output per iteration.
         assert run('loop X over {1..3} { output X named "iter [X]" }') == [
-            ("iter 1", H({1: 1})),
+            ("iter 1", d1),
             ("iter 2", H({2: 1})),
             ("iter 3", H({3: 1})),
         ]
 
     def test_negative_value_interpolates_with_sign(self) -> None:
-        assert run('X: -7\noutput 1 named "neg [X]"') == [("neg -7", H({1: 1}))]
+        assert run('X: -7\noutput 1 named "neg [X]"') == [("neg -7", d1)]
 
     def test_zero_value_interpolates(self) -> None:
-        assert run('X: 0\noutput 1 named "x = [X]"') == [("x = 0", H({1: 1}))]
+        assert run('X: 0\noutput 1 named "x = [X]"') == [("x = 0", d1)]
 
     def test_undefined_var_in_interpolation_raises(self) -> None:
         with pytest.raises(NameError, match=r"undefined variable"):
@@ -2910,32 +3011,32 @@ class TestStringInterpolation:
     def test_non_uppername_bracketed_text_preserved_verbatim(self) -> None:
         # Per AnyDice (program 42aae): only [UPPERNAME] interpolates. Brackets
         # around anything else are part of the literal label text.
-        assert run('output 0 named "[2 * 3]"') == [("[2 * 3]", H({0: 1}))]
+        assert run('output 0 named "[2 * 3]"') == [("[2 * 3]", dzero)]
 
     def test_non_uppername_arbitrary_text_preserved(self) -> None:
         assert run('output 0 named "[I\'m an arbitrary string!]"') == [
-            ("[I'm an arbitrary string!]", H({0: 1}))
+            ("[I'm an arbitrary string!]", dzero)
         ]
 
     def test_die_value_interpolates_as_opaque_marker(self) -> None:
         # Non-empty die renders opaquely. We don't reverse-engineer AnyDice's
         # source-text rendering ("d6", etc.); "d{?}" conveys "this was a die".
-        assert run('D: d6\noutput 1 named "die: [D]"') == [("die: d{?}", H({1: 1}))]
+        assert run('D: d6\noutput 1 named "die: [D]"') == [("die: d{?}", d1)]
 
     def test_pool_value_interpolates_with_size(self) -> None:
         # A pool's size is preserved in the marker.
-        assert run('D: 2d6\noutput 1 named "pool: [D]"') == [("pool: 2d{?}", H({1: 1}))]
+        assert run('D: 2d6\noutput 1 named "pool: [D]"') == [("pool: 2d{?}", d1)]
 
     def test_seq_value_interpolates_as_opaque_marker(self) -> None:
-        assert run('S: {1..4}\noutput 1 named "seq: [S]"') == [("seq: {?}", H({1: 1}))]
+        assert run('S: {1..4}\noutput 1 named "seq: [S]"') == [("seq: {?}", d1)]
 
     def test_empty_seq_interpolates_distinctly(self) -> None:
         # Empties get distinct markers as a debugging aid: "{}" vs the opaque
         # "{?}" for a populated seq.
-        assert run('S: {}\noutput 1 named "empty: [S]"') == [("empty: {}", H({1: 1}))]
+        assert run('S: {}\noutput 1 named "empty: [S]"') == [("empty: {}", d1)]
 
     def test_empty_die_interpolates_distinctly(self) -> None:
-        assert run('D: d{}\noutput 1 named "empty: [D]"') == [("empty: d{}", H({1: 1}))]
+        assert run('D: d{}\noutput 1 named "empty: [D]"') == [("empty: d{}", d1)]
 
     def test_interpolation_uses_value_at_output_time(self) -> None:
         # The label is computed when the `output` statement runs, using the
@@ -2985,13 +3086,13 @@ class TestBuiltinHighestOfAnd:
         assert run("output [highest of {1,2} and 5]") == [("output 1", H({5: 1}))]
 
     def test_empty_die_propagates(self) -> None:
-        # n-typed param: empty die yields H({}).
-        assert run("output [highest of d{} and 3]") == [("output 1", H({}))]
+        # n-typed param: empty die yields dempty.
+        assert run("output [highest of d{} and 3]") == [("output 1", dempty)]
 
     def test_empty_die_on_right_propagates(self) -> None:
-        # Symmetric: empty die on either side yields H({}). Verified against
+        # Symmetric: empty die on either side yields dempty. Verified against
         # AnyDice (program 42ac6).
-        assert run("output [highest of d6 and d{}]") == [("output 1", H({}))]
+        assert run("output [highest of d6 and d{}]") == [("output 1", dempty)]
 
 
 # ---- Builtin: [highest N of P] -----------------------------------------------------------
@@ -3061,8 +3162,8 @@ class TestBuiltinHighestNOf:
         ]
 
     def test_highest_0_of_pool(self) -> None:
-        # n=0: nothing kept; AnyDice (program 42ac6) returns H({0: 1}).
-        assert run("output [highest 0 of 4d6]") == [("output 1", H({0: 1}))]
+        # n=0: nothing kept; AnyDice (program 42ac6) returns dzero.
+        assert run("output [highest 0 of 4d6]") == [("output 1", dzero)]
 
     def test_highest_n_exceeds_pool_size(self) -> None:
         # n=5 of 4-die pool: AnyDice (program 42ac6) returns the full pool sum.
@@ -3073,13 +3174,13 @@ class TestBuiltinHighestNOf:
 
     def test_highest_n_of_empty_pool(self) -> None:
         # AnyDice (program 42ac6): `0d6` parses as a zero-die pool; `highest 3 of` it
-        # returns H({0: 1}).
-        assert run("output [highest 3 of 0d6]") == [("output 1", H({0: 1}))]
+        # returns dzero.
+        assert run("output [highest 3 of 0d6]") == [("output 1", dzero)]
 
     def test_highest_negative_n(self) -> None:
-        # Negative n: AnyDice (program 42ac6) returns H({0: 1}). Our impl builds an
+        # Negative n: AnyDice (program 42ac6) returns dzero. Our impl builds an
         # empty selector tuple for n <= 0, producing the same result.
-        assert run("output [highest -1 of 4d6]") == [("output 1", H({0: 1}))]
+        assert run("output [highest -1 of 4d6]") == [("output 1", dzero)]
 
     def test_highest_n_of_pool_collapsed_via_arith(self) -> None:
         # Per AnyDice (program 42ac6), `(4d6 + 4d6)` collapses to a single die (the
@@ -3211,13 +3312,13 @@ class TestBuiltinCountIn:
         assert run("C: {1, 2, 3}\noutput [count C in C]") == [("output 1", H({3: 1}))]
 
     def test_disjoint(self) -> None:
-        assert run("output [count {1, 3} in {2, 4, 6}]") == [("output 1", H({0: 1}))]
+        assert run("output [count {1, 3} in {2, 4, 6}]") == [("output 1", dzero)]
 
     def test_empty_vals(self) -> None:
-        assert run("output [count {} in {1, 2, 3}]") == [("output 1", H({0: 1}))]
+        assert run("output [count {} in {1, 2, 3}]") == [("output 1", dzero)]
 
     def test_empty_seq(self) -> None:
-        assert run("output [count {1, 2} in {}]") == [("output 1", H({0: 1}))]
+        assert run("output [count {1, 2} in {}]") == [("output 1", dzero)]
 
     def test_int_in_die_expansion(self) -> None:
         # 1d6: each outcome treated as a 1-element seq under :s. For each die
@@ -3262,12 +3363,12 @@ class TestBuiltinSort:
         assert run("output 1 @ [sort {3, 1, 2}]") == [("output 1", H({3: 1}))]
 
     def test_position_three_default_is_lowest(self) -> None:
-        assert run("output 3 @ [sort {3, 1, 2}]") == [("output 1", H({1: 1}))]
+        assert run("output 3 @ [sort {3, 1, 2}]") == [("output 1", d1)]
 
     def test_position_one_lowest_first_is_lowest(self) -> None:
         assert run(
             'set "position order" to "lowest first"\noutput 1 @ [sort {3, 1, 2}]'
-        ) == [("output 1", H({1: 1}))]
+        ) == [("output 1", d1)]
 
     def test_position_three_lowest_first_is_highest(self) -> None:
         assert run(
@@ -3281,7 +3382,7 @@ class TestBuiltinSort:
         assert run("output [sort {2, 2, 1, 1}]") == [("output 1", H({1: 2, 2: 2}))]
 
     def test_sort_empty(self) -> None:
-        assert run("output [sort {}]") == [("output 1", H({}))]
+        assert run("output [sort {}]") == [("output 1", dempty)]
 
     def test_sort_singleton(self) -> None:
         assert run("output [sort {7}]") == [("output 1", H({7: 1}))]
@@ -3471,7 +3572,7 @@ class TestBuiltinExplode:
 
     def test_explode_empty_die(self) -> None:
         # Empty die propagates as empty.
-        assert run("output [explode d{}]") == [("output 1", H({}))]
+        assert run("output [explode d{}]") == [("output 1", dempty)]
 
     def test_explode_pool_collapses_to_sum_first(self) -> None:
         # `[explode 2d6]` collapses 2d6 to its sum H (range 2..12) first, then
@@ -3583,7 +3684,7 @@ class TestBuiltinLowestOfAnd:
         assert run("output [lowest of {1,2} and 5]") == [("output 1", H({3: 1}))]
 
     def test_empty_die_propagates(self) -> None:
-        assert run("output [lowest of d{} and 3]") == [("output 1", H({}))]
+        assert run("output [lowest of d{} and 3]") == [("output 1", dempty)]
 
 
 # ---- Builtin: [lowest N of P] -----------------------------------------------------------
@@ -3657,7 +3758,7 @@ class TestBuiltinLowestNOf:
 
     def test_lowest_0_of_pool(self) -> None:
         # Mirror of [highest 0 of 4d6].
-        assert run("output [lowest 0 of 4d6]") == [("output 1", H({0: 1}))]
+        assert run("output [lowest 0 of 4d6]") == [("output 1", dzero)]
 
     def test_lowest_n_exceeds_pool_size(self) -> None:
         # Selectors past pool size silently drop; result equals full sum.
@@ -3665,10 +3766,10 @@ class TestBuiltinLowestNOf:
         assert run("output [lowest 5 of 4d6]") == [("output 1", expected)]
 
     def test_lowest_n_of_empty_pool(self) -> None:
-        assert run("output [lowest 3 of 0d6]") == [("output 1", H({0: 1}))]
+        assert run("output [lowest 3 of 0d6]") == [("output 1", dzero)]
 
     def test_lowest_negative_n(self) -> None:
-        assert run("output [lowest -1 of 4d6]") == [("output 1", H({0: 1}))]
+        assert run("output [lowest -1 of 4d6]") == [("output 1", dzero)]
 
     def test_lowest_n_of_pool_collapsed_via_arith(self) -> None:
         # Mirror of highest's pool-collapse-via-arith. (4d6 + 4d6) collapses to
@@ -3683,7 +3784,7 @@ class TestBuiltinLowestNOf:
 class TestBuiltinMaximumOf:
     # Verified against AnyDice (program 42b18). `[maximum of <die>]` returns the
     # maximum POSSIBLE outcome of the die. For pools, the max of the SUM
-    # distribution. Empty die returns 0 (NOT H({})).
+    # distribution. Empty die returns 0 (NOT dempty).
 
     def test_maximum_of_d6(self) -> None:
         assert run("output [maximum of d6]") == [("output 1", H({6: 1}))]
@@ -3704,8 +3805,8 @@ class TestBuiltinMaximumOf:
         assert run("output [maximum of 4d6]") == [("output 1", H({24: 1}))]
 
     def test_maximum_of_empty_die(self) -> None:
-        # Empty die -> 0, not H({}).
-        assert run("output [maximum of d{}]") == [("output 1", H({0: 1}))]
+        # Empty die -> 0, not dempty.
+        assert run("output [maximum of d{}]") == [("output 1", dzero)]
 
     def test_maximum_of_die_with_negatives(self) -> None:
         assert run("output [maximum of d{-3, -1, 2}]") == [("output 1", H({2: 1}))]
@@ -3724,7 +3825,7 @@ class TestBuiltinReverse:
         assert run("output 1 @ [reverse {1, 2, 3}]") == [("output 1", H({3: 1}))]
 
     def test_reverse_position_three_default(self) -> None:
-        assert run("output 3 @ [reverse {1, 2, 3}]") == [("output 1", H({1: 1}))]
+        assert run("output 3 @ [reverse {1, 2, 3}]") == [("output 1", d1)]
 
     def test_reverse_independent_of_position_order(self) -> None:
         # Position-order setting does NOT affect reverse (unlike sort).
@@ -3738,8 +3839,8 @@ class TestBuiltinReverse:
 
     def test_reverse_empty_returns_zero(self) -> None:
         # AnyDice quirk: `[reverse {}]` -> 0, NOT the empty seq.
-        # (`[sort {}]` returns H({}); they differ on empty input.)
-        assert run("output [reverse {}]") == [("output 1", H({0: 1}))]
+        # (`[sort {}]` returns dempty; they differ on empty input.)
+        assert run("output [reverse {}]") == [("output 1", dzero)]
 
     def test_reverse_singleton(self) -> None:
         assert run("output [reverse {7}]") == [("output 1", H({7: 1}))]
@@ -3780,7 +3881,7 @@ class TestBuiltinReverse:
 class TestBuiltinAbsolute:
     # Verified against AnyDice (program 42b1a). `[absolute N]` with `:n` typing:
     # ints abs; seqs sum-coerce then abs; dies expand per-outcome; empty die
-    # propagates as H({}); pools sum-coerce first.
+    # propagates as dempty; pools sum-coerce first.
 
     def test_absolute_positive(self) -> None:
         assert run("output [absolute 5]") == [("output 1", H({5: 1}))]
@@ -3789,7 +3890,7 @@ class TestBuiltinAbsolute:
         assert run("output [absolute -5]") == [("output 1", H({5: 1}))]
 
     def test_absolute_zero(self) -> None:
-        assert run("output [absolute 0]") == [("output 1", H({0: 1}))]
+        assert run("output [absolute 0]") == [("output 1", dzero)]
 
     def test_absolute_seq_mixed(self) -> None:
         # sum({-3, 1, -2}) = -4; abs = 4.
@@ -3800,7 +3901,7 @@ class TestBuiltinAbsolute:
 
     def test_absolute_empty_seq(self) -> None:
         # sum({}) = 0; abs = 0.
-        assert run("output [absolute {}]") == [("output 1", H({0: 1}))]
+        assert run("output [absolute {}]") == [("output 1", dzero)]
 
     def test_absolute_die_with_negatives(self) -> None:
         # Per-outcome: abs(-3)=3, abs(-1)=1, abs(2)=2.
@@ -3812,8 +3913,8 @@ class TestBuiltinAbsolute:
         assert run("output [absolute 1d{-2, 5}]") == [("output 1", H({2: 1, 5: 1}))]
 
     def test_absolute_empty_die(self) -> None:
-        # `:n` empty die propagates as H({}).
-        assert run("output [absolute d{}]") == [("output 1", H({}))]
+        # `:n` empty die propagates as dempty.
+        assert run("output [absolute d{}]") == [("output 1", dempty)]
 
     def test_absolute_pool(self) -> None:
         # 2d{-3, 1}: sum H = {-6:1, -2:2, 2:1}. Abs: {2:3, 6:1}.
@@ -3832,20 +3933,20 @@ class TestBuiltinContains:
     # produce VAL".
 
     def test_contains_present(self) -> None:
-        assert run("output [{1, 2, 3} contains 2]") == [("output 1", H({1: 1}))]
+        assert run("output [{1, 2, 3} contains 2]") == [("output 1", d1)]
 
     def test_contains_absent(self) -> None:
-        assert run("output [{1, 2, 3} contains 4]") == [("output 1", H({0: 1}))]
+        assert run("output [{1, 2, 3} contains 4]") == [("output 1", dzero)]
 
     def test_contains_with_duplicates_returns_boolean(self) -> None:
         # `[contains]` is a boolean: returns 0/1, not the count of matches.
-        assert run("output [{1, 2, 2, 3} contains 2]") == [("output 1", H({1: 1}))]
+        assert run("output [{1, 2, 2, 3} contains 2]") == [("output 1", d1)]
 
     def test_contains_empty(self) -> None:
-        assert run("output [{} contains 2]") == [("output 1", H({0: 1}))]
+        assert run("output [{} contains 2]") == [("output 1", dzero)]
 
     def test_contains_singleton_self(self) -> None:
-        assert run("output [{2} contains 2]") == [("output 1", H({1: 1}))]
+        assert run("output [{2} contains 2]") == [("output 1", d1)]
 
     def test_contains_die_as_val(self) -> None:
         # VAL is `:n`; d6 expands per-outcome. 3 of 6 outcomes are in {1,2,3}.
@@ -3853,8 +3954,8 @@ class TestBuiltinContains:
 
     def test_contains_pool_as_seq(self) -> None:
         # `:s` expansion of 2d6 -> per-roll tuples; 7 never appears as a roll
-        # element (it's a sum). Result H({0: 1}).
-        assert run("output [2d6 contains 7]") == [("output 1", H({0: 1}))]
+        # element (it's a sum). Result dzero.
+        assert run("output [2d6 contains 7]") == [("output 1", dzero)]
 
     def test_contains_die_as_seq(self) -> None:
         # d6 -> 1-element seq per outcome; (f,) contains 3 iff f == 3.
@@ -3922,14 +4023,14 @@ class TestBuiltinMiddleNOf:
         assert run("output [middle 5 of 4d6]") == [("output 1", P(6, 6, 6, 6).h())]
 
     def test_middle_zero(self) -> None:
-        assert run("output [middle 0 of 4d6]") == [("output 1", H({0: 1}))]
+        assert run("output [middle 0 of 4d6]") == [("output 1", dzero)]
 
     def test_middle_negative(self) -> None:
-        assert run("output [middle -1 of 4d6]") == [("output 1", H({0: 1}))]
+        assert run("output [middle -1 of 4d6]") == [("output 1", dzero)]
 
     def test_middle_of_zero_die_pool(self) -> None:
         # 0d6 evaluates to H({0:1}); middle 1 of a 1-element pool is the element.
-        assert run("output [middle 1 of 0d6]") == [("output 1", H({0: 1}))]
+        assert run("output [middle 1 of 0d6]") == [("output 1", dzero)]
 
     def test_middle_1_of_1d6(self) -> None:
         assert run("output [middle 1 of 1d6]") == [
@@ -3937,7 +4038,7 @@ class TestBuiltinMiddleNOf:
         ]
 
     def test_middle_1_of_empty_die(self) -> None:
-        assert run("output [middle 1 of d{}]") == [("output 1", H({}))]
+        assert run("output [middle 1 of d{}]") == [("output 1", dempty)]
 
     def test_middle_independent_of_position_order(self) -> None:
         # Position-order setting has no effect on [middle].
@@ -4072,7 +4173,7 @@ class TestExpansionEnumerationOrder:
         )
         assert run(prog) == [
             ("output 1", H({0: 2, 1: 1, 3: 1})),
-            ("output 2", H({0: 1})),
+            ("output 2", dzero),
         ]
 
 

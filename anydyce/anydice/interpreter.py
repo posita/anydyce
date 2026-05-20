@@ -65,7 +65,7 @@ __all__ = ("AnyDiceInterpreter",)
 NumT = int
 SeqT = RollT[NumT]
 DieT = P[NumT]
-AnyDiceResultT = tuple[str, H[int]]
+AnyDiceResultT = tuple[str, H[NumT]]
 AnyDiceResultsT = list[AnyDiceResultT]
 # AnyDice's surface "die" type maps to two cooperating internal types. The split exists
 # because positional information is meaningful for some operations and meaningless for
@@ -78,7 +78,7 @@ AnyDiceResultsT = list[AnyDiceResultT]
 # coexist in _Val, and are used wherever each fits. `P op X` (for X in P/H/int) already
 # collapses to H by design. We only convert P -> H by hand at sites that build outcome
 # maps directly (see _h_binop, _apply_cmp).
-_Val = NumT | H[int] | DieT | SeqT | str
+_Val = NumT | H[NumT] | DieT | SeqT | str
 
 # ---- Operator tables ---------------------------------------------------------------------
 
@@ -92,6 +92,32 @@ _Val = NumT | H[int] | DieT | SeqT | str
 # AnyDice emits empirically; it is `-(2**63 + 192) = -0x80000000000000C0`,
 # likely an artifact of PHP's `(int)(-INF)` cast.
 _POW_NEG_INF_SENTINEL = -9223372036854776000
+
+
+class _EmptyPoolOfOne(P[NumT]):
+    r"""
+    Nope, that’s not a contradiction.
+    But nor is it some kind of deep existential thought exercise.
+
+    Yup, it’s a hack.
+
+    This is ***solely*** to represent a pool of length one containing the empty die, which `dyce` itself takes a principled stance against.
+    (`dyce` refuses to include the empty die in pools because its presence would either have to be ignored or any convolution would collapse the entire pool into the empty die.)
+    But AnyDice treats `#d{}` (the “number” of one empty die) and `#(d{}d{})` (the “number” of a pool of one empty die) as different.
+    The former is zero.
+    The latter is one.
+    You do the math.
+
+    Oh wait.
+    You can’t.
+    Your guess is as good as mine as to why this makes sense.
+    Given the types of other bugs we’ve discovered, it probably doesn’t.
+    It’s probably yet another artifact of hacking the thing together without really understanding what’s going on.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._hs = (H({}),)
 
 
 def _anydice_pow_strict(a: int, b: int) -> int:
@@ -334,7 +360,7 @@ class AnyDiceInterpreter:
             n = self._eval(node.n)
             if isinstance(n, tuple):
                 n = sum(n)
-            if isinstance(n, P):
+            elif isinstance(n, P):
                 n = n.h()
             if isinstance(n, int):
                 faces = self._eval(node.faces)
@@ -409,9 +435,7 @@ class AnyDiceInterpreter:
         elif isinstance(v, tuple):
             return len(v)
         elif isinstance(v, P):
-            # `#P` returns the number of dice in the pool; an empty pool yields
-            # 0 (does NOT propagate emptiness). Verified via 42af3.
-            return len(v) if v.h() else 0
+            return len(v)  # this could be _EmptyPoolOfOne
         elif isinstance(v, H):
             # A bare die is a 1-position pool. Empty H -> 0. Verified via 42af3.
             return 1 if v else 0
@@ -664,14 +688,23 @@ class AnyDiceInterpreter:
             # Use a Pool so that @ can select positions. Arithmetic/output sums via .h().
             return n @ P(die)
 
-    def _expand_dice_count(self, n_die: H[int], face_die: H[int]) -> H[int]:
-        # For each outcome k of n_die with weight w_k, compute kd<face_die> and
-        # combine. Inner distributions can have different totals (e.g. 1d6 has
-        # total 6 vs 2d6's 36); aggregate_weighted LCM-normalizes them before
-        # merging to preserve the relative probabilities of each outer-outcome
-        # branch.
-        if not n_die:
-            return H({})
+    def _expand_dice_count(
+        self, n_die: H[int], face_die: H[int]
+    ) -> H[int] | _EmptyPoolOfOne:
+        # For each outcome k of n_die with weight w_k, compute kd<face_die> and combine.
+        # Inner distributions can have different totals (e.g. 1d6 has total 6 vs 2d6's
+        # 36). aggregate_weighted LCM-normalizes them before merging to preserve the
+        # relative probabilities of each outer-outcome branch.
+        #
+        # Erm, that is, *except* when either n_die or face_die is the empty die. How big
+        # is the die with no faces? To answer, we have to leave the world of reality,
+        # entering a realm not only of sight and sound, but lacking of mind. That's the
+        # signpost up ahead--your next stop, the AnyDice Twilight Clone. (3-5 days to
+        # get a basic syntax and interpreter working, and 5-10 times that trying to
+        # figure out and possibly reproduce all of the unprincipled idiosyncrasies. But
+        # who's counting?)
+        if not n_die or not face_die:
+            return _EmptyPoolOfOne()
 
         def _gen() -> Iterator[tuple[H[int], int]]:
             for k, w_k in n_die.items():
