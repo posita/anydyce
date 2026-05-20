@@ -337,7 +337,11 @@ class AnyDiceInterpreter:
             if isinstance(n, P):
                 n = n.h()
             if isinstance(n, int):
-                return self._roll_n(n, self._make_die(self._eval(node.faces)))
+                faces = self._eval(node.faces)
+                if n == 1 and isinstance(faces, P):
+                    # 1d(<pool>) is treated as a no-op
+                    return faces
+                return self._roll_n(n, self._make_die(faces))
             elif isinstance(n, H):
                 # AnyDice expands a die-as-count over its outcomes: for each
                 # outcome k, evaluate `k d <faces>` and combine the per-outcome
@@ -554,7 +558,18 @@ class AnyDiceInterpreter:
             )
 
     def _at_pool(self, left: _Val, pool: DieT) -> H[int]:
-        if isinstance(left, tuple):
+        if isinstance(left, int):
+            size = len(pool)
+            # Left is out of range
+            if not 1 <= left <= size:
+                return H({0: 1})
+            # 1-based position. highest-first: pos 1 = highest = pool.h(-1).
+            # lowest-first:  pos 1 = lowest  = pool.h(0).
+            elif self._settings.highest_first():
+                return pool.h(-left)
+            else:
+                return pool.h(left - 1)
+        elif isinstance(left, tuple):
             # Multi-position semantic: each element of the seq is a separate
             # position. The positions come from the SAME pool roll, so they're
             # correlated; dyce's `P.h(*selectors)` sums them jointly. Out-of-
@@ -570,19 +585,10 @@ class AnyDiceInterpreter:
             if not selectors:
                 return H({0: 1})
             return pool.h(*selectors)
-        if not isinstance(left, int):
+        else:
             raise TypeError(
                 f"@ left operand must be a number or sequence, got {type(left).__name__}"
             )
-        size = len(pool)
-        if left < 1 or left > size:
-            return H({0: 1})
-        # 1-based position. highest-first: pos 1 = highest = pool.h(-1).
-        # lowest-first:  pos 1 = lowest  = pool.h(0).
-        elif self._settings.highest_first():
-            return pool.h(-left)
-        else:
-            return pool.h(left - 1)
 
     def _at_num(self, left: _Val, num: int) -> int:
         if isinstance(left, int):
