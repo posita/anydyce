@@ -932,6 +932,33 @@ class TestAt:
             )
         ]
 
+    def test_num_at_pool_out_of_range_high(self) -> None:
+        # Scalar `N @ pool` with N > len(pool) returns H({0: 1}).
+        assert run("output 5 @ 3d6") == [("output 1", H({0: 1}))]
+
+    def test_num_at_pool_out_of_range_zero(self) -> None:
+        # Scalar `N @ pool` with N < 1 returns H({0: 1}) (the other half of
+        # the `left < 1 or left > size` guard).
+        assert run("output 0 @ 3d6") == [("output 1", H({0: 1}))]
+
+    def test_seq_at_pool_with_some_out_of_range_positions(self) -> None:
+        # Out-of-range positions in the seq are silently dropped; result is
+        # the same as if only the in-range positions had been listed.
+        assert run("output {-1, 1, 99} @ 3d6") == run("output 1 @ 3d6")
+
+    def test_seq_at_pool_with_some_out_of_range_positions_with_repeats(self) -> None:
+        # Out-of-range positions in the seq are silently dropped; result is
+        # the same as if only the in-range positions had been listed.
+        assert run("output {-2, -1, -1, 1, 1, 2, 99, 100, 99} @ 3d6") == run(
+            "output {1, 1, 2} @ 3d6"
+        )
+
+    def test_seq_at_pool_all_out_of_range(self) -> None:
+        # Every position out of range -> no selectors -> H({0: 1}).
+        assert run("output {-2, -1, -1, 99, 100, 99} @ 3d6") == [
+            ("output 1", H({0: 1}))
+        ]
+
     def test_die_at_seq(self) -> None:
         with pytest.raises(
             TypeError, match=r"@ left operand must be a number or sequence, got die"
@@ -4130,3 +4157,56 @@ class TestNegativeDiceCountPreservesPoolStructure:
                 ),
             )
         ]
+
+
+# ---- Regression: 1d(<pool>) is a no-op (corpus 0x41073) ---------------------------------
+
+
+class TestSingleDieOfPoolIsNoOp:
+    # `1d(<pool>)` should yield `<pool>` unchanged: a downstream pool
+    # consumer (`highest of`, `1@`, ...) must see the full pool structure
+    # rather than a single H produced by collapsing the pool and then
+    # re-rolling it as a one-element pool. Previously `_eval`'s DiceBinOp
+    # path went straight to `_roll_n(1, _make_die(faces))`, and
+    # `_make_die(P)` invoked `.h()` on the pool, flattening it. The fix
+    # short-circuits `1d(<pool>)` to return the pool directly when the
+    # count is the literal 1 and the faces evaluate to a P. AnyDice ground
+    # truth is the corpus 0x41073 oracle.
+
+    def test_corpus_0x41073_full_program(self) -> None:
+        # Two outputs from corpus 0x41073. `[highest 1 of 1d(2d6)]` must
+        # yield the max-of-2d6 order statistic (1: 1/36 ... 6: 11/36)
+        # rather than the triangular 2d6 sum. `[highest 1 of 1d(1d12)]`
+        # is the degenerate case: `1d(1d12) == 1d12`, max-of-1 = the die
+        # itself.
+        prog = "output [highest 1 of 1d(2d6)]\noutput [highest 1 of 1d(1d12)]"
+        assert run(prog) == [
+            ("output 1", H({1: 1, 2: 3, 3: 5, 4: 7, 5: 9, 6: 11})),
+            (
+                "output 2",
+                H(
+                    {
+                        1: 1,
+                        2: 1,
+                        3: 1,
+                        4: 1,
+                        5: 1,
+                        6: 1,
+                        7: 1,
+                        8: 1,
+                        9: 1,
+                        10: 1,
+                        11: 1,
+                        12: 1,
+                    }
+                ),
+            ),
+        ]
+
+    def test_1d_pool_equivalent_to_pool_under_pool_consumer(self) -> None:
+        # The no-op rule made operational: `1d(<pool>)` <=> `<pool>`, so
+        # downstream pool consumers must produce identical distributions
+        # from either form. The bug previously made the LHS yield the
+        # triangular 2d6 sum (because the pool collapsed via `_make_die`)
+        # while the RHS correctly gave the max-of-2d6 order statistic.
+        assert run("output [highest 1 of 1d(2d6)]") == run("output [highest 1 of 2d6]")
