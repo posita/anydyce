@@ -121,7 +121,12 @@ tox = [
 ]
 
 [tool.codespell]
-ignore-words-list = "Nd,countin"
+# Suggested pronunciations. (See WBO guides in
+# <https://en.wikipedia.org/wiki/Pronunciation_respelling_for_English#Traditional_respelling_systems>.)
+# - Nd: ehn-DEE
+# - countin: Shucks! Jes' lahk i'sez, pahdnah!
+# - damange: duh-MAYNJ
+ignore-words-list = "Nd,countin,damange"
 skip = ["*.ipynb"]
 
 [tool.coverage.run]
