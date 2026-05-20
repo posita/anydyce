@@ -4047,3 +4047,86 @@ class TestExpansionEnumerationOrder:
             ("output 1", H({0: 2, 1: 1, 3: 1})),
             ("output 2", H({0: 1})),
         ]
+
+
+# ---- Regression: negative-N dice count preserves pool structure -------------------------
+
+
+class TestNegativeDiceCountPreservesPoolStructure:
+    # AnyDice treats negative-N dice counts as equivalent across these forms:
+    #   -NdX, (-N)dX, -(NdX), Nd(-X), Nd(-dX)
+    # All five must produce the same distribution AND preserve the underlying
+    # pool structure, so pool operators (`highest of`, `1@`, ...) see N dice
+    # with negative faces rather than a single flattened H. Previously
+    # `_roll_n` collapsed the negative-N branch via `-((-n) @ P(die)).h()`,
+    # losing positional info; downstream `[highest 1 of -2d10]` then ran on
+    # the wrong shape. Regression: corpus 0x30d3a, 0x30d3b, 0x34534, 0x388d2,
+    # 0x34196, 0x418c8 all manifest this.
+
+    def test_roll_n_forms_under_pool_selection_are_equivalent(self) -> None:
+        # Wrap in `[highest 1 of ...]` so the pool/H representation actually
+        # matters (bare `output` collapses any `P` to `.h()`, masking the
+        # mid-stream collapse). Four forms that all flow through `_roll_n`:
+        #   -NdX, (-N)dX, Nd(-X), Nd(-dX)
+        # all must preserve the pool of |N| negative-faced dice. The fifth
+        # form `-(NdX)` goes through unary-neg-on-pool, a separate code
+        # path with its own (still-open) issue -- not in scope here.
+        forms = (
+            "output [highest 1 of -2d10]",
+            "output [highest 1 of (-2)d10]",
+            "output [highest 1 of 2d(-10)]",
+            "output [highest 1 of 2d(-d10)]",
+        )
+        first = run(forms[0])
+        for f in forms[1:]:
+            assert run(f) == first, f"{f!r} disagrees with {forms[0]!r}"
+
+    def test_corpus_0x30d3a_highest_1_of_neg_2d10(self) -> None:
+        # AnyDice ground truth for `[highest 1 of -2d10]`: order statistic of
+        # max(2 iid uniform over -10..-1), counts /100.
+        assert run("output [highest 1 of -2d10]") == [
+            (
+                "output 1",
+                H(
+                    {
+                        -10: 1,
+                        -9: 3,
+                        -8: 5,
+                        -7: 7,
+                        -6: 9,
+                        -5: 11,
+                        -4: 13,
+                        -3: 15,
+                        -2: 17,
+                        -1: 19,
+                    }
+                ),
+            )
+        ]
+
+    def test_unary_neg_on_pool_under_pool_selection(self) -> None:
+        # `-(NdX)` (explicit unary minus on a pool expression) must preserve
+        # the pool, per-die-negating each member, so downstream pool
+        # consumers (`highest of`, `1@`, ...) see a pool of negative-faced
+        # dice rather than a flat negated H. Verified equivalent to the
+        # four `_roll_n` forms (and corpus 0x30d3a). AnyDice ground truth
+        # archived in tmp-probes.db -0x27.
+        assert run("output [highest 1 of -(2d10)]") == [
+            (
+                "output 1",
+                H(
+                    {
+                        -10: 1,
+                        -9: 3,
+                        -8: 5,
+                        -7: 7,
+                        -6: 9,
+                        -5: 11,
+                        -4: 13,
+                        -3: 15,
+                        -2: 17,
+                        -1: 19,
+                    }
+                ),
+            )
+        ]
