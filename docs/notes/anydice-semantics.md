@@ -25,6 +25,9 @@ Maintenance: update this as new behaviors are characterized. The auditor (when i
 - **`d0` shows 0.**
   A die with zero faces produces the constant 0 (one outcome). `_make_die` line ~630. AnyDice convention.
 
+- **Outer-`d` over an empty operand still has cardinality 1 *if the count is die-typed*.**
+  For an `NdM` construction, AnyDice's cardinality rule depends on whether `N` is die-typed. If `N` came from a `d`-form (so its evaluation goes through the die-counted expansion path), `#X = 1` even when `M` and/or `N` evaluate to the empty die. If `N` is a scalar or sequence literal, the emptiness propagates and `#X = 0`. So `d{}d{}`, `d{}d2`, and `d2d{}` all give `#X = 1` (with the distribution itself remaining `{}`), while `0d{}`, `{}d{}`, and the bare `d{}` all give `#X = 0`. We preserve this via `_EmptyPoolOfOne` -- a `P` subclass constructed at `_expand_dice_count` (the only construction site for die-counted `NdM`) when the result would otherwise be empty. Its `__len__` returns 1, its `.h()` returns `H({})`, and `[0]` returns `H({})`, so downstream pool operators (`#`, `@`, ...) see a one-element pool whose only die is the empty distribution. The class docstring carries the Rod Serling rationale for future readers. Verified by probe `-0x29` in `tmp-probes.db` (and corpus probe `-0xe`).
+
 - **Strings are not real values.**
   Strings are only valid in `set` argument positions and in `output ... named ...`. They never appear in arithmetic, comparison, sequence, or dice context. See commit `STRINGS. ARE. NOT. REAL. VALUES. IN. ANYDICE.`
 
