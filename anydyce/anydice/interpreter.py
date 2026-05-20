@@ -377,13 +377,13 @@ class AnyDiceInterpreter:
 
     # ---- Unary operators -----------------------------------------------------------------
 
-    def _apply_neg(self, v: _Val) -> int | H[int]:
+    def _apply_neg(self, v: _Val) -> int | H[int] | P[int]:
         if isinstance(v, tuple):
-            v = sum(v)
-        elif isinstance(v, P):
-            v = v.h()
-        if isinstance(v, (int, H)):
+            return -sum(v)
+        elif isinstance(v, (int, H)):
             return -v
+        elif isinstance(v, P):
+            return P(*(-h for h in v))
         else:  # pragma: no cover
             raise TypeError(f"cannot negate {type(v).__name__}")
 
@@ -653,7 +653,7 @@ class AnyDiceInterpreter:
             # sum. Verified via 6585 (`1d6 - (-1d6)` yields 2d6's distribution).
             # Returns an H since negation collapses the pool's positional info,
             # which the negative-count case can't preserve anyway.
-            return -((-n) @ P(die)).h()
+            return (-n) @ P(-die)
         else:
             # Use a Pool so that @ can select positions. Arithmetic/output sums via .h().
             return n @ P(die)
