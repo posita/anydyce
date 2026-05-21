@@ -964,16 +964,27 @@ class AnyDiceInterpreter:
                 elif isinstance(arg, tuple):
                     bound[i] = arg
                 elif isinstance(arg, P):
-                    # Pool: Each roll becomes a tuple sorted by position-order setting.
-                    # dyce yields rolls in ascending order. Reverse for the default
-                    # highest-first.
+                    # Pool: Each roll becomes a tuple ordered by the position-order
+                    # setting. AnyDice iterates the order it submits its `:s` expansions
+                    # to the underlying function in *ascending* outcome order regardless
+                    # of the position-order setting. (Verified against the corpus 0xbcc
+                    # oracle under both highest-first and lowest-first, each yielding
+                    # the same result.) That order is observable to a non-param
+                    # accumulator (call-local persistence). dyce yields
+                    # (roll-tuple)-count pairs in *descending* order (or at least an
+                    # order that's not ascending), so we resort. Only the roll-tuple is
+                    # reversed when highest-first is set.
                     if not arg.h():
                         return H({})
 
+                    # Make sure that (roll-tuple)-count pairs are ordered "properly",
+                    # independent of the position-order setting
+                    rolls = sorted(arg.rolls_with_counts())
+                    # Make sure that each roll is ordered according to the setting
                     expansion.append(
-                        (i, [(r[::-1], c) for r, c in arg.rolls_with_counts()])
+                        (i, [(r[::-1], c) for r, c in rolls])
                         if self._settings.highest_first()
-                        else (i, [(r, c) for r, c in arg.rolls_with_counts()])
+                        else (i, [(r, c) for r, c in rolls])
                     )
                 elif isinstance(arg, H):
                     if not arg:

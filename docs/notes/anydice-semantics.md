@@ -78,6 +78,9 @@ Maintenance: update this as new behaviors are characterized. The auditor (when i
 - **First parameter varies fastest in expansion enumeration (little-endian).**
   For a function with multiple expanding `:n`/`:s` params, AnyDice enumerates the first argument as the innermost loop. Codified by `TestExpansionEnumerationOrder` (corpus 0x40389).
 
+- **`:s`-with-Pool iterates outcomes ascending, regardless of the position-order setting.**
+  When a `:s` parameter receives a Pool, AnyDice walks the pool's outcomes in ascending order. The `"position order"` setting affects the *per-roll* tuple ordering (which die in the roll is "first") but not the outer iteration order over the pool's outcomes. The order is observable only when the function body mutates a non-parameter variable across iterations (call-local persistence). Verified against corpus `0xbcc` under both `"highest first"` and `"lowest first"` -- identical results. Probe `-0x2a` (in `tmp-probes.db`) archives the lowest-first invariance witness. Codified by `TestSParamPoolExpansionIteratesAscending`.
+
 - **Function-body sequence return is sum-coerced.**
   If an iteration's `result:` is a tuple, it is `sum()`-ed to a single int before being added to the LCM-normalizing accumulator. Distributing the seq elements as separate outcomes (the prior buggy behavior) double-counts. Verified via 405c6.
 
@@ -142,6 +145,10 @@ Two paths in our interpreter were both collapsing the pool for unary `-`: `_roll
 ### `1d(<pool>)` is a no-op
 
 `1d(<pool>)` should yield `<pool>` unchanged so downstream pool consumers (`highest of`, `1@`, ...) see N dice rather than a single H produced by collapsing the pool and re-rolling it as a one-element pool. Previously `_eval`'s `DiceBinOp` path went straight to `_roll_n(1, _make_die(faces))`, and `_make_die(P)` invoked `.h()` on the pool, flattening it. The fix short-circuits when the count is the literal 1 and the faces evaluate to a P. Commit: *Treat 1d(<pool>) as a no-op* (interpreter.py:339-344). Canonical corpus fix: `0x41073` (`[highest 1 of 1d(2d6)]`); cleared roughly 6 corpus programs in the dynamic-sided `1d(<expr>)` family.
+
+### `:s` parameter Pool expansion outer iteration order
+
+Our `_invoke` built the `:s`-expansion list from `arg.rolls_with_counts()`, which dyce yields in *descending* outer order. The in-place `[::-1]` reverse on each row only flipped within-roll dice order (a no-op for 1-die rolls) and left outer iteration descending. The order is invisible for most function bodies but observable when a non-param accumulator mutates across iterations -- AnyDice always iterates ascending. Fix: sort the rolls ascending before constructing the expansion list (unconditional, since the AnyDice rule is invariant under the position-order setting -- see Section 1). Commit: *`:s`-param-Pool expansion iterates ascending (corpus 0xbcc)* (interpreter.py:973-983). Canonical corpus fix: `0xbcc` (`[exploding 1d6]` with `TOTALSUM` mutating across `DICE` outcomes).
 
 ### `preserve_zero_counts` in dyce-core (0.7.0rc3)
 

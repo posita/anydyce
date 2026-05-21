@@ -4311,3 +4311,38 @@ class TestSingleDieOfPoolIsNoOp:
         # triangular 2d6 sum (because the pool collapsed via `_make_die`)
         # while the RHS correctly gave the max-of-2d6 order statistic.
         assert run("output [highest 1 of 1d(2d6)]") == run("output [highest 1 of 2d6]")
+
+
+# ---- Regression: `:s` expansion over a Pool iterates ascending (corpus 0xbcc) -----------
+
+
+class TestSParamPoolExpansionIteratesAscending:
+    # When a `:s` parameter receives a Pool argument and the function body
+    # mutates a non-parameter variable across iterations (call-local
+    # persistence, per todo-53), the order in which outcomes are visited
+    # is observable -- and AnyDice iterates outcomes in ascending order.
+    # Previously `_invoke` built the `:s` expansion from
+    # `arg.rolls_with_counts()`, which dyce yields in *descending* outer
+    # order (e.g. `P(H(6))` yields `(6,), (5,), ..., (1,)`); the `[::-1]`
+    # reverse in the same line only flipped within-roll ordering (a no-op
+    # for 1-die rolls) and left the outer iteration descending. The fix
+    # sorts the rolls ascending before constructing the expansion list,
+    # so a non-param accumulator sees the same iteration order as
+    # AnyDice. Compare `TestExpansionEnumerationOrder` (analogous fix
+    # for `:n`-Cartesian-product enumeration). AnyDice ground truth is
+    # the corpus 0xbcc oracle.
+
+    def test_corpus_0xbcc_exploding_count_dice(self) -> None:
+        # `exploding 1d6` with `TOTALSUM` accumulating `[count {4,5,6} in
+        # DICE]` per outcome. Ascending iteration: outcomes 1,2,3 add 0
+        # (TOTALSUM stays 0, results 0,0,0); outcomes 4,5,6 each add 1
+        # (results 1,2,3). Multiset {0:3, 1:1, 2:1, 3:1}.
+        prog = (
+            "function: exploding DICE:s {\n"
+            "  TOTALSUM: TOTALSUM + [count {4,5,6} in DICE]\n"
+            "  result: TOTALSUM\n"
+            "}\n"
+            "TOTALSUM: 0\n"
+            "output [exploding 1d6]"
+        )
+        assert run(prog) == [("output 1", H({0: 3, 1: 1, 2: 1, 3: 1}))]
