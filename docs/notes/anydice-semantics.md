@@ -53,6 +53,15 @@ Maintenance: update this as new behaviors are characterized. The auditor (when i
 - **AnyDice has no modulo operator.**
   Design choice; not a divergence.
 
+- **Empty-die handling is operator-specific.**
+  AnyDice does not treat the empty die `d{}` uniformly across binary operators:
+  - `+`, `-`: a *single* empty operand coerces to scalar `0` (so `d{} + 5 = 5`); *both* operands empty propagates `H({})`. The both-empty case is operationally important -- it shows up when `result: [f] + [f]` hits a recursion cap from both sides; treating it as `0 + 0 = 0` would leak a spurious `0` into the parent distribution (see Section 3).
+  - `*`, `/`, `^`: any empty operand propagates `H({})`. Empty is the multiplicative annihilator, not a coerced `0`.
+  - `&`: any empty operand propagates `H({})`.
+  - `|`: asymmetric anomaly. `d{} | <nonzero>` acts as scalar `0` -- so `d{} | 5 = 1` because `0 | 5 = 1`. `d{} | <falsy>` propagates `H({})`, where "falsy" means another empty die or an empty sequence summed to `0`. The rule is essentially "`|` propagates only when the *result* would have been falsy". Coded in `_apply_bool`'s `|`-branch.
+  - `d`: any empty operand propagates `H({})` for the *value*, but the cardinality follows the dice-counted-vs-scalar-counted rule covered above ("Outer-`d` over an empty operand").
+  All single-empty cases are codified in `TestAdd` / `TestSub` / `TestMul` / `TestDiv` / `TestPow` / `TestAnd` / `TestOr` / `TestDieBinary`; both-empty cases live as `test_empty_die_<op>_empty_die` across the same classes.
+
 ### Unary operators
 
 - **`-<seq>` collapses, `+<seq>` does not.**
@@ -161,6 +170,10 @@ A first patch landed an unconditional sort-ascending for all pool arities, which
 - multi-die, lowest-first → `sorted(arg.rolls_with_counts())`.
 
 The inner per-roll `[::-1]` stays as the per-roll position-order presentation, independent of the outer sort. Commit: *`:s`-param-Pool expansion iterates by AnyDice's tripartite rule* (interpreter.py:966-1010). Canonical corpus fix: `0xbcc` (`[exploding 1d6]` with `TOTALSUM` mutating across `DICE` outcomes). Probes `-0x2a` / `-0x2b` / `-0x2c` lock in each branch.
+
+### `H({}) + H({}) = H({})`, not `0`
+
+Our `_apply_arith`'s "treat empty die as scalar `0` for `+`/`-`" rule was applied independently per operand, so `H({}) + H({})` collapsed via `0 + 0 = 0` instead of propagating `H({})`. The split surfaced on recursion-cap paths in exploding-dice corpus programs (`result: 1d[explode dN] + 1d[explode dN]` where both inner calls hit the depth cap and returned `H({})`); our spurious `0` leaked into the parent distribution and reshaped it broadly across interior outcomes, not just the tail. The truncation warnings on these programs were red herrings -- the dominant divergence wasn't the precision-floor tail, it was this empty+empty coercion. Fix: check both-operand emptiness *before* the per-operand single-empty rule fires (interpreter.py:467-485). Canonical corpus impact: cleared 16 of 18 truncation-warning residual programs (e.g. `0x42f0`, `0x5d53`, `0x10517`, `0x141db`) plus 5 additional exact matches (`0x142c7`, `0x28367`-`9`, `0x286d1`). Verified against the recursion-cap probes `-0x2e` (smaller-die variant of `0x42f0`) and `-0x30` (multi-fallback discriminator). Codified by `test_empty_die_<op>_empty_die` across the binary-op test classes.
 
 ### `preserve_zero_counts` in dyce-core (0.7.0rc3)
 

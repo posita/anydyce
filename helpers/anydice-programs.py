@@ -1535,19 +1535,27 @@ def _proportions_close(
 ) -> bool:
     r"""Compare two count dicts as proportions in percentage space.
 
-    Returns `True` iff the outcome sets agree and every per-outcome percentage
-    differs by no more than *tol_pct*. Uses `Fraction` exact arithmetic so the
-    result has no float-precision artifacts.
+    Returns `True` iff every outcome's percentage on each side differs from
+    the other side's by no more than *tol_pct*. Outcomes present on only one
+    side are treated as zero on the absent side, so a tail outcome that one
+    side truncated and the other retained matches iff its surviving-side
+    proportion is itself below *tol_pct* (the diff equals the surviving-side
+    proportion). This catches the precision-floor cluster: AnyDice's float
+    arithmetic retains tail outcomes down to double-precision underflow,
+    while our exact-rational pipeline truncates at ~1e-13 absolute via
+    dyce's TruncationWarning; the surviving tail values are far below
+    *tol_pct* and would be invisible to AnyDice's own UI display anyway.
+    Uses `Fraction` exact arithmetic so the result has no float-precision
+    artifacts.
     """
-    if set(ours) != set(theirs):
-        return False
     o_total = sum(ours.values())
     t_total = sum(theirs.values())
     if o_total == 0 or t_total == 0:
         return o_total == t_total
-    for k in ours:
-        diff = abs(Fraction(ours[k], o_total) - Fraction(theirs[k], t_total)) * 100
-        if diff > tol_pct:
+    for k in set(ours) | set(theirs):
+        o_prop = Fraction(ours.get(k, 0), o_total)
+        t_prop = Fraction(theirs.get(k, 0), t_total)
+        if abs(o_prop - t_prop) * 100 > tol_pct:
             return False
     return True
 
