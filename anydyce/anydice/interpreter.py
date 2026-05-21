@@ -464,14 +464,22 @@ class AnyDiceInterpreter:
             left = left.h()
         if isinstance(right, P):
             right = right.h()
-        # Empty-die handling: + and - treat empty die as scalar 0. * / and ^ propagate
-        # H({}).
-        if isinstance(left, H) and not left:
+        # Empty-die handling: +, -, and | treat a single empty operand as scalar 0 so
+        # `d{} + 5 = 5` (and symmetrically), but when *both* operands are empty, AnyDice
+        # propagates H({}). The both-empty case shows up in `result: [f] + [f]` when
+        # both recursive calls hit a depth-cap and return H({}); treating that as 0+0=0
+        # leaks a spurious zero into the parent distribution. *, /, ^, and & always
+        # propagate H({}) if at least one operand is H({}).
+        left_empty = isinstance(left, H) and not left
+        right_empty = isinstance(right, H) and not right
+        if left_empty and right_empty:
+            return H({})
+        if left_empty:
             if op in _EMPTY_DIE_AS_ZERO_ARITH:
                 left = 0
             else:
                 return H({})
-        if isinstance(right, H) and not right:
+        if right_empty:
             if op in _EMPTY_DIE_AS_ZERO_ARITH:
                 right = 0
             else:
