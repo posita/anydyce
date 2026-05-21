@@ -964,28 +964,45 @@ class AnyDiceInterpreter:
                 elif isinstance(arg, tuple):
                     bound[i] = arg
                 elif isinstance(arg, P):
-                    # Pool: Each roll becomes a tuple ordered by the position-order
-                    # setting. AnyDice iterates the order it submits its `:s` expansions
-                    # to the underlying function in *ascending* outcome order regardless
-                    # of the position-order setting. (Verified against the corpus 0xbcc
-                    # oracle under both highest-first and lowest-first, each yielding
-                    # the same result.) That order is observable to a non-param
-                    # accumulator (call-local persistence). dyce yields
-                    # (roll-tuple)-count pairs in *descending* order (or at least an
-                    # order that's not ascending), so we resort. Only the roll-tuple is
-                    # reversed when highest-first is set.
+                    # Pool: AnyDice's `:s` outer iteration order is tripartite, and
+                    # observable to any non-param accumulator (call-local persistence,
+                    # per todo-53). The rules, verified by tmp-probes.db -0x2a/-0x2b/
+                    # -0x2c (corpus 0xbcc, plus the `expose roll` probes):
+                    #
+                    #   * Single-die pool: iterate the underlying H by outcome value
+                    #     ascending. Position-order-invariant.
+                    #   * Multi-die under highest-first: sort dyce's ascending-stored
+                    #     roll-tuples by their reversed (highest-first canonical) form,
+                    #     lex-descending. So 2d6 goes (6,6), (5,6), (4,6), ..., (1,6),
+                    #     (5,5), (4,5), ..., (1,1).
+                    #   * Multi-die under lowest-first: sort dyce's ascending-stored
+                    #     roll-tuples lex-ascending. So 2d6 goes (1,1), (1,2), (1,3),
+                    #     ..., (1,6), (2,2), ..., (5,6), (6,6).
+                    #
+                    # The highest-first and lowest-first multi-die orderings are NOT
+                    # exact reverses of each other (e.g. lowest-first iter 3 = (1,3),
+                    # whereas reversed highest-first iter 19 = (2,2)). dyce's default
+                    # tuple-descending order agrees with neither past iteration 2.
+                    #
+                    # The inner per-roll [::-1] presents each tuple in its position-
+                    # order canonical form (highest-first or lowest-first) to the
+                    # function body, independent of the outer sort.
                     if not arg.h():
                         return H({})
 
-                    # Make sure that (roll-tuple)-count pairs are ordered "properly",
-                    # independent of the position-order setting
-                    rolls = sorted(arg.rolls_with_counts())
-                    # Make sure that each roll is ordered according to the setting
-                    expansion.append(
-                        (i, [(r[::-1], c) for r, c in rolls])
-                        if self._settings.highest_first()
-                        else (i, [(r, c) for r, c in rolls])
-                    )
+                    if len(arg) == 1:
+                        expansion.append((i, [((o,), w) for o, w in arg.h().items()]))
+                    else:
+                        if self._settings.highest_first():
+                            rolls = sorted(
+                                arg.rolls_with_counts(),
+                                key=lambda rc: rc[0][::-1],
+                                reverse=True,
+                            )
+                            expansion.append((i, [(r[::-1], c) for r, c in rolls]))
+                        else:
+                            rolls = sorted(arg.rolls_with_counts())
+                            expansion.append((i, [(r, c) for r, c in rolls]))
                 elif isinstance(arg, H):
                     if not arg:
                         return H({})
