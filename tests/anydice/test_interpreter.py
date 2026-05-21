@@ -4313,30 +4313,45 @@ class TestSingleDieOfPoolIsNoOp:
         assert run("output [highest 1 of 1d(2d6)]") == run("output [highest 1 of 2d6]")
 
 
-# ---- Regression: `:s` expansion over a Pool iterates ascending (corpus 0xbcc) -----------
+# ---- Regression: `:s` expansion over a Pool iterates by AnyDice's bifurcated rule -------
 
 
-class TestSParamPoolExpansionIteratesAscending:
+class TestSParamPoolExpansionIterationOrder:
     # When a `:s` parameter receives a Pool argument and the function body
     # mutates a non-parameter variable across iterations (call-local
-    # persistence, per todo-53), the order in which outcomes are visited
-    # is observable -- and AnyDice iterates outcomes in ascending order.
-    # Previously `_invoke` built the `:s` expansion from
-    # `arg.rolls_with_counts()`, which dyce yields in *descending* outer
-    # order (e.g. `P(H(6))` yields `(6,), (5,), ..., (1,)`); the `[::-1]`
-    # reverse in the same line only flipped within-roll ordering (a no-op
-    # for 1-die rolls) and left the outer iteration descending. The fix
-    # sorts the rolls ascending before constructing the expansion list,
-    # so a non-param accumulator sees the same iteration order as
-    # AnyDice. Compare `TestExpansionEnumerationOrder` (analogous fix
-    # for `:n`-Cartesian-product enumeration). AnyDice ground truth is
-    # the corpus 0xbcc oracle.
+    # persistence, per todo-53), the order in which the unique rolls are
+    # visited is observable.
+    # AnyDice's rule is tripartite:
+    #   * Single-die pool: iterate the underlying H by outcome value
+    #     ascending -- position-order-invariant.
+    #   * Multi-die pool under highest-first: sort unique rolls by their
+    #     highest-first tuple form, lex-descending -- so (6,6), (5,6)
+    #     [= (6,5)], (4,6), ..., (1,6), (5,5), (4,5), ..., (1,1).
+    #   * Multi-die pool under lowest-first: sort unique rolls by their
+    #     lowest-first tuple form (dyce's ascending-stored tuples sort
+    #     directly), lex-ascending -- so (1,1), (1,2), (1,3), ..., (1,6),
+    #     (2,2), (2,3), ..., (5,6), (6,6).
+    # The highest-first and lowest-first multi-die orderings are NOT exact
+    # reverses (e.g. lowest-first iter 3 = {1,3}, reversed highest-first
+    # iter 19 = {2,2}); both start at the position-order-extreme corner
+    # and end at the opposite, but the inner enumeration pattern differs.
+    # dyce yields ascending-stored tuples sorted lex-descending by default,
+    # which agrees with neither AnyDice ordering past iteration 2 of a
+    # multi-die pool. Corpus mismatches did not surface this until probe
+    # -0x2b discriminated past iteration 2 of 2d6.
+    # The inner per-roll tuple reverse remains conditional on highest-first
+    # (presenting each tuple in the position-order canonical form to the
+    # function body), independent of the outer sort.
+    # Compare `TestExpansionEnumerationOrder` for the analogous fix on
+    # `:n`-Cartesian-product enumeration.
 
-    def test_corpus_0xbcc_exploding_count_dice(self) -> None:
-        # `exploding 1d6` with `TOTALSUM` accumulating `[count {4,5,6} in
-        # DICE]` per outcome. Ascending iteration: outcomes 1,2,3 add 0
-        # (TOTALSUM stays 0, results 0,0,0); outcomes 4,5,6 each add 1
+    def test_corpus_0xbcc_single_die_exploding_count_dice(self) -> None:
+        # Single-die `:s`-with-Pool: `exploding 1d6` with `TOTALSUM`
+        # accumulating `[count {4,5,6} in DICE]` per outcome.
+        # Ascending iteration over the underlying d6: outcomes 1,2,3 add
+        # 0 (TOTALSUM stays 0, results 0,0,0); outcomes 4,5,6 each add 1
         # (results 1,2,3). Multiset {0:3, 1:1, 2:1, 3:1}.
+        # AnyDice ground truth: corpus 0xbcc.
         prog = (
             "function: exploding DICE:s {\n"
             "  TOTALSUM: TOTALSUM + [count {4,5,6} in DICE]\n"
@@ -4346,3 +4361,84 @@ class TestSParamPoolExpansionIteratesAscending:
             "output [exploding 1d6]"
         )
         assert run(prog) == [("output 1", H({0: 3, 1: 1, 2: 1, 3: 1}))]
+
+    def test_probe_0x2b_multi_die_2d6_iteration_3_is_multiset_4_6(self) -> None:
+        # Multi-die `:s`-with-Pool: the probe exposes the iteration-3 roll
+        # of `2d6` by building NEW_SEQ = {-10*highest, -1*next} and
+        # returning `dNEW_SEQ`.
+        # AnyDice's iteration-3 roll is multiset {4,6} (NEW_SEQ = {-60,
+        # -4}), grouping by highest face. dyce's default outer order would
+        # give multiset {5,5} at iteration 3 (NEW_SEQ = {-50, -5}),
+        # grouping by lowest face -- the discriminating case.
+        # AnyDice ground truth: tmp-probes.db -0x2b (`2d6 at 3`).
+        prog = (
+            "function: expose roll from ROLL:s at iteration J:n {\n"
+            "  I: I + 1\n"
+            "  if I = J {\n"
+            "    NEW_SEQ: {}\n"
+            "    loop K over {1..#ROLL} {\n"
+            "      NEW_SEQ: {NEW_SEQ, K @ ROLL * 10 ^ (#ROLL - K) * -1}\n"
+            "    }\n"
+            "    result: dNEW_SEQ\n"
+            "  }\n"
+            "}\n"
+            "I: 0\n"
+            "output [expose roll from 2d6 at iteration 3]"
+        )
+        assert run(prog) == [("output 1", H({-60: 1, -4: 1}))]
+
+    def test_probe_0x2b_multi_die_weighted_3d_iteration_1_is_multiset_3_3_3(
+        self,
+    ) -> None:
+        # Multi-die weighted `:s`-with-Pool, highest-first: locks in that
+        # the rule extends to weighted dice and that iteration STARTS at
+        # the highest-face extreme. For `3d{1,2,3,1}` (face outcomes
+        # {1,2,3} after dedup), AnyDice's iteration-1 roll is multiset
+        # {3,3,3} (NEW_SEQ = {-300, -30, -3}) -- the lex-descending-by-
+        # highest-first-form start. Discriminates against the broken
+        # sort-ascending fix, which would give multiset {1,1,1} (NEW_SEQ
+        # = {-100, -10, -1}) at iter 1.
+        # AnyDice ground truth: tmp-probes.db -0x2b (`3d{1,2,3,1} at 1`).
+        prog = (
+            "function: expose roll from ROLL:s at iteration J:n {\n"
+            "  I: I + 1\n"
+            "  if I = J {\n"
+            "    NEW_SEQ: {}\n"
+            "    loop K over {1..#ROLL} {\n"
+            "      NEW_SEQ: {NEW_SEQ, K @ ROLL * 10 ^ (#ROLL - K) * -1}\n"
+            "    }\n"
+            "    result: dNEW_SEQ\n"
+            "  }\n"
+            "}\n"
+            "I: 0\n"
+            "output [expose roll from 3d{1,2,3,1} at iteration 1]"
+        )
+        assert run(prog) == [("output 1", H({-300: 1, -30: 1, -3: 1}))]
+
+    def test_probe_0x2c_multi_die_2d6_lowest_first_iteration_3_is_multiset_1_3(
+        self,
+    ) -> None:
+        # Multi-die `:s`-with-Pool under `set "position order" to "lowest
+        # first"`: AnyDice iterates roll-tuples in lex-ASCENDING order over
+        # their lowest-first canonical form (= dyce's ascending-stored
+        # tuples). Iter 1 = multiset {1,1}, iter 2 = {1,2}, iter 3 =
+        # {1,3} (NEW_SEQ = {-10, -3} where 1@ROLL is the lowest face = 1
+        # and 2@ROLL is the second-lowest = 3 under lowest-first).
+        # Discriminates the lowest-first branch.
+        # AnyDice ground truth: tmp-probes.db -0x2c (`2d6 at 3`).
+        prog = (
+            'set "position order" to "lowest first"\n'
+            "function: expose roll from ROLL:s at iteration J:n {\n"
+            "  I: I + 1\n"
+            "  if I = J {\n"
+            "    NEW_SEQ: {}\n"
+            "    loop K over {1..#ROLL} {\n"
+            "      NEW_SEQ: {NEW_SEQ, K @ ROLL * 10 ^ (#ROLL - K) * -1}\n"
+            "    }\n"
+            "    result: dNEW_SEQ\n"
+            "  }\n"
+            "}\n"
+            "I: 0\n"
+            "output [expose roll from 2d6 at iteration 3]"
+        )
+        assert run(prog) == [("output 1", H({-10: 1, -3: 1}))]
