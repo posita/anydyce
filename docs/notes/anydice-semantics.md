@@ -78,8 +78,12 @@ Maintenance: update this as new behaviors are characterized. The auditor (when i
 - **First parameter varies fastest in expansion enumeration (little-endian).**
   For a function with multiple expanding `:n`/`:s` params, AnyDice enumerates the first argument as the innermost loop. Codified by `TestExpansionEnumerationOrder` (corpus 0x40389).
 
-- **`:s`-with-Pool iterates outcomes ascending, regardless of the position-order setting.**
-  When a `:s` parameter receives a Pool, AnyDice walks the pool's outcomes in ascending order. The `"position order"` setting affects the *per-roll* tuple ordering (which die in the roll is "first") but not the outer iteration order over the pool's outcomes. The order is observable only when the function body mutates a non-parameter variable across iterations (call-local persistence). Verified against corpus `0xbcc` under both `"highest first"` and `"lowest first"` -- identical results. Probe `-0x2a` (in `tmp-probes.db`) archives the lowest-first invariance witness. Codified by `TestSParamPoolExpansionIteratesAscending`.
+- **`:s`-with-Pool outer iteration order is tripartite.**
+  When a `:s` parameter receives a Pool, AnyDice's order over unique rolls depends on both the pool's arity and the `"position order"` setting. The order is observable only when the function body mutates a non-parameter variable across iterations (call-local persistence).
+  - **Single-die pool:** iterate the underlying H by outcome value ascending. Position-order-invariant. Verified by corpus `0xbcc`, probe `-0x2a`, and the `1d{1,3,2,1}` arm of probe `-0x2b`.
+  - **Multi-die under highest-first:** sort dyce's ascending-stored roll-tuples by their reversed (highest-first canonical) form, lex-descending -- so `2d6` goes `(6,6), (5,6), (4,6), ..., (1,6), (5,5), (4,5), ..., (1,1)`. Verified by the `2d6` and `3d{1,2,3,1}` arms of probe `-0x2b`.
+  - **Multi-die under lowest-first:** sort dyce's ascending-stored roll-tuples lex-ascending -- so `2d6` goes `(1,1), (1,2), (1,3), ..., (1,6), (2,2), ..., (5,6), (6,6)`. Verified by probe `-0x2c`.
+  The two multi-die orderings are *not* exact reverses of each other (e.g. lowest-first iter 3 = `(1,3)`, whereas reversed highest-first iter 19 = `(2,2)`); both start at the position-order-extreme corner and end at the opposite, but the inner enumeration pattern differs. The inner per-roll tuple reverse remains conditional on highest-first, presenting each tuple in the position-order canonical form to the function body, independent of the outer sort. Codified by `TestSParamPoolExpansionIterationOrder`.
 
 - **Function-body sequence return is sum-coerced.**
   If an iteration's `result:` is a tuple, it is `sum()`-ed to a single int before being added to the LCM-normalizing accumulator. Distributing the seq elements as separate outcomes (the prior buggy behavior) double-counts. Verified via 405c6.
@@ -148,7 +152,15 @@ Two paths in our interpreter were both collapsing the pool for unary `-`: `_roll
 
 ### `:s` parameter Pool expansion outer iteration order
 
-Our `_invoke` built the `:s`-expansion list from `arg.rolls_with_counts()`, which dyce yields in *descending* outer order. The in-place `[::-1]` reverse on each row only flipped within-roll dice order (a no-op for 1-die rolls) and left outer iteration descending. The order is invisible for most function bodies but observable when a non-param accumulator mutates across iterations -- AnyDice always iterates ascending. Fix: sort the rolls ascending before constructing the expansion list (unconditional, since the AnyDice rule is invariant under the position-order setting -- see Section 1). Commit: *`:s`-param-Pool expansion iterates ascending (corpus 0xbcc)* (interpreter.py:973-983). Canonical corpus fix: `0xbcc` (`[exploding 1d6]` with `TOTALSUM` mutating across `DICE` outcomes).
+Our `_invoke` built the `:s`-expansion list from `arg.rolls_with_counts()`, which dyce yields in descending lex order over ascending-stored tuples. This matches AnyDice's order only at iterations 1, 2, and the final roll, so the divergence was invisible for function bodies that only read `1@ROLL` (e.g. bushido). Corpus `0xbcc` first surfaced the single-die case (a flat ascending H-iteration), and probe `-0x2b` discriminated the multi-die case past iteration 2.
+
+A first patch landed an unconditional sort-ascending for all pool arities, which was correct for single-die and for multi-die lowest-first but wrong for multi-die highest-first. The current fix applies the tripartite rule (see Section 1):
+
+- `len(arg) == 1` → iterate `arg.h().items()` ascending.
+- multi-die, highest-first → `sorted(arg.rolls_with_counts(), key=lambda rc: rc[0][::-1], reverse=True)`.
+- multi-die, lowest-first → `sorted(arg.rolls_with_counts())`.
+
+The inner per-roll `[::-1]` stays as the per-roll position-order presentation, independent of the outer sort. Commit: *`:s`-param-Pool expansion iterates by AnyDice's tripartite rule* (interpreter.py:966-1010). Canonical corpus fix: `0xbcc` (`[exploding 1d6]` with `TOTALSUM` mutating across `DICE` outcomes). Probes `-0x2a` / `-0x2b` / `-0x2c` lock in each branch.
 
 ### `preserve_zero_counts` in dyce-core (0.7.0rc3)
 
