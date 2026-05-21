@@ -200,6 +200,10 @@ class TestDieBinary:
         assert run("output d{}d{}") == [("output 1", dempty)]
         assert run("output d{}d{}") == [("output 1", dempty)]
 
+    def test_parenthesized_empty_die_d_parenthesized_empty_die(self) -> None:
+        # Parser-variant of the bare `d{}d{}` form; same result.
+        assert run("output (d{})d(d{})") == [("output 1", dempty)]
+
 
 # ---- Variables ---------------------------------------------------------------------------
 
@@ -463,6 +467,9 @@ class TestAdd:
     def test_die_add_empty_die(self) -> None:
         assert run("output 2d6 + d{}") == [("output 1", 2 @ H(6))]
 
+    def test_empty_die_add_empty_die(self) -> None:
+        assert run("output d{} + d{}") == [("output 1", dempty)]
+
 
 # ---- Subtraction (-) ---------------------------------------------------------------------
 
@@ -542,6 +549,10 @@ class TestSub:
     def test_die_sub_empty_die(self) -> None:
         assert run("output 2d6 - d{}") == [("output 1", 2 @ H(6))]
 
+    def test_empty_die_sub_empty_die(self) -> None:
+        # Both sides empty: propagate (matching `+`'s both-empty rule and AnyDice).
+        assert run("output d{} - d{}") == [("output 1", dempty)]
+
 
 # ---- Multiplication (*) ------------------------------------------------------------------
 
@@ -620,6 +631,9 @@ class TestMul:
 
     def test_die_mul_empty_die(self) -> None:
         assert run("output 2d6 * d{}") == [("output 1", dempty)]
+
+    def test_empty_die_mul_empty_die(self) -> None:
+        assert run("output d{} * d{}") == [("output 1", dempty)]
 
 
 # ---- Division (/) ------------------------------------------------------------------------
@@ -729,6 +743,9 @@ class TestDiv:
     def test_die_div_empty_die(self) -> None:
         assert run("output 2d6 / d{}") == [("output 1", dempty)]
 
+    def test_empty_die_div_empty_die(self) -> None:
+        assert run("output d{} / d{}") == [("output 1", dempty)]
+
 
 # ---- Exponentiation (^) ------------------------------------------------------------------
 
@@ -809,6 +826,9 @@ class TestPow:
 
     def test_die_pow_empty_die(self) -> None:
         assert run("output 2d6 ^ d{}") == [("output 1", dempty)]
+
+    def test_empty_die_pow_empty_die(self) -> None:
+        assert run("output d{} ^ d{}") == [("output 1", dempty)]
 
     # AnyDice's `^` truncates fractional results toward zero rather than
     # returning floats. Per-outcome:
@@ -1647,6 +1667,9 @@ class TestAnd:
 
     def test_die_and_empty_die(self) -> None:
         assert run("output 2d6 & d{}") == [("output 1", dempty)]
+
+    def test_empty_die_and_empty_die(self) -> None:
+        assert run("output d{} & d{}") == [("output 1", dempty)]
 
 
 # ---- Logical or (|) ----------------------------------------------------------------------
