@@ -902,26 +902,49 @@ class AnyDiceInterpreter:
         args: list[_Val] = [
             self._eval(part) for part in call.parts if not isinstance(part, str)
         ]
-        func = self._funcs.get(shape)
-        if func is not None:
-            params: list[Param] = [p for p in func.pattern if isinstance(p, Param)]
-            return self._invoke(func, params, args)
-        builtin = self._builtins.get(shape)
-        if builtin is not None:
-            param_types, impl = builtin
-            return self._call_builtin(param_types, args, impl)
-        raise NameError(f"undefined function for call: {call.parts!r}")
+        # User-defined functions shadow builtins by lookup order.
+        entry: FunctionDef | tuple[list[str | None], Callable[..., _Val]] | None = (
+            self._funcs.get(shape) or self._builtins.get(shape)
+        )
+        if entry is None:
+            raise NameError(f"undefined function for call: {call.parts!r}")
+        return self._invoke(entry, args)
 
-    def _invoke(self, func: FunctionDef, params: list[Param], args: list[_Val]) -> _Val:  # noqa: C901
-        # For each parameter, decide whether the argument needs to expand the body (a
-        # die or pool argument bound to an n- or s-typed param) or be passed through
-        # (d-typed dice, concrete numbers, sequences as-is). Each expansion entry stores
-        # the iterations as `(bound_value, weight)` pairs already in the right shape for
-        # assignment, unifying H-outcome and pool-roll cases.
-        bound: list[_Val] = [0] * len(params)
+    def _bind_and_expand(  # noqa: C901
+        self,
+        param_types: list[str | None],
+        args: list[_Val],
+        *,
+        err_label: Callable[[int], str],
+    ) -> tuple[list[_Val], list[tuple[int, list[tuple[_Val, int]]]]] | None:
+        r"""Coerce args per their param types, building the (bound, expansion) pair.
+
+        Returns `(bound, expansion)` where `bound` carries each arg in its final
+        per-param shape and `expansion` lists the per-param iteration items for
+        any `:n`/`:s` arg that needs to expand the body across outcomes.
+        Returns `None` to signal an early-empty short-circuit: an empty H bound
+        to an `:n` or `:s` param means the caller should return `H({})` without
+        executing the body.
+
+        Param-type semantics (shared between user-defined and builtin entry):
+            * `None`: pass arg through with no coercion (AnyDice bare-param).
+            * `:n`: sum-coerce sequences, collapse P -> H; scalar binds directly,
+              H expands per-outcome.
+            * `:d`: int/tuple wraps as a 1-outcome H; H/P passes through (no
+              empty short-circuit -- the body decides).
+            * `:s`: int wraps as `(int,)`, tuple binds directly, P expands per-roll
+              under AnyDice's tripartite rule (single-die pool -> ascending
+              H-outcome order; multi-die under highest-first -> roll-tuples
+              sorted by reversed form lex-descending; multi-die under lowest-
+              first -> roll-tuples sorted lex-ascending; corpus 0xbcc and
+              probes -0x2a / -0x2b / -0x2c), H expands as singleton-per-outcome.
+
+        *err_label(i)* returns the human-readable label for param `i`, used in
+        TypeError messages -- e.g. `"function param FOO"` or `"builtin param 0"`.
+        """
+        bound: list[_Val] = [0] * len(param_types)
         expansion: list[tuple[int, list[tuple[_Val, int]]]] = []
-        for i, (param, arg) in enumerate(zip(params, args, strict=True)):
-            ptype = param.type
+        for i, (ptype, arg) in enumerate(zip(param_types, args, strict=True)):
             if ptype is None:
                 # AnyDice's bare/untyped params pass the argument through without
                 # coercion or expansion. The body sees whatever was passed --
@@ -939,11 +962,11 @@ class AnyDiceInterpreter:
                 elif isinstance(arg, H):
                     if not arg:
                         # An empty die argument to an n-typed param yields H({})
-                        return H({})
+                        return None
                     expansion.append((i, [(o, w) for o, w in arg.items()]))
                 else:
                     raise TypeError(
-                        f"function param {param.name}: expected number, got {type(arg).__name__}"
+                        f"{err_label(i)}: expected number, got {type(arg).__name__}"
                     )
             elif ptype == "d":
                 # `:d` is lossless on pools: the body's `@` and other pool-aware
@@ -964,7 +987,7 @@ class AnyDiceInterpreter:
                     arg = H({sum(arg): 1})  # noqa: PLW2901
                 if not isinstance(arg, (H, P)):
                     raise TypeError(
-                        f"function param {param.name}: expected die, got {type(arg).__name__}"
+                        f"{err_label(i)}: expected die, got {type(arg).__name__}"
                     )
                 bound[i] = arg
             elif ptype == "s":
@@ -973,73 +996,88 @@ class AnyDiceInterpreter:
                 elif isinstance(arg, tuple):
                     bound[i] = arg
                 elif isinstance(arg, P):
-                    # Pool: AnyDice's `:s` outer iteration order is tripartite, and
-                    # observable to any non-param accumulator (call-local persistence,
-                    # per todo-53). The rules, verified by tmp-probes.db -0x2a/-0x2b/
-                    # -0x2c (corpus 0xbcc, plus the `expose roll` probes):
-                    #
-                    #   * Single-die pool: iterate the underlying H by outcome value
-                    #     ascending. Position-order-invariant.
-                    #   * Multi-die under highest-first: sort dyce's ascending-stored
-                    #     roll-tuples by their reversed (highest-first canonical) form,
-                    #     lex-descending. So 2d6 goes (6,6), (5,6), (4,6), ..., (1,6),
-                    #     (5,5), (4,5), ..., (1,1).
-                    #   * Multi-die under lowest-first: sort dyce's ascending-stored
-                    #     roll-tuples lex-ascending. So 2d6 goes (1,1), (1,2), (1,3),
-                    #     ..., (1,6), (2,2), ..., (5,6), (6,6).
-                    #
-                    # The highest-first and lowest-first multi-die orderings are NOT
-                    # exact reverses of each other (e.g. lowest-first iter 3 = (1,3),
-                    # whereas reversed highest-first iter 19 = (2,2)). dyce's default
-                    # tuple-descending order agrees with neither past iteration 2.
-                    #
-                    # The inner per-roll [::-1] presents each tuple in its position-
-                    # order canonical form (highest-first or lowest-first) to the
-                    # function body, independent of the outer sort.
                     if not arg.h():
-                        return H({})
-
+                        return None
                     if len(arg) == 1:
                         expansion.append((i, [((o,), w) for o, w in arg.h().items()]))
+                    elif self._settings.highest_first():
+                        rolls = sorted(
+                            arg.rolls_with_counts(),
+                            key=lambda rc: rc[0][::-1],
+                            reverse=True,
+                        )
+                        expansion.append((i, [(r[::-1], c) for r, c in rolls]))
                     else:
-                        if self._settings.highest_first():
-                            rolls = sorted(
-                                arg.rolls_with_counts(),
-                                key=lambda rc: rc[0][::-1],
-                                reverse=True,
-                            )
-                            expansion.append((i, [(r[::-1], c) for r, c in rolls]))
-                        else:
-                            rolls = sorted(arg.rolls_with_counts())
-                            expansion.append((i, [(r, c) for r, c in rolls]))
+                        rolls = sorted(arg.rolls_with_counts())
+                        expansion.append((i, [(r, c) for r, c in rolls]))
                 elif isinstance(arg, H):
                     if not arg:
-                        return H({})
+                        return None
                     # A bare die (vs a pool) is treated as a 1-element seq. The body
                     # still expands once per outcome with X = (outcome,).
                     expansion.append((i, [((o,), w) for o, w in arg.items()]))
                 else:
                     raise TypeError(
-                        f"function param {param.name}: expected sequence, got {type(arg).__name__}"
+                        f"{err_label(i)}: expected sequence, got {type(arg).__name__}"
                     )
             else:
                 raise NotImplementedError(f"unknown param type: {ptype!r}")
+        return bound, expansion
 
+    def _invoke(
+        self,
+        entry: FunctionDef | tuple[list[str | None], Callable[..., _Val]],
+        args: list[_Val],
+    ) -> _Val:
+        # Polymorphic on entry type. User-defined functions (`FunctionDef`)
+        # tree-walk an AST body inside a managed local env with first-
+        # occurrence-wins duplicate-name handling. Builtins
+        # (`(param_types, impl)`) call a Python callable per expansion combo
+        # with the bound args. Both paths share the per-param coercion via
+        # `_bind_and_expand` and the LCM-aggregate via `_aggregate_iters`.
+        is_user = isinstance(entry, FunctionDef)
+        if is_user:
+            params = [p for p in entry.pattern if isinstance(p, Param)]
+            param_types = [p.type for p in params]
+            err_label = lambda i: f"function param {params[i].name}"  # noqa: E731
+        else:
+            param_types, impl = entry
+            params = None
+            err_label = lambda i: f"builtin param {i}"  # noqa: E731
+
+        bind = self._bind_and_expand(param_types, args, err_label=err_label)
+        if bind is None:
+            return H({})
+        bound, expansion = bind
+
+        if is_user:
+            return self._invoke_user(entry, params, bound, expansion)
+        return self._invoke_builtin(impl, bound, expansion)
+
+    def _invoke_user(
+        self,
+        func: FunctionDef,
+        params: list[Param],
+        bound: list[_Val],
+        expansion: list[tuple[int, list[tuple[_Val, int]]]],
+    ) -> _Val:
+        # No-expansion fast path: invoke the body once with `bound` installed
+        # in the env. Truncate the return when it's an H -- important for deep-
+        # recursion programs whose recursive calls are all-passthrough (e.g.
+        # `function: f N:n D:d { ... [f N/2 D] ... }` -- both args bypass
+        # expansion, so the body's bigint-growing operations would otherwise
+        # propagate untruncated).
         if not expansion:
             r = self._invoke_with_bound(func, params, bound)
-            # Truncate the return when it's an H, even on the no-expansion fast
-            # path. Important for deep-recursion programs whose recursive calls
-            # are all-passthrough (e.g. `function: f N:n D:d { ... [f N/2 D] ...
-            # }` -- both args bypass expansion, so the body's bigint-growing
-            # operations would otherwise propagate untruncated.
             return self._truncate(r) if isinstance(r, H) else r
 
-        # Cartesian product over expanded iterations. Per-iteration return values may
-        # have differing internal totals (a body branch returning a die has sum>1; a
-        # branch returning a scalar has sum=1). AnyDice normalizes those internal
-        # totals to a common LCM before combining so each iteration contributes its
-        # outer weight, not its outer weight scaled by its inner total. Same pattern
-        # as `_expand_dice_count`.
+        # Cartesian product over expanded iterations. Per-iteration return
+        # values may have differing internal totals (a body branch returning
+        # a die has sum>1; a branch returning a scalar has sum=1). AnyDice
+        # normalizes those internal totals to a common LCM before combining
+        # so each iteration contributes its outer weight, not its outer
+        # weight scaled by its inner total. Same pattern as
+        # `_expand_dice_count`.
         #
         # The function's local env is forked ONCE at the top of the call.
         # Within that single local env, the body runs once per outcome combo.
@@ -1053,8 +1091,6 @@ class AnyDiceInterpreter:
         #     Verified via program -7 (`[weird d6]` produces the cumulative
         #     sequence d{1, 3, 6, 10, 15, 21}, where REROLL is a non-param
         #     accumulator that visibly carries across V-iterations).
-        # Combos iterate in cartesian-product (lexicographic) order.
-        from itertools import product
 
         # Duplicate-named params: AnyDice's rule is FIRST-OCCURRENCE WINS
         # (positional, regardless of `:n`/`:d`/`:s` annotation). Subsequent
@@ -1074,47 +1110,115 @@ class AnyDiceInterpreter:
         self._depth += 1
         try:
 
-            def _gen() -> Iterator[tuple[H[int], int]]:
-                # AnyDice enumerates the first argument as the lowest-order
-                # term (it varies fastest / innermost loop); `product`
-                # would make the first param the outermost loop. Iterate
-                # the reversed expansion and un-reverse each combo to
-                # restore positional alignment. Observable only when a
-                # non-param variable persists across iterations (todo-53);
-                # see corpus 0x40389.
-                for combo in product(*[items for _, items in reversed(expansion)]):
-                    combo = combo[::-1]  # noqa: PLW2901
-                    weight = 1
-                    # Reset ALL params to their entry-bound values per iter.
-                    # Non-param env vars persist their mutations from the
-                    # previous iter. Skip duplicate-named param positions so
-                    # only the first-occurrence binding takes effect.
-                    for i, param in enumerate(params):
-                        if first_idx_for_name[param.name] == i:
-                            self._env[param.name] = bound[i]
-                    # Override expanding params with this iteration's combo,
-                    # again only at the first-occurrence position so a
-                    # duplicate that happens to expand doesn't clobber the
-                    # earlier binding.
-                    for j, (idx, _) in enumerate(expansion):
-                        value, w = combo[j]
-                        weight *= w
-                        if first_idx_for_name[params[idx].name] == idx:
-                            self._env[params[idx].name] = value
-                    r = self._execute_body(func)
-                    # When a body iteration returns a sequence, AnyDice sum-coerces it
-                    # to a single number rather than distributing seq elements as
-                    # separate outcomes. (Verified against AnyDice via 405c6's `[roll
-                    # 1d6 1d6]` which produces an H over A+B+C, not over {A+B, C}
-                    # elements.)
-                    if isinstance(r, tuple):
-                        r = sum(r)
-                    yield self._coerce_to_h(r), weight
+            def _per_iter(combo: tuple[tuple[_Val, int], ...]) -> _Val:
+                # Reset ALL params to their entry-bound values per iter.
+                # Non-param env vars persist their mutations from the
+                # previous iter. Skip duplicate-named param positions so
+                # only the first-occurrence binding takes effect.
+                for i, param in enumerate(params):
+                    if first_idx_for_name[param.name] == i:
+                        self._env[param.name] = bound[i]
+                # Override expanding params with this iteration's combo,
+                # again only at the first-occurrence position so a
+                # duplicate that happens to expand doesn't clobber the
+                # earlier binding.
+                for j, (idx, _) in enumerate(expansion):
+                    value, _w = combo[j]
+                    if first_idx_for_name[params[idx].name] == idx:
+                        self._env[params[idx].name] = value
+                return self._execute_body(func)
 
-            return self._truncate(aggregate_weighted(_gen()))  # ty: ignore[invalid-argument-type]
+            return self._aggregate_iters(
+                expansion, reverse_combos=True, per_iter=_per_iter
+            )
         finally:
             self._depth -= 1
             self._env = saved_env
+
+    def _invoke_builtin(
+        self,
+        impl: Callable[..., _Val],
+        bound: list[_Val],
+        expansion: list[tuple[int, list[tuple[_Val, int]]]],
+    ) -> _Val:
+        # No-expansion fast path: just call the impl with the bound args.
+        if not expansion:
+            return impl(self._settings, *bound)
+
+        # Expansion path: aggregate impl results across the Cartesian product.
+        # `reverse_combos=True` mirrors the user-defined enumeration order.
+        # Stateless builtin impls produce aggregates that are independent of
+        # iteration order, so True is observably equivalent to False here.
+        # The `_depth` bracket is structurally a no-op for builtins (impls
+        # don't recursively re-enter `_call`), but kept for symmetry with the
+        # user-defined path so future stateful builtins, if any, would behave
+        # consistently.
+        self._depth += 1
+        try:
+
+            def _per_iter(combo: tuple[tuple[_Val, int], ...]) -> _Val:
+                for j, (idx, _) in enumerate(expansion):
+                    value, _w = combo[j]
+                    bound[idx] = value
+                return impl(self._settings, *bound)
+
+            return self._aggregate_iters(
+                expansion, reverse_combos=True, per_iter=_per_iter
+            )
+        finally:
+            self._depth -= 1
+
+    def _aggregate_iters(
+        self,
+        expansion: list[tuple[int, list[tuple[_Val, int]]]],
+        *,
+        reverse_combos: bool,
+        per_iter: Callable[[tuple[tuple[_Val, int], ...]], _Val],
+    ) -> H[int]:
+        r"""LCM-aggregate per-iteration results across the expansion's
+        Cartesian product, returning a truncated H.
+
+        Each combination of expansion items is passed to *per_iter*, which
+        mutates whatever ambient state it needs (env, bound list, etc.) and
+        returns the body result for that combination. The per-combination
+        weight (product of the expansion's item weights) is computed here.
+
+        *reverse_combos* controls iteration order:
+            * `True`: iterate with the *reversed* expansion order so the first
+              expansion entry varies fastest (AnyDice's little-endian rule;
+              required for any user-defined function body that may observe
+              iteration order via non-param accumulators).
+            * `False`: iterate the natural Cartesian-product order. Observably
+              equivalent to True for any *per_iter* whose return depends only
+              on the combination's values (e.g. stateless builtin impls), but
+              distinct for user-defined bodies that read mutated non-param
+              env vars.
+        """
+        from itertools import product
+
+        if reverse_combos:
+            items_list = [items for _, items in reversed(expansion)]
+        else:
+            items_list = [items for _, items in expansion]
+
+        def _gen() -> Iterator[tuple[H[int], int]]:
+            for combo in product(*items_list):
+                if reverse_combos:
+                    combo = combo[::-1]  # noqa: PLW2901
+                weight = 1
+                for _, w in combo:
+                    weight *= w
+                r = per_iter(combo)
+                # When a body iteration returns a sequence, AnyDice sum-coerces
+                # it to a single number rather than distributing seq elements
+                # as separate outcomes. (Verified against AnyDice via 405c6's
+                # `[roll 1d6 1d6]` which produces an H over A+B+C, not over
+                # {A+B, C} elements.)
+                if isinstance(r, tuple):
+                    r = sum(r)
+                yield self._coerce_to_h(r), weight
+
+        return self._truncate(aggregate_weighted(_gen()))  # ty: ignore[invalid-argument-type]
 
     def _execute_body(self, func: FunctionDef) -> _Val:
         r"""Run `func`'s body in the current env, returning the `result:` value
@@ -1146,95 +1250,3 @@ class AnyDiceInterpreter:
         finally:
             self._depth -= 1
             self._env = saved_env
-
-    def _call_builtin(  # noqa: C901
-        self,
-        param_types: list[str | None],
-        args: list[_Val],
-        impl: Callable[..., _Val],
-    ) -> _Val:
-        # Builtin dispatch mirrors `_invoke`'s coercion (n-typed expands across H
-        # outcomes; s-typed expands across pool rolls or die outcomes-as-singleton-seqs)
-        # but DIFFERS for d-typed: pools are passed through as-is rather than collapsed
-        # via `arg.h()`. This preserves per-die structure that some builtins
-        # (e.g. `[highest N of P]`) need. Bare param types (None) pass through with
-        # no coercion (matches the AnyDice bare-param semantic in `_invoke`).
-        bound: list[_Val] = [0] * len(param_types)
-        expansion: list[tuple[int, list[tuple[_Val, int]]]] = []
-        for i, (ptype, arg) in enumerate(zip(param_types, args, strict=True)):
-            if ptype is None:
-                bound[i] = arg
-            elif ptype == "n":
-                if isinstance(arg, P):
-                    arg = arg.h()  # noqa: PLW2901
-                if isinstance(arg, tuple):
-                    arg = sum(arg)  # noqa: PLW2901
-                if isinstance(arg, int):
-                    bound[i] = arg
-                elif isinstance(arg, H):
-                    if not arg:
-                        return H({})
-                    expansion.append((i, [(o, w) for o, w in arg.items()]))
-                else:
-                    raise TypeError(
-                        f"builtin param {i}: expected number, got {type(arg).__name__}"
-                    )
-            elif ptype == "d":
-                # `:d` builtins do NOT short-circuit on empty H/P -- the impl
-                # decides (e.g. `[explode d{}]` -> H({}), but `[maximum of
-                # d{}]` -> 0). Same convention as user functions in `_invoke`.
-                if isinstance(arg, int):
-                    arg = H({arg: 1})  # noqa: PLW2901
-                elif isinstance(arg, tuple):
-                    arg = H({sum(arg): 1})  # noqa: PLW2901
-                if not isinstance(arg, (H, P)):
-                    raise TypeError(
-                        f"builtin param {i}: expected die, got {type(arg).__name__}"
-                    )
-                bound[i] = arg
-            elif ptype == "s":
-                if isinstance(arg, int):
-                    bound[i] = (arg,)
-                elif isinstance(arg, tuple):
-                    bound[i] = arg
-                elif isinstance(arg, P):
-                    if not arg.h():
-                        return H({})
-                    expansion.append(
-                        (i, [(r[::-1], c) for r, c in arg.rolls_with_counts()])
-                        if self._settings.highest_first()
-                        else (i, [(r, c) for r, c in arg.rolls_with_counts()])
-                    )
-                elif isinstance(arg, H):
-                    if not arg:
-                        return H({})
-                    expansion.append((i, [((o,), w) for o, w in arg.items()]))
-                else:
-                    raise TypeError(
-                        f"builtin param {i}: expected sequence, got {type(arg).__name__}"
-                    )
-            else:
-                raise NotImplementedError(f"unknown builtin param type: {ptype!r}")
-
-        if not expansion:
-            return impl(self._settings, *bound)
-
-        # Same LCM-normalization pattern as `_invoke`: per-iteration return values
-        # may have differing internal totals (latent for the currently-wired highest
-        # variants, but will surface for any builtin returning a variable-total H).
-        from itertools import product
-
-        def _gen() -> Iterator[tuple[H[int], int]]:
-            for combo in product(*[items for _, items in expansion]):
-                weight = 1
-                for j, (idx, _) in enumerate(expansion):
-                    value, w = combo[j]
-                    bound[idx] = value
-                    weight *= w
-                r = impl(self._settings, *bound)
-                # Mirror `_invoke`: sum-coerce a tuple return to a single number.
-                if isinstance(r, tuple):
-                    r = sum(r)
-                yield self._coerce_to_h(r), weight
-
-        return self._truncate(aggregate_weighted(_gen()))  # ty: ignore[invalid-argument-type]
