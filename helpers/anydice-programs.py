@@ -1124,6 +1124,25 @@ _PCT_RECOVERY_T_BOUND = 10**15
 _APPROX_TOLERANCE_PCT = Fraction(1, 10**8)
 _PCT_RECOVERY_T_K_MAX = 32
 
+# Phantom-mass auto-detection threshold (percentage units). When `_classify`
+# would emit `mismatch:values` and any AnyDice output arm's percentages sum to
+# strictly less than this, reclassify as `divergence:anydice-bug:phantom-mass`.
+# AnyDice's `:n`-expansion-over-empty-die path returns a "phantom-bearing
+# empty" that, when dropped from a parent expansion's aggregation, keeps the
+# iter's outer weight as phantom mass -- the visible distribution sums to
+# less than 100%. Our interpreter conflates this with regular `H({})` and
+# renormalizes, producing a divergent (but mathematically consistent within
+# our model) distribution. See `project_anydice_empty_flavors_phantom_mass`
+# memory entry for the full semantic background.
+#
+# Threshold tuned to clear float-rendering wobble (which sits around 99.99%
+# for distributions with many outcomes) while catching the substantial-
+# phantom cases (corpus scan 2026-05: `0x40858` at 0.46%, `0x1e23` at
+# 93.13%, `0x10f1b` at 99.69%). The 99.99%-band escapes (`0x13dc`) carry
+# divergence magnitudes below ~1e-3% per outcome and are best annotated
+# manually with the existing `anydice-bug` annotation flow.
+_PHANTOM_MASS_THRESHOLD_PCT = Fraction(997, 10)
+
 
 def _try_total(
     filtered: list[tuple[int, float]], total: int, tol: float
@@ -1381,7 +1400,7 @@ def cmd_compare(ids: list[str], db_path: Path, *, timeout_s: float) -> None:
     conn.close()
 
 
-def cmd_run(source: str, *, timeout_s: float, short: bool, width: int) -> None:
+def cmd_run(source: str, *, timeout_s: float, short: bool, precision: int) -> None:
     r"""Run *source* through the anydyce interpreter and print each output's
     distribution. Bounded by `timeout_s` via SIGALRM. Exits 1 on parse error,
     2 on interpreter error or timeout. Output formatting mirrors `H.format()`
@@ -1417,7 +1436,7 @@ def cmd_run(source: str, *, timeout_s: float, short: bool, width: int) -> None:
         elif short:
             print(h.format_short())
         else:
-            print(h.format(width=width))
+            print(h.format(precision=precision))
 
 
 # ---- Verify helpers ------------------------------------------------------------------
@@ -1569,6 +1588,38 @@ def _our_results_to_counts(
     return out
 
 
+def _min_arm_sum_pct(data: dict) -> tuple[int, Fraction] | None:
+    r"""Find the AnyDice output arm whose percentages sum to the lowest value.
+
+    Returns `(arm_index, sum_as_Fraction)` for the lowest-summing arm across
+    all distribution arms in *data*, or `None` if no arms exist. The sum is
+    computed as an exact Fraction from the float percentages so the threshold
+    check downstream is precise.
+
+    Used to detect "phantom mass" in AnyDice's oracle: when AnyDice's
+    `:n`-expansion-over-empty-die path returns a phantom-bearing empty that
+    propagates into a parent expansion's aggregation, the visible
+    distribution sums to less than 100%, with the missing fraction equal to
+    the dropped iter's outer weight. See `_PHANTOM_MASS_THRESHOLD_PCT`.
+    """
+    dists = data.get("distributions", {}).get("data", [])
+    if not dists:
+        return None
+    lowest: tuple[int, Fraction] | None = None
+    for i, arm in enumerate(dists):
+        s = Fraction(0)
+        for entry in arm:
+            if len(entry) != 2:
+                continue
+            o, p = entry
+            if o is None or p is None:
+                continue
+            s += Fraction(p)
+        if lowest is None or s < lowest[1]:
+            lowest = (i, s)
+    return lowest
+
+
 def _their_results_to_counts(data: dict) -> list[dict[int, int]]:
     dists = data.get("distributions", {})
     dist_data = dists.get("data", [])
@@ -1596,12 +1647,16 @@ def _classify(
     r"""Bucket a row.
 
     Returns `(bucket, detail)`. *bucket* is one of: `match`, `match:approximate`,
-    `mismatch:dist-count`, `mismatch:values`, `parse-fail`, `parse-fail:legacy`,
-    `interp-error:<ExcType>`, `interp-timeout`, `interp-oom`, `anydice-error`,
-    `anydice-503`, `anydice-empty`, `anydice-resource`, `anydice-bad-json`,
-    `anydice-bad-shape`, `unrun`. *detail* is a short string for sample reporting,
-    or `None`. The `interp-killed` bucket is added by `_verify_isolated` (worker
-    died unexpectedly) and never returned by `_classify` directly.
+    `mismatch:dist-count`, `mismatch:values`, `divergence:anydice-bug:phantom-mass`,
+    `parse-fail`, `parse-fail:legacy`, `interp-error:<ExcType>`, `interp-timeout`,
+    `interp-oom`, `anydice-error`, `anydice-503`, `anydice-empty`,
+    `anydice-resource`, `anydice-bad-json`, `anydice-bad-shape`, `unrun`. *detail*
+    is a short string for sample reporting, or `None`. The `interp-killed` bucket
+    is added by `_verify_isolated` (worker died unexpectedly) and never returned
+    by `_classify` directly. The `divergence:anydice-bug` family is otherwise
+    produced post-classify by the annotation-based reclassification (see
+    `_load_annotations`); `:phantom-mass` is the one sub-bucket emitted directly
+    by `_classify` based on the AnyDice oracle's percentage-sum signature.
 
     `match:approximate` covers distributions whose integer counts differ but whose
     proportions agree within `_APPROX_TOLERANCE_PCT` -- typically the result of
@@ -1709,6 +1764,20 @@ def _classify(
             if olbl == tlbl
             else f"dist[{i}] our label={olbl!r}, their label={tlbl!r}"
         )
+        # Phantom-mass auto-detection: if any AnyDice output arm's
+        # percentages sum to materially less than 100%, the divergence is
+        # AnyDice's :n-expansion-over-empty-die "phantom-bearing empty"
+        # signature, NOT a math error on our side. Reclassify rather than
+        # treating as a regular mismatch.
+        phantom = _min_arm_sum_pct(data)
+        if phantom is not None and phantom[1] < _PHANTOM_MASS_THRESHOLD_PCT:
+            return (
+                "divergence:anydice-bug:phantom-mass",
+                (
+                    f"phantom-mass on arm[{phantom[0]}]: sum={float(phantom[1]):.4f}%; "
+                    f"{label_info}"
+                ),
+            )
         return (
             "mismatch:values",
             f"{label_info}; ours = {oc}; theirs = {tc}",
@@ -2232,11 +2301,11 @@ def main() -> None:
         help="read program text from FILE (mutually exclusive with positional source)",
     )
     run_parser.add_argument(
-        "--timeout",
-        metavar="SECONDS",
-        type=float,
-        default=5.0,
-        help="interpreter wall-clock budget in seconds (default: 5.0)",
+        "--precision",
+        metavar="N",
+        type=int,
+        default=2,
+        help="precision passed to H.format() (default: 2)",
     )
     run_parser.add_argument(
         "--short",
@@ -2244,11 +2313,11 @@ def main() -> None:
         help="print each distribution via H.format_short() instead of the multi-line H.format()",
     )
     run_parser.add_argument(
-        "--width",
-        metavar="N",
-        type=int,
-        default=65,
-        help="width passed to H.format() (default: 65; ignored when --short is set)",
+        "--timeout",
+        metavar="SECONDS",
+        type=float,
+        default=5.0,
+        help="interpreter wall-clock budget in seconds (default: 5.0)",
     )
 
     # ---- verify ------------------------------------------------------------------
@@ -2442,9 +2511,9 @@ def main() -> None:
                 source = args.source
         cmd_run(
             source,
-            timeout_s=args.timeout,
+            precision=args.precision,
             short=args.short,
-            width=args.width,
+            timeout_s=args.timeout,
         )
     elif args.command == "verify":
         if args.ids and args.all_rows:
