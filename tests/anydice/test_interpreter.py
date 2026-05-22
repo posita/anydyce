@@ -863,13 +863,14 @@ class TestPow:
 
     # In an H-iterated context, AnyDice does NOT raise -- erroring on one
     # outcome would kill the whole distribution. Instead it substitutes a
-    # sentinel value (-9223372036854776000 = -(2^63 + 192) = -0x80000000000000C0)
-    # for every `0^negative` outcome, regardless of the exponent magnitude.
-    # Likely an artifact of PHP's `(int)(-INF)` cast. Verified empirically:
-    #   output 0^d{-1}    -> -9223372036854776000
-    #   output 0^d{-2}    -> -9223372036854776000
-    #   output 0^d{-100}  -> -9223372036854776000
-    _POW_NEG_INF_SENTINEL = -9223372036854776000
+    # sentinel value (-2^63 = INT64_MIN = -0x8000000000000000) for every
+    # `0^negative` outcome, regardless of the exponent magnitude. The
+    # signed-int overflow of the float-to-int conversion of `-INF`.
+    # Verified empirically across captured corpus outputs:
+    #   output 0^d{-1}    -> -9223372036854775808
+    #   output 0^d{-2}    -> -9223372036854775808
+    #   output 0^d{-100}  -> -9223372036854775808
+    _POW_NEG_INF_SENTINEL = -9223372036854775808
 
     def test_zero_pow_die_with_one_negative_outcome(self) -> None:
         assert run("output 0 ^ d{-1}") == [
