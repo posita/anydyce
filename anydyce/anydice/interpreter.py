@@ -88,10 +88,11 @@ _Val = NumT | H[NumT] | DieT | SeqT | str
 # sentinel value below for every offending per-outcome result, so the
 # overall distribution survives. The principle is "errors don't compose
 # probabilistically" -- raising on one outcome would kill the entire
-# computation. We mirror this split. The exact sentinel value matches what
-# AnyDice emits empirically; it is `-(2**63 + 192) = -0x80000000000000C0`,
-# likely an artifact of PHP's `(int)(-INF)` cast.
-_POW_NEG_INF_SENTINEL = -9223372036854776000
+# computation. We mirror this split. The sentinel value AnyDice emits is
+# `-2**63 = INT64_MIN = -0x8000000000000000` -- the signed-int overflow of
+# the float-to-int conversion of `-INF`. Verified: every sentinel-bearing
+# output in the captured corpus uses this exact value.
+_POW_NEG_INF_SENTINEL = -9223372036854775808
 
 
 class _EmptyPoolOfOne(P[NumT]):
