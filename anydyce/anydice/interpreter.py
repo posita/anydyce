@@ -22,7 +22,6 @@ from collections import Counter
 from collections.abc import Callable, Iterator
 
 from dyce import H, P, RollT, TruncationWarning
-from dyce.d import d0 as dempty
 from dyce.h import aggregate_weighted
 
 from .ast_ import (
@@ -65,11 +64,14 @@ try:
     import warnings
 
     from dyce.d import (  # type: ignore[attr-defined]
+        dempty,  # pyrefly: ignore[missing-module-attribute] # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[unresolved-import]
         dzero,  # pyrefly: ignore[missing-module-attribute] # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[unresolved-import]
     )
 
     warnings.warn("dyce is sane now, remove this guard", stacklevel=0)
 except ImportError:
+    from dyce.d import d0 as dempty
+
     dzero = H({0: 1})
 
 __all__ = ("AnyDiceInterpreter",)
@@ -456,7 +458,7 @@ class AnyDiceInterpreter:
 
     # ---- Binary operators ----------------------------------------------------------------
 
-    def _apply_binop(self, op: str, left: _Val, right: _Val) -> int | H[int]:
+    def _apply_binop(self, op: str, left: _Val, right: _Val) -> int | H[int] | P[int]:
         if op in _ARITH_OPS:
             return self._apply_arith(op, left, right)
         elif op in _CMP_OPS:
@@ -464,7 +466,7 @@ class AnyDiceInterpreter:
         else:  # pragma: no cover
             raise NotImplementedError(f"unhandled operator: {op!r}")
 
-    def _apply_arith(self, op: str, left: _Val, right: _Val) -> int | H[int]:
+    def _apply_arith(self, op: str, left: _Val, right: _Val) -> int | H[int] | P[int]:
         l_empty = isinstance(left, (H, P)) and not left
         r_empty = isinstance(right, (H, P)) and not right
         if l_empty and r_empty:
@@ -934,7 +936,17 @@ class AnyDiceInterpreter:
                 if isinstance(arg, P):
                     arg = arg.h()  # noqa: PLW2901
                 if isinstance(arg, tuple):
-                    arg = sum(arg)  # noqa: PLW2901
+                    # AnyDice sum-coerces a seq arg to `:n`, then wraps it as
+                    # a 1-outcome die at that sum so the call still routes
+                    # through the expansion-aggregation path. That way a
+                    # body that returns a tuple gets per-iter sum-coerced
+                    # (1 iter), even though the seq arg itself doesn't
+                    # multiply iterations. An empty seq is `H({sum(()): 1})`
+                    # = `H({0: 1})`, NOT `H({})` -- AnyDice runs the body
+                    # once with N=0 rather than eliminating the call.
+                    # Verified via tmp-probes -0x40 (weighted-seq body), -0x41
+                    # (scalar body), and -0x42 (empty-seq edge case).
+                    arg = H({sum(arg): 1})  # noqa: PLW2901
                 if isinstance(arg, int):
                     bound[i] = arg
                 elif isinstance(arg, H):
@@ -1013,24 +1025,23 @@ class AnyDiceInterpreter:
         # (`(param_types, impl)`) call a Python callable per expansion combo
         # with the bound args. Both paths share the per-param coercion via
         # `_bind_and_expand` and the LCM-aggregate via `_aggregate_iters`.
-        is_user = isinstance(entry, FunctionDef)
-        if is_user:
+        if isinstance(entry, FunctionDef):
             params = [p for p in entry.pattern if isinstance(p, Param)]
             param_types = [p.type for p in params]
             err_label = lambda i: f"function param {params[i].name}"  # noqa: E731
+            bind = self._bind_and_expand(param_types, args, err_label=err_label)
+            if bind is None:
+                return H({})
+            bound, expansion = bind
+            return self._invoke_user(entry, params, bound, expansion)
         else:
             param_types, impl = entry
-            params = None
             err_label = lambda i: f"builtin param {i}"  # noqa: E731
-
-        bind = self._bind_and_expand(param_types, args, err_label=err_label)
-        if bind is None:
-            return H({})
-        bound, expansion = bind
-
-        if is_user:
-            return self._invoke_user(entry, params, bound, expansion)
-        return self._invoke_builtin(impl, bound, expansion)
+            bind = self._bind_and_expand(param_types, args, err_label=err_label)
+            if bind is None:
+                return H({})
+            bound, expansion = bind
+            return self._invoke_builtin(impl, bound, expansion)
 
     def _invoke_user(
         self,
