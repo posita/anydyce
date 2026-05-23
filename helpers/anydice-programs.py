@@ -1062,7 +1062,9 @@ def cmd_compute(
         sys.exit(1)
 
     first = True
-    for program_id, program in rows:
+    total = len(rows)
+    idx_width = len(str(total))
+    for i, (program_id, program) in enumerate(rows, start=1):
         hex_id = f"{program_id:x}"
 
         if not first and delay > 0:
@@ -1070,7 +1072,10 @@ def cmd_compute(
         first = False
 
         if debug:
-            print(f"debug: computing program_id={hex_id}", file=sys.stderr)
+            print(
+                f"debug: [{i:>{idx_width}}/{total}] computing program_id={hex_id}",
+                file=sys.stderr,
+            )
 
         try:
             output = _post_program(program, timeout=timeout)
@@ -1840,10 +1845,12 @@ def _verify_isolated(
     }
     buckets: dict[str, list[tuple[int, str, str | None]]] = {}
 
+    total = len(rows)
+    idx_width = len(str(total))
     if debug:
         print(
             f"debug: starting forkserver Pool: workers={workers}, "
-            f"maxtasksperchild={maxtasksperchild}, jobs={len(rows)}",
+            f"maxtasksperchild={maxtasksperchild}, jobs={total}",
             file=sys.stderr,
         )
 
@@ -1862,16 +1869,22 @@ def _verify_isolated(
             )
             for program_id, program, output_json in rows
         ]
+        if debug:
+            print(
+                f"debug: submitted {total} jobs, collecting results...",
+                file=sys.stderr,
+            )
 
         # Parent-side wait buffer: workers enforce SIGALRM at timeout_s, so the
         # parent only needs enough slack for IPC/unwinding. 10s is generous.
         parent_wait = timeout_s + 10.0
         try:
-            for program_id, ar in async_results:
+            for i, (program_id, ar) in enumerate(async_results, start=1):
                 _, program, _ = rows_by_id[program_id]
                 if debug:
                     print(
-                        f"debug: collecting program_id={program_id:x}",
+                        f"debug: [{i:>{idx_width}}/{total}] collecting "
+                        f"program_id={program_id:x}",
                         file=sys.stderr,
                     )
                 try:
@@ -2000,11 +2013,14 @@ def cmd_verify(
     else:
         raw_buckets = {}
         processed = 0
+        total = len(rows)
+        idx_width = len(str(total))
         try:
-            for program_id, program, output_json in rows:
+            for i, (program_id, program, output_json) in enumerate(rows, start=1):
                 if debug:
                     print(
-                        f"debug: verifying program_id={program_id:x}",
+                        f"debug: [{i:>{idx_width}}/{total}] verifying "
+                        f"program_id={program_id:x}",
                         file=sys.stderr,
                     )
                 bucket, detail = _classify(program, output_json, timeout_s=timeout_s)
