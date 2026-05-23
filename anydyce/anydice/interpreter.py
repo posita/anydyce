@@ -22,6 +22,7 @@ from collections import Counter
 from collections.abc import Callable, Iterator
 
 from dyce import H, P, RollT, TruncationWarning
+from dyce.d import d0 as dempty
 from dyce.h import aggregate_weighted
 
 from .ast_ import (
@@ -59,6 +60,17 @@ from .ast_ import (
 )
 from .builtins_ import BUILTINS
 from .settings import Settings
+
+try:
+    import warnings
+
+    from dyce.d import (  # type: ignore[attr-defined]
+        dzero,  # pyrefly: ignore[missing-module-attribute] # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[unresolved-import]
+    )
+
+    warnings.warn("dyce is sane now, remove this guard", stacklevel=0)
+except ImportError:
+    dzero = H({0: 1})
 
 __all__ = ("AnyDiceInterpreter",)
 
@@ -182,12 +194,11 @@ _CMP_RAW: dict[str, Callable[..., bool]] = {
     ">=": operator.ge,
 }
 
-_ARITH_OPS = {"+", "-", "*", "/", "^"}
+_ARITH_OPS = {"+", "-", "*", "/", "^", "&", "|"}
 _CMP_OPS = {"=", "!=", "<", ">", "<=", ">="}
-_BOOL_OPS = {"&", "|"}
 
 # +/- treat empty die as scalar 0; */^ propagate emptiness as H({})
-_EMPTY_DIE_AS_ZERO_ARITH = {"+", "-"}
+_EMPTY_DIE_SKIPS_ARITH = {"+", "-", "|"}
 
 # ---- Function pattern shape --------------------------------------------------------------
 
@@ -450,42 +461,39 @@ class AnyDiceInterpreter:
             return self._apply_arith(op, left, right)
         elif op in _CMP_OPS:
             return self._apply_cmp(op, left, right)
-        elif op in _BOOL_OPS:
-            return self._apply_bool(op, left, right)
         else:  # pragma: no cover
             raise NotImplementedError(f"unhandled operator: {op!r}")
 
     def _apply_arith(self, op: str, left: _Val, right: _Val) -> int | H[int]:
-        # Sequences sum-coerce in arithmetic contexts
+        l_empty = isinstance(left, (H, P)) and not left
+        r_empty = isinstance(right, (H, P)) and not right
+        if l_empty and r_empty:
+            return dempty
+        # Sequences sum-coerce for boolean ops
         if isinstance(left, tuple):
             left = sum(left)
         if isinstance(right, tuple):
             right = sum(right)
-        if isinstance(left, P):
-            left = left.h()
-        if isinstance(right, P):
-            right = right.h()
-        # Empty-die handling: +, -, and | treat a single empty operand as scalar 0 so
-        # `d{} + 5 = 5` (and symmetrically), but when *both* operands are empty, AnyDice
-        # propagates H({}). The both-empty case shows up in `result: [f] + [f]` when
-        # both recursive calls hit a depth-cap and return H({}); treating that as 0+0=0
-        # leaks a spurious zero into the parent distribution. *, /, ^, and & always
-        # propagate H({}) if at least one operand is H({}).
-        left_empty = isinstance(left, H) and not left
-        right_empty = isinstance(right, H) and not right
-        if left_empty and right_empty:
-            return H({})
-        if left_empty:
-            if op in _EMPTY_DIE_AS_ZERO_ARITH:
-                left = 0
-            else:
-                return H({})
-        if right_empty:
-            if op in _EMPTY_DIE_AS_ZERO_ARITH:
-                right = 0
-            else:
-                return H({})
-        return self._h_binop(op, left, right)
+        if op in _EMPTY_DIE_SKIPS_ARITH:
+            # AnyDice anomaly: d{} - <thing> propagates <thing> (acts as a no-op). We
+            # match AnyDice's actual outputs (except for a bug where AnyDice is
+            # internally inconsistent when d{} is the lhs parameter).
+            if l_empty:
+                if isinstance(right, P):
+                    return right
+                else:
+                    left = 0
+                    l_empty = False
+            elif r_empty:
+                if isinstance(left, P):
+                    return left
+                else:
+                    right = 0
+                    r_empty = False
+        left = left.h() if isinstance(left, P) else left
+        right = right.h() if isinstance(right, P) else right
+
+        return dempty if l_empty or r_empty else self._h_binop(op, left, right)
 
     def _apply_cmp(self, op: str, left: _Val, right: _Val) -> int | H[int]:  # noqa: C901
         if isinstance(left, P):
@@ -517,36 +525,6 @@ class AnyDiceInterpreter:
                 return sum(_OP_FUNCS[op](left, e) for e in right)
             else:  # pragma: no cover
                 raise TypeError(f"unexpected left operand type {type(left).__name__}")
-        return self._h_binop(op, left, right)
-
-    def _apply_bool(self, op: str, left: _Val, right: _Val) -> int | H[int]:  # noqa: C901
-        # Sequences sum-coerce for boolean ops
-        if isinstance(left, tuple):
-            left = sum(left)
-        if isinstance(right, tuple):
-            right = sum(right)
-        if isinstance(left, P):
-            left = left.h()
-        if isinstance(right, P):
-            right = right.h()
-        l_empty = isinstance(left, H) and not left
-        r_empty = isinstance(right, H) and not right
-        if op == "&":
-            # Both sides propagate empty-die emptiness
-            if l_empty or r_empty:
-                return H({})
-        elif op == "|":
-            # AnyDice anomaly: d{} | <0> propagates H({}) (where <0> is empty seq summed
-            # to 0 or another empty die), but d{} | <nonzero> does NOT propagate (acts
-            # as scalar 0). We match AnyDice's actual outputs.
-            if l_empty and r_empty:
-                return H({})
-            if l_empty and isinstance(right, int) and right == 0:
-                return H({})
-            if l_empty:
-                left = 0
-            if r_empty:
-                right = 0
         return self._h_binop(op, left, right)
 
     def _h_binop(self, op: str, left: _Val, right: _Val) -> int | H[int]:
@@ -595,7 +573,7 @@ class AnyDiceInterpreter:
             size = len(pool)
             # Left is out of range
             if not 1 <= left <= size:
-                return H({0: 1})
+                return dzero
             # 1-based position. highest-first: pos 1 = highest = pool.h(-1).
             # lowest-first:  pos 1 = lowest  = pool.h(0).
             elif self._settings.highest_first():
@@ -616,7 +594,7 @@ class AnyDiceInterpreter:
                 if 1 <= p_int <= size:
                     selectors.append(-p_int if highest_first else p_int - 1)
             if not selectors:
-                return H({0: 1})
+                return dzero
             return pool.h(*selectors)
         else:
             raise TypeError(
@@ -666,7 +644,7 @@ class AnyDiceInterpreter:
     def _make_die(self, faces: _Val) -> H[int]:
         if isinstance(faces, int):
             # AnyDice convention: d0 always shows 0.
-            return H({0: 1}) if faces == 0 else H(faces)
+            return dzero if faces == 0 else H(faces)
         elif isinstance(faces, tuple):
             return H(Counter(faces)) if faces else H({})
         elif isinstance(faces, P):
@@ -686,7 +664,7 @@ class AnyDiceInterpreter:
             # Empty die regardless of n
             return H({})
         elif n == 0:
-            return H({0: 1})
+            return dzero
         elif n < 0:
             # AnyDice convention: `(-N)dX = -(NdX)` -- roll |N| dice and negate the
             # sum. Verified via 6585 (`1d6 - (-1d6)` yields 2d6's distribution).
