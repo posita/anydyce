@@ -15,7 +15,6 @@
 
 import pytest
 from dyce import H, P
-from dyce.d import d0 as dempty
 from dyce.d import d1, d2
 from dyce.h import aggregate_weighted
 from lark.exceptions import UnexpectedInput
@@ -26,11 +25,14 @@ try:
     import warnings
 
     from dyce.d import (  # type: ignore[attr-defined]
+        dempty,  # pyrefly: ignore[missing-module-attribute] # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[unresolved-import]
         dzero,  # pyrefly: ignore[missing-module-attribute] # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[unresolved-import]
     )
 
     warnings.warn("dyce is sane now, remove this guard", stacklevel=0)
 except ImportError:
+    from dyce.d import d0 as dempty
+
     dzero = H({0: 1})
 
 __all__ = ()
@@ -2377,12 +2379,16 @@ class TestBareParamPassthrough:
 
 
 class TestFunctionBodySeqReturnSumCoerce:
-    # When a function with explicit n-typed params expands across argument outcomes
-    # and the body returns a sequence per iteration, AnyDice sum-coerces the seq to
-    # a number before accumulating. Our impl previously distributed seq elements
-    # as separate outcomes, which double-counted. Verified against AnyDice (program
-    # 405c6) where [roll 1d6 1d6] with `result: {A+B, C}` produces an H over
-    # A+B+C values, not an H over A+B and C separately.
+    # Aggregation invariant: when a `:n`-typed function call expands across
+    # argument outcomes, the per-iteration body return is sum-coerced if it is
+    # a tuple, then accumulated. Verified against AnyDice (program 405c6,
+    # `[roll 1d6 1d6]` with `result: {A+B, C}` produces an H over A+B+C, not
+    # over {A+B, C}). The rule is *expansion -> sum-coerce return*, not
+    # *seq return -> sum-coerce*: a scalar-bound `:n` call (no expansion)
+    # preserves a tuple return as-is so the outer context can use it as
+    # die-faces, while a die-arg or seq-arg call expands and sum-coerces.
+    # The three weighted-seq-return tests below discriminate the three arg-
+    # shapes (scalar / die / seq) and pin the expected behavior.
 
     def test_seq_return_sum_coerced_simple(self) -> None:
         # Body returns {A+B, 0}; sum is A+B; result is the 2d6 sum distribution.
@@ -2412,6 +2418,38 @@ output [roll 1d6 1d6]
                 ),
             )
         ]
+
+    def test_weighted_seq_return_scalar_arg_preserved_as_die(self) -> None:
+        # `:n` + scalar arg = no expansion. Body returns a weighted-seq tuple
+        # which propagates as-is; the outer `2d` then reads it as die-faces.
+        # Discriminating probe from 0x304d investigation.
+        src = """
+function: weighted N:n { result: {0:1, 1:2} }
+output 2d[weighted 1]
+"""
+        assert run(src) == [("output 1", H({0: 1, 1: 4, 2: 4}))]
+
+    def test_weighted_seq_return_die_arg_expansion_sum_coerces(self) -> None:
+        # `:n` + die arg = expansion. d1 has one outcome -> 1 iter at N=1 ->
+        # body returns weighted-seq tuple (0, 1, 1) -> aggregation sum-coerces
+        # to 2 -> H({2: 1}) -> outer `2d` reads single face 2 -> H({4: 1}).
+        src = """
+function: weighted N:n { result: {0:1, 1:2} }
+output 2d[weighted d1]
+"""
+        assert run(src) == [("output 1", H({4: 1}))]
+
+    def test_weighted_seq_return_seq_arg_expansion_sum_coerces(self) -> None:
+        # `:n` + seq arg = expansion (per AnyDice; seq is treated as an H of
+        # outcomes, NOT sum-coerced to scalar). Currently FAILS: our
+        # `_bind_and_expand` sum-coerces a seq arg to a scalar at line 937,
+        # skipping expansion entirely, so this matches the scalar-arg shape
+        # (H({0:1, 1:4, 2:4})) instead of the die-arg shape (H({4: 1})).
+        src = """
+function: weighted N:n { result: {0:1, 1:2} }
+output 2d[weighted {1}]
+"""
+        assert run(src) == [("output 1", H({4: 1}))]
 
     def test_program_405c6_integration(self) -> None:
         # The full 405c6 program. Combines all three fixes:
