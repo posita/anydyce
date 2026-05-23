@@ -463,9 +463,15 @@ class TestAdd:
 
     def test_empty_die_add_die(self) -> None:
         assert run("output d{} + 2d6") == [("output 1", 2 @ H(6))]
+        assert run("output #(d{} + 2d6)") == [("output 1", H({2: 1}))]
+        assert run("output d{} + 0d6") == [("output 1", dzero)]
+        assert run("output #(d{} + 0d6)") == [("output 1", d1)]
 
     def test_die_add_empty_die(self) -> None:
         assert run("output 2d6 + d{}") == [("output 1", 2 @ H(6))]
+        assert run("output #(2d6 + d{})") == [("output 1", H({2: 1}))]
+        assert run("output 0d6 + d{}") == [("output 1", dzero)]
+        assert run("output #(0d6 + d{})") == [("output 1", d1)]
 
     def test_empty_die_add_empty_die(self) -> None:
         assert run("output d{} + d{}") == [("output 1", dempty)]
@@ -544,10 +550,16 @@ class TestSub:
         assert run("output d{} - {1..5}") == [("output 1", H({-15: 1}))]
 
     def test_empty_die_sub_die(self) -> None:
-        assert run("output d{} - 2d6") == [("output 1", 2 @ H(-6))]
+        assert run("output d{} - 2d6") == [("output 1", 2 @ H(6))]
+        assert run("output #(d{} - 2d6)") == [("output 1", H({2: 1}))]
+        assert run("output d{} - 0d6") == [("output 1", dzero)]
+        assert run("output #(d{} - 0d6)") == [("output 1", d1)]
 
     def test_die_sub_empty_die(self) -> None:
         assert run("output 2d6 - d{}") == [("output 1", 2 @ H(6))]
+        assert run("output #(2d6 - d{})") == [("output 1", H({2: 1}))]
+        assert run("output 0d6 - d{}") == [("output 1", dzero)]
+        assert run("output #(0d6 - d{})") == [("output 1", d1)]
 
     def test_empty_die_sub_empty_die(self) -> None:
         # Both sides empty: propagate (matching `+`'s both-empty rule and AnyDice).
@@ -1749,11 +1761,16 @@ class TestOr:
         assert run("output {1..5} | d{}") == [("output 1", d1)]
 
     def test_empty_die_or_die(self) -> None:
-        # 0 | each-2d6-outcome (all truthy) -> 1; total weight 36
-        assert run("output d{} | 2d6") == [("output 1", H({1: 36}))]
+        assert run("output d{} | 2d6") == [("output 1", 2 @ H(6))]
+        assert run("output #(d{} | 2d6)") == [("output 1", H({2: 1}))]
+        assert run("output d{} | 0d6") == [("output 1", dzero)]
+        assert run("output #(d{} | 0d6)") == [("output 1", d1)]
 
     def test_die_or_empty_die(self) -> None:
-        assert run("output 2d6 | d{}") == [("output 1", H({1: 36}))]
+        assert run("output 2d6 | d{}") == [("output 1", 2 @ H(6))]
+        assert run("output #(2d6 | d{})") == [("output 1", H({2: 1}))]
+        assert run("output 0d6 | d{}") == [("output 1", dzero)]
+        assert run("output #(0d6 | d{})") == [("output 1", d1)]
 
     # ---- Anomaly probes: cases where both | operands evaluate to zero/empty -----
 
@@ -1762,13 +1779,10 @@ class TestOr:
         assert run("output {} | {}") == [("output 1", dzero)]
 
     def test_empty_seq_or_empty_die(self) -> None:
-        # sum 0 | (right empty die acts as 0) = 0
         assert run("output {} | d{}") == [("output 1", dzero)]
 
     def test_empty_die_or_empty_seq(self) -> None:
-        # AnyDice anomaly: d{} | {} returns dempty even though d{} | 5 returns H({1:1}).
-        # We match AnyDice's actual output for this specific corner case.
-        assert run("output d{} | {}") == [("output 1", dempty)]
+        assert run("output d{} | {}") == [("output 1", dzero)]
 
     def test_empty_die_or_empty_die(self) -> None:
         # Both sides empty die -> propagate.
@@ -1846,10 +1860,13 @@ class TestHash:
     def test_hash_die(self) -> None:
         assert run("output #d6") == [("output 1", d1)]
 
-    def test_hash_pool(self) -> None:
-        assert run("output #(2d6)") == [("output 1", H({2: 1}))]
+    def test_hash_zero_pool_empty(self) -> None:
+        assert run("output #d{}") == [("output 1", H({0: 1}))]
 
-    def test_hash_pool_three(self) -> None:
+    def test_hash_zero_pool(self) -> None:
+        assert run("output #(0d0)") == [("output 1", d1)]
+
+    def test_hash_pool(self) -> None:
         assert run("output #(3d6)") == [("output 1", H({3: 1}))]
 
     def test_hash_empty_seq(self) -> None:
@@ -4466,3 +4483,37 @@ class TestSParamPoolExpansionIterationOrder:
             "output [expose roll from 2d6 at iteration 3]"
         )
         assert run(prog) == [("output 1", H({-10: 1, -3: 1}))]
+
+
+# ---- Regression: H({}) + H({}) propagates under recursion-cap (corpus 0x42f0) ------------
+
+
+class TestRecursionCapEmptyArithmetic:
+    # End-to-end integration test for the empty+empty propagation chain.
+    # `_apply_arith` has dedicated unit tests for each binary op
+    # (TestAdd::test_empty_die_add_empty_die et al.), but those don't
+    # exercise the full chain that surfaced as corpus 0x42f0:
+    # recursion-cap returns H({}) -> propagated through `*` -> propagated
+    # through `+` -> aggregated under `:n` expansion -> renormalized.
+    # If any link in that chain regresses (e.g. an `_apply_arith` rewrite
+    # accidentally short-circuits both-empty to scalar 0, or `*`-propagation
+    # changes, or aggregation handles empty iters differently), this catches
+    # it without a full corpus verify.
+    # Probe shape is the -0x2e small variant of 0x42f0:
+    #   N: 2; explode-on-N with `1d[explode dN] + 1d[explode dN]`; max
+    #   function depth 3. AnyDice ground truth verified earlier in the
+    #   session against the live oracle.
+
+    def test_corpus_0x42f0_small_variant(self) -> None:
+        prog = (
+            "N: 2\n"
+            "function: explode ROLLEDVALUE:n {\n"
+            " if ROLLEDVALUE = N {result: 1d[explode dN] + 1d[explode dN]}\n"
+            " result: ROLLEDVALUE\n"
+            "}\n"
+            'set "maximum function depth" to 3\n'
+            "output 1d[explode dN]"
+        )
+        # AnyDice oracle: (1: 1/2, 2: 1/8, 3: 1/4, 4: 1/8). LCM-friendly
+        # integer form: total 8.
+        assert run(prog) == [("output 1", H({1: 4, 2: 1, 3: 2, 4: 1}))]
