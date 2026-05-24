@@ -56,11 +56,10 @@ import warnings
 import matplotlib_inline
 from dyce.lifecycle import ExperimentalWarning
 
-import anydyce as _  # noqa: F401
+import anydyce.magic  # noqa: F401
 
 matplotlib_inline.backend_inline.set_matplotlib_formats("svg")
 warnings.filterwarnings("ignore", category=ExperimentalWarning)
-# %load_ext anydyce.magic
 
 # %% [markdown]
 # ### Interactive example: highest, middle, and lowest of 3d6
