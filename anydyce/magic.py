@@ -89,3 +89,13 @@ def load_ipython_extension(ipython: InteractiveShell) -> None:
         anyd,
         magic_kind="cell",
     )
+
+
+try:
+    from IPython import get_ipython  # pyright: ignore[reportPrivateImportUsage]
+
+    _ip = get_ipython()
+    if _ip is not None:
+        load_ipython_extension(_ip)
+except ImportError:
+    pass
