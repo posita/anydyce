@@ -950,7 +950,13 @@ class HorizontalBarHPlotter(BarHPlotter):
             ax.set_yticks(outcomes)
             ax.tick_params(labelbottom=False)
             ax.set_ylim((max(outcomes) + 0.5, min(outcomes) - 0.5))
-            ax.barh(outcomes, values, color=next(color_iter), label=label, **barh_kw)
+            ax.barh(
+                outcomes,
+                tuple(float(v) for v in values),
+                color=next(color_iter),
+                label=label,
+                **barh_kw,
+            )
             ax.legend(loc="upper right")
             row_start += rowspan
 
@@ -1304,15 +1310,27 @@ def limit_for_display(h: H[_T], cutoff: Fraction) -> H:
 def values_xy_for_graph_type(
     h: H[_T],
     graph_type: GraphTypeT,
-) -> tuple[tuple[_T, ...], tuple[float, ...]]:
+) -> tuple[tuple[_T, ...], tuple[Fraction, ...]]:
     outcomes, probabilities = (
         zip(*h.probability_items(), strict=True) if h else ((), ())
     )
 
     if graph_type == "at_least":
-        probabilities = tuple(accumulate(probabilities, __sub__, initial=1.0))[:-1]
+        probabilities = tuple(
+            accumulate(
+                probabilities,
+                __sub__,
+                initial=Fraction(1),
+            )
+        )[:-1]
     elif graph_type == "at_most":
-        probabilities = tuple(accumulate(probabilities, __add__, initial=0.0))[1:]
+        probabilities = tuple(
+            accumulate(
+                probabilities,
+                __add__,
+                initial=Fraction(0),
+            )
+        )[1:]
     elif graph_type == "normal":
         pass
     else:

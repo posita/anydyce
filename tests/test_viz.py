@@ -9,7 +9,6 @@
 import base64
 import warnings
 from fractions import Fraction
-from math import isclose
 
 import matplotlib as mpl
 import pytest
@@ -235,59 +234,44 @@ def test_values_xy_for_graph_type() -> None:
     lo = p_3d6.h(0)
     hi = p_3d6.h(-1)
 
-    def _tuples_close(a: tuple[float, ...], b: tuple[float, ...]) -> bool:
-        if len(a) != len(b):
-            return False
-
-        return all(map(isclose, a, b))
-
     lo_outcomes_normal, lo_values_normal = values_xy_for_graph_type(lo, "normal")
     _, hi_values_normal = values_xy_for_graph_type(hi, "normal")
     assert lo_outcomes_normal == d6_outcomes
-    assert _tuples_close(
-        lo_values_normal,
-        (
-            0.4212962962962,
-            0.2824074074074,
-            0.1712962962962,
-            0.0879629629629,
-            0.0324074074074,
-            0.0046296296296,
-        ),
+    assert lo_values_normal == (
+        Fraction(91, 216),
+        Fraction(61, 216),
+        Fraction(37, 216),
+        Fraction(19, 216),
+        Fraction(7, 216),
+        Fraction(1, 216),
     )
-    assert _tuples_close(hi_values_normal, lo_values_normal[::-1])
+    assert hi_values_normal == lo_values_normal[::-1]
 
     lo_outcomes_at_least, lo_values_at_least = values_xy_for_graph_type(lo, "at_least")
     _, hi_values_at_least = values_xy_for_graph_type(hi, "at_least")
     assert lo_outcomes_at_least == d6_outcomes
-    assert _tuples_close(
-        lo_values_at_least,
-        (
-            1.0,
-            0.5787037037037,
-            0.2962962962962,
-            0.125,
-            0.0370370370370,
-            0.0046296296296,
-        ),
+    assert lo_values_at_least == (
+        Fraction(1),
+        Fraction(125, 216),
+        Fraction(8, 27),
+        Fraction(1, 8),
+        Fraction(1, 27),
+        Fraction(1, 216),
     )
-    assert _tuples_close(
-        hi_values_at_least,
-        (
-            1.0,
-            0.9953703703703,
-            0.9629629629629,
-            0.875,
-            0.7037037037037,
-            0.4212962962962,
-        ),
+    assert hi_values_at_least == (
+        Fraction(1),
+        Fraction(215, 216),
+        Fraction(26, 27),
+        Fraction(7, 8),
+        Fraction(19, 27),
+        Fraction(91, 216),
     )
 
     lo_outcomes_at_most, lo_values_at_most = values_xy_for_graph_type(lo, "at_most")
     _, hi_values_at_most = values_xy_for_graph_type(hi, "at_most")
     assert lo_outcomes_at_most == d6_outcomes
-    assert _tuples_close(lo_values_at_most, hi_values_at_least[::-1])
-    assert _tuples_close(hi_values_at_most, lo_values_at_least[::-1])
+    assert lo_values_at_most == hi_values_at_least[::-1]
+    assert hi_values_at_most == lo_values_at_least[::-1]
 
 
 def test_csv_download_link_emtpy() -> None:
