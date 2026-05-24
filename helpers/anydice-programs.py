@@ -42,6 +42,7 @@ from urllib.parse import urlparse
 
 from dyce import H
 
+from anydyce.anydice import DEFAULT_PRECISION, format_anydice_results
 from anydyce.anydice import parse as anydyce_parse
 from anydyce.anydice import unparse as anydyce_unparse
 from anydyce.anydice.ast_ import (
@@ -1432,16 +1433,7 @@ def cmd_run(source: str, *, timeout_s: float, short: bool, precision: int) -> No
         signal.setitimer(signal.ITIMER_REAL, 0)
         signal.signal(signal.SIGALRM, prev_handler)
 
-    for i, (label, h) in enumerate(results):
-        if i > 0:
-            print()
-        print(f"=== {label} ===")
-        if not h:
-            print("(empty distribution)")
-        elif short:
-            print(h.format_short())
-        else:
-            print(h.format(precision=precision))
+    print(format_anydice_results(results, precision=precision, short=short))
 
 
 # ---- Verify helpers ------------------------------------------------------------------
@@ -2320,8 +2312,8 @@ def main() -> None:
         "--precision",
         metavar="N",
         type=int,
-        default=2,
-        help="precision passed to H.format() (default: 2)",
+        default=DEFAULT_PRECISION,
+        help=f"precision passed to H.format() (default: {DEFAULT_PRECISION})",
     )
     run_parser.add_argument(
         "--short",
