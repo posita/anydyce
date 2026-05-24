@@ -84,7 +84,7 @@ class SettingsDict(TypedDict):
     burst_cmap_inner: str
     burst_cmap_link: bool
     burst_cmap_outer: str
-    burst_cmap_use_mpts: bool
+    burst_cmap_use_midpoints: bool
     burst_color_bg: str
     burst_color_bg_trnsp: bool
     burst_color_text: str
@@ -285,7 +285,7 @@ class _PlotWidgetsDataclass:
         ),
     )
 
-    burst_cmap_use_mpts: widgets.Checkbox = field(
+    burst_cmap_use_midpoints: widgets.Checkbox = field(
         init=False,
         repr=False,
         default_factory=partial(
@@ -433,8 +433,8 @@ class PlotWidgets(_PlotWidgetsDataclass):
     - *initial_burst_cmap_outer* is the initially selected color map for outer burst
        graphs (defaults to `#!python "viridis"`).
 
-    - *initial_burst_cmap_use_mpts* is the starting value for whether to map midpoints to color maps for burst
-       graphs (defaults to `#!python True`).
+    - *initial_burst_cmap_use_midpoints* is the starting value for whether to map
+       midpoints to color maps for burst graphs (defaults to `#!python True`).
 
     - *initial_burst_color_bg* is the initially selected background color for burst
        graphs (defaults to `#!python "white"`).
@@ -478,7 +478,7 @@ class PlotWidgets(_PlotWidgetsDataclass):
         initial_burst_cmap_inner: str = _DEFAULT_CMAP,
         initial_burst_cmap_link: bool = True,
         initial_burst_cmap_outer: str = _DEFAULT_COMPARE_CMAP,
-        initial_burst_cmap_use_mpts: bool = True,
+        initial_burst_cmap_use_midpoints: bool = True,
         initial_burst_columns: int = _DEFAULT_COLS_BURST,
         initial_burst_swap: bool = False,
         initial_burst_zero_fill_normalize: bool = False,
@@ -509,7 +509,7 @@ class PlotWidgets(_PlotWidgetsDataclass):
         self.burst_cmap_link.value = initial_burst_cmap_link
         self.burst_cmap_outer.disabled = initial_burst_cmap_link
         self.burst_cmap_outer.value = initial_burst_cmap_outer
-        self.burst_cmap_use_mpts.value = initial_burst_cmap_use_mpts
+        self.burst_cmap_use_midpoints.value = initial_burst_cmap_use_midpoints
         self.burst_color_bg.value = initial_burst_color_bg
         self.burst_color_bg_trnsp.value = initial_burst_color_bg_trnsp
         self.burst_color_text.value = initial_burst_color_text
@@ -522,7 +522,7 @@ class PlotWidgets(_PlotWidgetsDataclass):
         self.markers.value = initial_markers
         self.plot_style.value = initial_plot_style
         self.resolution.value = initial_resolution
-        self._suspend_plot_updates_depth = 0  # ty: ignore[invalid-assignment]
+        self._suspend_plot_updates_depth = 0
 
         def _handle_cutoff(change: _ChangeT) -> None:
             self.cutoff.disabled = not change["new"]
@@ -683,7 +683,7 @@ class BurstHPlotter(HPlotter):
                                 plot_widgets.burst_zero_fill_normalize,
                                 plot_widgets.burst_cmap_inner,
                                 plot_widgets.burst_cmap_outer,
-                                plot_widgets.burst_cmap_use_mpts,
+                                plot_widgets.burst_cmap_use_midpoints,
                                 plot_widgets.burst_cmap_link,
                             ]
                         ),
@@ -767,7 +767,7 @@ class BurstHPlotter(HPlotter):
                     else settings["burst_cmap_outer"]
                 ),
                 title=label,
-                use_midpoints_for_colors=settings["burst_cmap_use_mpts"],
+                use_midpoints_for_colors=settings["burst_cmap_use_midpoints"],
             )
             ax.title.set_color(settings["burst_color_text"])
             for text in ax.texts:
@@ -1294,7 +1294,7 @@ def jupyter_visualize(
     initial_burst_cmap_inner: str = _DEFAULT_CMAP,
     initial_burst_cmap_link: bool = True,
     initial_burst_cmap_outer: str = _DEFAULT_COMPARE_CMAP,
-    initial_burst_cmap_use_mpts: bool = True,
+    initial_burst_cmap_use_midpoints: bool = True,
     initial_burst_color_bg: str = _DEFAULT_BURST_COLOR_BG,
     initial_burst_color_bg_trnsp: bool = False,
     initial_burst_color_text: str = _DEFAULT_BURST_COLOR_TEXT,
@@ -1334,7 +1334,7 @@ def jupyter_visualize(
             initial_burst_cmap_inner=initial_burst_cmap_inner,
             initial_burst_cmap_link=initial_burst_cmap_link,
             initial_burst_cmap_outer=initial_burst_cmap_outer,
-            initial_burst_cmap_use_mpts=initial_burst_cmap_use_mpts,
+            initial_burst_cmap_use_midpoints=initial_burst_cmap_use_midpoints,
             initial_burst_color_bg=initial_burst_color_bg,
             initial_burst_color_bg_trnsp=initial_burst_color_bg_trnsp,
             initial_burst_color_text=initial_burst_color_text,

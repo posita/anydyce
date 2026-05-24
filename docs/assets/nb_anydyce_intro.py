@@ -115,7 +115,7 @@ jupyter_visualize(
     initial_burst_cmap_inner="RdYlGn",
     initial_burst_cmap_link=False,
     initial_burst_cmap_outer="Greys",
-    initial_burst_cmap_use_mpts=False,
+    initial_burst_cmap_use_midpoints=False,
 )
 
 # %% [markdown]
