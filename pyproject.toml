@@ -55,7 +55,6 @@ fallback_version = "0.0.0+unknown"
 
 [dependency-groups]
 dev = [
-    "ipython",
     {include-group = "docs"},
     {include-group = "lint"},
     {include-group = "test"},
