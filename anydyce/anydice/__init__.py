@@ -27,31 +27,85 @@ from .interpreter import AnyDiceInterpreter, AnyDiceResultsT
 from .transformer import AnyDiceTransformer
 from .unparser import unparse
 
-__all__ = ("parse", "run", "unparse")
+__all__ = ("DEFAULT_PRECISION", "parse", "run", "unparse")
+
+# The default precision to be passed to H.format() for any user-facing presentation
+# TODO(posita): # noqa: TD003 - Propagate this?
+DEFAULT_PRECISION = 2
 
 _GRAMMAR: str = (Path(__file__).parent / "grammar.lark").read_text()
 _PARSER = Lark(_GRAMMAR, parser="lalr", transformer=AnyDiceTransformer())
 
 
-def run(source: str) -> AnyDiceResultsT:
+def format_anydice_results(
+    results: AnyDiceResultsT, *, precision: int = DEFAULT_PRECISION, short: bool = False
+) -> str:
     r"""
-    Run AnyDice source text and return `(name, distribution)` pairs, one per `output` statement.
+    Formats output results from [`run`][anydyce.anydice.run].
+
+    >>> from anydyce.anydice import format_anydice_results, run
+    >>> print(
+    ...     format_anydice_results(
+    ...         run('output 2d3 named "2d3" output d{} named "the empty die"')
+    ...     )
+    ... )
+    ==== 2d3 ====
+    avg |    4.00
+    std |    1.15
+    var |    1.33
+      2 |  11.11% |#####
+      3 |  22.22% |###########
+      4 |  33.33% |################
+      5 |  22.22% |###########
+      6 |  11.11% |#####
+    <BLANKLINE>
+    ==== the empty die ====
+    (empty distribution)
+
+    >>> print(
+    ...     format_anydice_results(
+    ...         run('output [highest 3 of 4d6] named "4d6 drop lowest"'),
+    ...         precision=4,
+    ...         short=True,
+    ...     )
+    ... )
+    ==== 4d6 drop lowest ====
+    {avg: 12.24, 3:  0.0772%, 4:  0.3086%, 5:  0.7716%, ..., 16:  7.2531%, 17:  4.1667%, 18:  1.6204%}
     """
-    program = parse(source)
-    return AnyDiceInterpreter().run(program)
+    blocks: list[str] = []
+
+    for label, h in results:
+        block = f"==== {label} ====\n"
+        if not h:
+            block += "(empty distribution)"
+        elif short:
+            block += h.format_short(precision=precision)
+        else:
+            block += h.format(precision=precision)
+        blocks.append(block)
+
+    return "\n\n".join(blocks) if blocks else "(no output)"
 
 
 def parse(source: str) -> Program:
     r"""
-    Parse AnyDice source text and return an AST [`Program`][anydyce.anydice.ast_.Program].
+    Parses AnyDice source text into an AST [`Program`][anydyce.anydice.ast_.Program].
+
+    Useful for (e.g.) passing to [`AnyDiceInterpreter.run`][anydice.anydice.interpreter.AnyDiceInterpreter.run].
     """
-    # The cast is necessary because, despite its type hint, parse will return an
-    # instance of whatever is created by the provided transformer. Since we provide one,
-    # and we know what its output should be, we check and then safely cast it.
     program = _PARSER.parse(source)
-    if isinstance(program, Program):
+    if isinstance(program, Program):  # expected return value of our transformer
         return cast("Program", program)
     else:
         raise TypeError(
             f"expected type of program ({program!r}) to be {Program!r}, not {type(program)!r}"  # pragma: no cover
         )
+
+
+def run(source: str) -> AnyDiceResultsT:
+    r"""
+    Shorthand for `#!python AnyDiceInterpreter().run(parse(source))`, returning one `#!python (name, distribution)` pair per `output` statement.
+
+    See [`parse`][anydyce.anydice.parse] and [`AnyDiceInterpreter.run`][anydice.anydice.interpreter.AnyDiceInterpreter.run] for additional detail.
+    """
+    return AnyDiceInterpreter().run(parse(source))

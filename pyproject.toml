@@ -184,6 +184,9 @@ docstring-code-format = true
 docstring-code-line-length = "dynamic"
 
 [tool.ruff.lint.per-file-ignores]
+"anydyce/magic.py" = [
+  "T201",  # `print` is the Jupyter cell-output mechanism
+]
 "docs/assets/nb_*.py" = [
   # Allow co-mingled imports for snippets
   "E402",  # Module level import not at top of file

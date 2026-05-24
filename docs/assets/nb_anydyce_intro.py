@@ -60,6 +60,7 @@ import anydyce as _  # noqa: F401
 
 matplotlib_inline.backend_inline.set_matplotlib_formats("svg")
 warnings.filterwarnings("ignore", category=ExperimentalWarning)
+# %load_ext anydyce.magic
 
 # %% [markdown]
 # ### Interactive example: highest, middle, and lowest of 3d6
@@ -191,3 +192,8 @@ ax_line.legend()
 plt.gcf().set_size_inches(9.6, 9.6)
 plt.tight_layout()
 plt.show()
+
+# %% language="anyd"
+# %%anyd --precision 7
+# output 3d6 named "3d6"
+# output [highest 3 of 4d6] named "[highest 3 of 4d6]"
