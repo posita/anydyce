@@ -67,7 +67,7 @@ class TestPlotWidgets:
             "burst_cmap_inner",
             "burst_cmap_link",
             "burst_cmap_outer",
-            "burst_cmap_use_mpts",
+            "burst_cmap_use_midpoints",
             "burst_color_bg",
             "burst_color_bg_trnsp",
             "burst_color_text",
