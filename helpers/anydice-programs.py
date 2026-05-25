@@ -17,7 +17,6 @@
 import argparse
 import gzip
 import hashlib
-import http.cookiejar
 import json
 import multiprocessing.pool
 import os
@@ -32,7 +31,6 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-import urllib.response
 from collections.abc import Iterator  # noqa: TC003
 from fractions import Fraction
 from functools import reduce
@@ -69,6 +67,17 @@ from anydyce.anydice.ast_ import (
     ValueRepeatElem,
     VarAssign,
 )
+from anydyce.anydice.fetch import (
+    ANYDICE_HOST,
+    DEFAULT_HEADERS,
+    BadOrMissingProgramIdError,
+    EmptyProgramError,
+    NetworkError,
+    NoSuchProgramError,
+    check_http_response,
+    fetch_anydice_program,
+    program_id_as_int,
+)
 from anydyce.anydice.interpreter import (
     AnyDiceInterpreter,
     AnyDiceResultsT,
@@ -76,62 +85,13 @@ from anydyce.anydice.interpreter import (
     _pattern_shape,
 )
 
+__all__ = ()
+
 _DB_DEFAULT = Path(__file__).parent / Path(__file__).with_suffix(".db").name
-_ANYDICE_HOST = "anydice.com"
-_DEFAULT_HEADERS = {
-    # RFC 9113 requires header keys to be lower case for HTTP/2, but HTTP/1.1 treats
-    # header keys as case insensitive. The default appears to be something like
-    # "User-agent: Python-urllib/<python-version>" (capital "U", lowercase "a"). Chrome
-    # and Firefox both use "User-Agent" (capital "U", capital "A"), so we're sticking
-    # with that.
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-}
-_CALCULATOR_URL = f"https://{_ANYDICE_HOST}/calculator_limited.php"
-_CREATE_LINK_URL = f"https://{_ANYDICE_HOST}/createLink.php"
+_CALCULATOR_URL = f"https://{ANYDICE_HOST}/calculator_limited.php"
+_CREATE_LINK_URL = f"https://{ANYDICE_HOST}/createLink.php"
 
 _ID_RE = re.compile(r"/program/([0-9a-fA-F]+)(?:\.html)?(?:[?#]|$)")
-_HEX_RE = re.compile(r"^[0-9a-fA-F]+$")
-_SRC_RE = re.compile(r'var loadedProgram = "((?:[^"\\]|\\.)*)";')
-
-# AnyDice signals "no such program" by returning HTTP 200 with a placeholder
-# program rather than a 4xx. We exact-match the placeholder text (after
-# trimming surrounding whitespace) so that legit programs which merely
-# *contain* the substring -- e.g. inside a comment -- aren't false-positive
-# flagged. The exact text has been legitimately saved at the IDs in the
-# allowlist below (people trolled). Add new IDs only when their stored
-# program is byte-equal to the placeholder.
-_NOT_FOUND_PLACEHOLDER_TEXT = (
-    "output 0 \\ Sorry, AnyDice does not have the program you requested. \\"
-)
-_NOT_FOUND_PLACEHOLDER_LEGIT_IDS = frozenset({0x790, 0x1AF0})
-
-
-def _is_not_found_placeholder(program: str, requested_id: int) -> bool:
-    return (
-        program.strip() == _NOT_FOUND_PLACEHOLDER_TEXT
-        and requested_id not in _NOT_FOUND_PLACEHOLDER_LEGIT_IDS
-    )
-
-
-class _NetworkError(RuntimeError):
-    r"""Raised when a remote response is unexpected (status, host, or content shape)."""
-
-
-def _check_response(resp: urllib.response.addinfourl, expected_host: str) -> None:
-    r"""Verify *resp* is a 200 from *expected_host* after any redirects.
-
-    Aborts on anything else. Status check guards against compromised hosts that
-    return 4xx/5xx (caught by urlopen anyway) and against unexpected redirects to
-    a different host (which urllib follows silently for GET).
-    """
-    status = getattr(resp, "status", None)
-    if status != 200:
-        raise _NetworkError(f"unexpected status {status} from {resp.url}")
-    final_host = urlparse(resp.url).netloc
-    if final_host != expected_host:
-        raise _NetworkError(
-            f"unexpected redirect: requested {expected_host}, got {final_host} ({resp.url})"
-        )
 
 
 def _extract_json(body: str) -> str:
@@ -476,20 +436,6 @@ def _migrate_to_current_schema(conn: sqlite3.Connection) -> None:
 # ---- Fetch helpers -------------------------------------------------------------------
 
 
-def _normalize_fetch_arg(arg: str) -> str:
-    # Already has a URL scheme. Return as-is.
-    if urlparse(arg).scheme:
-        return arg
-    # Exists as a local path. Return as-is (bare path -> file:// in _fetch_html).
-    if Path(arg).exists():
-        return arg
-    # Looks like a bare hex program ID. Expand to full URL.
-    if _HEX_RE.match(arg):
-        return f"https://anydice.com/program/{arg}"
-    # Otherwise use as-is and let it fail naturally.
-    return arg
-
-
 def _program_id_from_url(url: str) -> int | None:
     parsed = urlparse(url)
     m = _ID_RE.search(parsed.path)
@@ -506,30 +452,6 @@ def _try_program_id(arg: str) -> int | None:
     except ValueError:
         pass
     return _program_id_from_url(arg)
-
-
-def _fetch_html(url: str) -> str:
-    # Treat bare paths as file:// URLs.
-    if not urlparse(url).scheme:
-        url = Path(url).resolve().as_uri()
-    jar = http.cookiejar.CookieJar()
-    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
-    opener.addheaders = list(_DEFAULT_HEADERS.items())
-    with opener.open(url) as resp:
-        if urlparse(url).scheme in ("http", "https"):
-            _check_response(resp, _ANYDICE_HOST)
-        raw = resp.read()
-    return raw.decode("utf-8", errors="replace")
-
-
-def _extract_program(html: str) -> str | None:
-    m = _SRC_RE.search(html)
-    if m is None:
-        return None
-    # The captured group is the JS string literal content; json.loads decodes escape
-    # sequences (\n, \\, \", etc.) exactly as JavaScript would. strict=False accepts
-    # literal control characters embedded in the string.
-    return json.loads(f'"{m.group(1)}"', strict=False)
 
 
 def _upsert_program(conn: sqlite3.Connection, program_id: int, program: str) -> str:
@@ -584,15 +506,15 @@ def _upsert_program(conn: sqlite3.Connection, program_id: int, program: str) -> 
 def _create_link(program: str) -> int:
     data = urllib.parse.urlencode({"program": program}).encode()
     req = urllib.request.Request(
-        _CREATE_LINK_URL, data=data, headers=_DEFAULT_HEADERS, method="POST"
+        _CREATE_LINK_URL, data=data, headers=DEFAULT_HEADERS, method="POST"
     )
     with urllib.request.urlopen(req) as resp:  # noqa: S310
-        _check_response(resp, _ANYDICE_HOST)
+        check_http_response(resp, ANYDICE_HOST)
         body = resp.read().decode("utf-8").strip()
     # Expected response shape: a URL like https://anydice.com/program/1a2b
     program_id = _program_id_from_url(body)
     if program_id is None:
-        raise _NetworkError(f"unexpected response body from createLink.php: {body!r}")
+        raise NetworkError(f"unexpected response body from createLink.php: {body!r}")
     return program_id
 
 
@@ -607,7 +529,7 @@ def _print_timeout_retry(timeout: float, attempt: int, retries: int) -> None:
 def _post_program(program: str, *, timeout: float = 30.0, retries: int = 1) -> str:
     data = urllib.parse.urlencode({"program": program}).encode()
     req = urllib.request.Request(
-        _CALCULATOR_URL, data=data, headers=_DEFAULT_HEADERS, method="POST"
+        _CALCULATOR_URL, data=data, headers=DEFAULT_HEADERS, method="POST"
     )
     # AnyDice occasionally echoes raw request bytes back inside an error
     # response without re-encoding, producing invalid UTF-8. errors="replace"
@@ -620,7 +542,7 @@ def _post_program(program: str, *, timeout: float = 30.0, retries: int = 1) -> s
         attempt += 1
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
-                _check_response(resp, _ANYDICE_HOST)
+                check_http_response(resp, ANYDICE_HOST)
                 body = resp.read().decode("utf-8", errors="replace")
             break
         except urllib.error.HTTPError as exc:
@@ -632,8 +554,8 @@ def _post_program(program: str, *, timeout: float = 30.0, retries: int = 1) -> s
             # codes propagate.
             if exc.code not in (500, 503):
                 raise
-            if urlparse(exc.url or "").netloc != _ANYDICE_HOST:
-                raise _NetworkError(f"unexpected redirect on error: {exc.url}") from exc
+            if urlparse(exc.url or "").netloc != ANYDICE_HOST:
+                raise NetworkError(f"unexpected redirect on error: {exc.url}") from exc
             if exc.code == 503:
                 # 503 body is HTML, not JSON. Synthesize a recognizable JSON
                 # marker so the output column stays JSON-shaped and `_classify`
@@ -716,7 +638,7 @@ def _post_program(program: str, *, timeout: float = 30.0, retries: int = 1) -> s
     if not isinstance(parsed, dict) or (
         parsed and "distributions" not in parsed and "error" not in parsed
     ):
-        raise _NetworkError(
+        raise NetworkError(
             f"unexpected JSON shape from calculator_limited.php: {body[:200]!r}"
         )
     return body
@@ -767,7 +689,7 @@ def _is_remote(url: str) -> bool:
 def _abort_remote_disabled(command: str) -> None:
     print(
         f"error: {command} requires --allow-remote (this command contacts "
-        f"{_ANYDICE_HOST}; only enable when you trust the upstream site)",
+        f"{ANYDICE_HOST}; only enable when you trust the upstream site)",
         file=sys.stderr,
     )
     sys.exit(2)
@@ -779,8 +701,6 @@ def cmd_fetch(
     conn = _open_db(db_path)
 
     for url in urls:
-        url = _normalize_fetch_arg(url)  # noqa: PLW2901
-
         if debug:
             print(f"debug: processing {url}", file=sys.stderr)
 
@@ -789,37 +709,35 @@ def cmd_fetch(
             continue
 
         try:
-            program_id = _program_id_from_url(url)
-            if program_id is None:
-                print(f"warning: no hex program ID in URL, skipping: {url}")
-                continue
-
-            html = _fetch_html(url)
-
-            program = _extract_program(html)
-            if program is None:
-                print(f"warning: loadedProgram not found in page: {url}")
-                continue
-
-            if _is_not_found_placeholder(program, program_id):
-                # AnyDice returned its "no such program" placeholder for a
-                # program_id that isn't the legit 1af0 save. Don't pollute the
-                # DB.
-                print(
-                    f"warning: AnyDice has no program at id={program_id:x} "
-                    "(returned the not-found placeholder); skipping"
-                )
-                continue
-
-            status = _upsert_program(conn, program_id, program)
-            hex_id = f"{program_id:x}"
-            print(f"{status}: program_id={hex_id} ({url})")
-        except _NetworkError:
+            program_hex_id, program_url, program = fetch_anydice_program(url)
+        except BadOrMissingProgramIdError as exc:
+            if debug:
+                print(exc, file=sys.stderr)
+            print(f"warning: no hex program ID in URL, skipping: {url}")
+            continue
+        except EmptyProgramError as exc:
+            if debug:
+                print(exc, file=sys.stderr)
+            print(f"warning: loadedProgram not found in page: {url}")
+            continue
+        except NoSuchProgramError as exc:
+            if debug:
+                print(exc, file=sys.stderr)
+            print(
+                f"warning: no program found at: {url} "
+                "(returned the not-found placeholder); skipping"
+            )
+            continue
+        except NetworkError:
             # Abort the whole batch: a network anomaly may indicate the upstream
             # is compromised, and continuing risks corrupting the DB.
             raise
         except Exception as exc:  # noqa: BLE001
             print(f"error: {type(exc).__name__}: {exc} ({url})")
+        else:
+            program_id = program_id_as_int(program_hex_id)
+            status = _upsert_program(conn, program_id, program)
+            print(f"{status}: program_id={program_hex_id} ({program_url})")
 
     conn.close()
 
@@ -866,7 +784,7 @@ def cmd_link(
             status = _upsert_program(conn, program_id, program)
             hex_id = f"{program_id:x}"
             print(f"{status}: program_id={hex_id}")
-        except _NetworkError:
+        except NetworkError:
             raise
         except Exception as exc:  # noqa: BLE001
             print(f"error: {type(exc).__name__}: {exc} ({program!r})")
@@ -1085,7 +1003,7 @@ def cmd_compute(
             if status == "changed":
                 print(f"  old: {old_output}")
                 print(f"  new: {output}")
-        except _NetworkError:
+        except NetworkError:
             raise
         except Exception as exc:  # noqa: BLE001
             print(f"error: {type(exc).__name__}: {exc} (program_id={hex_id})")
@@ -2159,7 +2077,7 @@ def main() -> None:
     fetch_parser.add_argument(
         "--allow-remote",
         action="store_true",
-        help=f"permit http(s) URLs (default-deny because contacting {_ANYDICE_HOST}"
+        help=f"permit http(s) URLs (default-deny because contacting {ANYDICE_HOST}"
         f" can be unsafe when the upstream is compromised)",
     )
 
@@ -2181,7 +2099,7 @@ def main() -> None:
         "--allow-remote",
         action="store_true",
         help=f"required for the network path; ignored when --fake or --fake-id is set (no network call is made). "
-        f"Without --fake/--fake-id, the command contacts {_ANYDICE_HOST}.",
+        f"Without --fake/--fake-id, the command contacts {ANYDICE_HOST}.",
     )
     link_fake_group = link_parser.add_mutually_exclusive_group()
     link_fake_group.add_argument(
@@ -2250,7 +2168,7 @@ def main() -> None:
     compute_parser.add_argument(
         "--allow-remote",
         action="store_true",
-        help=f"required to run; this command always contacts {_ANYDICE_HOST}",
+        help=f"required to run; this command always contacts {ANYDICE_HOST}",
     )
 
     # ---- show --------------------------------------------------------------------
