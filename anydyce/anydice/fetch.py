@@ -160,7 +160,7 @@ def extract_program_from_json(
         )
     if (
         program.strip() == _NOT_FOUND_PLACEHOLDER_TEXT
-        and program_id not in _NOT_FOUND_PLACEHOLDER_LEGIT_IDS
+        and program_id_as_int(program_id) not in _NOT_FOUND_PLACEHOLDER_LEGIT_IDS
     ):
         raise NoSuchProgramError(
             f"no such program {program_id} exists"
@@ -171,10 +171,38 @@ def extract_program_from_json(
     return program
 
 
-def fetch_anydice_program(program_loc_or_id: str | int) -> tuple[str, str, str]:
+def extract_program_id_and_url(program_loc_or_id: str | int) -> tuple[str, str]:
+    r"""
+    Returns `#!python (program_id, program_url)`, if discoverable from *program_loc_or_id*.
+    Raises a [`BadOrMissingProgramIdError`][anydyce.anydice.fetch.BadOrMissingProgramIdError] otherwise.
+    """
+    if isinstance(program_loc_or_id, int):
+        program_id = program_id_as_str(program_loc_or_id)
+        program_url = urljoin(_ANYDICE_FETCH_URL, program_id)
+    elif _HEX_PROG_ID_RE.match(program_loc_or_id):
+        program_id = program_loc_or_id
+        program_url = urljoin(_ANYDICE_FETCH_URL, program_id)
+    else:
+        m = _HEX_PROG_ID_IN_LOC_RE.search(program_loc_or_id)
+        if not m:
+            raise BadOrMissingProgramIdError(
+                f"unable to determine program ID from location ({program_loc_or_id})",
+                program_url=program_loc_or_id,
+            )
+        program_id = m.group(1)
+        program_url = program_loc_or_id
+    program_url = (
+        program_url
+        if urlparse(program_url).scheme
+        else Path(program_url).resolve().as_uri()
+    )
+    return program_id, program_url
+
+
+def fetch_anydice_program(program_loc_or_id: str | int) -> tuple[str, str, str, str]:
     r"""
     Fetches and caches any program associated with *program_loc_or_id*.
-    Returns `#!python (program_id, program_url, program)` if found.
+    Returns `#!python (program_id, initial_url, final_url, program)`, if found.
 
     *program_loc_or_id* can be a location (e.g., `/path/to/.../program_id(.html)`, `file:///path/to/.../program_id(.html)`, `http://.../program_id`), or a hexadecimal program ID string or an `#!python int`.
     If *program_loc_or_id* is a program ID, a URL will be constructed and the program (if any) will be retrieved from AnyDice's website.
@@ -186,30 +214,12 @@ def fetch_anydice_program(program_loc_or_id: str | int) -> tuple[str, str, str]:
     Raises a [`NetworkError`][anydyce.anydice.fetch.NetworkError] if there was a problem retrieving the content.
     Raises a [`NoSuchProgramError`][anydyce.anydice.fetch.NoSuchProgramError] if a program was returned, but matches the missing placeholder used if *program_id* does not reference a saved program.
     """
-    if isinstance(program_loc_or_id, int):
-        program_id = program_id_as_str(program_loc_or_id)
-        intial_url = urljoin(_ANYDICE_FETCH_URL, program_id)
-    elif _HEX_PROG_ID_RE.match(program_loc_or_id):
-        program_id = program_loc_or_id
-        intial_url = urljoin(_ANYDICE_FETCH_URL, program_id)
-    else:
-        m = _HEX_PROG_ID_IN_LOC_RE.search(program_loc_or_id)
-        if not m:
-            raise BadOrMissingProgramIdError(
-                f"unable to determine program ID from location ({program_loc_or_id})",
-                program_url=program_loc_or_id,
-            )
-        program_id = m.group(1)
-        intial_url = program_loc_or_id
-    intial_url = (
-        intial_url
-        if urlparse(intial_url).scheme
-        else Path(intial_url).resolve().as_uri()
-    )
-    final_url, html = fetch_content_for_url_cached(intial_url)
+    program_id, initial_url = extract_program_id_and_url(program_loc_or_id)
+    final_url, html = fetch_content_for_url_cached(initial_url)
     return (
         program_id,
-        intial_url,
+        initial_url,
+        final_url,
         _extract_program_from_var_loaded_program(
             html, program_id=program_id, program_url=final_url
         ),
@@ -234,17 +244,17 @@ def program_id_as_int(program_id: str | int) -> int:
     r"""
     Returns *program_id* in integer form.
 
-    >>> from anydyce.anydice.fetch import program_id_as_int
-    >>> program_id_as_int(22)
-    22
-    >>> program_id_as_int(-255)
-    -255
-    >>> program_id_as_int("-abc")
-    -2748
-    >>> program_id_as_int("Ka-BLAM!")
-    Traceback (most recent call last):
-      ...
-    BadOrMissingProgramIdError: unable to parse program ID: ('Ka-BLAM!')
+        >>> from anydyce.anydice.fetch import program_id_as_int
+        >>> program_id_as_int(22)
+        22
+        >>> program_id_as_int(-255)
+        -255
+        >>> program_id_as_int("-abc")
+        -2748
+        >>> program_id_as_int("Ka-BLAM!")
+        Traceback (most recent call last):
+          ...
+        BadOrMissingProgramIdError: unable to parse program ID: ('Ka-BLAM!')
     """
     try:
         return int(program_id, 16) if isinstance(program_id, str) else program_id
@@ -258,17 +268,17 @@ def program_id_as_str(program_id: str | int) -> str:
     r"""
     Returns *program_id* in hexadecimal string form.
 
-    >>> from anydyce.anydice.fetch import program_id_as_str
-    >>> program_id_as_str(22)
-    '16'
-    >>> program_id_as_str(-255)
-    '-ff'
-    >>> program_id_as_str("-abc")
-    '-abc'
-    >>> program_id_as_str("Ka-BLAM!")
-    Traceback (most recent call last):
-      ...
-    BadOrMissingProgramIdError: unable to parse program ID: ('Ka-BLAM!')
+        >>> from anydyce.anydice.fetch import program_id_as_str
+        >>> program_id_as_str(22)
+        '16'
+        >>> program_id_as_str(-255)
+        '-ff'
+        >>> program_id_as_str("-abc")
+        '-abc'
+        >>> program_id_as_str("Ka-BLAM!")
+        Traceback (most recent call last):
+          ...
+        BadOrMissingProgramIdError: unable to parse program ID: ('Ka-BLAM!')
     """
     try:
         return (
@@ -280,6 +290,30 @@ def program_id_as_str(program_id: str | int) -> str:
         raise BadOrMissingProgramIdError(
             f"unable to parse program ID {program_id}", program_id=str(program_id)
         ) from exc
+
+
+def sharded_subpath_from_program_id(program_id: str | int) -> Path:
+    r"""
+    Returns the canonical sharded subpath of the program file associated with *program_id*.
+
+        >>> from anydyce.anydice.fetch import sharded_subpath_from_program_id
+        >>> sharded_subpath_from_program_id("f").as_posix()
+        '00/0f/f.txt'
+        >>> sharded_subpath_from_program_id("1a2b3c").as_posix()
+        '2b/3c/1a2b3c.txt'
+
+    Any minus sign is preserved for the final filename only.
+
+        >>> sharded_subpath_from_program_id("-abc").as_posix()
+        '0a/bc/-abc.txt'
+    """
+    program_id_padded = (
+        f"{program_id_as_int(program_id):05x}"  # pad to 5 to account for any negative
+    )
+    program_id = program_id_as_str(program_id)
+    return (
+        Path(program_id_padded[-4:-2]) / program_id_padded[-2:] / program_id
+    ).with_suffix(".txt")
 
 
 def _extract_program_from_var_loaded_program(

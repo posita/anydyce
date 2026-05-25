@@ -709,7 +709,9 @@ def cmd_fetch(
             continue
 
         try:
-            program_hex_id, program_url, program = fetch_anydice_program(url)
+            program_hex_id, initial_url, _final_url, program = fetch_anydice_program(
+                url
+            )
         except BadOrMissingProgramIdError as exc:
             if debug:
                 print(exc, file=sys.stderr)
@@ -737,7 +739,7 @@ def cmd_fetch(
         else:
             program_id = program_id_as_int(program_hex_id)
             status = _upsert_program(conn, program_id, program)
-            print(f"{status}: program_id={program_hex_id} ({program_url})")
+            print(f"{status}: program_id={program_hex_id} ({initial_url})")
 
     conn.close()
 
