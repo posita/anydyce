@@ -22,6 +22,7 @@ Currently, this includes:
 - `%anyd_load` - fetch an AnyDice program by ID or URL and replace the cell with its source.
 """
 
+import html
 import warnings
 from datetime import UTC, datetime
 
@@ -29,9 +30,10 @@ from dyce.lifecycle import ExperimentalWarning
 from IPython import get_ipython  # pyright: ignore[reportPrivateImportUsage]
 from IPython.core.interactiveshell import InteractiveShell
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
+from IPython.display import HTML, Markdown, display
 
 from .anydice import DEFAULT_PRECISION, format_anydice_results, run
-from .anydice.fetch import fetch_anydice_program
+from .anydice.fetch import fetch_anydice_program, is_pyodide
 
 __all__ = ("load_ipython_extension",)
 
@@ -94,25 +96,53 @@ def anyd_load(line: str) -> None:
 
     On success, the cell is replaced with an `%%anyd` cell containing the fetched program plus a comment header recording the source URL and fetch time.
     The replaced cell is ***not*** auto-executed.
+    If the program cannot be retrieved directly from anydice.com, an attempt is made to find it using a mirror.
     On failure (e.g., network error, missing program, etc.), the exception propagates to Jupyter and the original `%anyd_load` line is left in place.
     """
     args = parse_argstring(anyd_load, line)
-    program_id, initial_url, _final_url, program = fetch_anydice_program(
+    program_id_hex, initial_url, _final_url, program = fetch_anydice_program(
         args.location_or_id
     )
     fetched_at = datetime.now(UTC).astimezone().isoformat(timespec="seconds")
     new_cell = (
         "%%anyd\n"
         "\\\n"
-        f"  AnyDice program {program_id} fetched from {initial_url} at {fetched_at} using:\n"
+        f"  AnyDice program {program_id_hex} fetched from {initial_url} at {fetched_at} using:\n"
         f"  %anyd_load {args.location_or_id}\n"
         "\\\n"
         f"{program}"
     )
     # Inside a magic, the shell is what just invoked us is guaranteed to exist
-    ipy = get_ipython()
-    assert ipy
-    ipy.set_next_input(new_cell, replace=True)
+    if is_pyodide():
+        _display_program_with_copy_button(new_cell)
+    else:
+        ipy = get_ipython()
+        assert ipy
+        ipy.set_next_input(new_cell, replace=True)
+
+
+def _display_program_with_copy_button(content: str) -> None:
+    content = content.strip()
+    escaped_for_attr = html.escape(content, quote=True)
+    display(
+        Markdown(
+            "**Copy the block below into a new cell to run it:**\n\n"
+            f"```anydice\n{content}\n```"
+        ),
+        HTML(f"""
+          <button
+              data-copy-content="{escaped_for_attr}"
+              onclick="navigator.clipboard.writeText(this.dataset.copyContent).then(
+                () => {{ this.textContent = 'Copied'; setTimeout(() => this.textContent = 'Copy', 1500); }},
+                () => {{ this.textContent = 'Failed'; setTimeout(() => this.textContent = 'Copy', 1500); }}
+              )"
+              style="padding: 0.3em 0.8em; cursor: pointer; min-width: 7em;
+                background: #99999999; border: 1px solid #999; border-radius: 3px;
+                font-size: 0.85em;">
+            Copy
+          </button>
+        """),
+    )
 
 
 def load_ipython_extension(ipy: InteractiveShell) -> None:
