@@ -15,6 +15,7 @@
 
 import re
 import warnings
+from collections.abc import Callable
 
 import pytest
 from dyce import TruncationWarning
@@ -22,9 +23,54 @@ from dyce.lifecycle import ExperimentalWarning
 from IPython.core.interactiveshell import InteractiveShell
 from lark.exceptions import UnexpectedToken
 
-from anydyce import magic as magic_mod
+from anydyce import magic as anydyce_magic
 from anydyce.anydice import AnyDiceResultsT
-from anydyce.magic import anyd, load_ipython_extension
+from anydyce.anydice.fetch import NetworkError, NoSuchProgramError
+from anydyce.magic import anyd, anyd_load, load_ipython_extension
+
+__all__ = ()
+
+_FetchImpl = Callable[[str], tuple[str, str, str, str]]
+
+
+class _RecordingShell:
+    r"""Minimal shell stub that records `set_next_input` calls."""
+
+    def __init__(self) -> None:
+        self.set_next_input_calls: list[tuple[str, bool]] = []
+
+    def set_next_input(self, text: str, *, replace: bool = False) -> None:
+        self.set_next_input_calls.append((text, replace))
+
+
+@pytest.fixture(autouse=True)
+def no_real_fetch(monkeypatch: pytest.MonkeyPatch) -> None:
+    r"""
+    Safety net: any test that reaches `fetch_anydice_program` without first installing a fake (via the `fake_fetch` fixture) raises instead of hitting the network.
+
+    Autouse so it's in place for every test; tests that need a working fake install one via `fake_fetch`, which displaces this blocker for that test only.
+    """
+
+    def _blocked(*_args: object, **_kwargs: object) -> tuple[str, str, str, str]:
+        raise AssertionError(
+            "fetch_anydice_program called in test without configuring fake_fetch"
+        )
+
+    monkeypatch.setattr(anydyce_magic, "fetch_anydice_program", _blocked)
+
+
+@pytest.fixture
+def fake_fetch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> Callable[[_FetchImpl], None]:
+    r"""
+    Install a callable as the `fetch_anydice_program` implementation for this test, displacing the autouse `_no_real_fetch` blocker.
+    """
+
+    def install(impl: _FetchImpl) -> None:
+        monkeypatch.setattr(anydyce_magic, "fetch_anydice_program", impl)
+
+    return install
 
 
 @pytest.fixture(scope="session")
@@ -33,6 +79,14 @@ def ipython_shell() -> InteractiveShell:
     # is safer for tests than using IPython.testing.globalipapp.get_ipython, whose
     # backing (start_ipython) is once-only and can return None on subsequent calls.
     return InteractiveShell.instance()
+
+
+@pytest.fixture
+def recording_shell(monkeypatch: pytest.MonkeyPatch) -> _RecordingShell:
+    r"""Replace the active IPython shell with a `RecordingShell` stub for this test."""
+    shell = _RecordingShell()
+    monkeypatch.setattr(anydyce_magic, "get_ipython", lambda: shell)
+    return shell
 
 
 class TestAnydMagicBasic:
@@ -130,7 +184,7 @@ class TestAnydMagicWarnings:
         recwarn: pytest.WarningsRecorder,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        original_run = magic_mod.run
+        original_run = anydyce_magic.run
 
         def _emit_deprecation(source: str) -> AnyDiceResultsT:
             warnings.warn("test deprecation", DeprecationWarning, stacklevel=2)
@@ -140,10 +194,10 @@ class TestAnydMagicWarnings:
             warnings.warn("test experimental", ExperimentalWarning, stacklevel=2)
             return original_run(source)
 
-        monkeypatch.setattr(magic_mod, "run", _emit_deprecation)
+        monkeypatch.setattr(anydyce_magic, "run", _emit_deprecation)
         anyd("", "output 1d6")
 
-        monkeypatch.setattr(magic_mod, "run", _emit_experimental)
+        monkeypatch.setattr(anydyce_magic, "run", _emit_experimental)
         anyd("", "output 1d6")
 
         # DeprecationWarnings and ExperimentalWarnings *are* suppressed
@@ -157,17 +211,158 @@ class TestAnydMagicWarnings:
         recwarn: pytest.WarningsRecorder,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        original_run = magic_mod.run
+        original_run = anydyce_magic.run
 
         def _emit_truncation(source: str) -> AnyDiceResultsT:
             warnings.warn("test truncation", TruncationWarning, stacklevel=2)
             return original_run(source)
 
-        monkeypatch.setattr(magic_mod, "run", _emit_truncation)
+        monkeypatch.setattr(anydyce_magic, "run", _emit_truncation)
         anyd("", "output 1d6")
 
         # TruncationWarnings are *not* suppressed
         assert any(issubclass(w.category, TruncationWarning) for w in recwarn.list)
+
+
+class TestAnydLoadMagicBasic:
+    # `recording_shell` replaces the IPython shell with a stub that records
+    # `set_next_input` calls. `fake_fetch` installs a stand-in for
+    # `fetch_anydice_program` so the magic never hits the network (the autouse
+    # `_no_real_fetch` blocker fires for any test that forgets to do so).
+
+    def test_replaces_cell_on_success(
+        self,
+        fake_fetch: Callable[[_FetchImpl], None],
+        recording_shell: _RecordingShell,
+    ) -> None:
+        fake_fetch(
+            lambda _arg: (
+                "4d2",
+                "https://anydice.com/program/4d2",
+                "https://anydice.com/",
+                "output 3d6\n",
+            )
+        )
+
+        anyd_load("4d2")
+
+        assert len(recording_shell.set_next_input_calls) == 1
+        text, replace = recording_shell.set_next_input_calls[0]
+        assert replace is True
+        assert text.startswith("%%anyd\n")
+        assert text.rstrip().endswith("output 3d6")
+
+    def test_program_url_and_input_in_comment(
+        self,
+        fake_fetch: Callable[[_FetchImpl], None],
+        recording_shell: _RecordingShell,
+    ) -> None:
+        # The fetched-from URL returned by fetch_anydice_program appears in the header,
+        # and the replayed `%anyd_load` line echoes what the user originally typed so
+        # the cell shows how to re-fetch
+        fake_fetch(
+            lambda _arg: (
+                "4d2",
+                "https://anydice.com/program/4d2",
+                "https://anydice.com/",
+                "output 3d6\n",
+            )
+        )
+
+        anyd_load("4d2")
+
+        text, _ = recording_shell.set_next_input_calls[0]
+        assert "fetched from https://anydice.com/program/4d2" in text
+        assert "%anyd_load 4d2\n" in text
+
+    def test_fetched_at_in_comment(
+        self,
+        fake_fetch: Callable[[_FetchImpl], None],
+        recording_shell: _RecordingShell,
+    ) -> None:
+        fake_fetch(
+            lambda _arg: (
+                "4d2",
+                "https://anydice.com/program/4d2",
+                "https://anydice.com/",
+                "output 3d6\n",
+            )
+        )
+
+        anyd_load("4d2")
+
+        text, _ = recording_shell.set_next_input_calls[0]
+        # ISO 8601 timestamp with tz offset somewhere in the comment header.
+        assert re.search(
+            r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}",
+            text,
+        )
+
+    def test_program_id_passed_to_fetch(
+        self,
+        fake_fetch: Callable[[_FetchImpl], None],
+        # Present for the side-effect of patching anydyce.magic.get_python
+        recording_shell: _RecordingShell,  # noqa: ARG002
+    ) -> None:
+        captured: list[str] = []
+
+        def _capture(arg: str) -> tuple[str, str, str, str]:
+            captured.append(arg)
+            return (
+                "4d2",
+                "https://anydice.com/program/4d2",
+                "https://anydice.com/",
+                "output 3d6\n",
+            )
+
+        fake_fetch(_capture)
+
+        anyd_load("4d2")
+        anyd_load("https://anydice.com/program/4d2")
+
+        assert captured == [
+            "4d2",
+            "https://anydice.com/program/4d2",
+        ]
+
+
+class TestAnydLoadMagicErrors:
+    def test_no_such_program_propagates(
+        self,
+        fake_fetch: Callable[[_FetchImpl], None],
+        recording_shell: _RecordingShell,
+    ) -> None:
+        def _raise(_arg: str) -> tuple[str, str, str, str]:
+            raise NoSuchProgramError("no such program", program_id="deadbeef")
+
+        fake_fetch(_raise)
+
+        with pytest.raises(NoSuchProgramError):
+            anyd_load("deadbeef")
+
+        # Cell must NOT be replaced on failure
+        assert recording_shell.set_next_input_calls == []
+
+    def test_network_error_propagates(
+        self,
+        fake_fetch: Callable[[_FetchImpl], None],
+        recording_shell: _RecordingShell,
+    ) -> None:
+        def _raise(_arg: str) -> tuple[str, str, str, str]:
+            raise NetworkError("connection refused")
+
+        fake_fetch(_raise)
+
+        with pytest.raises(NetworkError):
+            anyd_load("4d2")
+
+        assert recording_shell.set_next_input_calls == []
+
+    def test_missing_arg_raises(self) -> None:
+        from IPython.core.error import UsageError
+
+        with pytest.raises(UsageError):
+            anyd_load("")
 
 
 class TestLoadIPythonExtension:
@@ -175,6 +370,11 @@ class TestLoadIPythonExtension:
         load_ipython_extension(ipython_shell)
         cell_magics = ipython_shell.magics_manager.magics["cell"]
         assert "anyd" in cell_magics
+
+    def test_registers_anyd_load_magic(self, ipython_shell: InteractiveShell) -> None:
+        load_ipython_extension(ipython_shell)
+        line_magics = ipython_shell.magics_manager.magics["line"]
+        assert "anyd_load" in line_magics
 
     def test_registered_magic_runs(
         self,

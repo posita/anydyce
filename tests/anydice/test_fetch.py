@@ -23,6 +23,7 @@ from anydyce.anydice.fetch import (
     NoSuchProgramError,
     _extract_program_from_var_loaded_program,
     extract_program_from_json,
+    sharded_subpath_from_program_id,
 )
 
 __all__ = ()
@@ -109,3 +110,28 @@ output 3d6 named \"3d6\"
             _extract_program_from_var_loaded_program(
                 html, program_id=program_id, program_url=program_url
             )
+
+
+class TestShardedSubpathFromProgramId:
+    def test_positive_short(self) -> None:
+        assert sharded_subpath_from_program_id("f").as_posix() == "00/0f/f.txt"
+
+    def test_positive_exact(self) -> None:
+        assert sharded_subpath_from_program_id("abcd").as_posix() == "ab/cd/abcd.txt"
+
+    def test_positive_long(self) -> None:
+        assert (
+            sharded_subpath_from_program_id("1a2b3c").as_posix() == "2b/3c/1a2b3c.txt"
+        )
+
+    def test_negative_short_omits_minus_in_dirs(self) -> None:
+        assert sharded_subpath_from_program_id("-f").as_posix() == "00/0f/-f.txt"
+
+    def test_negative_exact_omits_minus_in_dirs(self) -> None:
+        assert sharded_subpath_from_program_id("-abc").as_posix() == "0a/bc/-abc.txt"
+        assert sharded_subpath_from_program_id("-abcd").as_posix() == "ab/cd/-abcd.txt"
+
+    def test_negative_long_omits_minus_in_dirs(self) -> None:
+        assert (
+            sharded_subpath_from_program_id("-1a2b3c").as_posix() == "2b/3c/-1a2b3c.txt"
+        )
