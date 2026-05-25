@@ -34,7 +34,7 @@ class TestExtractProgramFromJson:
         extracted = extract_program_from_json(
             r'''"output 3d6 named \"3d6\"
 \noutput [highest 3 of 4d6] named \"highest 3 of 4d6\""''',
-            program_id="",
+            program_id_hex="",
             program_url="",
         )
         assert (
@@ -43,37 +43,37 @@ class TestExtractProgramFromJson:
         )
 
     def test_bad_json(self) -> None:
-        program_id = "abc123"
+        program_id_hex = "abc123"
         program_url = "file:///from/nowhere/abc123.html"
         with pytest.raises(JSONDecodeError):
             extract_program_from_json(
                 r"Ka-BLAM!",
-                program_id=program_id,
+                program_id_hex=program_id_hex,
                 program_url=program_url,
             )
 
     def test_empty_program(self) -> None:
-        program_id = "abc123"
+        program_id_hex = "abc123"
         program_url = "file:///from/nowhere/abc123.html"
         with pytest.raises(
-            EmptyProgramError, match=rf"\bempty program\b.*{re.escape(program_id)}"
+            EmptyProgramError, match=rf"\bempty program\b.*{re.escape(program_id_hex)}"
         ):
             extract_program_from_json(
                 r'""',
-                program_id=program_id,
+                program_id_hex=program_id_hex,
                 program_url=program_url,
             )
 
     def test_no_such_program(self) -> None:
-        program_id = "abc123"
+        program_id_hex = "abc123"
         program_url = "file:///from/nowhere/abc123.html"
         with pytest.raises(
             NoSuchProgramError,
-            match=rf"\bno such program\b.*{re.escape(program_id)}.*{re.escape(program_url)}",
+            match=rf"\bno such program\b.*{re.escape(program_id_hex)}.*{re.escape(program_url)}",
         ):
             extract_program_from_json(
                 r'"output 0 \\ Sorry, AnyDice does not have the program you requested. \\"',
-                program_id=program_id,
+                program_id_hex=program_id_hex,
                 program_url=program_url,
             )
 
@@ -89,7 +89,7 @@ output 3d6 named \"3d6\"
 <body>Fake</body>
 </html>"""
         extracted = _extract_program_from_var_loaded_program(
-            html, program_id="", program_url=""
+            html, program_id_hex="", program_url=""
         )
         assert (
             extracted
@@ -97,7 +97,7 @@ output 3d6 named \"3d6\"
         )
 
     def test_extract_program_from_var_loaded_program_empty_program(self) -> None:
-        program_id = "abc123"
+        program_id_hex = "abc123"
         program_url = "file:///from/nowhere/abc123.html"
         html = r"""<!DOCTYPE html>
 <html lang="en"><head><title>Fake</title>
@@ -105,10 +105,10 @@ output 3d6 named \"3d6\"
 </html>"""
         with pytest.raises(
             EmptyProgramError,
-            match=rf"\bprogram entry missing\b.*{re.escape(program_id)}",
+            match=rf"\bprogram entry missing\b.*{re.escape(program_id_hex)}",
         ):
             _extract_program_from_var_loaded_program(
-                html, program_id=program_id, program_url=program_url
+                html, program_id_hex=program_id_hex, program_url=program_url
             )
 
 

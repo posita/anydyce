@@ -333,7 +333,7 @@ class TestAnydLoadMagicErrors:
         recording_shell: _RecordingShell,
     ) -> None:
         def _raise(_arg: str) -> tuple[str, str, str, str]:
-            raise NoSuchProgramError("no such program", program_id="deadbeef")
+            raise NoSuchProgramError("no such program", program_id_hex="deadbeef")
 
         fake_fetch(_raise)
 
