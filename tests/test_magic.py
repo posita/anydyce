@@ -93,7 +93,7 @@ class TestAnydMagicBasic:
     def test_single_output_default_format(
         self, capsys: pytest.CaptureFixture[str]
     ) -> None:
-        anyd("", "output 3d6")
+        anyd("--text", "output 3d6")
         out = capsys.readouterr().out
         assert re.search(r"^==== output 1 ====$", out, re.MULTILINE)
         # Default uses H.format, which is multi-line and includes "avg" header
@@ -102,7 +102,7 @@ class TestAnydMagicBasic:
     def test_single_output_short_format(
         self, capsys: pytest.CaptureFixture[str]
     ) -> None:
-        anyd("--short", "output 1d6")
+        anyd("--short-text", "output 1d6")
         out = capsys.readouterr().out
         assert re.search(r"^==== output 1 ====$", out, re.MULTILINE)
         # Short uses H.format_short, which emits a single-line {...}, where H.format has
@@ -112,12 +112,12 @@ class TestAnydMagicBasic:
         assert "|" not in out
 
     def test_named_output(self, capsys: pytest.CaptureFixture[str]) -> None:
-        anyd("", 'output 1d6 named "my roll"')
+        anyd("--text", 'output 1d6 named "my roll"')
         out = capsys.readouterr().out
         assert re.search(r"^==== my roll ====$", out, re.MULTILINE)
 
     def test_multiple_outputs(self, capsys: pytest.CaptureFixture[str]) -> None:
-        anyd("", "output 1d6\noutput 2d6")
+        anyd("--text", "output 1d6\noutput 2d6")
         out = capsys.readouterr().out
         assert re.search(r"^==== output 1 ====$", out, re.MULTILINE)
         assert re.search(r"^==== output 2 ====$", out, re.MULTILINE)
@@ -125,12 +125,12 @@ class TestAnydMagicBasic:
     def test_no_output_statements_silent(
         self, capsys: pytest.CaptureFixture[str]
     ) -> None:
-        anyd("", "X: 5")
+        anyd("--text", "X: 5")
         out = capsys.readouterr().out
         assert out == "(no output)\n"
 
     def test_empty_cell_silent(self, capsys: pytest.CaptureFixture[str]) -> None:
-        anyd("", "")
+        anyd("--text", "")
         out = capsys.readouterr().out
         assert out == "(no output)\n"
 
@@ -140,18 +140,18 @@ class TestAnydMagicArgs:
         # This is a sanity check only. A lower precision will produce a coarser
         # histogram. We only assert that both runs succeed and produce *different*
         # output (i.e., the flag actually reached the formatter).
-        anyd("--precision 4", "output 4d6")
+        anyd("--text --precision 4", "output 4d6")
         coarse = capsys.readouterr().out
-        anyd("--precision 64", "output 4d6")
+        anyd("--text --precision 64", "output 4d6")
         fine = capsys.readouterr().out
         assert coarse != fine
 
     def test_precision_passed_through_with_short(
         self, capsys: pytest.CaptureFixture[str]
     ) -> None:
-        anyd("--precision 4 --short", "output 4d6")
+        anyd("--short-text --precision 4", "output 4d6")
         coarse = capsys.readouterr().out
-        anyd("--precision 64 --short", "output 4d6")
+        anyd("--short-text --precision 64 ", "output 4d6")
         fine = capsys.readouterr().out
         assert coarse != fine
 
@@ -171,11 +171,11 @@ class TestAnydMagicArgs:
 class TestAnydMagicErrorsPropagate:
     def test_parse_error_propagates(self) -> None:
         with pytest.raises(UnexpectedToken):
-            anyd("", "this is not valid anydice @@@")
+            anyd("--text", "this is not valid anydice @@@")
 
     def test_interpreter_error_propagates(self) -> None:
         with pytest.raises(NameError, match=r"\bundefined function\b"):
-            anyd("", "output [undefined function 1 2 3]")
+            anyd("--text", "output [undefined function 1 2 3]")
 
 
 class TestAnydMagicWarnings:
@@ -195,10 +195,10 @@ class TestAnydMagicWarnings:
             return original_run(source)
 
         monkeypatch.setattr(anydyce_magic, "run", _emit_deprecation)
-        anyd("", "output 1d6")
+        anyd("--text", "output 1d6")
 
         monkeypatch.setattr(anydyce_magic, "run", _emit_experimental)
-        anyd("", "output 1d6")
+        anyd("--text", "output 1d6")
 
         # DeprecationWarnings and ExperimentalWarnings *are* suppressed
         assert not any(
@@ -218,7 +218,7 @@ class TestAnydMagicWarnings:
             return original_run(source)
 
         monkeypatch.setattr(anydyce_magic, "run", _emit_truncation)
-        anyd("", "output 1d6")
+        anyd("--text", "output 1d6")
 
         # TruncationWarnings are *not* suppressed
         assert any(issubclass(w.category, TruncationWarning) for w in recwarn.list)
@@ -382,6 +382,6 @@ class TestLoadIPythonExtension:
         ipython_shell: InteractiveShell,
     ) -> None:
         load_ipython_extension(ipython_shell)
-        ipython_shell.run_cell_magic("anyd", "", "output 2d6")
+        ipython_shell.run_cell_magic("anyd", "--text", "output 2d6")
         out = capsys.readouterr().out
         assert re.search(r"^==== output 1 ====$", out, re.MULTILINE)

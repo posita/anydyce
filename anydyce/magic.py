@@ -32,37 +32,84 @@ from IPython.core.interactiveshell import InteractiveShell
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 from IPython.display import HTML, Markdown, display
 
+from . import jupyter_visualize
 from .anydice import DEFAULT_PRECISION, format_anydice_results, run
 from .anydice.fetch import fetch_anydice_program, is_pyodide
+from .viz import BurstHPlotter, HorizontalBarHPlotter, LineHPlotter
 
 __all__ = ("load_ipython_extension",)
+
+_FORMAT_BAR = "bar"
+_FORMAT_BURST = "burst"
+_FORMAT_LINE = "line"
+_FORMAT_TEXT = "text"
+_FORMAT_TEXT_SHORT = "short-text"
+
+_PLOTTER_NAMES_BY_FORMAT = {
+    _FORMAT_BAR: HorizontalBarHPlotter.NAME,
+    _FORMAT_BURST: BurstHPlotter.NAME,
+    _FORMAT_LINE: LineHPlotter.NAME,
+}
+
+_OUTPUT_FORMAT = "output_format"
 
 
 @magic_arguments()
 @argument(
-    "--short",
-    action="store_true",
-    help="Format each output on one-line instead of the default multi-line format.",
+    f"--{_FORMAT_BAR}",
+    action="store_const",
+    const=_FORMAT_BAR,
+    default=_FORMAT_TEXT,
+    dest=_OUTPUT_FORMAT,
+    help=f'use interactive visual formatting with "{_PLOTTER_NAMES_BY_FORMAT[_FORMAT_BAR]}" selected',
+)
+@argument(
+    f"--{_FORMAT_BURST}",
+    action="store_const",
+    const=_FORMAT_BURST,
+    dest=_OUTPUT_FORMAT,
+    help=f'use interactive visual formatting with "{_PLOTTER_NAMES_BY_FORMAT[_FORMAT_BURST]}" selected',
+)
+@argument(
+    f"--{_FORMAT_LINE}",
+    action="store_const",
+    const=_FORMAT_LINE,
+    dest=_OUTPUT_FORMAT,
+    help=f'use interactive visual formatting with "{_PLOTTER_NAMES_BY_FORMAT[_FORMAT_LINE]}" selected',
+)
+@argument(
+    f"--{_FORMAT_TEXT}",
+    action="store_const",
+    const=_FORMAT_TEXT,
+    dest=_OUTPUT_FORMAT,
+    help="format each output as multi-line text",
+)
+@argument(
+    f"--{_FORMAT_TEXT_SHORT}",
+    action="store_const",
+    const=_FORMAT_TEXT_SHORT,
+    dest=_OUTPUT_FORMAT,
+    help="format each output as single-line text",
 )
 @argument(
     "--precision",
     type=int,
     default=DEFAULT_PRECISION,
-    help=f"Number of decimal places used when formatting output values. Default: {DEFAULT_PRECISION}.",
+    help=f"number of decimal places used when formatting output values as text. Default: {DEFAULT_PRECISION}",
 )
 def anyd(line: str, cell: str) -> None:
     r"""
-    Run the cell as legacy AnyDice source and print each output's distribution.
+    Run the cell as legacy AnyDice source and display each output's distribution.
 
     Examples:
 
         %%anyd
         output 3d6
 
-        %%anyd --short
-        output 2d20
+        %%anyd --bar
+        output 3d6
 
-        %%anyd --precision 32
+        %%anyd --short --precision 32
         output 1d100
     """
     args = parse_argstring(anyd, line)
@@ -73,17 +120,26 @@ def anyd(line: str, cell: str) -> None:
         # cell output
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         warnings.filterwarnings("ignore", category=ExperimentalWarning)
-        print(
-            format_anydice_results(
-                run(cell), precision=args.precision, short=args.short
+        results = run(cell)
+        if args.output_format in _PLOTTER_NAMES_BY_FORMAT:
+            jupyter_visualize(
+                results,
+                selected_name=_PLOTTER_NAMES_BY_FORMAT[args.output_format],
             )
-        )
+        else:
+            print(
+                format_anydice_results(
+                    results,
+                    precision=args.precision,
+                    short=args.output_format == _FORMAT_TEXT_SHORT,
+                )
+            )
 
 
 @magic_arguments()
 @argument(
     "location_or_id",
-    help="An AnyDice program ID or URL.",
+    help="an AnyDice program ID or URL",
 )
 def anyd_load(line: str) -> None:
     r"""
@@ -94,10 +150,11 @@ def anyd_load(line: str) -> None:
         %anyd_load 4d2
         %anyd_load https://anydice.com/program/4d2
 
-    On success, the cell is replaced with an `%%anyd` cell containing the fetched program plus a comment header recording the source URL and fetch time.
-    The replaced cell is ***not*** auto-executed.
-    If the program cannot be retrieved directly from anydice.com, an attempt is made to find it using a mirror.
-    On failure (e.g., network error, missing program, etc.), the exception propagates to Jupyter and the original `%anyd_load` line is left in place.
+    On success, the cell is replaced with an `%%anyd` cell containing the fetched
+    program plus a comment header recording the source URL and fetch time. The replaced
+    cell is *not* auto-executed. On failure (e.g., network error, missing program,
+    etc.), the exception propagates to Jupyter and the original `%anyd_load` line is
+    left in place.
     """
     args = parse_argstring(anyd_load, line)
     program_id_hex, initial_url, _final_url, program = fetch_anydice_program(
@@ -106,12 +163,23 @@ def anyd_load(line: str) -> None:
     fetched_at = datetime.now(UTC).astimezone().isoformat(timespec="seconds")
     new_cell = (
         "%%anyd\n"
-        "\\\n"
-        f"  AnyDice program {program_id_hex} fetched from {initial_url} at {fetched_at} using:\n"
+        "\\ ================================================================================ /\n"
+        f"  AnyDice program {program_id_hex} fetched from {initial_url}\n"
+        f"  at {fetched_at} using:\n"
         f"  %anyd_load {args.location_or_id}\n"
-        "\\\n"
+        "/ ================================================================================ \\\n"
         f"{program}"
     )
+    if is_pyodide():
+        # Insert a space after any `\\<LF>` or `\\<CR>` so Python's tokenizer doesn't
+        # treat the `\\` as a line continuation.
+        #
+        # JupyterLite's pyodide-kernel eagerly tokenizes cell-magic bodies as Python.
+        # `\\<LF>` collapses lines via line continuation, often producing mixed-
+        # indentation `IndentationError`s. Adding a space after `\\` breaks the
+        # continuation. AnyDice ignores trailing whitespace after a comment-closing
+        # `\\`, so this is a no-op for AnyDice parsing.
+        new_cell = new_cell.replace("\\\n", "\\ \n").replace("\\\r", "\\ \r")
     # Inside a magic, the shell is what just invoked us is guaranteed to exist
     if is_pyodide():
         _display_program_with_copy_button(new_cell)
