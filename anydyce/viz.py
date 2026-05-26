@@ -122,7 +122,6 @@ _DEFAULT_BURST_COLOR_BG = _get_param_for_style(_DEFAULT_PLOT_STYLE, "figure.face
 
 _MARKERS = {
     "point": ".",
-    "pixel": ",",
     "circle": "o",
     "triangle_down": "v",
     "triangle_up": "^",
@@ -515,6 +514,7 @@ class PlotWidgets(_PlotWidgetsDataclass):
         self.burst_color_text.value = initial_burst_color_text
         self.burst_columns.value = initial_burst_columns
         self.burst_swap.value = initial_burst_swap
+        self.burst_zero_fill_normalize.disabled = initial_burst_cmap_use_midpoints
         self.burst_zero_fill_normalize.value = initial_burst_zero_fill_normalize
         self.cutoff.disabled = not initial_enable_cutoff
         self.enable_cutoff.value = initial_enable_cutoff
@@ -565,6 +565,13 @@ class PlotWidgets(_PlotWidgetsDataclass):
             self.burst_color_bg.disabled = change["new"]
 
         self.burst_color_bg_trnsp.observe(_handle_burst_color_bg_trnsp, names="value")
+
+        def _handle_burst_cmap_use_midpoints(change: _ChangeT) -> None:
+            self.burst_zero_fill_normalize.disabled = change["new"]
+
+        self.burst_cmap_use_midpoints.observe(
+            _handle_burst_cmap_use_midpoints, names="value"
+        )
 
     def asdict(self) -> dict[str, Any]:
         return {field.name: getattr(self, field.name) for field in fields(self)}
