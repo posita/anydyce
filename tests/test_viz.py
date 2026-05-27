@@ -6,7 +6,6 @@
 # software in any capacity.
 # ======================================================================================
 
-import base64
 import warnings
 from fractions import Fraction
 
@@ -18,11 +17,8 @@ from ipywidgets import widgets  # type: ignore[import-untyped]
 
 from anydyce import HPlotterChooser
 from anydyce.viz import (
-    BarHPlotter,
     BurstHPlotter,
     HorizontalBarHPlotter,
-    Image,
-    ImageType,
     LineHPlotter,
     PlotWarning,
     PlotWidgets,
@@ -45,18 +41,6 @@ def _suppress_experimental() -> None:
 # ---- Tests ---------------------------------------------------------------------------
 
 
-class TestImage:
-    def test_rich_display_png(self) -> None:
-        img = Image("", ImageType.PNG, b"1234")
-        assert img._repr_png_() == base64.b64encode(b"1234").decode()
-        assert img._repr_svg_() is None
-
-    def test_rich_display_svg(self) -> None:
-        img = Image("", ImageType.SVG, b"1234")
-        assert img._repr_png_() is None
-        assert img._repr_svg_() == "1234"
-
-
 class TestPlotWidgets:
     def test_construction(self) -> None:
         mpl.use("agg")
@@ -64,14 +48,12 @@ class TestPlotWidgets:
             initial_alpha=0.125,
             initial_enable_cutoff=True,
             initial_graph_type="at_least",
-            initial_img_type=ImageType.SVG,
             initial_markers="xo",
             initial_plot_style="default",
         )
         assert plot_widgets.alpha.value == 0.125  # 1/(2**3) # noqa: RUF069
         assert plot_widgets.enable_cutoff.value is True
         assert plot_widgets.graph_type.value == "at_least"
-        assert plot_widgets.img_type.value is ImageType.SVG
         assert plot_widgets.markers.value == "xo"
         assert plot_widgets.plot_style.value == "default"
 
@@ -95,7 +77,6 @@ class TestPlotWidgets:
             "cutoff",
             "enable_cutoff",
             "graph_type",
-            "img_type",
             "markers",
             "plot_style",
             "resolution",
@@ -106,14 +87,6 @@ class TestPlotWidgets:
         mpl.use("agg")
         with pytest.warns(PlotWarning, match=r"\bunrecognized plot style\b"):
             PlotWidgets(initial_plot_style="does not exist")
-
-
-class TestBarHPlotter:
-    def test_layouts(self) -> None:
-        plot_widgets = PlotWidgets()
-        bar_plotter = BarHPlotter()
-        layout_widget = bar_plotter.layout(plot_widgets)
-        assert isinstance(layout_widget, widgets.Widget)
 
 
 class TestBurstHPlotter:
@@ -149,7 +122,6 @@ class TestHPlotterChooser:
             chooser._plotters_by_name.keys()  # noqa: SLF001
         ) == {
             "Line Plot",
-            "Bar Plot",
             "Horizontal Bar Plots",
             "Burst Plots",
         }
@@ -172,7 +144,7 @@ class TestHPlotterChooser:
 
     def test_construction_selected_name(self) -> None:
         chooser = HPlotterChooser(
-            plotters_or_factories=(BarHPlotter, LineHPlotter),
+            plotters_or_factories=(BurstHPlotter, LineHPlotter),
             selected_name="Line Plot",
         )
         accordion_widget = chooser._out.children[0]  # noqa: SLF001

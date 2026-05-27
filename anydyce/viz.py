@@ -16,7 +16,6 @@ from collections import Counter
 from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields
-from enum import StrEnum
 from fractions import Fraction
 from functools import partial
 from itertools import accumulate, chain, cycle, islice
@@ -35,7 +34,6 @@ from dyce.viz import (
     _DEFAULT_ALPHA,
     _DEFAULT_MARKERS,
     GraphTypeT,
-    plot_bar,
     plot_burst,
     plot_line,
 )
@@ -81,11 +79,6 @@ class PlotWarning(UserWarning):
     """
 
 
-class ImageType(StrEnum):
-    PNG = "PNG"
-    SVG = "SVG"
-
-
 class SettingsDict(TypedDict):
     alpha: float
     burst_cmap_inner: str
@@ -100,7 +93,6 @@ class SettingsDict(TypedDict):
     burst_zero_fill_normalize: bool
     enable_cutoff: bool
     graph_type: GraphTypeT
-    img_type: ImageType
     markers: str
     plot_style: str
     resolution: int
@@ -109,7 +101,7 @@ class SettingsDict(TypedDict):
 # ---- Data ----------------------------------------------------------------------------
 
 _DEFAULT_COLS_BURST = 3
-_DEFAULT_RESOLUTION = 12
+_DEFAULT_RESOLUTION = 10
 _CUTOFF_BASE = 10
 _CUTOFF_EXP = 6
 
@@ -173,44 +165,27 @@ _MARKERS = {
 # ---- Classes -------------------------------------------------------------------------
 
 
-class Image:
+class _SvgImg:
     r"""
-    Abstraction to support downloading images of varying types.
+    Abstraction to support downloading the SVG plot image.
 
     The [initializer][anydyce.viz.Image.__init__] requires several parameters.
-    *file_name* is the name of the file to be downloaded. *file_type* is the type of the
-    image data. *data* is the image data.
+    *file_name* is the name of the file to be downloaded.
+    *data* is the raw SVG data.
 
     !!! warning
 
-        This is a relatively dumb class. It is left to the caller to ensure that
-        *file_type* accurately describes *data*.
+        This is a relatively dumb class. It is left to the caller to ensure that *data* is actually SVG data.
     """
 
-    def __init__(self, file_name: str, file_type: ImageType, data: bytes) -> None:
-        if file_type is ImageType.PNG:
-            self._data = base64.b64encode(data).decode()
-            self._mime_pfx = "data:image/png;base64,"
-        elif file_type is ImageType.SVG:
-            self._data = data.decode()
-            self._mime_pfx = "data:image/svg+xml,"
-        else:
-            assert False, f"unrecognized file type {file_type}"  # noqa: B011, PT015
+    def __init__(self, file_name: str, data: bytes) -> None:
+        self._data = data.decode()
+        self._mime_pfx = "data:image/svg+xml,"
 
-        if file_name.lower().endswith(file_type.lower()):
+        if file_name.lower().endswith(".svg"):
             self._file_name = file_name
         else:
-            self._file_name = file_name + "." + file_type.lower()
-
-        self._file_type = file_type
-
-    def _repr_png_(self) -> str | None:  # noqa: PLW3201
-        r"""
-        [Rich
-        display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display)
-        hook method used by IPython to display PNG images.
-        """
-        return self._data if self._file_type is ImageType.PNG else None
+            self._file_name = file_name + ".svg"
 
     def _repr_svg_(self) -> str | None:  # noqa: PLW3201
         r"""
@@ -218,10 +193,10 @@ class Image:
         display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display)
         hook method used by IPython to display SVG images.
         """
-        return self._data if self._file_type is ImageType.SVG else None
+        return self._data
 
     def download_link(self) -> str:
-        return f'<a download="{self._file_name}" href="{self._mime_pfx}{urllib.parse.quote(self._data)}" target="_blank">Download {self._file_type.value} image</a>'
+        return f'<a download="{self._file_name}" href="{self._mime_pfx}{urllib.parse.quote(self._data)}" target="_blank">Download SVG image</a>'
 
 
 @dataclass(frozen=True)
@@ -275,18 +250,6 @@ class _PlotWidgetsDataclass:
             step=1,
             continuous_update=False,
             description="Resolution",
-        ),
-    )
-
-    img_type: widgets.ToggleButtons = field(
-        init=False,
-        repr=False,
-        default_factory=partial(
-            widgets.ToggleButtons,
-            value=_first_of(ImageType),
-            options=[(img_type.value, img_type) for img_type in ImageType],
-            description="Image Format",
-            rows=min(len(ImageType), 5),
         ),
     )
 
@@ -498,9 +461,6 @@ class PlotWidgets(_PlotWidgetsDataclass):
     - *initial_graph_type* is the type of graph first shown (defaults to
        `#!python "normal"`.
 
-    - *initial_img_type* is the initially selected image type (defaults to
-       [`ImageType.SVG`][anydyce.viz.ImageType.SVG]).
-
     - *initial_markers* are the starting set of markers for line plots (defaults to
        `#!python "oX^v><dP"`).
 
@@ -527,7 +487,6 @@ class PlotWidgets(_PlotWidgetsDataclass):
         initial_burst_color_text: str = _DEFAULT_BURST_COLOR_TEXT,
         initial_enable_cutoff: bool = True,
         initial_graph_type: GraphTypeT = _DEFAULT_GRAPH_TYPE,
-        initial_img_type: ImageType = ImageType.SVG,
         initial_markers: str = _DEFAULT_MARKERS,
         initial_plot_style: str = _DEFAULT_PLOT_STYLE,
         initial_resolution: int = _DEFAULT_RESOLUTION,
@@ -560,7 +519,6 @@ class PlotWidgets(_PlotWidgetsDataclass):
         self.cutoff.disabled = not initial_enable_cutoff
         self.enable_cutoff.value = initial_enable_cutoff
         self.graph_type.value = initial_graph_type
-        self.img_type.value = initial_img_type
         self.markers.value = initial_markers
         self.plot_style.value = initial_plot_style
         self.resolution.value = initial_resolution
@@ -665,7 +623,6 @@ class HPlotter:
             [
                 plot_widgets.enable_cutoff,
                 plot_widgets.cutoff,
-                plot_widgets.img_type,
                 plot_widgets.resolution,
             ]
         )
@@ -693,64 +650,6 @@ class HPlotter:
         *requested*. The default implementation always returns `#!python False`.
         """
         return False
-
-
-class BarHPlotter(HPlotter):
-    r"""
-    !!! warning "Experimental"
-
-        This class should be considered experimental and may change or disappear in
-        future versions.
-
-    A plotter for creating a single vertical bar plot visualizing all primary
-    histograms. Secondary histograms are ignored.
-    """
-
-    NAME: str = "Bar Plot"
-
-    def layout(self, plot_widgets: PlotWidgets) -> widgets.Widget:
-        cutoff_layout_widget = super().layout(plot_widgets)
-
-        return widgets.VBox(
-            [
-                widgets.HBox(
-                    [
-                        cutoff_layout_widget,
-                        plot_widgets.graph_type,
-                        widgets.VBox(
-                            [
-                                plot_widgets.alpha,
-                                plot_widgets.plot_style,
-                            ]
-                        ),
-                    ]
-                ),
-            ]
-        )
-
-    def plot(
-        self,
-        hs: Sequence[tuple[str, H, H | None]],
-        settings: SettingsDict,
-    ) -> None:
-        _, ax = plt.subplots(
-            figsize=(
-                settings["resolution"],
-                settings["resolution"] / 16 * 9,
-            )
-        )
-
-        plot_bar(
-            *(h for _, h, _ in hs),
-            alpha=settings["alpha"],
-            ax=ax,
-            graph_type=settings["graph_type"],
-            labels=[label for label, _, _ in hs],
-        )
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            ax.legend()
 
 
 class BurstHPlotter(HPlotter):
@@ -885,7 +784,7 @@ class BurstHPlotter(HPlotter):
         return requested
 
 
-class HorizontalBarHPlotter(BarHPlotter):
+class HorizontalBarHPlotter(HPlotter):
     r"""
     !!! warning "Experimental"
 
@@ -898,6 +797,26 @@ class HorizontalBarHPlotter(BarHPlotter):
 
     NAME: str = "Horizontal Bar Plots"
 
+    def layout(self, plot_widgets: PlotWidgets) -> widgets.Widget:
+        cutoff_layout_widget = super().layout(plot_widgets)
+
+        return widgets.VBox(
+            [
+                widgets.HBox(
+                    [
+                        cutoff_layout_widget,
+                        plot_widgets.graph_type,
+                        widgets.VBox(
+                            [
+                                plot_widgets.alpha,
+                                plot_widgets.plot_style,
+                            ]
+                        ),
+                    ]
+                ),
+            ]
+        )
+
     def plot(
         self,
         hs: Sequence[tuple[str, H, H | None]],
@@ -907,10 +826,9 @@ class HorizontalBarHPlotter(BarHPlotter):
             1 for _ in chain.from_iterable(h.outcomes() for _, h, _ in hs)
         )
         total_height = total_outcomes + 1  # one extra to accommodate the axis
-        inches_per_height_unit = settings["resolution"] / 64
         figsize = (
             settings["resolution"],
-            total_height * inches_per_height_unit,
+            total_height * settings["resolution"] / 48,
         )
         plt.figure(figsize=figsize)
         barh_kw: dict[str, Any] = {"alpha": settings["alpha"]}
@@ -1080,7 +998,6 @@ class HPlotterChooser:
         plotters_or_factories: Iterable[HPlotter | HPlotterFactoryT] = (
             BurstHPlotter,
             LineHPlotter,
-            BarHPlotter,
             HorizontalBarHPlotter,
         ),
         selected_name: str | None = None,
@@ -1134,7 +1051,7 @@ class HPlotterChooser:
         self.hs: tuple[tuple[str, H, H | None], ...] = ()
         self._hs_culled: tuple[tuple[str, H, H | None], ...] = ()
         self._cutoff: float | None = None
-        self._csv_download_link = ""
+        self._csv_download_link_html = ""
         self.update_hs(histogram_specs)
         self._selected_plotter: HPlotter | None
         tab_names = tuple(self._plotters_by_name.keys())
@@ -1221,13 +1138,27 @@ class HPlotterChooser:
                 facecolor=mcolors.to_rgba(
                     settings["burst_color_bg"], alpha=0.0 if transparent else None
                 ),
-                format=settings["img_type"],
+                format="SVG",
                 transparent=transparent,
             )
             img_name = "-".join(label for label, _, _ in self.hs)
-            img = Image(img_name, settings["img_type"], buf.getvalue())
-            display(HTML(f"{self._csv_download_link} | {img.download_link()}"))
-            display(img)
+            svg_raw = buf.getvalue().decode()
+            display(
+                HTML(
+                    rf"""
+{self._csv_download_link_html} |
+<a download="{img_name}.svg" href="data:image/svg+xml,{urllib.parse.quote(svg_raw)}" target="_blank">Download SVG image</a>
+                """.strip()
+                )
+            )
+            display(
+                widgets.Image(
+                    value=svg_raw.encode("utf-8"),
+                    format="svg+xml",
+                    width="100%",
+                    height="auto",
+                )
+            )
             plt.clf()
             plt.close()
 
@@ -1243,7 +1174,7 @@ class HPlotterChooser:
         explanation of *histogram_specs*.
         """
         self.hs = _histogram_specs_to_h_tuples(histogram_specs, cutoff=None)
-        self._csv_download_link = _csv_download_link(self.hs)
+        self._csv_download_link_html = _csv_download_link(self.hs)
 
         self._plot_widgets.burst_swap.disabled = all(
             h_outer is None or h_inner == h_outer for _, h_inner, h_outer in self.hs
@@ -1372,7 +1303,6 @@ def jupyter_visualize(
     initial_burst_zero_fill_normalize: bool = False,
     initial_enable_cutoff: bool = True,
     initial_graph_type: GraphTypeT = _DEFAULT_GRAPH_TYPE,
-    initial_img_type: ImageType = ImageType.SVG,
     initial_markers: str = _DEFAULT_MARKERS,
     initial_plot_style: str = _DEFAULT_PLOT_STYLE,
     initial_resolution: int = _DEFAULT_RESOLUTION,
@@ -1413,7 +1343,6 @@ def jupyter_visualize(
             initial_burst_zero_fill_normalize=initial_burst_zero_fill_normalize,
             initial_enable_cutoff=initial_enable_cutoff,
             initial_graph_type=initial_graph_type,
-            initial_img_type=initial_img_type,
             initial_markers=initial_markers,
             initial_plot_style=initial_plot_style,
             initial_resolution=initial_resolution,
