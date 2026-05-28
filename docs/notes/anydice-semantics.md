@@ -8,7 +8,7 @@ A living catalog of:
 
 Each entry should carry a concrete reference (a test name, a probe id, a commit, or a corpus program id) so the claim is verifiable. AnyDice is closed-source; everything here is the result of empirical reverse-engineering against the live `anydice.com` and the cached corpus output.
 
-Maintenance: update this as new behaviors are characterized. The auditor (when it lands) should be able to auto-generate parts of section 2 from the corpus DB's `annotations` table.
+Maintenance: update this as new behaviors are characterized. The corpus DB's `annotations` table (in `anydice-data`) holds the per-program rationale for every `divergence:anydice-bug` row; cross-reference this catalog against `SELECT program_id, note FROM annotations` when adding new bug classes. The rename-counterfactual technique (Section 4) is the standard tool for confirming a new divergence belongs to the param-leakage class.
 
 ---
 
@@ -115,9 +115,48 @@ These are behaviors we have evidence are unintended defects in AnyDice's impleme
 
 AnyDice fails to reset later-position `:n`/`:s` parameters between iterations of an earlier parameter's expansion. The leak is *per-outcome*: each outcome of the later parameter has its own mutable state cell that AnyDice carries forward as the earlier parameter sweeps its values, instead of resetting per `(P_outer, P_inner)` combo. The signature is exactly cumulative-leak across the inner-loop slots; probe -0x26 nails the model exactly (results, including weights, predicted to the last decimal).
 
-This single mechanism is responsible for the entire `divergence:anydice-bug` cluster around param-reassignment-under-expansion: roughly 60+ corpus programs, including the long-parked program `0x1102` (`pentastar dice with penalty dice`). Our interpreter's faithful "params iteration-local / non-params call-local" implementation (5fec / 7f1) is what AnyDice *intends*; AnyDice's implementation of that intent has a missing isolation boundary between params and the shared per-outcome state structure used (correctly) for non-params.
+This single mechanism is responsible for the entire `divergence:anydice-bug` cluster around param-reassignment-under-expansion: ~60 corpus programs as of the full-corpus verify on 2026-05-26, including the long-parked program `0x1102` (`pentastar dice with penalty dice`). Our interpreter's faithful "params iteration-local / non-params call-local" implementation (5fec / 7f1) is what AnyDice *intends*; AnyDice's implementation of that intent has a missing isolation boundary between params and the shared per-outcome state structure used (correctly) for non-params.
 
-Evidence: probe -0x26 in `tmp-probes.db`; `TestCorpus1102SExpansionAggregationDivergence` (strict-xfail sentinel asserting the AnyDice oracle as a wrong-direction marker).
+Evidence: probe -0x26 in `tmp-probes.db`; `TestCorpus1102SExpansionAggregationDivergence` (strict-xfail sentinel asserting the AnyDice oracle as a wrong-direction marker). The annotations table at `posita/anydice-data` carries per-program rationale for every member of this cluster.
+
+### Joint `:n` expansion of two non-uniformly-weighted dies
+
+A distinct expansion-time defect, separate from the slot-leak above: when a function call expands two `:n` parameters whose argument dies have *non-uniform* weight distributions, AnyDice's joint enumeration appears to mis-weight the outcome combinations. The bug is invisible at uniform weights (where each combination has equal weight regardless of enumeration ordering) and surfaces specifically when both arg dies' outcome weights differ.
+
+Evidence: corpus `0x4123a` (canonical), with isolation probes `0x42b13`, `0x42b15`, `0x42b16`, `0x42b20`-`0x42b23` annotated as `divergence:anydice-bug`. Our interpreter's joint enumeration is mathematically correct.
+
+### Phantom-mass empty (`divergence:anydice-bug:phantom-mass`)
+
+AnyDice's `:n`/`:s` parameter-expansion aggregator distinguishes two flavors of "empty" in a per-iter contribution:
+
+- **Regular empty `H({})`**: produced by a literal `d{}`, by the depth-cap handler, by `*` / `/` / `^` empty propagation, or by any expression that evaluates to an empty `H`. When this appears as an iter's result, AnyDice DROPS it from aggregation and RENORMALIZES the remaining iters' contributions to sum to 100%. Our `aggregate_weighted` does the same.
+
+- **Phantom-bearing empty**: produced by `:n` (and `:s`) parameter expansion *specifically when the call site triggers expansion over an empty distribution* — the param is expansion-typed (`:n`/`:s`) AND the arg has zero outcomes (so the expansion sets up over 0 iterations). When this appears as an iter's result, AnyDice DROPS it from outcome aggregation but KEEPS the iter's outer weight as "phantom mass" — the visible distribution sums to *less than 100%*, with the missing fraction equalling the dropped iter's weight.
+
+We conflate both flavors into `H({})` (no phantom representation), so corpus programs that exercise the distinction show small-but-real divergences (probability mass that should be missing instead gets renormalized into other outcomes). Affects ~5 corpus programs in the small DB's `divergence:anydice-bug:phantom-mass` annotation bucket; the `+0` workaround (`[expr] + 0`, converting `H({})` to `H({0:1})`) was empirically shown to sidestep the divergence on `0x13dc` by making the inner iter non-empty.
+
+Evidence: probe `-0x3d` in `tmp-probes.db` (the `weird af` recursive program at increasing `max_depth`); corpus `0x13dc` (the `stress` -> `check botch [botch B]` chain at ROLL=10).
+
+### LHS-asymmetric `d{}` arithmetic bugs
+
+AnyDice's operator-specific empty-die handling (covered in Section 1) is mostly principled, but there are LHS-asymmetric defects under `+`, `-`, `|` when `d{}` is on the left and the right operand is a seq or pool. Specifically:
+
+- `d{} + {1,2,3}` returns the seq's elements per-element rather than sum-coercing to `H({3, 6, 9})`. Pool-shaped instead of scalar-coerced.
+- `3d6 + d{}` (and `|` variants) preserves the LHS pool's positional structure rather than collapsing — as if `d{}` were a no-op identity on the non-empty side instead of a coerced scalar `0`.
+- `d{} | {}` returns empty (propagates) where the principled bool-OR-with-empty-RHS would yield `0`.
+
+Our `_apply_arith` / `_apply_bool` implement uniform scalar-0-coercion across these cases (so e.g. `d{} | <nonzero scalar>` yields `1` as expected). The divergences are deliberate.
+
+Evidence: annotations `0x42aa4` (canonical multi-op cluster) and `0x1857f` (singleton).
+
+### Comparison against seq RHS
+
+Comparison operators (`<`, `<=`, `>`, `>=`, `=`, `!=`) against a sequence right-hand-side appear to coerce the seq to its sum, then run `=` against the sum — not the documented "element-wise lex compare" or "die-vs-seq" semantics. The empty-seq case is degenerate (always-true).
+
+- `d6 <= {2,3}` returns the answer for `d6 = 5` rather than the lex/elementwise interpretation. Verified: `0x42a2f`.
+- `d6 <= {}` returns "always true" (vacuous truth at the empty-seq boundary). Verified: `0x42a34`.
+
+Our interpreter does element-wise lex compare (matching the documented semantics for sequence-vs-sequence) and sum-coerces seq-against-scalar in numeric context (matching Section 1's rule).
 
 ### int64 overflow on outcome values
 
@@ -138,6 +177,12 @@ Examples: `0x19a58`, `0x25d0d` (substantially similar programs by the same autho
 Listed here for completeness even though the fix is upstream. dyce's `P.h(*selectors)` previously dropped per-position multiplicity when the duplicate-selection covered only a *subset* of pool positions (e.g. `.h(-2,-2)` on a 2-die pool). The Prefix/Suffix selection types were multiplicity-blind; selections with `count>1` over a partial subset fell through to them, silently de-duplicating. AnyDice preserves multiplicity here; we did not. Fixed in dyce `0.7.0rc4`; anydyce pinned to that release.
 
 Evidence: dyce's `tests/test_p.py::test_analyze_selection_single_pos`; corpus `0x11caf` cleared by the upstream fix.
+
+### Miscellaneous one-off anomalies
+
+Behaviors that don't generalize into a class but are documented for completeness:
+
+- **Depth-accounting structural dependence (`0x1065f`)**: AnyDice's recursion-cap accounting depends on call-site structure in a non-obvious way. The corpus program triggers a FRL↔IFL recursion that, under our principled depth count, hits an `if H({})` situation that AnyDice's documented "Boolean values can only be numbers" rule should reject — yet AnyDice emits a clean output. Lowering `max_depth` doesn't change AnyDice's output; inlining one of the calls (removing it from the stack) DOES make AnyDice error. The exact mechanism is unaccountable under any clean rule; treated as bug rather than feature.
 
 ---
 
@@ -181,11 +226,63 @@ A dyce-core change re-ported into the dyce-cleanroom branch to support our inter
 
 ---
 
+## 4. Methodology: the rename-counterfactual technique
+
+Most of the bugs in Section 2 — especially the parameter-leakage cluster — were diagnosed using a counterfactual rewrite that exploits AnyDice's *correct* handling of local-variable mutation as a baseline. The technique is the standard tool for confirming whether a corpus divergence belongs to a known bug class (or surfaces a new one).
+
+### Procedure
+
+Given a function under investigation:
+
+```
+function: F X:n Y:n {
+  ...  body that may mutate X and/or Y ...
+}
+```
+
+Rewrite by renaming each parameter and reassigning the renamed param to the original name as the function body's first statements:
+
+```
+function: F _X_:n _Y_:n {
+  X: _X_
+  Y: _Y_
+  ...  body, unchanged, still references X and Y ...
+}
+```
+
+The body is now identical to the original *syntactically*, but `X` and `Y` are now **local variables** (assigned from the renamed parameters at entry) rather than parameter slots. AnyDice's "call-local-mutation" semantics for non-parameters is correct (we verified this independently — locals reset per call but persist across iterations within a call, modeled faithfully by our interpreter); only its parameter-slot semantics has the per-outcome-leak defect.
+
+Then run both versions through AnyDice (and our interpreter) and compare.
+
+### Diagnostic matrix
+
+Let `O_orig` and `O_rewritten` be AnyDice's outputs for the two programs; `M_orig` and `M_rewritten` be ours.
+
+| Observation | Interpretation |
+|---|---|
+| `O_orig == O_rewritten` | No parameter-leak in this program. The divergence (if any) belongs to a different bug class — pursue separately (overflow, joint-expansion non-uniform-weights, phantom-mass, etc.). |
+| `O_orig != O_rewritten` | AnyDice treats the params differently from the locals — confirms a parameter-handling bug. |
+| `O_rewritten == M_orig` | Our interpreter matches the "as if params were locals" interpretation, which is what AnyDice *intends*. The divergence sits exactly in AnyDice's missing param-isolation. Annotate `divergence:anydice-bug`. |
+| `O_rewritten == M_rewritten` | Sanity check — both interpreters agree on the local-variable semantics, which they should. If this fails, *we* have a bug. |
+
+The strong signal is the conjunction: `O_orig != O_rewritten` AND `O_rewritten == M_orig`. That combination uniquely fingerprints the param-leakage bug class — different from joint-expansion bugs (which affect both versions identically) and from overflow bugs (which affect outcome values, not weights).
+
+### Limitations
+
+- **Programs that don't mutate parameters** show no diagnostic signal — the rewrite is a no-op on behavior. Use a different technique (or skip the program; if it doesn't mutate params, it can't exhibit this bug).
+- **Programs that use parameters in expansion-arg position (`[F X Y]` where X, Y are themselves params being expanded)** require care — the rewrite preserves expansion behavior since renamed params are still `:n`/`:s`-typed, but the diagnostic only catches the *body-mutation* component of the leak.
+- **Hand-applied per program** — there's no automated rewriter. The original plan was an "auditor" that would generate Tier-2 sisters automatically and run the differential; this remains unbuilt (see Backlog).
+
+### Example: probe `-0x11` in `tmp-probes.db`
+
+Isolates the per-outcome `:s`-slot leakage for the `0x1102` (pentastar-with-penalty) family. The rewritten variant reassigns `PSET: _PSET_` at function entry; AnyDice's output for the rewritten variant matches our interpreter's output for the original, while AnyDice's output for the original differs from both. The `(orig != rewritten) AND (rewritten == ours)` signal is the canonical fingerprint.
+
+---
+
 ## Backlog of known opens
 
 These are characterized but not yet fixed / annotated:
 
 - **Built-in expansion enumeration order** (`_call_builtin`, interpreter.py:1144) -- has the same big-endian pattern as `_invoke`; not yet fixed. Whether to converge on one execution path for user-defined + built-in calls is a separate design question.
 - **`!` on a pool** -- known to collapse on both sides (faithful), but the deeper question of whether AnyDice would *intend* per-die `!` on a pool isn't resolved. Tracked only as "collapses on both sides today."
-- **The 128-program corpus residual** (`mismatch:values` after rc4 + per-die-neg) -- mostly param-leakage / overflow per the existing classification; final annotation pass via the auditor is still ahead.
-- **Auditor tooling** -- the re-runnable verifier that regenerates Tier-2 sisters, re-checks the equivalence + `AnyDice(S) == ours(S)` differential, and emits / re-validates `divergence:anydice-bug` annotations against the corpus DB. Not yet built.
+- **Auditor tooling** -- not being built. The original plan was a re-runnable verifier that auto-generates rename-counterfactual rewrites for every program in the corpus and runs the diagnostic matrix from Section 4 against the AnyDice oracle + our interpreter. The technique works fine when applied by hand, and the corpus is now fully annotated (full-corpus verify 2026-05-26: 0 unexplained `mismatch:values` across 159,821 programs), so the automation's payoff is limited. Resurface if a new corpus expansion or interpreter change motivates a re-sweep.

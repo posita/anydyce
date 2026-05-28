@@ -13,7 +13,7 @@ import urllib.parse
 import warnings
 from abc import abstractmethod
 from collections import Counter
-from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
+from collections.abc import Callable, Generator, Iterable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields
 from fractions import Fraction
@@ -735,7 +735,7 @@ class BurstHPlotter(HPlotter):
             logical_rows * actual_rows_per_fig + total_gaps * actual_rows_per_gap
         )
 
-        def _zero_fill_normalize() -> Iterable[tuple[str, H, H | None]]:
+        def _zero_fill_normalize() -> Iterator[tuple[str, H, H | None]]:
             unique_outcomes: set[Any] = set()
             for _, first_h, second_h in hs:
                 unique_outcomes.update(first_h)
@@ -1245,7 +1245,7 @@ def limit_for_display(h: H[_T], cutoff: Fraction) -> H:
     if cutoff_count == 0:
         return h
 
-    def _cull() -> Iterable[tuple[_T, int]]:
+    def _cull() -> Iterator[tuple[_T, int]]:
         so_far = 0
 
         for outcome, count in sorted(h.items(), key=itemgetter(1)):
