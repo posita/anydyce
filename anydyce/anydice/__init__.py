@@ -14,12 +14,13 @@
 # ======================================================================================
 
 r"""
-AnyDice-compatible interpreter backed by dyce primitives.
+[AnyDice](https://anydice.com/)-compatible interpreter backed by [`dyce`](https://github.com/posita/dyce/) primitives.
 """
 
 from pathlib import Path
 from typing import cast
 
+from dyce.lifecycle import experimental
 from lark import Lark
 
 from .ast_ import Program
@@ -29,14 +30,22 @@ from .unparser import unparse
 
 __all__ = ("DEFAULT_PRECISION", "parse", "run", "unparse")
 
-# The default precision to be passed to H.format() for any user-facing presentation
-# TODO(posita): # noqa: TD003 - Propagate this?
-DEFAULT_PRECISION = 2
+try:
+    import warnings
+
+    from dyce.h import (  # type: ignore[attr-defined]
+        DEFAULT_PRECISION,  # pyrefly: ignore[missing-module-attribute] # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[unresolved-import]
+    )
+
+    warnings.warn("dyce is sane now, remove this guard", stacklevel=0)
+except ImportError:
+    DEFAULT_PRECISION = 2
 
 _GRAMMAR: str = (Path(__file__).parent / "grammar.lark").read_text()
 _PARSER = Lark(_GRAMMAR, parser="lalr", transformer=AnyDiceTransformer())
 
 
+@experimental
 def format_anydice_results(
     results: AnyDiceResultsT, *, precision: int = DEFAULT_PRECISION, short: bool = False
 ) -> str:
@@ -87,6 +96,7 @@ def format_anydice_results(
     return "\n\n".join(blocks) if blocks else "(no output)"
 
 
+@experimental
 def parse(source: str) -> Program:
     r"""
     Parses AnyDice source text into an AST [`Program`][anydyce.anydice.ast_.Program].
@@ -102,6 +112,7 @@ def parse(source: str) -> Program:
         )
 
 
+@experimental
 def run(source: str) -> AnyDiceResultsT:
     r"""
     Shorthand for `#!python AnyDiceInterpreter().run(parse(source))`, returning one `#!python (name, distribution)` pair per `output` statement.
