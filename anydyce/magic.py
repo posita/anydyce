@@ -33,7 +33,7 @@ from IPython.core.magic_arguments import argument, magic_arguments, parse_argstr
 from IPython.display import HTML, Markdown, display
 
 from . import jupyter_visualize
-from .anydice import DEFAULT_PRECISION, format_anydice_results, run
+from .anydice import DEFAULT_PRECISION, format_results, run
 from .anydice.fetch import fetch_anydice_program, is_pyodide
 from .viz import BurstHPlotter, HorizontalBarHPlotter, LineHPlotter
 
@@ -128,7 +128,7 @@ def anyd(line: str, cell: str) -> None:
             )
         else:
             print(
-                format_anydice_results(
+                format_results(
                     results,
                     precision=args.precision,
                     short=args.output_format == _FORMAT_TEXT_SHORT,

@@ -9,7 +9,9 @@
 // AnyDice grammar for Lark LALR(1) + contextual lexer
 //
 // Operator precedence (tightest binding first):
-//   unary (#/!/−/+/d)  >  binary d  >  @  >  ^  >  */÷  >  +/-  >  comparisons  >  &  >  |
+//   unary (#/!/−/+/d)  >  binary d  >  @  >  ^  >  */÷  >  +/-  >  comparisons  >  &/|
+// `&` and `|` share a single precedence level (left-associative); see the bool_expr
+// rule below.
 //
 // All prefix unary operators bind at the same right-recursive level (tighter than
 // binary d):

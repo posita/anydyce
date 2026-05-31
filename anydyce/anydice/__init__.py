@@ -28,7 +28,16 @@ from .interpreter import AnyDiceInterpreter, AnyDiceResultsT
 from .transformer import AnyDiceTransformer
 from .unparser import unparse
 
-__all__ = ("DEFAULT_PRECISION", "parse", "run", "unparse")
+__all__ = (
+    "DEFAULT_PRECISION",
+    "AnyDiceInterpreter",
+    "AnyDiceResultsT",
+    "AnyDiceTransformer",
+    "Program",
+    "parse",
+    "run",
+    "unparse",
+)
 
 try:
     import warnings
@@ -46,15 +55,15 @@ _PARSER = Lark(_GRAMMAR, parser="lalr", transformer=AnyDiceTransformer())
 
 
 @experimental
-def format_anydice_results(
+def format_results(
     results: AnyDiceResultsT, *, precision: int = DEFAULT_PRECISION, short: bool = False
 ) -> str:
     r"""
     Formats output results from [`run`][anydyce.anydice.run].
 
-    >>> from anydyce.anydice import format_anydice_results, run
+    >>> from anydyce.anydice import format_results, run
     >>> print(
-    ...     format_anydice_results(
+    ...     format_results(
     ...         run('output 2d3 named "2d3" output d{} named "the empty die"')
     ...     )
     ... )
@@ -72,7 +81,7 @@ def format_anydice_results(
     (empty distribution)
 
     >>> print(
-    ...     format_anydice_results(
+    ...     format_results(
     ...         run('output [highest 3 of 4d6] named "4d6 drop lowest"'),
     ...         precision=4,
     ...         short=True,
@@ -99,9 +108,9 @@ def format_anydice_results(
 @experimental
 def parse(source: str) -> Program:
     r"""
-    Parses AnyDice source text into an AST [`Program`][anydyce.anydice.ast_.Program].
+    Parses AnyDice source text into an AST [`Program`][anydyce.anydice.Program].
 
-    Useful for (e.g.) passing to [`AnyDiceInterpreter.run`][anydice.anydice.interpreter.AnyDiceInterpreter.run].
+    Useful for (e.g.) passing to [`AnyDiceInterpreter.run`][anydice.anydice.AnyDiceInterpreter.run].
     """
     program = _PARSER.parse(source)
     if isinstance(program, Program):  # expected return value of our transformer
@@ -115,8 +124,8 @@ def parse(source: str) -> Program:
 @experimental
 def run(source: str) -> AnyDiceResultsT:
     r"""
-    Shorthand for `#!python AnyDiceInterpreter().run(parse(source))`, returning one `#!python (name, distribution)` pair per `output` statement.
+    Shorthand for `AnyDiceInterpreter().run(parse(source))`, returning one `(name, distribution)` pair per `output` statement.
 
-    See [`parse`][anydyce.anydice.parse] and [`AnyDiceInterpreter.run`][anydice.anydice.interpreter.AnyDiceInterpreter.run] for additional detail.
+    See [`parse`][anydyce.anydice.parse] and [`AnyDiceInterpreter.run`][anydice.anydice.AnyDiceInterpreter.run] for additional detail.
     """
     return AnyDiceInterpreter().run(parse(source))

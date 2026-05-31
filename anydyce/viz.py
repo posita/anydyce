@@ -424,50 +424,50 @@ class PlotWidgets(_PlotWidgetsDataclass):
        0.75`).
 
     - *initial_burst_cmap_inner* is the initially selected color map for inner burst
-       graphs (defaults to `#!python "viridis"`).
+       graphs (defaults to `"viridis"`).
 
     - *initial_burst_cmap_link* is the starting value for linking the color maps for
-       inner and outer burst graphs (defaults to `#!python True`).
+       inner and outer burst graphs (defaults to `True`).
 
     - *initial_burst_cmap_outer* is the initially selected color map for outer burst
-       graphs (defaults to `#!python "viridis"`).
+       graphs (defaults to `"viridis"`).
 
     - *initial_burst_cmap_use_midpoints* is the starting value for whether to map
-       midpoints to color maps for burst graphs (defaults to `#!python True`).
+       midpoints to color maps for burst graphs (defaults to `True`).
 
     - *initial_burst_color_bg* is the initially selected background color for burst
-       graphs (defaults to `#!python "white"`).
+       graphs (defaults to `"white"`).
 
     - *initial_burst_color_bg_trnsp* is the initially selected background transparency
-       color burst graphs (defaults to `#!python False`).
+       color burst graphs (defaults to `False`).
 
     - *initial_burst_color_text* is the initially selected text color for burst graphs
-       (defaults to `#!python "black"`).
+       (defaults to `"black"`).
 
     - *initial_burst_columns* is the initially selected number of columns for displaying
-       burst graphs (defaults to `#!python 3`).
+       burst graphs (defaults to `3`).
 
     - *initial_burst_swap* is whether the inner and outer burst graphs should be swapped
-       at first (defaults to `#!python False`).
+       at first (defaults to `False`).
 
     - *initial_burst_zero_fill_normalize* is whether all burst graphs should share a
        scale at first (i.e., so similar values share similar colors across burst graphs)
-       (defaults to `#!python False`).
+       (defaults to `False`).
 
     - *initial_enable_cutoff* is whether small values should be omitted from graphs at
-       first (defaults to `#!python True`).
+       first (defaults to `True`).
 
     - *initial_graph_type* is the type of graph first shown (defaults to
-       `#!python "normal"`.
+       `"normal"`.
 
     - *initial_markers* are the starting set of markers for line plots (defaults to
-       `#!python "oX^v><dP"`).
+       `"oX^v><dP"`).
 
     - *initial_plot_style* is the starting color style for non-burst graphs (defaults to
-       `#!python "bmh"`).
+       `"bmh"`).
 
     - *initial_resolution* is the starting value for the graph resolution (defaults to
-      `#!python 12`).
+      `12`).
     """
 
     def __init__(
@@ -646,7 +646,7 @@ class HPlotter:
         matplotlib.figure.Figure`](https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure)
         in which the visualization should be constructed. *hs* is a sequence of
         three-tuples, a name, a primary histogram, and an optional secondary histogram
-        (`#!python None` if omitted). Plotters should implement this function to
+        (`None` if omitted). Plotters should implement this function to
         display at least the primary histogram and visually associate it with the name.
         """
         raise NotImplementedError
@@ -654,7 +654,7 @@ class HPlotter:
     def transparent(self, *, requested: bool) -> bool:  # noqa: ARG002
         r"""
         Returns whether this plotter produces plots which support transparency if
-        *requested*. The default implementation always returns `#!python False`.
+        *requested*. The default implementation always returns `False`.
         """
         return False
 
@@ -963,13 +963,13 @@ class HPlotterChooser:
     are optional.
 
     *histogram_specs* is the histogram data set which defaults to an empty tuple. If
-    provided, each item therein can be a `#!python dyce.H` object, a 2-tuple, or a
-    3-tuple. 2-tuples are in the format `#!python (str, H)`, where `#!python str` is
-    a name or description that will be used to identify the accompanying `#!python H`
+    provided, each item therein can be a `dyce.H` object, a 2-tuple, or a
+    3-tuple. 2-tuples are in the format `(str, H)`, where `str` is
+    a name or description that will be used to identify the accompanying `H`
     object where it appears in the visualization. 3-tuples are in the format `#!python
-    (str, H, H)`. The second `#!python H` object is used for the interior ring in
-    “burst” break-out graphs, but otherwise ignored. If an item is `#!python None`, it
-    is roughly synonymous with `#!python ("", H({}), None)`, with the exception that
+    (str, H, H)`. The second `H` object is used for the interior ring in
+    “burst” break-out graphs, but otherwise ignored. If an item is `None`, it
+    is roughly synonymous with `("", H({}), None)`, with the exception that
     it does not advance the automatic naming counter. This can be useful as “blank”
     filler to achieve a desired layout (e.g., where one wants to compare across burst
     graphs that don't neatly fit into a particular row size).
@@ -978,11 +978,11 @@ class HPlotterChooser:
     [`update_hs`][anydyce.viz.HPlotterChooser.update_hs].
 
     Plotter controls (including the selection tabs) are contained within an accordion
-    interface. If *controls_expanded* is `#!python True`, the accordion is initially
-    expanded for the user. If it is `#!python False`, it is initially collapsed.
+    interface. If *controls_expanded* is `True`, the accordion is initially
+    expanded for the user. If it is `False`, it is initially collapsed.
 
     *plot_widgets* allows object creators to customize the available control widgets,
-    including their initial values. It defaults to `#!python None` which results in a
+    including their initial values. It defaults to `None` which results in a
     fresh [`PlotWidgets`][anydyce.viz.PlotWidgets] object being created during
     construction.
 
@@ -990,7 +990,7 @@ class HPlotterChooser:
     is to provide factories for all plotters currently available in `anydyce`.
 
     *selected_name* is the name of the plotter to be displayed initially. It must match
-    the `#!python NAME` property of an available plotter provided by the
+    the `NAME` property of an available plotter provided by the
     *plotters_or_factories* parameter.
     """
 
@@ -1209,7 +1209,7 @@ def limit_for_display(h: H[_T], cutoff: Fraction) -> H:
         future versions.
 
     Discards outcomes in *h*, starting with the smallest counts as long as the total
-    discarded in proportion to `#!python h.total` does not exceed *cutoff*. This can
+    discarded in proportion to `h.total` does not exceed *cutoff*. This can
     be useful in speeding up plots where there are large number of negligible
     probabilities.
 
