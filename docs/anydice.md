@@ -25,9 +25,9 @@
 `anydyce` provides a pure Python cleanroom implementation of Jasper Flick’s [AnyDice Dice Probability Calculator](https://anydice.com/) via its [`anydyce.anydice`][anydyce.anydice] subpackage.
 
     >>> from anydyce.anydice import format_results, run
-    >>> program = r'''
+    >>> program = r"""
     ...     output 3d6
-    ... '''
+    ... """
     >>> results = run(program)
     >>> print(format_results(results))
     ==== output 1 ====
