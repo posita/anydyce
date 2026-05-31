@@ -13,6 +13,7 @@ theme:
   features:
     - content.code.annotate
     - content.tabs.link
+    - navigation.footer
     - navigation.expand
     - navigation.sections
   palette:
@@ -110,7 +111,10 @@ watch:
 
 nav:
   - Introduction: index.md
+  - AnyDice Interpreter: anydice.md
   - Release notes: notes.md
   - Contributing: contrib.md
   - License: license.md
-  - API: anydyce.md
+  - API:
+    - Core: anydyce.md
+    - AnyDice: anydyce.anydice.md
