@@ -33,6 +33,13 @@ __all__ = ()
 _FetchImpl = Callable[[str], tuple[str, str, str, str]]
 
 
+@pytest.fixture(autouse=True)
+def _suppress_experimental() -> None:
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    warnings.filterwarnings("ignore", category=ExperimentalWarning)
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+
 class _RecordingShell:
     r"""Minimal shell stub that records `set_next_input` calls."""
 

@@ -804,7 +804,7 @@ class AnyDiceInterpreter:
 
     # ---- Sequence evaluation -------------------------------------------------------------
 
-    def _eval_seq(self, elems: list[SeqElem]) -> SeqT:  # noqa: C901
+    def _eval_seq(self, elems: list[SeqElem]) -> SeqT:
         values: list[int] = []
         for elem in elems:
             if isinstance(elem, ValueElem):
@@ -827,8 +827,9 @@ class AnyDiceInterpreter:
                 stop = self._eval_int(elem.stop, "range bounds")
                 repeat = self._eval_int(elem.repeat, "range repeat count")
                 if start <= stop:
-                    for v in range(start, stop + 1):
-                        values.extend([v] * repeat)
+                    # `{a..b:N}` concatenates the whole [a..b] range N times, *not* each
+                    # element repeated N times
+                    values.extend(list(range(start, stop + 1)) * repeat)
             else:
                 raise NotImplementedError(
                     f"unhandled sequence element: {type(elem).__name__}"

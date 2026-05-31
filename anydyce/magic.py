@@ -33,7 +33,11 @@ from IPython.core.magic_arguments import argument, magic_arguments, parse_argstr
 from IPython.display import HTML, Markdown, display
 
 from . import jupyter_visualize
-from .anydice import DEFAULT_PRECISION, format_results, run
+from .anydice import (
+    DEFAULT_PRECISION,  # pyright: ignore[reportAttributeAccessIssue]
+    format_results,
+    run,
+)
 from .anydice.fetch import fetch_anydice_program, is_pyodide
 from .viz import BurstHPlotter, HorizontalBarHPlotter, LineHPlotter
 

@@ -17,6 +17,7 @@ import pytest
 from dyce import H, P
 from dyce.d import d1, d2
 from dyce.h import aggregate_weighted
+from dyce.lifecycle import ExperimentalWarning
 from lark.exceptions import UnexpectedInput
 
 from anydyce.anydice import run
@@ -36,6 +37,11 @@ except ImportError:
     dzero = H({0: 1})
 
 __all__ = ()
+
+
+@pytest.fixture(autouse=True)
+def _suppress_experimental() -> None:
+    warnings.filterwarnings("ignore", category=ExperimentalWarning)
 
 
 # ---- Literals and output -----------------------------------------------------------------
@@ -240,13 +246,16 @@ class TestSequences:
     def test_range(self) -> None:
         assert run("output {1..3}") == [("output 1", H({1: 1, 2: 1, 3: 1}))]
 
-    def test_range_repeat(self) -> None:
-        # each value in 1..3 appears twice; weights are not GCD-reduced
-        assert run("output {1..3:2}") == [("output 1", H({1: 2, 2: 2, 3: 2}))]
-
     def test_value_repeat(self) -> None:
         # {1:3} is three 1s
         assert run("output {1:3}") == [("output 1", H({1: 3}))]
+
+    def test_range_repeat(self) -> None:
+        # `{1..3:2}` expands to `{1, 2, 3, 1, 2, 3}`, not GCD-reduced
+        assert run("output {1..3:2}") == [("output 1", H({1: 2, 2: 2, 3: 2}))]
+        assert run("output 2 @ {1..3:2}") == [("output 1", H({2: 1}))]
+        assert run("output 3 @ {1..3:2}") == [("output 1", H({3: 1}))]
+        assert run("output 4 @ {1..3:2}") == [("output 1", H({1: 1}))]
 
     def test_variable_type_reassignment(self) -> None:
         assert run("X: 5\nX: {1..3}\noutput X") == [("output 1", H({1: 1, 2: 1, 3: 1}))]
@@ -303,6 +312,24 @@ class TestSequencesAdvanced:
     def test_die_repeat_block_position_at_block_end(self) -> None:
         # Program 42975: position 4 is the last element of d4:2's first block -> 4.
         assert run("output 4 @ {d4:2, d8}") == [("output 1", H({4: 1}))]
+
+    def test_sequence_notation_mix_preserves_expected_order(self) -> None:
+        src = """
+S: {-3..-1:2, {4..6, {d{7, 8}}:3}}
+loop N over {1..#S} {
+  output N@S named "S at position [N]"
+}
+"""
+        expected = [-3, -2, -1, -3, -2, -1, 4, 5, 6, 7, 8, 7, 8, 7, 8]
+        results = run(src)
+        assert len(results) == len(expected)
+        for i, (label, h) in enumerate(results):
+            assert label == f"S at position {i + 1}"
+            assert h == H({expected[i]: 1}), (
+                f"position {i + 1}: expected {expected[i]}, got {dict(h.items())}"
+            )
+
+    # TODO(posita): # noqa: TD003 - These tests probably belong in a different class
 
     def test_chained_d_is_left_associative(self) -> None:
         # AnyDice's `<count> d <faces>` operator chains left-associatively:

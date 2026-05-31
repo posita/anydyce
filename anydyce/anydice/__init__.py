@@ -61,34 +61,46 @@ def format_results(
     r"""
     Formats output results from [`run`][anydyce.anydice.run].
 
-    >>> from anydyce.anydice import format_results, run
-    >>> print(
-    ...     format_results(
-    ...         run('output 2d3 named "2d3" output d{} named "the empty die"')
-    ...     )
-    ... )
-    ==== 2d3 ====
-    avg |    4.00
-    std |    1.15
-    var |    1.33
-      2 |  11.11% |#####
-      3 |  22.22% |###########
-      4 |  33.33% |################
-      5 |  22.22% |###########
-      6 |  11.11% |#####
-    <BLANKLINE>
-    ==== the empty die ====
-    (empty distribution)
+    <!-- BEGIN MONKEY PATCH --
+    >>> import warnings
+    >>> from dyce.lifecycle import ExperimentalWarning
+    >>> warnings.filterwarnings("ignore", category=ExperimentalWarning)
 
-    >>> print(
-    ...     format_results(
-    ...         run('output [highest 3 of 4d6] named "4d6 drop lowest"'),
-    ...         precision=4,
-    ...         short=True,
-    ...     )
-    ... )
-    ==== 4d6 drop lowest ====
-    {avg: 12.24, 3:  0.0772%, 4:  0.3086%, 5:  0.7716%, ..., 16:  7.2531%, 17:  4.1667%, 18:  1.6204%}
+      -- END MONKEY PATCH -->
+
+        >>> from anydyce.anydice import format_results, run
+        >>> print(
+        ...     format_results(
+        ...         run('output 2d3 named "2d3" output d{} named "the empty die"')
+        ...     )
+        ... )
+        ==== 2d3 ====
+        avg |    4.00
+        std |    1.15
+        var |    1.33
+          2 |  11.11% |#####
+          3 |  22.22% |###########
+          4 |  33.33% |################
+          5 |  22.22% |###########
+          6 |  11.11% |#####
+        <BLANKLINE>
+        ==== the empty die ====
+        (empty distribution)
+
+        >>> print(
+        ...     format_results(
+        ...         run('output [highest 3 of 4d6] named "4d6 drop lowest"'),
+        ...         precision=4,
+        ...         short=True,
+        ...     )
+        ... )
+        ==== 4d6 drop lowest ====
+        {avg: 12.24, 3:  0.0772%, 4:  0.3086%, 5:  0.7716%, ..., 16:  7.2531%, 17:  4.1667%, 18:  1.6204%}
+
+    <!-- BEGIN MONKEY PATCH --
+    >>> warnings.resetwarnings()
+
+       -- END MONKEY PATCH -->
     """
     blocks: list[str] = []
 
