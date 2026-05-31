@@ -94,7 +94,7 @@ class AnyDiceError(Exception):
     r"""
     Base class for any AnyDice application errors.
 
-    Takes *msg* and *excs* and passes them to the `#!python Exception` construction.
+    Takes *msg* and *excs* and passes them to the `Exception` construction.
     Optionally takes *program_id_hex* and *program_url*, which are available as attributes.
     """
 
@@ -179,7 +179,7 @@ def extract_program_from_json(
 
 def extract_program_id_hex_and_url(program_loc_or_id: str | int) -> tuple[str, str]:
     r"""
-    Returns `#!python (program_id_hex, program_url)`, if discoverable from *program_loc_or_id*.
+    Returns `(program_id_hex, program_url)`, if discoverable from *program_loc_or_id*.
     Raises a [`BadOrMissingProgramIdError`][anydyce.anydice.fetch.BadOrMissingProgramIdError] otherwise.
     """
     if isinstance(program_loc_or_id, int):
@@ -208,9 +208,9 @@ def extract_program_id_hex_and_url(program_loc_or_id: str | int) -> tuple[str, s
 def fetch_anydice_program(program_loc_or_id: str | int) -> tuple[str, str, str, str]:
     r"""
     Fetches and caches any program associated with *program_loc_or_id*.
-    Returns `#!python (program_id_hex, initial_url, final_url, program)`, if found.
+    Returns `(program_id_hex, initial_url, final_url, program)`, if found.
 
-    *program_loc_or_id* can be a location (e.g., `/path/to/.../program_id_hex(.html)`, `file:///path/to/.../program_id_hex(.html)`, `http://.../program_id_hex`), or a hexadecimal program ID string or an `#!python int`.
+    *program_loc_or_id* can be a location (e.g., `/path/to/.../program_id_hex(.html)`, `file:///path/to/.../program_id_hex(.html)`, `http://.../program_id_hex`), or a hexadecimal program ID string or an `int`.
     If *program_loc_or_id* is a program ID, a URL will be constructed and the program (if any) will be retrieved from AnyDice's website.
     If fetching was successful, subsequent calls on the same *program_loc_or_id* should avoid additional network round trips so long as they remain in-cache.
     Programs from retrieved from local filesystems are not cached.

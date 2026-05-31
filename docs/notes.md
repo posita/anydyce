@@ -25,21 +25,21 @@
 - Drops support for 3.9 and 3.10 and extends support to 3.14
 <!-- TODO(posita): Fill this out -->
 - Removes the following (analogies now live in [`dyce==0.7.0`](https://github.com/posita/dyce/releases/tag/v0.7.0).
-  - `#!python anydyce.viz.alphasize`
-  - `#!python anydyce.viz.cumulative_probability_formatter`
-  - `#!python anydyce.viz.graph_colors`
-  - `#!python anydyce.viz.outcome_name_formatter`
-  - `#!python anydyce.viz.outcome_name_probability_formatter`
-  - `#!python anydyce.viz.plot_bar`
-  - `#!python anydyce.viz.plot_burst_subplot`
-  - `#!python anydyce.viz.plot_burst`
-  - `#!python anydyce.viz.plot_line`
-  - `#!python anydyce.viz.plot_scatter`
-  - `#!python anydyce.viz.probability_formatter`
+  - `anydyce.viz.alphasize`
+  - `anydyce.viz.cumulative_probability_formatter`
+  - `anydyce.viz.graph_colors`
+  - `anydyce.viz.outcome_name_formatter`
+  - `anydyce.viz.outcome_name_probability_formatter`
+  - `anydyce.viz.plot_bar`
+  - `anydyce.viz.plot_burst_subplot`
+  - `anydyce.viz.plot_burst`
+  - `anydyce.viz.plot_line`
+  - `anydyce.viz.plot_scatter`
+  - `anydyce.viz.probability_formatter`
 
-  <!-- - `#!python anydyce.viz.limit_for_display` -->
-  <!-- - `#!python anydyce.viz.values_xy_for_graph_type` -->
-  <!-- - `#!python anydyce.viz.` -->
+  <!-- - `anydyce.viz.limit_for_display` -->
+  <!-- - `anydyce.viz.values_xy_for_graph_type` -->
+  <!-- - `anydyce.viz.` -->
 
 ## [0.4.6](https://github.com/posita/anydyce/releases/tag/v0.4.6)
 
@@ -54,19 +54,19 @@
 
 ## [0.4.4](https://github.com/posita/anydyce/releases/tag/v0.4.4)
 
-- Added `#!python SettingsDict["burst_columns"]` and related widget.
-- Added `#!python None` as an acceptable item value for `#!python histogram_specs` parameter to [`HPlotterChooser` initializer][anydyce.viz.HPlotterChooser], [`HPlotterChooser.update_hs`][anydyce.viz.HPlotterChooser.update_hs], and [`jupyter_visualize`][anydyce.viz.jupyter_visualize].
+- Added `SettingsDict["burst_columns"]` and related widget.
+- Added `None` as an acceptable item value for `histogram_specs` parameter to [`HPlotterChooser` initializer][anydyce.viz.HPlotterChooser], [`HPlotterChooser.update_hs`][anydyce.viz.HPlotterChooser.update_hs], and [`jupyter_visualize`][anydyce.viz.jupyter_visualize].
 
 ## [0.4.3](https://github.com/posita/anydyce/releases/tag/v0.4.3)
 
-- Restored [rich display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display) hook methods accidentally removed from `#!python anydyce.viz.Image` in [v0.4.2](#042).
+- Restored [rich display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display) hook methods accidentally removed from `anydyce.viz.Image` in [v0.4.2](#042).
 
 ## [0.4.2](https://github.com/posita/anydyce/releases/tag/v0.4.2)
 
 !!! bug
 
     ***Do not use!***
-    This release inadvertently removed [rich display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display) hook methods from `#!python anydyce.viz.Image`.
+    This release inadvertently removed [rich display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display) hook methods from `anydyce.viz.Image`.
     That broke the ability to display interactive plots.
     (Fixed in [v0.4.3](#043).)
 
@@ -121,7 +121,7 @@
 
 ## [0.1.1](https://github.com/posita/anydyce/releases/tag/v0.1.1)
 
-- Removes use of `#!python numerary.types.…SCU` types.
+- Removes use of `numerary.types.…SCU` types.
 - Links to an external (Gist) repository for example notebook.
 - Adds comparison table to AnyDice to `README.md`.
 
