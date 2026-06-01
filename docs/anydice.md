@@ -286,12 +286,12 @@ The expression `0d1000` resolves to `d0`.
 
     ```c
     function: roll N:n of the die D:d { result: NdD }
-    output [roll 4 of the die d3]                        \ output 4d3 \
-    output [roll d2 of the die d3]                       \ output d2d3 \
-    output [roll 2d4 of the die d3]                      \ output 2d4d3 \
-    output [roll [roll d2 of the die d4] of the die d3]  \ output d2d4d3 \
-    output [roll 2 of the die 4d3]                       \ output 2d(4d3) \
-    output [roll d2 of the die 4d3]                      \ output d2d(4d3) \
+    output [roll 4 of the die d3]                       named "same as output 4d3"
+    output [roll d2 of the die d3]                      named "same as output d2d3"
+    output [roll 2d4 of the die d3]                     named "same as output 2d4d3"
+    output [roll [roll d2 of the die d4] of the die d3] named "same as output d2d4d3"
+    output [roll 2 of the die 4d3]                      named "same as output 2d(4d3)"
+    output [roll d2 of the die 4d3]                     named "same as output d2d(4d3)"
     ```
 
     In lay terms, where the left-hand operand is a die, this means, “roll a first die, then whatever number comes up, roll that many of a second die, then collapse the whole thing down into a single die.”
