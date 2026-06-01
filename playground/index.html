@@ -10,7 +10,7 @@
   <header>
     <h1>AnyDice Playground</h1>
     <div class="header-meta">
-      <span class="status" id="status">Editor only (Pyodide not yet wired)</span>
+      <span class="status" id="status">Starting up...</span>
     </div>
   </header>
 
@@ -19,7 +19,7 @@
       <div class="pane-header">
         <h2>Source</h2>
         <div class="pane-actions">
-          <button id="run-btn" disabled title="Pyodide not yet wired">Run</button>
+          <button id="run-btn" disabled title="Starting up...">Run</button>
         </div>
       </div>
       <div id="editor"></div>
@@ -30,10 +30,17 @@
         <h2>Output</h2>
       </div>
       <div id="output" class="output-placeholder">
-        Output will appear here once the runtime is wired up.
+        Starting up...
       </div>
     </section>
   </main>
+
+  <!--
+    Pyodide loader. NOT an ES module: it registers `window.loadPyodide`
+    via a global script. Pin to a specific version so the indexURL we pass to
+    `loadPyodide()` later matches the script's package set.
+  -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js"></script>
 
   <!--
     Import map: pin all CodeMirror 6 + Lezer packages to specific versions on
