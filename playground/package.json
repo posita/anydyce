@@ -1,0 +1,10 @@
+{
+  "name": "anydyce-playground",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Static-page playground for the anydyce AnyDice interpreter. Pure-browser; no build step; no runtime deps (CodeMirror loads from esm.sh via importmap; Pyodide once wired). This package.json exists only to provide `npm test` and document the project shape.",
+  "scripts": {
+    "test": "node --test test/test-tokenize.mjs"
+  }
+}
