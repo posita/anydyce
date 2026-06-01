@@ -64,6 +64,21 @@ Some foundation necessary to our analysis of AnyDice behaviors is present below,
 
 [^1]: See the “[Documentation](https://anydice.com/docs/)”, “[Function Library](https://anydice.com/docs/function-library/)”, and “[Articles](https://anydice.com/articles/)” sections of the AnyDice website.
 
+### A note on performance
+
+In some cases, our interpreter outperforms anydice.com.
+This can be hard to gauge, since our interpreter runs in-browser, and is subject to the limitations of the user’s execution environment.
+However, on modest hardware, the following program completes in under 2s in our interpreter, but times out before producing results on anydice.com.
+
+```c
+output 300@(1000d100)
+```
+
+In many other cases, however, our interpreter under-performs anydice.com, and sometimes by an order of magnitude or more.
+For example, AnyDice program [`282d6`](https://raw.githubusercontent.com/posita/anydice-data/refs/heads/main/anydice.com/program/82/d6/282d6.txt) completes in under 5s on anydice.com, but fails to complete within 2m with our interpreter (in this case, because our interpreter in its current form attempts to be unhelpfully precise about the math, which becomes ***very*** laborious as integer denominators become huge).
+
+Our interpreter and the underlying [`dyce` library](https://github.com/posita/dyce/) on which it is built are very much works in progress, and performance improvements are a high priority item on the road map.
+
 ## Background
 
 AnyDice appears to have been around in some form or another since 2009, receiving a handful of updates between then and 2026.
@@ -117,7 +132,7 @@ In some cases, our interpreter supersedes AnyDice’s where AnyDice’s behavior
       We considered two programs to be equivalent if they resulted in the same AST from our parser and transformer.
       De-duping based on AST resulted in a corpus just shy of 160,000 distinct programs.
 
-      As an aside, some of those programs mirrored our own probes (e.g., [`39567`](https://raw.githubusercontent.com/posita/anydice-data/refs/heads/main/anydice.com/program/95/67/39567.txt) saved by the author of [PythonDice](https://github.com/Ar-Kareem/PythonDice/)), suggesting areas where users tripped over unintuitive “hot spots” of the interpreter, surfacing and resolve questions likely very similar to our own.
+      As an aside, some of those programs mirrored our own probes (e.g., AnyDice program [`39567`](https://raw.githubusercontent.com/posita/anydice-data/refs/heads/main/anydice.com/program/95/67/39567.txt) saved by the author of [PythonDice](https://github.com/Ar-Kareem/PythonDice/)), suggesting areas where users tripped over unintuitive “hot spots” of the interpreter, surfacing and resolve questions likely very similar to our own.
 
 ## AnyDice as our reference implementation
 
