@@ -1,143 +1,110 @@
-// Pyodide runtime wrapper.  Loads Pyodide, installs the anydyce wheel from
-// ./wheels/, and exposes a single async run(source) -> [{label, text, short}]
-// entry point for the playground UI.
+// Pyodide runner -- main-thread shim. Spawns the Pyodide Web Worker and
+// translates its postMessage protocol into Promise-based calls for the
+// playground UI. The Pyodide instance itself lives inside the worker (see
+// pyodide-worker.js); main thread never touches it directly.
 //
-// Pyodide-the-runtime (NOT the kernel-wrapped variant we use in JupyterLite):
-// no Jupyter messaging protocol, no message handlers; just `pyodide.runPython`
-// at the boundary.  Simpler than spinning up an actual kernel for a one-shot
-// editor + run + render workflow.
+// Public API:
+//   await initPyodide(onStatus)  -> resolves when runtime is ready
+//   await runAnydice(source)     -> returns array of {label, text, short, items}
 
-const PYODIDE_VERSION = "v0.27.5";
-const PYODIDE_INDEX_URL = `https://cdn.jsdelivr.net/pyodide/${PYODIDE_VERSION}/full/`;
+let worker = null;
+let initPromise = null;
+let onStatusCallback = null;
+let nextRunId = 0;
+const pendingRuns = new Map(); // runId -> { resolve, reject }
+// Sticky flag set when the worker emits an `error` event (worker-script-level
+// crash, e.g. Pyodide internal failure, OOM, importScripts failure). Once
+// set, subsequent runAnydice / initPyodide calls reject immediately with a
+// "please reload" message rather than silently hanging on postMessage to a
+// dead worker. We could try to rebuild the worker in place, but for a
+// persistent crash that'd just re-crash on the next run; surfacing the
+// failure and letting the user reload is more honest.
+let workerCrashed = false;
+let workerCrashError = null;
 
-// Python-side bootstrap. Defines a single _do_run(source) helper that runs
-// the AnyDice program through anydyce and shapes the output into a
-// JS-friendly structure.  Suppresses experimental warnings in the same
-// shape as our IPython %%anyd magic.
-const PYTHON_BOOTSTRAP = `
-import warnings
-from dyce.lifecycle import ExperimentalWarning
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-warnings.filterwarnings("ignore", category=ExperimentalWarning)
+function ensureWorker() {
+  if (worker) return;
+  // Classic worker (NOT type: "module") because pyodide.js uses
+  // importScripts(), which isn't available in module workers.
+  worker = new Worker(new URL("./pyodide-worker.js", import.meta.url));
 
-from anydyce.anydice import run as _anydyce_run
-
-def _do_run(source):
-    results = _anydyce_run(source)
-    return [
-        {
-            "label": label,
-            "text": h.format() if h else "(empty distribution)",
-            "short": h.format_short() if h else "{}",
-            "items": list(h.items()) if h else [],
+  worker.addEventListener("message", (ev) => {
+    const msg = ev.data;
+    switch (msg.type) {
+      case "status":
+        if (onStatusCallback) onStatusCallback(msg.message);
+        break;
+      case "result": {
+        const handler = pendingRuns.get(msg.runId);
+        if (handler) {
+          pendingRuns.delete(msg.runId);
+          handler.resolve(msg.results);
         }
-        for label, h in results
-    ]
-`;
-
-// Find every .whl file the user has dropped into ./wheels/. Pyodide's micropip
-// will install them in the order returned; anydyce should be last since it
-// imports the deps installed earlier.  We rely on naming convention rather
-// than inspecting METADATA: anydyce wheel filename starts with "anydyce-",
-// everything else is treated as a dependency.
-async function discoverLocalWheels() {
-  const candidates = [];
-
-  // Try fetching wheels/index.json if present (preferred for clean enumeration).
-  // The user is expected to maintain wheels/index.json as a list of filenames.
-  try {
-    const resp = await fetch("./wheels/index.json");
-    if (resp.ok) {
-      const list = await resp.json();
-      if (Array.isArray(list)) {
-        for (const name of list) {
-          if (typeof name === "string" && name.endsWith(".whl")) {
-            candidates.push(name);
+        break;
+      }
+      case "error":
+        if (msg.stage === "run") {
+          const handler = pendingRuns.get(msg.runId);
+          if (handler) {
+            pendingRuns.delete(msg.runId);
+            handler.reject(new Error(msg.error));
           }
         }
-      }
+        // init errors are handled by the listener installed in initPyodide().
+        break;
+      // "ready" is also handled by the init listener; no-op here.
     }
-  } catch {
-    // Fall through to filename-guess fallback.
-  }
+  });
 
-  return candidates;
+  worker.addEventListener("error", (ev) => {
+    // Worker-script-level error (e.g. Pyodide internal crash, OOM, syntax
+    // error in the worker file, importScripts failure). Mark the worker as
+    // crashed so subsequent runAnydice / initPyodide calls reject
+    // immediately rather than silently no-op'ing against the dead worker.
+    workerCrashed = true;
+    workerCrashError = new Error(
+      `Pyodide worker crashed: ${ev.message || "unknown error"} ` +
+        `(${ev.filename || "?"}:${ev.lineno || "?"}). ` +
+        "Please reload the page.",
+    );
+    if (initPromise && initPromise.then) {
+      initPromise = Promise.reject(workerCrashError);
+    }
+    for (const { reject } of pendingRuns.values()) reject(workerCrashError);
+    pendingRuns.clear();
+  });
 }
-
-// Single shared promise so concurrent callers all wait on the same load.
-let _initPromise = null;
 
 export function initPyodide(onStatus = () => {}) {
-  if (_initPromise) return _initPromise;
-  _initPromise = (async () => {
-    onStatus("Loading Python runtime...");
+  if (workerCrashed) return Promise.reject(workerCrashError);
+  if (initPromise) return initPromise;
+  ensureWorker();
+  onStatusCallback = onStatus;
 
-    if (typeof loadPyodide !== "function") {
-      throw new Error(
-        "loadPyodide is not defined. The Pyodide CDN script in index.html " +
-        "may have failed to load -- check the network tab.",
-      );
-    }
+  initPromise = new Promise((resolve, reject) => {
+    const onMessage = (ev) => {
+      const msg = ev.data;
+      if (msg.type === "ready") {
+        worker.removeEventListener("message", onMessage);
+        resolve();
+      } else if (msg.type === "error" && msg.stage === "init") {
+        worker.removeEventListener("message", onMessage);
+        reject(new Error(msg.error));
+      }
+    };
+    worker.addEventListener("message", onMessage);
+    worker.postMessage({ type: "init" });
+  });
 
-    const pyodide = await loadPyodide({ indexURL: PYODIDE_INDEX_URL });
-
-    onStatus("Loading micropip...");
-    await pyodide.loadPackage("micropip");
-    const micropip = pyodide.pyimport("micropip");
-
-    onStatus("Discovering local wheels...");
-    const wheelNames = await discoverLocalWheels();
-    if (wheelNames.length === 0) {
-      throw new Error(
-        "No wheels found in ./wheels/. Build the anydyce wheel " +
-        "(`uv build --wheel` in the repo root) and list its filename in " +
-        "playground/wheels/index.json (e.g. " +
-        '`["anydyce-0.5.0rc1-py3-none-any.whl"]`).',
-      );
-    }
-
-    onStatus(`Installing ${wheelNames.length} local wheel(s)...`);
-    // Sort so non-anydyce wheels install before anydyce. Pyodide / micropip
-    // resolves transitive deps from PyPI automatically; local wheels override.
-    wheelNames.sort((a, b) => {
-      const aAnyd = a.startsWith("anydyce-") ? 1 : 0;
-      const bAnyd = b.startsWith("anydyce-") ? 1 : 0;
-      return aAnyd - bAnyd;
-    });
-    for (const name of wheelNames) {
-      onStatus(`Installing ${name}...`);
-      // micropip requires an absolute URL with a real http/https scheme; a
-      // bare relative path "./wheels/X.whl" is rejected with "Cannot download
-      // from a non-remote location". Resolve against the document base URL so
-      // we end up with e.g. http://localhost:8000/wheels/X.whl.
-      const wheelUrl = new URL(`./wheels/${name}`, window.location.href).toString();
-      await micropip.install(wheelUrl);
-    }
-
-    onStatus("Initializing AnyDice interpreter...");
-    await pyodide.runPythonAsync(PYTHON_BOOTSTRAP);
-
-    onStatus("Ready.");
-    return pyodide;
-  })();
-  return _initPromise;
+  return initPromise;
 }
 
-// Run an AnyDice source string through anydyce, returning an array of
-// {label, text, short, items} objects -- one per `output` statement.
-export async function runAnydice(pyodide, source) {
-  const doRun = pyodide.globals.get("_do_run");
-  let resultProxy;
-  try {
-    resultProxy = doRun(source);
-    // Convert the Python list-of-dicts to a JS array-of-objects. The
-    // dict_converter ensures each Python dict becomes a plain JS object
-    // rather than a Pyodide PyProxy we'd have to clean up.
-    return resultProxy.toJs({ dict_converter: Object.fromEntries });
-  } finally {
-    if (resultProxy && typeof resultProxy.destroy === "function") {
-      resultProxy.destroy();
-    }
-    doRun.destroy();
-  }
+export function runAnydice(source) {
+  if (workerCrashed) return Promise.reject(workerCrashError);
+  ensureWorker();
+  const runId = ++nextRunId;
+  return new Promise((resolve, reject) => {
+    pendingRuns.set(runId, { resolve, reject });
+    worker.postMessage({ type: "run", source, runId });
+  });
 }
