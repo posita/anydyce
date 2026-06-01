@@ -1,0 +1,159 @@
+/* AnyDice Playground -- minimal stylesheet.
+ * Intentionally framework-free; expand as needed. */
+
+:root {
+  --bg:           #fafafa;
+  --bg-elev:      #ffffff;
+  --border:       #d0d4d8;
+  --text:         #1a1d22;
+  --muted:        #6b7178;
+  --accent:       #2a7a4f;
+  --accent-fg:    #ffffff;
+  --code-bg:      #f4f6f8;
+  --selection-bg: #b3d4fc;
+
+  /* Syntax-highlighting palette (light) -- VSCode "Light+" inspired. */
+  --syn-keyword:  #af00db;
+  --syn-op-kw:    #af00db;
+  --syn-var:      #001080;
+  --syn-prop:     #795e26;
+  --syn-num:      #098658;
+  --syn-str:      #a31515;
+  --syn-comment:  #008000;
+  --syn-op:       #383a42;
+  --syn-bracket:  #383a42;
+  --syn-punct:    #6b7178;
+
+  --font-mono:   ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  --font-ui:     -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:           #14171c;
+    --bg-elev:      #1c2128;
+    --border:       #2d333b;
+    --text:         #e6edf3;
+    --muted:        #8b949e;
+    --accent:       #4cc38a;
+    --accent-fg:    #14171c;
+    --code-bg:      #1c2128;
+    --selection-bg: #264f78;
+
+    /* Syntax-highlighting palette (dark) -- VSCode "Dark+" inspired. */
+    --syn-keyword:  #c586c0;
+    --syn-op-kw:    #c586c0;
+    --syn-var:      #9cdcfe;
+    --syn-prop:     #dcdcaa;
+    --syn-num:      #b5cea8;
+    --syn-str:      #ce9178;
+    --syn-comment:  #6a9955;
+    --syn-op:       #d4d4d4;
+    --syn-bracket:  #d4d4d4;
+    --syn-punct:    #8b949e;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.4;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.5em 1em;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elev);
+}
+header h1 {
+  font-size: 1.1em;
+  margin: 0;
+  font-weight: 600;
+}
+.header-meta {
+  font-size: 0.85em;
+  color: var(--muted);
+}
+
+main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4em 1em;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elev);
+}
+.pane-header h2 {
+  font-size: 0.9em;
+  font-weight: 500;
+  margin: 0;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.pane-actions button {
+  font-family: inherit;
+  font-size: 0.9em;
+  padding: 0.3em 0.9em;
+  border: 1px solid var(--border);
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-radius: 3px;
+  cursor: pointer;
+}
+.pane-actions button:disabled {
+  background: var(--border);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+#editor {
+  flex: 1;
+  overflow: auto;
+}
+#editor .cm-editor {
+  height: 100%;
+}
+#editor .cm-content {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+#output {
+  flex: 1;
+  padding: 1em;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+.output-placeholder {
+  color: var(--muted);
+  font-style: italic;
+  font-family: var(--font-ui) !important;
+}
