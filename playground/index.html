@@ -36,11 +36,10 @@
   </main>
 
   <!--
-    Pyodide loader. NOT an ES module: it registers `window.loadPyodide`
-    via a global script. Pin to a specific version so the indexURL we pass to
-    `loadPyodide()` later matches the script's package set.
+    Pyodide loads inside the Web Worker (pyodide-worker.js), not on the
+    main thread, so there's no <script src="pyodide.js"> tag here. The
+    worker uses importScripts() to pull in Pyodide from the CDN.
   -->
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js"></script>
 
   <!--
     Import map: pin all CodeMirror 6 + Lezer packages to specific versions on

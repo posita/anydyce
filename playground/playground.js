@@ -175,38 +175,47 @@ function renderError(err) {
 // touching it at registration time. Assigned by the `new EditorView(...)`
 // call later in this file.
 let editor;
-let pyodideRef = null;
+let runtimeReady = false;
 // Set when the user hits Run / Shift-Enter before the runtime is ready.
 // The initPyodide .then() callback checks this flag and auto-fires
 // handleRun() the moment Pyodide finishes loading, so the user's click
 // isn't lost to timing.
 let runPending = false;
+// Lock: at most one in-flight run per output pane. The Run button is
+// disabled during a run, but the Shift-Enter keymap binding bypasses the
+// disabled state, so a separate flag is needed to make the guard work for
+// both code paths.
+let runInFlight = false;
 
 async function handleRun() {
-  if (!pyodideRef) {
+  if (!runtimeReady) {
     runPending = true;
     setStatus("Run queued; will execute when runtime is ready.");
     return;
   }
+  if (runInFlight) {
+    // Already running; silently ignore the extra trigger rather than
+    // queueing it. If the user wants concurrent runs, they can open a
+    // second tab.
+    return;
+  }
+  runInFlight = true;
   const source = editor.state.doc.toString();
   // Visual run-in-progress state: clear the output pane, disable the Run
   // button, and reflect running in the corner status. The Shift-Enter
   // keymap binding calls into handleRun() the same way the button click
   // does, so both paths get this behavior. Restoration happens in the
   // `finally` block below, regardless of whether the run succeeded or threw.
+  // (With Pyodide now in a worker, the main thread stays responsive during
+  // the run; the rAF yield from the prior single-threaded version is no
+  // longer needed.)
   setStatus("Running...");
   runBtn.disabled = true;
   outputEl.classList.remove("output-placeholder");
   outputEl.textContent = "";
-  // Yield to the event loop so the browser actually paints the "running"
-  // state before we hand control to Pyodide. runPython is synchronous and
-  // blocks the main thread until Python returns, so without this yield the
-  // "Running..." status and cleared output flash by invisibly between two
-  // adjacent paints. requestAnimationFrame resolves after the next paint.
-  await new Promise((resolve) => requestAnimationFrame(resolve));
   const t0 = performance.now();
   try {
-    const results = await runAnydice(pyodideRef, source);
+    const results = await runAnydice(source);
     const dt = Math.round(performance.now() - t0);
     renderResults(results);
     setStatus(`Ran in ${dt} ms.`);
@@ -214,6 +223,7 @@ async function handleRun() {
     renderError(err);
     setStatus("Run failed.");
   } finally {
+    runInFlight = false;
     runBtn.disabled = false;
   }
 }
@@ -259,8 +269,8 @@ window.editor = editor;
 // is interactive, so by the time the user clicks Run the runtime is
 // (probably) ready. The Run button stays disabled until init succeeds.
 initPyodide(setStatus)
-  .then((pyodide) => {
-    pyodideRef = pyodide;
+  .then(() => {
+    runtimeReady = true;
     runBtn.disabled = false;
     runBtn.title = "Run the program (Shift+Enter)";
     if (runPending) {
