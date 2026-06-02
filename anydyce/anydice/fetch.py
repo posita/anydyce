@@ -35,6 +35,7 @@ __all__ = (
     "NoSuchProgramError",
     "extract_program_from_json",
     "fetch_anydice_program",
+    "gh_mirror_url_for_program_id_hex",
     "program_id_as_hex",
     "program_id_as_int",
 )
@@ -222,7 +223,7 @@ def fetch_anydice_program(program_loc_or_id: str | int) -> tuple[str, str, str, 
     """
     program_id_hex, initial_url = extract_program_id_hex_and_url(program_loc_or_id)
     try:
-        mirror_url = _gh_mirror_url_for_program_id_hex(program_id_hex)
+        mirror_url = gh_mirror_url_for_program_id_hex(program_id_hex)
         final_url, program = fetch_content_for_url_cached(mirror_url)
     except (EmptyProgramError, HTTPError, NetworkError, NoSuchProgramError):
         if is_pyodide():
@@ -258,6 +259,22 @@ def fetch_content_for_url_cached(url: str) -> tuple[str, str]:
             content_url = check_http_response(resp, urlparse(url).hostname or "")
             raw = resp.read()
         return content_url, raw.decode("utf-8", errors="replace")
+
+
+def gh_mirror_url_for_program_id_hex(program_id_hex: str) -> str:
+    r"""
+    Returns the mirror URL for a given *program_hex_id*.
+    This is pure formatting.
+    It does not guarantee that anything exists at the URL.
+
+        >>> from anydyce.anydice.fetch import gh_mirror_url_for_program_id_hex
+        >>> gh_mirror_url_for_program_id_hex("123")
+        'https://raw.githubusercontent.com/posita/anydice-data/refs/heads/main/anydice.com/program/01/23/123.txt'
+        >>> gh_mirror_url_for_program_id_hex("fedcba98")
+        'https://raw.githubusercontent.com/posita/anydice-data/refs/heads/main/anydice.com/program/ba/98/fedcba98.txt'
+    """
+    sharded_subpath = sharded_subpath_from_program_id(program_id_hex)
+    return urljoin(_GH_MIRROR_URL_BASE, sharded_subpath.as_posix())
 
 
 def is_pyodide() -> bool:
@@ -342,11 +359,6 @@ def sharded_subpath_from_program_id(program_id: str | int) -> Path:
 
 def _anydice_url_for_program_id_hex(program_id_hex: str) -> str:
     return urljoin(_ANYDYCE_FETCH_URL_BASE, program_id_hex)
-
-
-def _gh_mirror_url_for_program_id_hex(program_id_hex: str) -> str:
-    sharded_subpath = sharded_subpath_from_program_id(program_id_hex)
-    return urljoin(_GH_MIRROR_URL_BASE, sharded_subpath.as_posix())
 
 
 def _extract_program_from_var_loaded_program(
