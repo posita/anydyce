@@ -13,28 +13,16 @@
 # (This does not apply to code comments.) Thank you!
 # ======================================================================================
 
+import warnings
+
 import pytest
 from dyce import H, P
-from dyce.d import d1, d2
+from dyce.d import d1, d2, dempty, dzero
 from dyce.h import aggregate_weighted
 from dyce.lifecycle import ExperimentalWarning
 from lark.exceptions import UnexpectedInput
 
 from anydyce.anydice import run
-
-try:
-    import warnings
-
-    from dyce.d import (  # type: ignore[attr-defined]
-        dempty,  # pyrefly: ignore[missing-module-attribute] # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[unresolved-import]
-        dzero,  # pyrefly: ignore[missing-module-attribute] # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[unresolved-import]
-    )
-
-    warnings.warn("dyce is sane now, remove this guard", stacklevel=0)
-except ImportError:
-    from dyce.d import d0 as dempty
-
-    dzero = H({0: 1})
 
 __all__ = ()
 

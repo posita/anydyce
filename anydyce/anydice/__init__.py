@@ -20,6 +20,7 @@ r"""
 from pathlib import Path
 from typing import cast
 
+from dyce.h import DEFAULT_PRECISION
 from dyce.lifecycle import experimental
 from lark import Lark
 
@@ -38,17 +39,6 @@ __all__ = (
     "run",
     "unparse",
 )
-
-try:
-    import warnings
-
-    from dyce.h import (  # type: ignore[attr-defined]
-        DEFAULT_PRECISION,  # pyrefly: ignore[missing-module-attribute] # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[unresolved-import]
-    )
-
-    warnings.warn("dyce is sane now, remove this guard", stacklevel=0)
-except ImportError:
-    DEFAULT_PRECISION = 2
 
 _GRAMMAR: str = (Path(__file__).parent / "grammar.lark").read_text()
 _PARSER = Lark(_GRAMMAR, parser="lalr", transformer=AnyDiceTransformer())
