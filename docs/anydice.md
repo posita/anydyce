@@ -75,7 +75,7 @@ output 300@(1000d100)
 ```
 
 In many other cases, however, our interpreter under-performs anydice.com, and sometimes by an order of magnitude or more.
-For example, AnyDice program [`282d6`](https://raw.githubusercontent.com/posita/anydice-data/refs/heads/main/anydice.com/program/82/d6/282d6.txt) completes in under 5s on anydice.com, but fails to complete within 2m with our interpreter (in this case, because our interpreter in its current form attempts to be unhelpfully precise about the math, which becomes ***very*** laborious as integer denominators become huge).
+For example, AnyDice programs [`183b0`](https://raw.githubusercontent.com/posita/anydice-data/refs/heads/main/anydice.com/program/83/b0/183b0.txt) and [`282d6`](https://raw.githubusercontent.com/posita/anydice-data/refs/heads/main/anydice.com/program/82/d6/282d6.txt) complete in under 5s on anydice.com, but fail to complete within 2m with our interpreter (in this case, because our interpreter in its current form attempts to be unhelpfully precise about the math, which becomes ***very*** laborious as integer denominators become huge).
 
 Our interpreter and the underlying [`dyce` library](https://github.com/posita/dyce/) on which it is built are very much works in progress, and performance improvements are a high priority item on the road map.
 
@@ -612,6 +612,24 @@ function: process S:s {
   result: dS
 }
 output [process 5d{2, 3, 4}]
+```
+
+## TODO
+
+Crazy math:
+
+```c
+D: d{1:99, 0}
+loop N over {1..60} {
+  D: D * D
+  output D named "d{1:99, 0} after loop [N]"
+}
+output d{} named "================================================================"
+D: d{1:9, 0}
+loop N over {1..60} {
+  D: D * D
+  output D named "d{1:9, 0} after loop [N]"
+}
 ```
 
 <!-- BEGIN MONKEY PATCH --
