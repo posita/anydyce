@@ -10,6 +10,8 @@ Each entry should carry a concrete reference (a test name, a probe id, a commit,
 
 Maintenance: update this as new behaviors are characterized. The corpus DB's `annotations` table (in `anydice-data`) holds the per-program rationale for every `divergence:anydice-bug` row; cross-reference this catalog against `SELECT program_id, note FROM annotations` when adding new bug classes. The rename-counterfactual technique (Section 4) is the standard tool for confirming a new divergence belongs to the param-leakage class.
 
+Future-investigation lead: the `match:approximate` corpus cohort (~26k programs as of 2026-05-26) is the most likely place to find more instances of Classes A and B. Programs in that cohort produce results that *almost* match AnyDice but with small residual differences — exactly the signature you'd expect if AnyDice's float-precision drift (Class A) or silent mass loss (Class B) is small enough to fall within our equivalence tolerance but visible enough to fail exact match.
+
 ---
 
 ## 1. Preserved AnyDice idiosyncrasies
@@ -105,6 +107,9 @@ Maintenance: update this as new behaviors are characterized. The corpus DB's `an
 
 - **Built-in functions are looked up after user-defined functions** -- but currently dispatch through a distinct execution path from user-defined functions. Consolidation is queued.
 
+- **Function body with no reachable `result:` contributes zero mass.**
+  When an iteration of a function call completes without hitting a `result:` statement (e.g. an `if`-chain that doesn't cover all input cases), AnyDice contributes no probability mass for that iteration. The displayed distribution then sums to less than 100% across the affected output rows. This is the "missing branch" idiosyncrasy: it's a programmer error to write a function that can fall through without a result, but AnyDice's handling (silent zero contribution rather than an error) is a deliberate design choice we replicate faithfully. Corpus examples: `0x11182` (Rune Crit: covers `HI=20` / `LO=20` / `HI=LO` cases but not `HI!=20 & LO!=20 & HI!=LO`; sum=14.5%), `0x140df` (Successes pool: covers `SUCCESSES > 3` / `=2` / `=1` / `=0` but misses `=3`; sum=90.12% on the 4d6 row only). Both programs have NO bug annotations because we match AnyDice exactly — the sub-100% sums are present in both interpreters' outputs.
+
 ---
 
 ## 2. Excluded AnyDice bugs (we deliberately do not replicate)
@@ -178,11 +183,31 @@ Listed here for completeness even though the fix is upstream. dyce's `P.h(*selec
 
 Evidence: dyce's `tests/test_p.py::test_analyze_selection_single_pos`; corpus `0x11caf` cleared by the upstream fix.
 
+### Doubling-amplification of precision error under iterated squaring recurrences
+
+Any recurrence whose total-mass invariant has form `S' = S²` (e.g. joint enumeration that squares the sum-of-counts) amplifies AnyDice's initial float-precision error by 2× per iteration. Mathematically: if AnyDice's stored sum is `1 - δ` for some tiny precision error δ (positive or negative), then `S' = (1 - δ)² ≈ 1 - 2δ` — the deviation from 1 doubles per iteration.
+
+After enough iterations, the visible sum-of-probabilities drift can become arbitrarily large. The direction of drift depends on the sign of the original rounding error, so different starting states show drift in opposite directions on the same recurrence shape.
+
+The empirical precision estimate from probe `-0x48` (a pure `D: D*D` recurrence) is consistent with **float64-level rounding** — about 5e-15 initial deviation, doubling per iteration. The earlier "~17-bit" estimate from `-0x47` was an overestimate caused by additional rounding sources in the `minus helper` recurrence. AnyDice probably uses float64 (or equivalent) for probabilities; the visible bug is the structural amplification of float64's irreducible 1e-15 rounding, not an unusually-low-precision representation.
+
+This is **not specific to AnyDice's representation** — any finite-precision arithmetic exhibits the same amplification when the recurrence squares per step. The only way to avoid it is exact rational arithmetic, which is computationally infeasible at scale. Visible symptom: probability rows fail `sum ≈ 100%` past some iteration count.
+
+Affects (small cluster — only 2 corpus programs found):
+
+- `0x183b0`: outputs at loops 45/50/55 with sum drift 100.70% / 124.85% / 121,605.33%. The clip-with-`d{}` variant (output 4) survives because empty-die return short-circuits the broken branches.
+- `-0x47` (probe): asymmetric mass loss via `[minus helper D D]` recurrence; sum=124.85% at loop 50.
+- `-0x48` (probe): pure `D: D*D` recurrence with two starting states, demonstrating opposite-sign drift (p=0.99 drifts BELOW 100%, p=0.9 drifts ABOVE 100%).
+
+The corpus-wide scan flagged 4 programs total with sum != 100% — three were Class B (below) and one was this Class A. So Class A is genuinely rare; it requires both an iterated squaring recurrence AND enough loop iterations to amplify the rounding error to visible levels.
+
 ### Miscellaneous one-off anomalies
 
 Behaviors that don't generalize into a class but are documented for completeness:
 
-- **Depth-accounting structural dependence (`0x1065f`)**: AnyDice's recursion-cap accounting depends on call-site structure in a non-obvious way. The corpus program triggers a FRL↔IFL recursion that, under our principled depth count, hits an `if H({})` situation that AnyDice's documented "Boolean values can only be numbers" rule should reject — yet AnyDice emits a clean output. Lowering `max_depth` doesn't change AnyDice's output; inlining one of the calls (removing it from the stack) DOES make AnyDice error. The exact mechanism is unaccountable under any clean rule; treated as bug rather than feature.
+- **Depth-accounting structural dependence (`0x1065f`)**: AnyDice's recursion-cap accounting depends on call-site structure in a non-obvious way. The corpus program triggers a FRL↔IFL recursion that, under our principled depth count, hits an `if H({})` situation that AnyDice's documented "Boolean values can only be numbers" rule should reject — yet AnyDice emits a clean output. The visible signature is the same as the Section 1 "missing `result:` returns zero mass" idiosyncrasy (sum=98.21% on the "average total" row), but the *trigger* here is the recursion cap rather than programmer error. The mismatch with AnyDice's documented `if d{}` rule is what places this in Section 2 rather than Section 1.
+
+  Lowering `max_depth` further doesn't change AnyDice's output, but *inlining* one of the calls (removing it from the stack) DOES make AnyDice error per the documented rule — so AnyDice's depth-accounting has additional structural dependencies we don't fully understand. Treated as bug rather than feature.
 
 ---
 
