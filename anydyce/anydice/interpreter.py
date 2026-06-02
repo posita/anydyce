@@ -22,6 +22,7 @@ from collections import Counter
 from collections.abc import Callable, Iterator
 
 from dyce import H, P, RollT, TruncationWarning
+from dyce.d import dempty, dzero
 from dyce.h import aggregate_weighted
 
 from .ast_ import (
@@ -60,26 +61,13 @@ from .ast_ import (
 from .builtins_ import BUILTINS
 from .settings import Settings
 
-try:
-    import warnings
-
-    from dyce.d import (  # type: ignore[attr-defined]
-        dempty,  # pyrefly: ignore[missing-module-attribute] # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[unresolved-import]
-        dzero,  # pyrefly: ignore[missing-module-attribute] # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[unresolved-import]
-    )
-
-    warnings.warn("dyce is sane now, remove this guard", stacklevel=0)
-except ImportError:
-    from dyce.d import d0 as dempty
-
-    dzero = H({0: 1})
-
 __all__ = ("AnyDiceInterpreter",)
 
 NumT = int
 SeqT = RollT[NumT]
-DieT = P[NumT]
-AnyDiceResultT = tuple[str, H[NumT]]
+DieT = H[NumT]
+PoolT = P[NumT]
+AnyDiceResultT = tuple[str, DieT]
 AnyDiceResultsT = list[AnyDiceResultT]
 # AnyDice's surface "die" type maps to two cooperating internal types. The split exists
 # because positional information is meaningful for some operations and meaningless for
@@ -92,7 +80,11 @@ AnyDiceResultsT = list[AnyDiceResultT]
 # coexist in _Val, and are used wherever each fits. `P op X` (for X in P/H/int) already
 # collapses to H by design. We only convert P -> H by hand at sites that build outcome
 # maps directly (see _h_binop, _apply_cmp).
-_Val = NumT | H[NumT] | DieT | SeqT | str
+_Val = NumT | DieT | PoolT | SeqT | str
+_CountT = int
+_ParamIndexT = int
+_ExpansionT = list[tuple[_ParamIndexT, list[tuple[_Val, _CountT]]]]
+_BoundT = list[_Val]
 
 # ---- Operator tables ---------------------------------------------------------------------
 
@@ -109,30 +101,37 @@ _Val = NumT | H[NumT] | DieT | SeqT | str
 _POW_NEG_INF_SENTINEL = -9223372036854775808
 
 
-class _EmptyPoolOfOne(P[NumT]):
+class _EmptyPoolOfOne(PoolT):
     r"""
     Nope, that’s not a contradiction.
-    But nor is it some kind of deep existential thought exercise.
+    Nor is it some kind of deep existential thought exercise.
 
-    Yup, it’s a hack.
+    This is a hack ***solely*** to represent a pool of length one containing the empty die, which `dyce` itself takes a principled stance against.
+    `dyce` refuses to include the empty die in pools because its presence would either have to be ignored or any convolution would collapse the entire pool into the empty die.
 
-    This is ***solely*** to represent a pool of length one containing the empty die, which `dyce` itself takes a principled stance against.
-    (`dyce` refuses to include the empty die in pools because its presence would either have to be ignored or any convolution would collapse the entire pool into the empty die.)
     But AnyDice treats `#d{}` (the “number” of one empty die) and `#(d{}d{})` (the “number” of a pool of one empty die) as different.
     The former is zero.
     The latter is one.
     You do the math.
 
-    Oh wait.
-    You can’t.
-    Your guess is as good as mine as to why this makes sense.
-    Given the types of other bugs we’ve discovered, it probably doesn’t.
-    It’s probably yet another artifact of hacking the thing together without really understanding what’s going on.
+        >>> from anydyce.anydice.interpreter import _EmptyPoolOfOne
+        >>> epoo = _EmptyPoolOfOne()
+        >>> len(epoo)
+        1
+        >>> epoo[0]
+        H({})
+
+    Introducing: E-POO.
+    For those times when it’s ***not*** Numberwang.
+    Because that just stinks.
     """
 
     def __init__(self) -> None:
         super().__init__()
-        self._hs = (H({}),)
+        self._h_groups = {H({}): 1}
+        self._len = 1
+        assert self._hash is None
+        assert self._total is None
 
 
 def _anydice_pow_strict(a: int, b: int) -> int:
@@ -570,7 +569,7 @@ class AnyDiceInterpreter:
                 f"@ right operand has unexpected type {type(right).__name__}"
             )
 
-    def _at_pool(self, left: _Val, pool: DieT) -> H[int]:
+    def _at_pool(self, left: _Val, pool: PoolT) -> H[int]:
         if isinstance(left, int):
             size = len(pool)
             # Left is out of range
@@ -656,7 +655,7 @@ class AnyDiceInterpreter:
         else:
             raise TypeError(f"cannot use {type(faces).__name__} as die faces")
 
-    def _roll_n(self, n: int, die: H[int]) -> H[int] | DieT:
+    def _roll_n(self, n: int, die: H[int]) -> H[int] | PoolT:
         # Strip zero-count entries before constructing a pool. `_truncate`
         # preserves them as keys (so `#{H}` reads the right support), but pool
         # selection arithmetic in dyce.p assumes positive counts and divides
@@ -897,7 +896,7 @@ class AnyDiceInterpreter:
         args: list[_Val],
         *,
         err_label: Callable[[int], str],
-    ) -> tuple[list[_Val], list[tuple[int, list[tuple[_Val, int]]]]] | None:
+    ) -> tuple[_BoundT, _ExpansionT] | None:
         r"""Coerce args per their param types, building the (bound, expansion) pair.
 
         Returns `(bound, expansion)` where `bound` carries each arg in its final
@@ -923,8 +922,8 @@ class AnyDiceInterpreter:
         *err_label(i)* returns the human-readable label for param `i`, used in
         TypeError messages -- e.g. `"function param FOO"` or `"builtin param 0"`.
         """
-        bound: list[_Val] = [0] * len(param_types)
-        expansion: list[tuple[int, list[tuple[_Val, int]]]] = []
+        bound: _BoundT = [0] * len(param_types)
+        expansion: _ExpansionT = []
         for i, (ptype, arg) in enumerate(zip(param_types, args, strict=True)):
             if ptype is None:
                 # AnyDice's bare/untyped params pass the argument through without
@@ -1048,8 +1047,8 @@ class AnyDiceInterpreter:
         self,
         func: FunctionDef,
         params: list[Param],
-        bound: list[_Val],
-        expansion: list[tuple[int, list[tuple[_Val, int]]]],
+        bound: _BoundT,
+        expansion: _ExpansionT,
     ) -> _Val:
         # No-expansion fast path: invoke the body once with `bound` installed
         # in the env. Truncate the return when it's an H -- important for deep-
@@ -1128,8 +1127,8 @@ class AnyDiceInterpreter:
     def _invoke_builtin(
         self,
         impl: Callable[..., _Val],
-        bound: list[_Val],
-        expansion: list[tuple[int, list[tuple[_Val, int]]]],
+        bound: _BoundT,
+        expansion: _ExpansionT,
     ) -> _Val:
         # No-expansion fast path: just call the impl with the bound args.
         if not expansion:
@@ -1160,7 +1159,7 @@ class AnyDiceInterpreter:
 
     def _aggregate_iters(
         self,
-        expansion: list[tuple[int, list[tuple[_Val, int]]]],
+        expansion: _ExpansionT,
         *,
         reverse_combos: bool,
         per_iter: Callable[[tuple[tuple[_Val, int], ...]], _Val],
@@ -1223,7 +1222,7 @@ class AnyDiceInterpreter:
         return H({})
 
     def _invoke_with_bound(
-        self, func: FunctionDef, params: list[Param], bound: list[_Val]
+        self, func: FunctionDef, params: list[Param], bound: _BoundT
     ) -> _Val:
         saved_env = self._env
         self._env = dict(saved_env)
