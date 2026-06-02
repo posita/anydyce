@@ -143,7 +143,7 @@ tox = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dyce", extras = ["viz"], specifier = "~=0.7.0rc2" },
+    { name = "dyce", extras = ["viz"], specifier = "~=0.7.0rc5" },
     { name = "ipywidgets" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'", specifier = ">=4.5" },
 ]
@@ -904,15 +904,15 @@ wheels = [
 
 [[package]]
 name = "dyce"
-version = "0.7.0rc4"
+version = "0.7.0rc5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "optype" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2b/1a/9eb28a56c4d3aa6da19b76c179bb3dc980ab3e49e43f96e21b4f359aeeb9/dyce-0.7.0rc4.tar.gz", hash = "sha256:6795a46bcf3488f765976f70d0a01f5a638c7b34c0fce8bd1b6efa3a29a991c0", size = 958782, upload-time = "2026-05-19T22:01:59.048Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/25/05/b7c2ad2f687e62e6f741d82075c9268416a07dcbc760172844e79df9e282/dyce-0.7.0rc5.tar.gz", hash = "sha256:5a132b33259e9225fec20a23dead91dfde9ade3ebba4ebb0d942927bd20ea843", size = 964038, upload-time = "2026-06-02T01:51:27.805Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/39/9d/0c21fbed3516d1e6d3e4ed444520796f0d3c4d5160b1eacec52cfbae6aa0/dyce-0.7.0rc4-py3-none-any.whl", hash = "sha256:82c3cea768e20daa98c9027e15dfbfdb08cf0796ad90dfb6bd40c3c1ab850233", size = 60899, upload-time = "2026-05-19T22:01:57.636Z" },
+    { url = "https://files.pythonhosted.org/packages/ff/bc/db76f161e9be1dce588d1746dc1b3feb8beec8fdd1110b48d7f29cf1b24b/dyce-0.7.0rc5-py3-none-any.whl", hash = "sha256:d6871ddf411dab7a5328755c44ac3dee917b41a89f9d5a4e4148c688968a5c6c", size = 62573, upload-time = "2026-06-02T01:51:26.349Z" },
 ]
 
 [package.optional-dependencies]
@@ -2294,7 +2294,7 @@ name = "pexpect"
 version = "4.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "ptyprocess" },
+    { name = "ptyprocess", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f", size = 166450, upload-time = "2023-11-25T09:07:26.339Z" }
 wheels = [

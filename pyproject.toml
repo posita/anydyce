@@ -16,7 +16,7 @@ license-files = ["LICENSE"]
 authors = [{name = "Matt Bogosian", email = "matt@bogosian.net"}]
 requires-python = ">=3.11"
 dependencies = [
-    "dyce[viz]~=0.7.0rc2",
+    "dyce[viz]~=0.7.0rc5",
     "ipywidgets",
     "typing_extensions>=4.5; python_version < '3.13'",  # back-port of deprecated decorator
 ]
