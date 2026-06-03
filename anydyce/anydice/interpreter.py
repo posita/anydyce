@@ -17,11 +17,10 @@ r"""AnyDice tree-walking interpreter backed by dyce primitives."""
 
 import operator
 import sys
-import warnings
 from collections import Counter
 from collections.abc import Callable, Iterator
 
-from dyce import H, P, RollT, TruncationWarning
+from dyce import H, P, RollT, quantize_hs
 from dyce.d import dempty, dzero
 from dyce.h import aggregate_weighted
 
@@ -87,6 +86,8 @@ _ExpansionT = list[tuple[_ParamIndexT, list[tuple[_Val, _CountT]]]]
 _BoundT = list[_Val]
 
 # ---- Operator tables ---------------------------------------------------------------------
+
+_DEFAULT_QUANTIZATION_BIT_WIDTH = 256
 
 # `0^negative` is mathematically undefined. AnyDice's behavior splits by
 # context: in scalar^scalar form it raises an explicit error; in any
@@ -254,7 +255,12 @@ class AnyDiceInterpreter:
             self._builtins[shape] = (list(param_types), impl)
         self._depth = 0
 
-    def run(self, program: Program) -> AnyDiceResultsT:
+    def run(
+        self,
+        program: Program,
+        *,
+        quantize_bit_width: int = _DEFAULT_QUANTIZATION_BIT_WIDTH,
+    ) -> AnyDiceResultsT:
         r"""Execute a parsed program and return `(name, distribution)` pairs."""
         self._env = {}
         self._outputs = []
@@ -274,8 +280,9 @@ class AnyDiceInterpreter:
         if prev_limit < 5000:
             sys.setrecursionlimit(5000)
         try:
-            for stmt in program.stmts:
-                self._exec(stmt)
+            with quantize_hs(bit_width=quantize_bit_width, preserve_zero_counts=True):
+                for stmt in program.stmts:
+                    self._exec(stmt)
             return list(self._outputs)
         finally:
             if prev_limit < 5000:
@@ -656,10 +663,10 @@ class AnyDiceInterpreter:
             raise TypeError(f"cannot use {type(faces).__name__} as die faces")
 
     def _roll_n(self, n: int, die: H[int]) -> H[int] | PoolT:
-        # Strip zero-count entries before constructing a pool. `_truncate`
-        # preserves them as keys (so `#{H}` reads the right support), but pool
-        # selection arithmetic in dyce.p assumes positive counts and divides
-        # by gcd(0, 0) when fed zeros.
+        # Strip zero-count entries before constructing a pool. Most of the time, we
+        # preserve them as keys (so `#{H}` reads the right support), but pool selection
+        # arithmetic in dyce.p assumes positive counts and divides by gcd(0, 0) when fed
+        # zeros.
         die = H({o: c for o, c in die.items() if c > 0})
         if not die:
             # Empty die regardless of n
@@ -699,7 +706,7 @@ class AnyDiceInterpreter:
                 sub = self._roll_n(k, face_die)
                 yield (sub.h() if isinstance(sub, P) else sub), w_k
 
-        return self._truncate(aggregate_weighted(_gen()))  # ty: ignore[invalid-argument-type]
+        return aggregate_weighted(_gen())  # ty: ignore[invalid-return-type]
 
     # ---- Coercion ------------------------------------------------------------------------
 
@@ -714,48 +721,6 @@ class AnyDiceInterpreter:
             return value
         else:
             raise TypeError(f"cannot coerce {type(value).__name__} to die")
-
-    def _truncate(self, h: H[int]) -> H[int]:
-        r"""Zero the count of any outcome whose within-H probability falls
-        below `self._settings.precision`, then reduce the survivors to lowest
-        terms so subsequent operations don't compound the magnitude.
-        Outcomes are preserved as zero-count keys rather than dropped, so
-        operators that read H's keys (e.g. `#{H}` taking length of a seq
-        constructed from H's outcomes) see the same support AnyDice does
-        under its float-floor rounding. Emits a `TruncationWarning` when any
-        outcome is zeroed. No-op when precision is 0 or the H is empty."""
-        precision = self._settings.precision
-        if precision <= 0 or not h:
-            return h
-        # Compare via cross-multiplication to avoid Fraction allocations per outcome.
-        # Zero iff count / total < precision  <==>  count * precision.denominator
-        # < total * precision.numerator.
-        num = h.total * precision.numerator
-        den = precision.denominator
-        counts: dict[int, int] = {}
-        zeroed = 0
-        survived = False
-        for outcome, count in h.items():
-            if count * den < num:
-                counts[outcome] = 0
-                zeroed += 1
-            else:
-                counts[outcome] = count
-                survived = True
-        if zeroed:
-            warnings.warn(
-                f"truncated {zeroed} outcome(s) below precision {precision!r}",
-                TruncationWarning,
-                stacklevel=2,
-            )
-        if not survived:
-            return H({})
-        # Reduce to lowest terms (preserving zero-count keys) regardless of
-        # whether anything was zeroed -- the count magnitude is what matters
-        # for downstream big-int cost. For the deep-recursion case, this
-        # collapses single-surviving-outcome Hs from H({k: huge}) to
-        # H({k: 1}), bounding the magnitude across recursion levels.
-        return H(counts).lowest_terms(preserve_zero_counts=True)
 
     def _eval_name(self, name: Expr | None) -> str | None:
         if name is None:
@@ -1057,8 +1022,7 @@ class AnyDiceInterpreter:
         # expansion, so the body's bigint-growing operations would otherwise
         # propagate untruncated).
         if not expansion:
-            r = self._invoke_with_bound(func, params, bound)
-            return self._truncate(r) if isinstance(r, H) else r
+            return self._invoke_with_bound(func, params, bound)
 
         # Cartesian product over expanded iterations. Per-iteration return
         # values may have differing internal totals (a body branch returning
@@ -1207,7 +1171,7 @@ class AnyDiceInterpreter:
                     r = sum(r)
                 yield self._coerce_to_h(r), weight
 
-        return self._truncate(aggregate_weighted(_gen()))  # ty: ignore[invalid-argument-type]
+        return aggregate_weighted(_gen())  # ty: ignore[invalid-return-type]
 
     def _execute_body(self, func: FunctionDef) -> _Val:
         r"""Run `func`'s body in the current env, returning the `result:` value
