@@ -51,13 +51,6 @@ def format_results(
     r"""
     Formats output results from [`run`][anydyce.anydice.run].
 
-    <!-- BEGIN MONKEY PATCH --
-    >>> import warnings
-    >>> from dyce.lifecycle import ExperimentalWarning
-    >>> warnings.filterwarnings("ignore", category=ExperimentalWarning)
-
-      -- END MONKEY PATCH -->
-
         >>> from anydyce.anydice import format_results, run
         >>> print(
         ...     format_results(
@@ -86,11 +79,6 @@ def format_results(
         ... )
         ==== 4d6 drop lowest ====
         {avg: 12.24, 3:  0.0772%, 4:  0.3086%, 5:  0.7716%, ..., 16:  7.2531%, 17:  4.1667%, 18:  1.6204%}
-
-    <!-- BEGIN MONKEY PATCH --
-    >>> warnings.resetwarnings()
-
-       -- END MONKEY PATCH -->
     """
     blocks: list[str] = []
 

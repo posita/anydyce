@@ -19,7 +19,6 @@ from fractions import Fraction
 import matplotlib as mpl
 import pytest
 from dyce import H, P
-from dyce.lifecycle import ExperimentalWarning
 from ipywidgets import widgets  # type: ignore[import-untyped]
 
 from anydyce import HPlotterChooser
@@ -40,8 +39,6 @@ __all__ = ()
 
 @pytest.fixture(autouse=True)
 def _suppress_experimental() -> None:
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    warnings.filterwarnings("ignore", category=ExperimentalWarning)
     warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 

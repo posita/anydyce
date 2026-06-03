@@ -11,14 +11,6 @@
   It looks like crap in a text editor, but it has no effect on rendering, and it allows much more useful diffs.
   Thank you!
 -->
-<!-- BEGIN MONKEY PATCH --
->>> import warnings
->>> from dyce import TruncationWarning
->>> from dyce.lifecycle import ExperimentalWarning
->>> warnings.filterwarnings("ignore", category=ExperimentalWarning)
->>> warnings.filterwarnings("ignore", category=TruncationWarning)
-
-  -- END MONKEY PATCH -->
 
 # `anydyce`’s *Mostly*-Compatible AnyDice Interpreter
 
@@ -631,8 +623,3 @@ loop N over {1..60} {
   output D named "d{1:9, 0} after loop [N]"
 }
 ```
-
-<!-- BEGIN MONKEY PATCH --
->>> warnings.resetwarnings()
-
-   -- END MONKEY PATCH -->

@@ -1213,13 +1213,6 @@ def limit_for_display(h: H[_T], cutoff: Fraction) -> H:
     be useful in speeding up plots where there are large number of negligible
     probabilities.
 
-    <!-- BEGIN MONKEY PATCH --
-    >>> import warnings
-    >>> from dyce.lifecycle import ExperimentalWarning
-    >>> warnings.filterwarnings("ignore", category=ExperimentalWarning)
-
-      -- END MONKEY PATCH -->
-
         >>> from anydyce.viz import limit_for_display
         >>> from dyce import H
         >>> from fractions import Fraction
@@ -1230,12 +1223,6 @@ def limit_for_display(h: H[_T], cutoff: Fraction) -> H:
         H({3: 3, 4: 4, 5: 5, 6: 6})
         >>> limit_for_display(h, cutoff=Fraction(6, 21))
         H({4: 4, 5: 5, 6: 6})
-
-    <!-- BEGIN MONKEY PATCH --
-    >>> warnings.resetwarnings()
-
-       -- END MONKEY PATCH -->
-
     """
     if cutoff < 0 or cutoff > 1:
         raise ValueError(f"cutoff ({cutoff}) must be between zero and one, inclusive")
