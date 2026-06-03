@@ -13,23 +13,15 @@
 # (This does not apply to code comments.) Thank you!
 # ======================================================================================
 
-import warnings
-
 import pytest
 from dyce import H, P
 from dyce.d import d1, d2, dempty, dzero
 from dyce.h import aggregate_weighted
-from dyce.lifecycle import ExperimentalWarning
 from lark.exceptions import UnexpectedInput
 
 from anydyce.anydice import run
 
 __all__ = ()
-
-
-@pytest.fixture(autouse=True)
-def _suppress_experimental() -> None:
-    warnings.filterwarnings("ignore", category=ExperimentalWarning)
 
 
 # ---- Literals and output -----------------------------------------------------------------

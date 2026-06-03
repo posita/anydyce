@@ -13,10 +13,7 @@
 # (This does not apply to code comments.) Thank you!
 # ======================================================================================
 
-import warnings
-
 import pytest
-from dyce.lifecycle import ExperimentalWarning
 from lark import UnexpectedInput
 
 from anydyce.anydice import parse
@@ -52,11 +49,6 @@ from anydyce.anydice.ast_ import (
 )
 
 __all__ = ()
-
-
-@pytest.fixture(autouse=True)
-def _suppress_experimental() -> None:
-    warnings.filterwarnings("ignore", category=ExperimentalWarning)
 
 
 # ---- Operator precedence - unary operators -------------------------------------------
