@@ -141,6 +141,11 @@ main {
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
+.pane-actions {
+  display: flex;
+  gap: 0.4em;
+  align-items: center;
+}
 .pane-actions button {
   font-family: inherit;
   font-size: 0.9em;
@@ -150,6 +155,13 @@ main {
   color: var(--accent-fg);
   border-radius: 3px;
   cursor: pointer;
+}
+.pane-actions button.btn-secondary {
+  background: var(--bg);
+  color: var(--text);
+}
+.pane-actions button.btn-secondary:hover {
+  background: var(--code-bg);
 }
 .pane-actions button:disabled {
   background: var(--border);
