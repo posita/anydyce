@@ -1,8 +1,9 @@
 // AnyDice Playground -- editor wiring.
 //
-// First iteration: just sets up the CodeMirror 6 editor with the AnyDice
-// syntax mode and a sample program. Pyodide integration / Run button /
-// URL-fragment encoding will follow.
+// Wires the CodeMirror 6 editor, the Pyodide worker runtime (see
+// pyodide-runner.js), the Run / Share buttons, and URL-fragment program
+// hydration (`#p=<base64url>` to load + share programs without server
+// involvement).
 
 // CodeMirror 6 imports use bare specifiers; the importmap in index.html maps
 // them to esm.sh URLs. See the importmap comment for the version-pinning and
@@ -145,10 +146,22 @@ output [roll 2 of the die 4d3]                      named "same as output 2d(4d3
 output [roll d2 of the die 4d3]                     named "same as output d2d(4d3)"
 `;
 
+// ---- URL fragment helpers ---------------------------------------------------
+// The pure encoding logic lives in ./url-fragment.js so it can be unit-tested
+// under Node without DOM. This file only needs the location-reading wrapper.
+
+import { b64urlEncode, parseUrlHashForProgram } from "./url-fragment.js";
+
+// Pull a program from `#p=...` if present, else return null.
+function programFromUrl() {
+  return parseUrlHashForProgram(location.hash);
+}
+
 // ---- DOM refs and helpers ---------------------------------------------------
 
 const statusEl = document.getElementById("status");
 const runBtn   = document.getElementById("run-btn");
+const shareBtn = document.getElementById("share-btn");
 const outputEl = document.getElementById("output");
 
 function setStatus(msg) {
@@ -230,9 +243,14 @@ async function handleRun() {
 
 // ---- Editor -----------------------------------------------------------------
 
+// Initial document: prefer a URL-supplied program over the bundled sample.
+// programFromUrl() returns null on missing/malformed fragments so we fall
+// back to the sample cleanly.
+const initialDoc = programFromUrl() ?? SAMPLE_PROGRAM;
+
 editor = new EditorView({
   parent: document.getElementById("editor"),
-  doc: SAMPLE_PROGRAM,
+  doc: initialDoc,
   extensions: [
     basicSetup,
     // Shift-Enter runs the program. Registered through CM6's keymap (NOT a
@@ -291,3 +309,44 @@ initPyodide(setStatus)
   });
 
 runBtn.addEventListener("click", handleRun);
+
+// ---- Share URL --------------------------------------------------------------
+
+async function handleShare() {
+  const source = editor.state.doc.toString();
+  const encoded = b64urlEncode(source);
+  const shareUrl = `${location.origin}${location.pathname}#p=${encoded}`;
+  // Update the address bar (no reload). Doesn't trigger hashchange when the
+  // hash is unchanged, but the editor already contains the latest content
+  // anyway, so a no-op event would be benign.
+  history.replaceState(null, "", `#p=${encoded}`);
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+    setStatus("Share URL copied to clipboard.");
+  } catch (err) {
+    // Clipboard API can fail in non-secure contexts or when not focused.
+    // Fall back to surfacing the URL in the output pane so the user can
+    // copy it manually.
+    outputEl.classList.remove("output-placeholder");
+    outputEl.textContent =
+      `Share URL (copy manually -- clipboard access denied):\n\n${shareUrl}`;
+    setStatus("Share URL ready (clipboard unavailable).");
+  }
+}
+
+shareBtn.addEventListener("click", handleShare);
+
+// ---- Hash-change reload -----------------------------------------------------
+
+// Back/forward navigation between programs without page reload. When the user
+// navigates to a new URL hash, re-hydrate the editor with that program. Only
+// applies when `#p=` decodes successfully; an unrelated hash change (or a
+// malformed one) leaves the editor alone.
+window.addEventListener("hashchange", () => {
+  const next = programFromUrl();
+  if (next === null) return;
+  if (next === editor.state.doc.toString()) return; // no-op; avoid undo-stack churn
+  editor.dispatch({
+    changes: { from: 0, to: editor.state.doc.length, insert: next },
+  });
+});
