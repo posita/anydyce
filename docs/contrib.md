@@ -58,6 +58,7 @@ Linting and type checking are run via [pre-commit](https://pre-commit.com/).
 …
 % uv run pre-commit run --all-files --hook-stage pre-push
 …
+% ( cd playground && npm test )
 ```
 
 ## Submission guidelines
