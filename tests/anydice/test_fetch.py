@@ -116,22 +116,50 @@ class TestShardedSubpathFromProgramId:
     def test_positive_short(self) -> None:
         assert sharded_subpath_from_program_id("f").as_posix() == "00/0f/f.txt"
 
+    def test_positive_short_omits_leading_zeros(self) -> None:
+        assert sharded_subpath_from_program_id("0f").as_posix() == "00/0f/f.txt"
+
     def test_positive_exact(self) -> None:
         assert sharded_subpath_from_program_id("abcd").as_posix() == "ab/cd/abcd.txt"
+
+    def test_positive_exact_omits_leading_zeros(self) -> None:
+        assert sharded_subpath_from_program_id("0abcd").as_posix() == "ab/cd/abcd.txt"
+        assert sharded_subpath_from_program_id("000abcd").as_posix() == "ab/cd/abcd.txt"
 
     def test_positive_long(self) -> None:
         assert (
             sharded_subpath_from_program_id("1a2b3c").as_posix() == "2b/3c/1a2b3c.txt"
         )
 
+    def test_positive_long_omits_leading_zeros(self) -> None:
+        assert (
+            sharded_subpath_from_program_id("0001a2b3c").as_posix()
+            == "2b/3c/1a2b3c.txt"
+        )
+
     def test_negative_short_omits_minus_in_dirs(self) -> None:
         assert sharded_subpath_from_program_id("-f").as_posix() == "00/0f/-f.txt"
+
+    def test_negative_short_omits_leading_zeros(self) -> None:
+        assert sharded_subpath_from_program_id("-0f").as_posix() == "00/0f/-f.txt"
 
     def test_negative_exact_omits_minus_in_dirs(self) -> None:
         assert sharded_subpath_from_program_id("-abc").as_posix() == "0a/bc/-abc.txt"
         assert sharded_subpath_from_program_id("-abcd").as_posix() == "ab/cd/-abcd.txt"
 
+    def test_negative_exact_omits_leading_zeros(self) -> None:
+        assert sharded_subpath_from_program_id("-000abc").as_posix() == "0a/bc/-abc.txt"
+        assert (
+            sharded_subpath_from_program_id("-000abcd").as_posix() == "ab/cd/-abcd.txt"
+        )
+
     def test_negative_long_omits_minus_in_dirs(self) -> None:
         assert (
             sharded_subpath_from_program_id("-1a2b3c").as_posix() == "2b/3c/-1a2b3c.txt"
+        )
+
+    def test_negative_long_omits_leading_zeros(self) -> None:
+        assert (
+            sharded_subpath_from_program_id("-0001a2b3c").as_posix()
+            == "2b/3c/-1a2b3c.txt"
         )
