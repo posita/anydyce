@@ -1,13 +1,18 @@
 // AnyDice Playground -- editor wiring.
 //
 // Wires the CodeMirror 6 editor, the Pyodide worker runtime (see
-// pyodide-runner.js), the Run / Share buttons, and URL-fragment program
-// hydration:
+// pyodide-runner.js), the Run / Cancel / Share buttons, and URL-fragment
+// program hydration:
 //   `#p=<base64url>` -- inline program text encoded in the URL fragment
 //                       (sync; no network involvement).
 //   `#id=<hex>`      -- corpus program ID; fetched async from the GitHub
 //                       raw-content mirror via ./corpus-mirror.js.
 // `#p=` takes precedence if both are present.
+//
+// Cancel terminates the Pyodide worker mid-run; a fresh worker is then
+// re-initialized (incurs the ~5s Pyodide load again, but guarantees the
+// runtime is back in a clean state regardless of what the prior run was
+// doing in C-level Python code).
 
 // CodeMirror 6 imports use bare specifiers; the importmap in index.html maps
 // them to esm.sh URLs. See the importmap comment for the version-pinning and
@@ -19,7 +24,12 @@ import { indentWithTab } from "@codemirror/commands";
 import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { tags as t } from "@lezer/highlight";
 import { anydice } from "./anydice-mode.js";
-import { initPyodide, runAnydice } from "./pyodide-runner.js";
+import {
+  CancelledError,
+  cancelCurrentRun,
+  initPyodide,
+  runAnydice,
+} from "./pyodide-runner.js";
 
 // Editor theme. All tunable knobs (colors, sizes, paddings) live as CSS
 // variables in playground.css; this block only handles the structural
@@ -206,10 +216,11 @@ async function fetchProgramFromUrl() {
 
 // ---- DOM refs and helpers ---------------------------------------------------
 
-const statusEl = document.getElementById("status");
-const runBtn   = document.getElementById("run-btn");
-const shareBtn = document.getElementById("share-btn");
-const outputEl = document.getElementById("output");
+const statusEl  = document.getElementById("status");
+const runBtn    = document.getElementById("run-btn");
+const shareBtn  = document.getElementById("share-btn");
+const cancelBtn = document.getElementById("cancel-btn");
+const outputEl  = document.getElementById("output");
 
 function setStatus(msg) {
   if (statusEl) statusEl.textContent = msg;
@@ -262,15 +273,18 @@ async function handleRun() {
   runInFlight = true;
   const source = editor.state.doc.toString();
   // Visual run-in-progress state: clear the output pane, disable the Run
-  // button, and reflect running in the corner status. The Shift-Enter
-  // keymap binding calls into handleRun() the same way the button click
-  // does, so both paths get this behavior. Restoration happens in the
-  // `finally` block below, regardless of whether the run succeeded or threw.
+  // button, enable the Cancel button, and reflect running in the corner
+  // status. The Shift-Enter keymap binding calls into handleRun() the same
+  // way the button click does, so both paths get this behavior. Restoration
+  // happens in the `finally` block below, regardless of whether the run
+  // succeeded, threw, or was cancelled.
   // (With Pyodide now in a worker, the main thread stays responsive during
   // the run; the rAF yield from the prior single-threaded version is no
   // longer needed.)
   setStatus("Running...");
   runBtn.disabled = true;
+  cancelBtn.disabled = false;
+  cancelBtn.title = "Cancel the current run (terminates and re-initializes the worker)";
   outputEl.classList.remove("output-placeholder");
   outputEl.textContent = "";
   const t0 = performance.now();
@@ -280,11 +294,54 @@ async function handleRun() {
     renderResults(results);
     setStatus(`Ran in ${dt} ms.`);
   } catch (err) {
-    renderError(err);
-    setStatus("Run failed.");
+    if (err instanceof CancelledError) {
+      // Cancel is a deliberate user action, not a failure. handleCancel()
+      // updates the status and re-inits the runtime; don't overwrite that
+      // here.
+      outputEl.textContent = "(cancelled)";
+    } else {
+      renderError(err);
+      setStatus("Run failed.");
+    }
   } finally {
     runInFlight = false;
     runBtn.disabled = false;
+    cancelBtn.disabled = true;
+    cancelBtn.title = "No run in progress";
+  }
+}
+
+async function handleCancel() {
+  if (!runInFlight) return;
+  // Disable Cancel immediately to avoid double-clicks during the (brief)
+  // teardown + re-init window.
+  cancelBtn.disabled = true;
+  cancelBtn.title = "Cancelling...";
+  setStatus("Cancelling and re-initializing runtime...");
+  // Mark runtime as not-ready so any Run / Shift-Enter triggered during
+  // re-init gets queued (handleRun checks runtimeReady).
+  runtimeReady = false;
+  // Terminate the worker. The pending run's Promise rejects with
+  // CancelledError; handleRun's catch handles the UI for that, and its
+  // finally re-enables runBtn. We disable it again below for the re-init
+  // window.
+  cancelCurrentRun();
+  // Yield once so handleRun's catch + finally run before we proceed.
+  await Promise.resolve();
+  runBtn.disabled = true;
+  try {
+    await initPyodide(setStatus);
+    runtimeReady = true;
+    runBtn.disabled = false;
+    if (runPending) {
+      // Same queued-run logic as the initial-load path: if the user clicked
+      // Run while re-init was in progress, honor it now.
+      runPending = false;
+      handleRun();
+    }
+  } catch (err) {
+    setStatus("Runtime failed to re-initialize. Reload to recover.");
+    renderError(err);
   }
 }
 
@@ -373,6 +430,7 @@ initPyodide(setStatus)
   });
 
 runBtn.addEventListener("click", handleRun);
+cancelBtn.addEventListener("click", handleCancel);
 
 // ---- Share URL --------------------------------------------------------------
 
