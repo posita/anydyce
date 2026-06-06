@@ -2,8 +2,12 @@
 //
 // Wires the CodeMirror 6 editor, the Pyodide worker runtime (see
 // pyodide-runner.js), the Run / Share buttons, and URL-fragment program
-// hydration (`#p=<base64url>` to load + share programs without server
-// involvement).
+// hydration:
+//   `#p=<base64url>` -- inline program text encoded in the URL fragment
+//                       (sync; no network involvement).
+//   `#id=<hex>`      -- corpus program ID; fetched async from the GitHub
+//                       raw-content mirror via ./corpus-mirror.js.
+// `#p=` takes precedence if both are present.
 
 // CodeMirror 6 imports use bare specifiers; the importmap in index.html maps
 // them to esm.sh URLs. See the importmap comment for the version-pinning and
@@ -147,14 +151,57 @@ output [roll d2 of the die 4d3]                     named "same as output d2d(4d
 `;
 
 // ---- URL fragment helpers ---------------------------------------------------
-// The pure encoding logic lives in ./url-fragment.js so it can be unit-tested
-// under Node without DOM. This file only needs the location-reading wrapper.
+// The pure encoding logic lives in ./url-fragment.js and ./corpus-mirror.js so
+// both can be unit-tested under Node without DOM. This file wraps them with
+// the location-reading bits and the fetch logic for #id=.
 
-import { b64urlEncode, parseUrlHashForProgram } from "./url-fragment.js";
+import {
+  b64urlEncode,
+  parseUrlHashForProgram,
+  parseUrlHashForProgramId,
+} from "./url-fragment.js";
+import { ghMirrorUrlForProgramId, programIdAsHex } from "./corpus-mirror.js";
 
-// Pull a program from `#p=...` if present, else return null.
+// Pull a program from `#p=...` if present, else return null. Synchronous --
+// the inline-encoded program is decoded immediately with no I/O.
 function programFromUrl() {
   return parseUrlHashForProgram(location.hash);
+}
+
+// Fetch the program identified by `#id=...` from the corpus mirror, or return
+// null if the URL doesn't contain `#id=` or the fetch fails. Async because it
+// makes a network request. Caller handles editor update + status messages.
+async function fetchProgramFromUrl() {
+  const rawId = parseUrlHashForProgramId(location.hash);
+  if (!rawId) return null;
+  // Normalize the ID via corpus-mirror's parser (handles case, leading zeros,
+  // sign). Throws on malformed input -- catch and surface as null.
+  let hexId;
+  try {
+    hexId = programIdAsHex(rawId);
+  } catch {
+    setStatus(`Invalid program ID: ${rawId}`);
+    return null;
+  }
+  const url = ghMirrorUrlForProgramId(hexId);
+  setStatus(`Loading program 0x${hexId} from corpus...`);
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      if (resp.status === 404) {
+        setStatus(`Program 0x${hexId} not found in corpus.`);
+      } else {
+        setStatus(`Failed to load 0x${hexId}: HTTP ${resp.status}.`);
+      }
+      return null;
+    }
+    const text = await resp.text();
+    setStatus(`Loaded program 0x${hexId}.`);
+    return text;
+  } catch (err) {
+    setStatus(`Failed to load 0x${hexId}: ${err.message || err}.`);
+    return null;
+  }
 }
 
 // ---- DOM refs and helpers ---------------------------------------------------
@@ -243,9 +290,12 @@ async function handleRun() {
 
 // ---- Editor -----------------------------------------------------------------
 
-// Initial document: prefer a URL-supplied program over the bundled sample.
-// programFromUrl() returns null on missing/malformed fragments so we fall
-// back to the sample cleanly.
+// Initial document. Two-stage hydration:
+//   1. Synchronous: if `#p=` is present in the URL, decode and use it for the
+//      initial editor doc -- no flicker, no network round-trip.
+//   2. Asynchronous: if `#id=` is present (and `#p=` wasn't), the editor
+//      starts with the bundled sample, then a fetch kicks off and replaces
+//      the doc when it completes (handled below, after `editor` exists).
 const initialDoc = programFromUrl() ?? SAMPLE_PROGRAM;
 
 editor = new EditorView({
@@ -280,6 +330,20 @@ editor = new EditorView({
 
 // Expose for ad-hoc poking during development.
 window.editor = editor;
+
+// Stage 2 of URL hydration: if the URL has `#id=` (and not `#p=`), fetch the
+// program from the corpus mirror and replace the editor's content when it
+// arrives. This runs in parallel with Pyodide startup -- by the time the
+// runtime is ready, the corpus program will (probably) already be loaded.
+if (programFromUrl() === null) {
+  fetchProgramFromUrl().then((text) => {
+    if (text !== null && text !== editor.state.doc.toString()) {
+      editor.dispatch({
+        changes: { from: 0, to: editor.state.doc.length, insert: text },
+      });
+    }
+  });
+}
 
 // ---- Runtime wiring ---------------------------------------------------------
 
@@ -338,15 +402,22 @@ shareBtn.addEventListener("click", handleShare);
 
 // ---- Hash-change reload -----------------------------------------------------
 
-// Back/forward navigation between programs without page reload. When the user
-// navigates to a new URL hash, re-hydrate the editor with that program. Only
-// applies when `#p=` decodes successfully; an unrelated hash change (or a
-// malformed one) leaves the editor alone.
-window.addEventListener("hashchange", () => {
-  const next = programFromUrl();
-  if (next === null) return;
-  if (next === editor.state.doc.toString()) return; // no-op; avoid undo-stack churn
+// Back/forward navigation between programs without page reload. Tries `#p=`
+// first (sync), then `#id=` (async). Skips dispatch when the new text matches
+// the current editor content to avoid undo-stack churn.
+function replaceEditorDoc(text) {
+  if (text === editor.state.doc.toString()) return;
   editor.dispatch({
-    changes: { from: 0, to: editor.state.doc.length, insert: next },
+    changes: { from: 0, to: editor.state.doc.length, insert: text },
   });
+}
+
+window.addEventListener("hashchange", async () => {
+  const sync = programFromUrl();
+  if (sync !== null) {
+    replaceEditorDoc(sync);
+    return;
+  }
+  const fetched = await fetchProgramFromUrl();
+  if (fetched !== null) replaceEditorDoc(fetched);
 });

@@ -9,6 +9,7 @@ import {
   b64urlDecode,
   b64urlEncode,
   parseUrlHashForProgram,
+  parseUrlHashForProgramId,
 } from "../url-fragment.js";
 
 // ---- Round-trip tests -----------------------------------------------------
@@ -140,4 +141,48 @@ test("parses a real-world program round-trip via hash", () => {
     "function: f X:n { result: X * X }\noutput [f 3d6]";
   const hash = `#p=${b64urlEncode(src)}`;
   assert.equal(parseUrlHashForProgram(hash), src);
+});
+
+// ---- parseUrlHashForProgramId tests ---------------------------------------
+
+test("parseUrlHashForProgramId: returns the raw id string", () => {
+  assert.equal(parseUrlHashForProgramId("#id=183b0"), "183b0");
+});
+
+test("parseUrlHashForProgramId: parses without leading '#'", () => {
+  assert.equal(parseUrlHashForProgramId("id=22432"), "22432");
+});
+
+test("parseUrlHashForProgramId: returns null on empty hash", () => {
+  assert.equal(parseUrlHashForProgramId(""), null);
+  assert.equal(parseUrlHashForProgramId("#"), null);
+});
+
+test("parseUrlHashForProgramId: returns null when 'id' is absent", () => {
+  assert.equal(parseUrlHashForProgramId("#p=abc"), null);
+  assert.equal(parseUrlHashForProgramId("#foo=bar"), null);
+});
+
+test("parseUrlHashForProgramId: returns null on undefined or null input", () => {
+  assert.equal(parseUrlHashForProgramId(null), null);
+  assert.equal(parseUrlHashForProgramId(undefined), null);
+});
+
+test("parseUrlHashForProgramId: returns null when 'id' is present but empty", () => {
+  assert.equal(parseUrlHashForProgramId("#id="), null);
+});
+
+test("parseUrlHashForProgramId: returns id even when 'p' is also present", () => {
+  // No precedence enforced at this layer; the caller decides which to use.
+  // Both helpers extract their own param independently.
+  assert.equal(parseUrlHashForProgramId("#p=abc&id=183b0"), "183b0");
+  assert.equal(parseUrlHashForProgram("#p=" + b64urlEncode("foo") + "&id=183b0"), "foo");
+});
+
+test("parseUrlHashForProgramId: returns id verbatim (no normalization)", () => {
+  // Normalization (case, leading zeros) is corpus-mirror's job; the parser
+  // returns whatever string is in the URL.
+  assert.equal(parseUrlHashForProgramId("#id=00123"), "00123");
+  assert.equal(parseUrlHashForProgramId("#id=FFFF"), "FFFF");
+  assert.equal(parseUrlHashForProgramId("#id=-abc"), "-abc");
 });
