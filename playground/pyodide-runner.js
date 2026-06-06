@@ -6,6 +6,19 @@
 // Public API:
 //   await initPyodide(onStatus)  -> resolves when runtime is ready
 //   await runAnydice(source)     -> returns array of {label, text, short, items}
+//   cancelCurrentRun()           -> terminates the worker, rejecting any
+//                                   in-flight run with CancelledError; caller
+//                                   re-calls initPyodide() to bring runtime
+//                                   back up before the next runAnydice().
+
+// Distinct error class so the caller can distinguish a deliberate cancel
+// from a real runtime error (e.g. a Python exception inside the program).
+export class CancelledError extends Error {
+  constructor() {
+    super("Run cancelled.");
+    this.name = "CancelledError";
+  }
+}
 
 let worker = null;
 let initPromise = null;
@@ -107,4 +120,36 @@ export function runAnydice(source) {
     pendingRuns.set(runId, { resolve, reject });
     worker.postMessage({ type: "run", source, runId });
   });
+}
+
+// Returns true if there's at least one run currently waiting for a result.
+// Useful for the UI to decide whether the Cancel button should be enabled.
+export function hasInFlightRun() {
+  return pendingRuns.size > 0;
+}
+
+// Terminate the worker, killing any in-flight run. The pending Promise(s)
+// reject with CancelledError. State is reset so the next initPyodide() call
+// creates a fresh worker -- there's no way to "resume" a terminated worker,
+// re-init is mandatory before the next run.
+//
+// Why hard terminate instead of a co-operative cancel signal: Pyodide's
+// Python execution can spend long stretches in C-level loops (dyce's deep
+// arithmetic, importlib, etc.) where it never checks interrupt buffers. A
+// terminate is the only mechanism that ALWAYS works in finite wall-clock
+// time. The cost is one full Pyodide re-init (~5s) per cancel, which we
+// accept for guaranteed responsiveness.
+export function cancelCurrentRun() {
+  if (!worker) return;
+  worker.terminate();
+  const cancelError = new CancelledError();
+  for (const { reject } of pendingRuns.values()) reject(cancelError);
+  pendingRuns.clear();
+  worker = null;
+  initPromise = null;
+  // Deliberate-cancel resets are NOT crashes; clear those flags so the next
+  // initPyodide() doesn't immediately short-circuit with the "please reload"
+  // message left over from an actual prior crash.
+  workerCrashed = false;
+  workerCrashError = null;
 }
