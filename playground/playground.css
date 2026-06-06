@@ -113,6 +113,17 @@ main {
   overflow: hidden;
 }
 
+/* The right column splits vertically into output (top) and logs (bottom).
+ * Output gets more vertical room than logs because results are the primary
+ * thing the user reads; the logs pane is empty during clean runs. */
+.right-column {
+  display: grid;
+  grid-template-rows: 2fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  overflow: hidden;
+}
+
 .pane {
   display: flex;
   flex-direction: column;
@@ -193,4 +204,42 @@ main {
   color: var(--muted);
   font-style: italic;
   font-family: var(--font-ui) !important;
+  /* #output normally uses pre-wrap so histogram output preserves its
+   * formatting; for placeholder prose that turns the HTML's surrounding
+   * newline + indent into a literal blank line and indent. Collapse to
+   * normal while the placeholder class is active. !important needed for
+   * the same reason font-family above does: the #output ID selector beats
+   * a bare class selector. */
+  white-space: normal !important;
+}
+
+#logs {
+  flex: 1;
+  padding: 1em;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: var(--editor-font-size);
+  line-height: 1.35;
+}
+.logs-placeholder {
+  color: var(--muted);
+  font-style: italic;
+  font-family: var(--font-ui) !important;
+}
+
+.log-entry {
+  white-space: pre-wrap;
+  margin: 0.1em 0;
+}
+.log-entry-info     { color: var(--muted); }
+.log-entry-warning  { color: var(--syn-prop); }
+.log-entry-error    { color: var(--syn-str); }
+.log-entry-cancel   { color: var(--syn-op-kw); }
+/* Tracebacks: indent and dim so the offending error line still stands out
+ * above the noise. */
+.log-entry-traceback {
+  color: var(--muted);
+  padding-left: 1em;
+  border-left: 2px solid var(--border);
+  margin: 0.2em 0 0.4em 0;
 }
