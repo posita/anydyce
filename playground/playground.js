@@ -26,6 +26,7 @@ import { tags as t } from "@lezer/highlight";
 import { anydice } from "./anydice-mode.js";
 import {
   CancelledError,
+  RunError,
   cancelCurrentRun,
   initPyodide,
   runAnydice,
@@ -221,6 +222,7 @@ const runBtn    = document.getElementById("run-btn");
 const shareBtn  = document.getElementById("share-btn");
 const cancelBtn = document.getElementById("cancel-btn");
 const outputEl  = document.getElementById("output");
+const logsEl    = document.getElementById("logs");
 
 function setStatus(msg) {
   if (statusEl) statusEl.textContent = msg;
@@ -237,9 +239,64 @@ function renderResults(results) {
 }
 
 function renderError(err) {
+  // Output shows a short error summary only; the full traceback lives in
+  // the logs pane (see logTraceback). Keeping output terse means the eye
+  // can quickly tell "did it work?" without scrolling past 30 lines of
+  // traceback.
   outputEl.classList.remove("output-placeholder");
   const detail = (err && err.message) || String(err);
-  outputEl.textContent = `Error:\n\n${detail}`;
+  outputEl.textContent = `Error: ${detail}`;
+}
+
+// ---- Logs pane -------------------------------------------------------------
+//
+// Cleared at the start of every run, so the pane always reflects just the
+// current run's warnings / errors / cancel events. The output and logs
+// panes together represent one run: output for results, logs for
+// diagnostic messages. The Run button doubles as the clear action.
+//
+// Severity classes (.log-entry-info / -warning / -error / -cancel /
+// -traceback) drive CSS colors; see playground.css.
+
+let logsHasContent = false;
+
+function resetLogs() {
+  logsEl.textContent = "";
+  logsEl.classList.remove("logs-placeholder");
+  logsHasContent = true;
+}
+
+function scrollLogsToBottom() {
+  logsEl.scrollTop = logsEl.scrollHeight;
+}
+
+function logEntry(severity, text) {
+  if (!logsHasContent) resetLogs();
+  const entry = document.createElement("div");
+  entry.className = `log-entry log-entry-${severity}`;
+  entry.textContent = text;
+  logsEl.appendChild(entry);
+  scrollLogsToBottom();
+}
+
+function logWarnings(warnings) {
+  if (!warnings || warnings.length === 0) return;
+  for (const w of warnings) {
+    // Format mirrors Python's default warning formatter, which users will
+    // recognize from console output: filename:lineno: Category: message.
+    const loc = w.filename ? `${w.filename}:${w.lineno}: ` : "";
+    logEntry("warning", `${loc}${w.category}: ${w.message}`);
+  }
+}
+
+function logTraceback(traceback) {
+  if (!traceback) return;
+  if (!logsHasContent) resetLogs();
+  const block = document.createElement("div");
+  block.className = "log-entry log-entry-traceback";
+  block.textContent = traceback.trimEnd();
+  logsEl.appendChild(block);
+  scrollLogsToBottom();
 }
 
 // Forward-declared so the keymap binding below can close over it without
@@ -287,10 +344,12 @@ async function handleRun() {
   cancelBtn.title = "Cancel the current run (terminates and re-initializes the worker)";
   outputEl.classList.remove("output-placeholder");
   outputEl.textContent = "";
+  resetLogs();
   const t0 = performance.now();
   try {
-    const results = await runAnydice(source);
+    const { results, warnings } = await runAnydice(source);
     const dt = Math.round(performance.now() - t0);
+    logWarnings(warnings);
     renderResults(results);
     setStatus(`Ran in ${dt} ms.`);
   } catch (err) {
@@ -299,8 +358,20 @@ async function handleRun() {
       // updates the status and re-inits the runtime; don't overwrite that
       // here.
       outputEl.textContent = "(cancelled)";
-    } else {
+      logEntry("cancel", "Cancelled by user.");
+    } else if (err instanceof RunError) {
+      // Python-level error from the program. Output gets the short summary;
+      // logs get the traceback (and any warnings emitted before the throw).
+      logWarnings(err.warnings);
       renderError(err);
+      logEntry("error", err.message);
+      logTraceback(err.traceback);
+      setStatus("Run failed.");
+    } else {
+      // Anything else is a runtime-level failure (worker crash, etc.) --
+      // no traceback or warnings available.
+      renderError(err);
+      logEntry("error", (err && err.message) || String(err));
       setStatus("Run failed.");
     }
   } finally {

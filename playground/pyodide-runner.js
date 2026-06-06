@@ -5,7 +5,10 @@
 //
 // Public API:
 //   await initPyodide(onStatus)  -> resolves when runtime is ready
-//   await runAnydice(source)     -> returns array of {label, text, short, items}
+//   await runAnydice(source)     -> resolves to {results, warnings};
+//                                   rejects with RunError (Python exception:
+//                                   carries .traceback and .warnings) or
+//                                   CancelledError (deliberate cancel).
 //   cancelCurrentRun()           -> terminates the worker, rejecting any
 //                                   in-flight run with CancelledError; caller
 //                                   re-calls initPyodide() to bring runtime
@@ -17,6 +20,18 @@ export class CancelledError extends Error {
   constructor() {
     super("Run cancelled.");
     this.name = "CancelledError";
+  }
+}
+
+// Carries the full Python traceback and any warnings emitted before the
+// exception was raised. The short summary lives in .message (e.g.
+// "ValueError: foo"); .traceback is the full multi-line traceback.
+export class RunError extends Error {
+  constructor(message, traceback, warnings) {
+    super(message);
+    this.name = "RunError";
+    this.traceback = traceback || null;
+    this.warnings = warnings || [];
   }
 }
 
@@ -51,7 +66,10 @@ function ensureWorker() {
         const handler = pendingRuns.get(msg.runId);
         if (handler) {
           pendingRuns.delete(msg.runId);
-          handler.resolve(msg.results);
+          handler.resolve({
+            results: msg.results,
+            warnings: msg.warnings || [],
+          });
         }
         break;
       }
@@ -60,7 +78,9 @@ function ensureWorker() {
           const handler = pendingRuns.get(msg.runId);
           if (handler) {
             pendingRuns.delete(msg.runId);
-            handler.reject(new Error(msg.error));
+            handler.reject(
+              new RunError(msg.error, msg.traceback, msg.warnings),
+            );
           }
         }
         // init errors are handled by the listener installed in initPyodide().

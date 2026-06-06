@@ -15,8 +15,17 @@
 //   Worker -> Main:
 //     { type: "status", message }                   -- progress updates
 //     { type: "ready" }                             -- init complete
-//     { type: "result", results, runId }            -- successful run
-//     { type: "error", stage: "init"|"run", error, runId? }
+//     { type: "result", results, warnings, runId }  -- successful run
+//     { type: "error", stage: "init"|"run", error,
+//                      traceback?, warnings?, runId? }
+//
+// `warnings` is an array of {category, message, filename, lineno} captured
+// by the Python-side showwarning override. It accompanies BOTH successful
+// runs and run-stage errors -- a program can emit warnings up to the point
+// it raises. `traceback` is the full Python traceback string (separate
+// from `error`, which is a short one-line summary like
+// "ValueError: foo"). Init-stage errors have neither traceback nor
+// warnings populated.
 
 const PYODIDE_VERSION = "v0.27.5";
 const PYODIDE_INDEX_URL = `https://cdn.jsdelivr.net/pyodide/${PYODIDE_VERSION}/full/`;
@@ -28,24 +37,58 @@ const PYODIDE_INDEX_URL = `https://cdn.jsdelivr.net/pyodide/${PYODIDE_VERSION}/f
 importScripts(`${PYODIDE_INDEX_URL}pyodide.js`);
 
 const PYTHON_BOOTSTRAP = `
+import traceback as _traceback
 import warnings
 from dyce.lifecycle import ExperimentalWarning
+# Default action is "default" (print first occurrence per location). The
+# playground UI shows every warning explicitly in the logs pane, so we
+# switch to "always" -- a recurring TruncationWarning at the same site
+# should be visible each run, not silently de-duplicated. simplefilter()
+# RESETS the filter list, so the category-specific ignores below MUST be
+# added AFTER it; filterwarnings() prepends, so the last-added rule is
+# checked first.
+warnings.simplefilter("always")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=ExperimentalWarning)
 
 from anydyce.anydice import run as _anydyce_run
 
+_captured_warnings = []
+
+def _capture_warning(message, category, filename, lineno, file=None, line=None):
+    _captured_warnings.append({
+        "category": category.__name__,
+        "message": str(message),
+        "filename": filename or "",
+        "lineno": int(lineno) if lineno is not None else 0,
+    })
+
+warnings.showwarning = _capture_warning
+
 def _do_run(source):
-    results = _anydyce_run(source)
-    return [
-        {
-            "label": label,
-            "text": h.format() if h else "(empty distribution)",
-            "short": h.format_short() if h else "{}",
-            "items": list(h.items()) if h else [],
+    _captured_warnings.clear()
+    try:
+        results = _anydyce_run(source)
+    except BaseException as exc:
+        return {
+            "ok": False,
+            "error": f"{type(exc).__name__}: {exc}",
+            "traceback": _traceback.format_exc(),
+            "warnings": list(_captured_warnings),
         }
-        for label, h in results
-    ]
+    return {
+        "ok": True,
+        "results": [
+            {
+                "label": label,
+                "text": h.format() if h else "(empty distribution)",
+                "short": h.format_short() if h else "{}",
+                "items": list(h.items()) if h else [],
+            }
+            for label, h in results
+        ],
+        "warnings": list(_captured_warnings),
+    }
 `;
 
 let pyodide = null;
@@ -140,13 +183,36 @@ self.addEventListener("message", async (ev) => {
     }
   } else if (msg.type === "run") {
     try {
-      const results = runSource(msg.source);
-      self.postMessage({ type: "result", results, runId: msg.runId });
+      const out = runSource(msg.source);
+      // out is the structured result from _do_run: either {ok:true,
+      // results, warnings} or {ok:false, error, traceback, warnings}.
+      // We translate to the existing result/error message split.
+      if (out.ok) {
+        self.postMessage({
+          type: "result",
+          results: out.results,
+          warnings: out.warnings,
+          runId: msg.runId,
+        });
+      } else {
+        self.postMessage({
+          type: "error",
+          stage: "run",
+          error: out.error,
+          traceback: out.traceback,
+          warnings: out.warnings,
+          runId: msg.runId,
+        });
+      }
     } catch (err) {
+      // Hard failure outside _do_run's try/except (Pyodide-level error,
+      // e.g. _do_run not defined). No captured warnings available.
       self.postMessage({
         type: "error",
         stage: "run",
         error: (err && err.message) || String(err),
+        traceback: null,
+        warnings: [],
         runId: msg.runId,
       });
     }
