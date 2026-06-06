@@ -51,3 +51,16 @@ export function parseUrlHashForProgram(hashStr) {
     return null;
   }
 }
+
+// Parse a URL hash string and return the value of the `id` parameter (a hex
+// program ID), or null if not present. Returns the raw string -- normalization
+// (case, leading-zero stripping, validation) is the caller's responsibility
+// via corpus-mirror's helpers. Accepts hash with or without leading "#".
+export function parseUrlHashForProgramId(hashStr) {
+  if (!hashStr) return null;
+  const stripped = hashStr.replace(/^#/, "");
+  if (!stripped) return null;
+  const params = new URLSearchParams(stripped);
+  const id = params.get("id");
+  return id || null;
+}
