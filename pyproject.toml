@@ -47,7 +47,7 @@ requires = ["setuptools>=64", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["anydyce"]
+packages = ["anydyce", "anydyce.anydice"]
 package-data = {"anydyce" = ["py.typed"]}
 
 [tool.setuptools_scm]
