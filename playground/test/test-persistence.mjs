@@ -6,10 +6,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  LOGS_SPLIT_KEY,
   STORAGE_KEY,
   createDebouncedSaver,
+  loadLogsSplit,
   loadSavedDoc,
   saveDoc,
+  saveLogsSplit,
   stripUrlFragment,
 } from "../persistence.js";
 
@@ -93,6 +96,48 @@ test("STORAGE_KEY is stable and namespaced", () => {
   // Other tabs / apps on the same origin must not collide. The "anydyce-
   // playground:" prefix is the namespace.
   assert.match(STORAGE_KEY, /^anydyce-playground:/);
+});
+
+// ---- loadLogsSplit / saveLogsSplit ---------------------------------------
+
+test("LOGS_SPLIT_KEY shares the playground namespace", () => {
+  assert.match(LOGS_SPLIT_KEY, /^anydyce-playground:/);
+  assert.notEqual(LOGS_SPLIT_KEY, STORAGE_KEY);
+});
+
+test("saveLogsSplit + loadLogsSplit round-trip a numeric percentage", () => {
+  const storage = makeStorage();
+  saveLogsSplit(42.5, storage);
+  assert.equal(loadLogsSplit(storage), 42.5);
+});
+
+test("saveLogsSplit + loadLogsSplit round-trip an integer percentage", () => {
+  const storage = makeStorage();
+  saveLogsSplit(75, storage);
+  assert.equal(loadLogsSplit(storage), 75);
+});
+
+test("loadLogsSplit returns null when unset", () => {
+  assert.equal(loadLogsSplit(makeStorage()), null);
+});
+
+test("loadLogsSplit returns null on garbage values", () => {
+  const storage = makeStorage();
+  storage.setItem(LOGS_SPLIT_KEY, "nonsense");
+  assert.equal(loadLogsSplit(storage), null);
+});
+
+test("loadLogsSplit returns null on storage error", () => {
+  assert.equal(loadLogsSplit(makeThrowingStorage()), null);
+});
+
+test("saveLogsSplit swallows storage errors silently", () => {
+  assert.doesNotThrow(() => saveLogsSplit(50, makeThrowingStorage()));
+});
+
+test("loadLogsSplit / saveLogsSplit no-op when storage is unavailable", () => {
+  assert.equal(loadLogsSplit(null), null);
+  assert.doesNotThrow(() => saveLogsSplit(50, null));
 });
 
 // ---- stripUrlFragment ----------------------------------------------------
