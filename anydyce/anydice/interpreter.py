@@ -19,6 +19,7 @@ import operator
 import sys
 from collections import Counter
 from collections.abc import Callable, Iterator
+from contextlib import ExitStack
 
 from dyce import H, P, RollT, quantize_hs
 from dyce.d import dempty, dzero
@@ -86,8 +87,6 @@ _ExpansionT = list[tuple[_ParamIndexT, list[tuple[_Val, _CountT]]]]
 _BoundT = list[_Val]
 
 # ---- Operator tables ---------------------------------------------------------------------
-
-_DEFAULT_QUANTIZATION_BIT_WIDTH = 256
 
 # `0^negative` is mathematically undefined. AnyDice's behavior splits by
 # context: in scalar^scalar form it raises an explicit error; in any
@@ -235,7 +234,16 @@ class _ResultReturn(Exception):  # noqa: N818
 
 class AnyDiceInterpreter:
     def __init__(self) -> None:
-        self._settings = Settings()
+        # `_settings` is non-`None` only during a `run()` call -- see `run()`'s
+        # try/finally. Code paths that need the active settings assert
+        # non-`None` to satisfy type checkers; calling them outside a run is a
+        # bug. Same lifecycle pattern as `_quantize_stack` below.
+        self._settings: Settings | None = None
+        # ExitStack that owns the nested `quantize_hs` contexts produced by
+        # `set "anydyce: calculation precision"` directives. Owned by `run()`;
+        # `_apply_calc_precision` unwinds and re-enters as needed when a `set`
+        # changes the calc bit_width.
+        self._quantize_stack: ExitStack | None = None
         self._env: dict[str, _Val] = {}
         self._outputs: AnyDiceResultsT = []
         # Functions are keyed by their pattern *shape* -- a tuple slotting fixed words
@@ -259,13 +267,22 @@ class AnyDiceInterpreter:
         self,
         program: Program,
         *,
-        quantize_bit_width: int = _DEFAULT_QUANTIZATION_BIT_WIDTH,
+        settings: Settings | None = None,
     ) -> AnyDiceResultsT:
-        r"""Execute a parsed program and return `(name, distribution)` pairs."""
+        r"""Execute a parsed program and return `(name, distribution)` pairs.
+
+        If `settings` is provided, the interpreter uses it for the duration of
+        the call and mutations from `set` directives are visible to the
+        caller afterwards (the final value at end-of-run is what the caller
+        observes -- formatting consumers read e.g. `settings.display_precision`
+        from it). If omitted, a fresh `Settings()` is used internally and the
+        caller cannot observe `set`-directive effects.
+        """
         self._env = {}
         self._outputs = []
         self._funcs = {}
         self._depth = 0
+        self._settings = settings if settings is not None else Settings()
         # Bump Python's recursion limit for the duration of this run. Both
         # `dyce.p`'s pool-selection (recurses ~4 Python frames per distinct
         # outcome of the underlying H, via `lowest_terms` / `__hash__` in
@@ -280,17 +297,36 @@ class AnyDiceInterpreter:
         if prev_limit < 5000:
             sys.setrecursionlimit(5000)
         try:
-            with quantize_hs(bit_width=quantize_bit_width, preserve_zero_counts=True):
+            with ExitStack() as stack:
+                self._quantize_stack = stack
+                self._apply_calc_precision(self._settings.calc_bit_width)
                 for stmt in program.stmts:
                     self._exec(stmt)
             return list(self._outputs)
         finally:
             if prev_limit < 5000:
                 sys.setrecursionlimit(prev_limit)
+            self._settings = None
+            self._quantize_stack = None
+
+    def _apply_calc_precision(self, bit_width: int) -> None:
+        r"""Unwind any active `quantize_hs` context and enter a new one for
+        `bit_width`. `bit_width == 0` means "exact" -- no quantization, no
+        active context. Called from `run()` at entry and from the SetStmt
+        handler when `"anydyce: calculation precision"` changes."""
+        assert self._quantize_stack is not None, "called outside run()"
+        # close() unwinds all registered exits. ExitStack stays reusable, so
+        # subsequent enter_context() registers the replacement (or no
+        # replacement, for bit_width=0).
+        self._quantize_stack.close()
+        if bit_width > 0:
+            self._quantize_stack.enter_context(
+                quantize_hs(bit_width=bit_width, preserve_zero_counts=True)
+            )
 
     # ---- Statement execution -------------------------------------------------------------
 
-    def _exec(self, stmt: Stmt) -> None:
+    def _exec(self, stmt: Stmt) -> None:  # noqa: C901
         if isinstance(stmt, OutputStmt):
             value = self._eval(stmt.expr)
             h = self._coerce_to_h(value)
@@ -299,9 +335,13 @@ class AnyDiceInterpreter:
                 label = f"output {len(self._outputs) + 1}"
             self._outputs.append((label, h))
         elif isinstance(stmt, SetStmt):
+            assert self._settings is not None, "SetStmt outside run()"
             v = self._eval(stmt.value)
             if isinstance(v, (str, int)):
                 self._settings.set(stmt.key, v)
+                # Adjusts the active `quantize_hs` context for the rest of the run
+                if stmt.key == "anydyce: calculation precision":
+                    self._apply_calc_precision(self._settings.calc_bit_width)
             else:  # pragma: no cover
                 raise TypeError(
                     f"set value must resolve to string or number, got {type(v).__name__}"
@@ -577,6 +617,7 @@ class AnyDiceInterpreter:
             )
 
     def _at_pool(self, left: _Val, pool: PoolT) -> H[int]:
+        assert self._settings is not None, "_at_pool called outside run()"
         if isinstance(left, int):
             size = len(pool)
             # Left is out of range
@@ -637,6 +678,7 @@ class AnyDiceInterpreter:
             return seq[left - 1]
 
     def _digit_at(self, pos: int, num: int) -> int:
+        assert self._settings is not None, "_digit_at called outside run()"
         if pos < 1:
             return 0
         sign = -1 if num < 0 else 1
@@ -838,6 +880,7 @@ class AnyDiceInterpreter:
     # ---- Function calls ------------------------------------------------------------------
 
     def _call(self, call: Call) -> _Val:
+        assert self._settings is not None, "_call called outside run()"
         # Recursion-depth guard: Each call exceeding the configured maximum returns
         # H({}) without executing the body. The unwinding result is then governed by
         # how each operator treats H({}) (e.g. + treats it as 0; / propagates).
@@ -887,6 +930,7 @@ class AnyDiceInterpreter:
         *err_label(i)* returns the human-readable label for param `i`, used in
         TypeError messages -- e.g. `"function param FOO"` or `"builtin param 0"`.
         """
+        assert self._settings is not None, "_bind_and_expand called outside run()"
         bound: _BoundT = [0] * len(param_types)
         expansion: _ExpansionT = []
         for i, (ptype, arg) in enumerate(zip(param_types, args, strict=True)):
@@ -1061,26 +1105,26 @@ class AnyDiceInterpreter:
         saved_env = self._env
         self._env = dict(saved_env)
         self._depth += 1
+
+        def _per_iter(combo: tuple[tuple[_Val, int], ...]) -> _Val:
+            # Reset ALL params to their entry-bound values per iter.
+            # Non-param env vars persist their mutations from the
+            # previous iter. Skip duplicate-named param positions so
+            # only the first-occurrence binding takes effect.
+            for i, param in enumerate(params):
+                if first_idx_for_name[param.name] == i:
+                    self._env[param.name] = bound[i]
+            # Override expanding params with this iteration's combo,
+            # again only at the first-occurrence position so a
+            # duplicate that happens to expand doesn't clobber the
+            # earlier binding.
+            for j, (idx, _) in enumerate(expansion):
+                value, _w = combo[j]
+                if first_idx_for_name[params[idx].name] == idx:
+                    self._env[params[idx].name] = value
+            return self._execute_body(func)
+
         try:
-
-            def _per_iter(combo: tuple[tuple[_Val, int], ...]) -> _Val:
-                # Reset ALL params to their entry-bound values per iter.
-                # Non-param env vars persist their mutations from the
-                # previous iter. Skip duplicate-named param positions so
-                # only the first-occurrence binding takes effect.
-                for i, param in enumerate(params):
-                    if first_idx_for_name[param.name] == i:
-                        self._env[param.name] = bound[i]
-                # Override expanding params with this iteration's combo,
-                # again only at the first-occurrence position so a
-                # duplicate that happens to expand doesn't clobber the
-                # earlier binding.
-                for j, (idx, _) in enumerate(expansion):
-                    value, _w = combo[j]
-                    if first_idx_for_name[params[idx].name] == idx:
-                        self._env[params[idx].name] = value
-                return self._execute_body(func)
-
             return self._aggregate_iters(
                 expansion, reverse_combos=True, per_iter=_per_iter
             )
@@ -1094,6 +1138,7 @@ class AnyDiceInterpreter:
         bound: _BoundT,
         expansion: _ExpansionT,
     ) -> _Val:
+        assert self._settings is not None, "_invoke_builtin called outside run()"
         # No-expansion fast path: just call the impl with the bound args.
         if not expansion:
             return impl(self._settings, *bound)

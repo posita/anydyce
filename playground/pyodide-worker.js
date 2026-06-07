@@ -51,7 +51,7 @@ warnings.simplefilter("always")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=ExperimentalWarning)
 
-from anydyce.anydice import run as _anydyce_run
+from anydyce.anydice import Settings, run as _anydyce_run
 
 _captured_warnings = []
 
@@ -67,8 +67,13 @@ warnings.showwarning = _capture_warning
 
 def _do_run(source):
     _captured_warnings.clear()
+    # Fresh Settings per run so a prior cell's set directives don't leak.
+    # _anydyce_run mutates this in place when the program uses
+    # \`set "anydyce: display precision" to ...\` / calculation precision;
+    # we read the final display_precision back below for formatting.
+    settings = Settings()
     try:
-        results = _anydyce_run(source)
+        results = _anydyce_run(source, settings=settings)
     except BaseException as exc:
         return {
             "ok": False,
@@ -76,13 +81,14 @@ def _do_run(source):
             "traceback": _traceback.format_exc(),
             "warnings": list(_captured_warnings),
         }
+    precision = settings.display_precision
     return {
         "ok": True,
         "results": [
             {
                 "label": label,
-                "text": h.format() if h else "(empty distribution)",
-                "short": h.format_short() if h else "{}",
+                "text": h.format(precision=precision) if h else "(empty distribution)",
+                "short": h.format_short(precision=precision) if h else "{}",
                 "items": list(h.items()) if h else [],
             }
             for label, h in results

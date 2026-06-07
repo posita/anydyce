@@ -26,6 +26,7 @@ from lark import Lark
 
 from .ast_ import Program
 from .interpreter import AnyDiceInterpreter, AnyDiceResultsT
+from .settings import Settings
 from .transformer import AnyDiceTransformer
 from .unparser import unparse
 
@@ -35,6 +36,7 @@ __all__ = (
     "AnyDiceResultsT",
     "AnyDiceTransformer",
     "Program",
+    "Settings",
     "parse",
     "run",
     "unparse",
@@ -46,40 +48,53 @@ _PARSER = Lark(_GRAMMAR, parser="lalr", transformer=AnyDiceTransformer())
 
 @experimental
 def format_results(
-    results: AnyDiceResultsT, *, precision: int = DEFAULT_PRECISION, short: bool = False
+    results: AnyDiceResultsT, *, settings: Settings | None = None, short: bool = False
 ) -> str:
     r"""
     Formats output results from [`run`][anydyce.anydice.run].
 
-        >>> from anydyce.anydice import format_results, run
-        >>> print(
-        ...     format_results(
-        ...         run('output 2d3 named "2d3" output d{} named "the empty die"')
-        ...     )
+    Reads `display_precision` from *settings*, if provided.
+    Pass the same [`Settings`][anydyce.anydice.Settings] object passed to `run` will ensure settings modifications in the program are honored during formatting.
+
+        >>> from anydyce.anydice import Settings, format_results, run
+        >>> settings = Settings()
+        >>> results = run(
+        ...     'output 2d3 named "2d3" output d{} named "the empty die"'
+        ...     'set "anydyce: display precision" to "high"',
+        ...     settings=settings,
         ... )
+        >>> print(format_results(results, settings=settings))
         ==== 2d3 ====
         avg |    4.00
         std |    1.15
         var |    1.33
-          2 |  11.11% |#####
-          3 |  22.22% |###########
-          4 |  33.33% |################
-          5 |  22.22% |###########
-          6 |  11.11% |#####
+          2 |  11.111111% |#####
+          3 |  22.222222% |##########
+          4 |  33.333333% |###############
+          5 |  22.222222% |##########
+          6 |  11.111111% |#####
         <BLANKLINE>
         ==== the empty die ====
         (empty distribution)
 
+        >>> settings = Settings()
+        >>> settings.set("anydyce: display precision", 4)
         >>> print(
         ...     format_results(
-        ...         run('output [highest 3 of 4d6] named "4d6 drop lowest"'),
-        ...         precision=4,
+        ...         run(
+        ...             'output [highest 3 of 4d6] named "4d6 drop lowest"',
+        ...             settings=settings,
+        ...         ),
+        ...         settings=settings,
         ...         short=True,
         ...     )
         ... )
         ==== 4d6 drop lowest ====
         {avg: 12.24, 3:  0.0772%, 4:  0.3086%, 5:  0.7716%, ..., 16:  7.2531%, 17:  4.1667%, 18:  1.6204%}
     """
+    precision = (
+        settings.display_precision if settings is not None else DEFAULT_PRECISION
+    )
     blocks: list[str] = []
 
     for label, h in results:
@@ -112,10 +127,12 @@ def parse(source: str) -> Program:
 
 
 @experimental
-def run(source: str) -> AnyDiceResultsT:
+def run(source: str, *, settings: Settings | None = None) -> AnyDiceResultsT:
     r"""
-    Shorthand for `AnyDiceInterpreter().run(parse(source))`, returning one `(name, distribution)` pair per `output` statement.
+    Shorthand for `AnyDiceInterpreter().run(parse(source), settings=settings)`, returning one `(name, distribution)` pair per `output` statement.
 
-    See [`parse`][anydyce.anydice.parse] and [`AnyDiceInterpreter.run`][anydice.anydice.AnyDiceInterpreter.run] for additional detail.
+    If *settings* is provided, the interpreter mutates it during execution (e.g. when the program contains `set "anydyce: display precision" to ...`), so the caller or others can observe its final state (e.g., [`format_results`][anydyce.anydice.format_result]’ examination of `settings.display_precision`).
+
+    See [`format_results`][anydyce.anydice.format_results], [`parse`][anydyce.anydice.parse], and [`AnyDiceInterpreter.run`][anydice.anydice.AnyDiceInterpreter.run] for additional detail.
     """
-    return AnyDiceInterpreter().run(parse(source))
+    return AnyDiceInterpreter().run(parse(source), settings=settings)

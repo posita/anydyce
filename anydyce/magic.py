@@ -35,6 +35,7 @@ from IPython.display import HTML, Markdown, display
 from . import jupyter_visualize
 from .anydice import (
     DEFAULT_PRECISION,  # pyright: ignore[reportAttributeAccessIssue]
+    Settings,
     format_results,
     run,
 )
@@ -124,7 +125,12 @@ def anyd(line: str, cell: str) -> None:
         # cell output
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         warnings.filterwarnings("ignore", category=ExperimentalWarning)
-        results = run(cell)
+        # Seed the display precision from the CLI flag; `set "anydyce: display
+        # precision"` inside the cell can override (the run() call mutates
+        # settings in place). format_results then reads the final value.
+        settings = Settings()
+        settings.set("anydyce: display precision", args.precision)
+        results = run(cell, settings=settings)
         if args.output_format in _PLOTTER_NAMES_BY_FORMAT:
             jupyter_visualize(
                 results,
@@ -134,7 +140,7 @@ def anyd(line: str, cell: str) -> None:
             print(
                 format_results(
                     results,
-                    precision=args.precision,
+                    settings=settings,
                     short=args.output_format == _FORMAT_TEXT_SHORT,
                 )
             )

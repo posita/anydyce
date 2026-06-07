@@ -24,7 +24,7 @@ from IPython.core.interactiveshell import InteractiveShell
 from lark.exceptions import UnexpectedToken
 
 from anydyce import magic as anydyce_magic
-from anydyce.anydice import AnyDiceResultsT
+from anydyce.anydice import AnyDiceResultsT, Settings
 from anydyce.anydice.fetch import NetworkError, NoSuchProgramError
 from anydyce.magic import anyd, anyd_load, load_ipython_extension
 
@@ -186,13 +186,17 @@ class TestAnydMagicWarnings:
     ) -> None:
         original_run = anydyce_magic.run
 
-        def _emit_deprecation(source: str) -> AnyDiceResultsT:
+        def _emit_deprecation(
+            source: str, *, settings: Settings | None = None
+        ) -> AnyDiceResultsT:
             warnings.warn("test deprecation", DeprecationWarning, stacklevel=2)
-            return original_run(source)
+            return original_run(source, settings=settings)
 
-        def _emit_experimental(source: str) -> AnyDiceResultsT:
+        def _emit_experimental(
+            source: str, *, settings: Settings | None = None
+        ) -> AnyDiceResultsT:
             warnings.warn("test experimental", ExperimentalWarning, stacklevel=2)
-            return original_run(source)
+            return original_run(source, settings=settings)
 
         monkeypatch.setattr(anydyce_magic, "run", _emit_deprecation)
         anyd("--text", "output 1d6")
@@ -213,9 +217,11 @@ class TestAnydMagicWarnings:
     ) -> None:
         original_run = anydyce_magic.run
 
-        def _emit_truncation(source: str) -> AnyDiceResultsT:
+        def _emit_truncation(
+            source: str, *, settings: Settings | None = None
+        ) -> AnyDiceResultsT:
             warnings.warn("test truncation", TruncationWarning, stacklevel=2)
-            return original_run(source)
+            return original_run(source, settings=settings)
 
         monkeypatch.setattr(anydyce_magic, "run", _emit_truncation)
         anyd("--text", "output 1d6")
