@@ -31,6 +31,12 @@ import {
   initPyodide,
   runAnydice,
 } from "./pyodide-runner.js";
+import {
+  createDebouncedSaver,
+  loadSavedDoc,
+  saveDoc,
+  stripUrlFragment,
+} from "./persistence.js";
 
 // Editor theme. All tunable knobs (colors, sizes, paddings) live as CSS
 // variables in playground.css; this block only handles the structural
@@ -418,13 +424,30 @@ async function handleCancel() {
 
 // ---- Editor -----------------------------------------------------------------
 
-// Initial document. Two-stage hydration:
-//   1. Synchronous: if `#p=` is present in the URL, decode and use it for the
-//      initial editor doc -- no flicker, no network round-trip.
-//   2. Asynchronous: if `#id=` is present (and `#p=` wasn't), the editor
-//      starts with the bundled sample, then a fetch kicks off and replaces
-//      the doc when it completes (handled below, after `editor` exists).
-const initialDoc = programFromUrl() ?? SAMPLE_PROGRAM;
+// Initial document. Resolution order:
+//   1. `#p=` in the URL (sync): wins over everything else. Shared link
+//      always shows its program first.
+//   2. localStorage saved doc: the user's prior session if any.
+//   3. `#id=` in the URL (async, resolved below after editor exists): if
+//      neither 1 nor 2 hit, the bundled sample is shown until the fetch
+//      lands, then replaced.
+//   4. Bundled SAMPLE_PROGRAM: the default for a brand-new visit OR when
+//      the saved doc is empty (clearing the editor + reload is a
+//      discoverable "reset to sample" gesture). Using `||` instead of `??`
+//      collapses the null and empty-string cases under one behavior.
+const initialDoc = programFromUrl() || loadSavedDoc() || SAMPLE_PROGRAM;
+
+// Debounced save: fires ~500ms after the last keystroke. On fire, persists
+// the current doc to localStorage AND strips any URL fragment, so the bare
+// URL on reload picks up the saved doc (sharing-wins-on-first-visit; user-
+// edits-win-on-reload).
+const docSaver = createDebouncedSaver({
+  delayMs: 500,
+  onFire: (text) => {
+    saveDoc(text);
+    stripUrlFragment();
+  },
+});
 
 editor = new EditorView({
   parent: document.getElementById("editor"),
@@ -453,6 +476,15 @@ editor = new EditorView({
     anydice,
     syntaxHighlighting(anydiceHighlightStyle),
     anydiceEditorTheme,
+    // Persist on idle. Also fires when the doc is replaced programmatically
+    // (e.g. `#id=` corpus fetch), which is the right behavior: after a
+    // corpus program loads, it becomes "your work-in-progress" for future
+    // reloads.
+    EditorView.updateListener.of((update) => {
+      if (update.docChanged) {
+        docSaver.schedule(update.state.doc.toString());
+      }
+    }),
   ],
 });
 
