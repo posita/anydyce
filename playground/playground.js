@@ -33,10 +33,13 @@ import {
 } from "./pyodide-runner.js";
 import {
   createDebouncedSaver,
+  loadLogsSplit,
   loadSavedDoc,
   saveDoc,
+  saveLogsSplit,
   stripUrlFragment,
 } from "./persistence.js";
+import { attachRowResizer, clampPercent } from "./resizer.js";
 
 // Editor theme. All tunable knobs (colors, sizes, paddings) live as CSS
 // variables in playground.css; this block only handles the structural
@@ -534,6 +537,22 @@ initPyodide(setStatus)
 
 runBtn.addEventListener("click", handleRun);
 cancelBtn.addEventListener("click", handleCancel);
+
+// ---- Output / logs resizer --------------------------------------------------
+
+// Restore a previously dragged split (clamped to the resizer's safe range so
+// a stale or hand-edited localStorage value can never strand a pane offscreen)
+// and wire pointer-drag handling. The resizerSize here MUST match the
+// `--resizer-size` CSS variable; see playground.css.
+const savedSplit = loadLogsSplit();
+const initialSplit = savedSplit !== null ? clampPercent(savedSplit) : undefined;
+attachRowResizer({
+  container: document.querySelector(".right-column"),
+  resizer: document.getElementById("row-resizer"),
+  resizerSize: 6,
+  initialPercent: initialSplit ?? undefined,
+  onSettled: (pct) => saveLogsSplit(pct),
+});
 
 // ---- Share URL --------------------------------------------------------------
 

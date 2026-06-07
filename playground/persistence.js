@@ -15,6 +15,7 @@
 //     wrap in try/catch and treat errors as "no-op + carry on".
 
 export const STORAGE_KEY = "anydyce-playground:doc";
+export const LOGS_SPLIT_KEY = "anydyce-playground:logs-split";
 
 // Read the saved editor doc, or null if absent / unreadable.
 export function loadSavedDoc(storage = globalThis.localStorage) {
@@ -33,6 +34,34 @@ export function saveDoc(text, storage = globalThis.localStorage) {
   try {
     if (!storage) return;
     storage.setItem(STORAGE_KEY, text);
+  } catch {
+    // ignore
+  }
+}
+
+// Read the persisted output/logs split as a number (the output pane's
+// percent share), or null if absent / unparsable / out of plausible range.
+// Validation is light -- the consumer clamps to its own bounds before use,
+// so we only reject obvious garbage here.
+export function loadLogsSplit(storage = globalThis.localStorage) {
+  try {
+    if (!storage) return null;
+    const raw = storage.getItem(LOGS_SPLIT_KEY);
+    if (raw === null) return null;
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return null;
+    return n;
+  } catch {
+    return null;
+  }
+}
+
+// Persist the output/logs split as a percentage string. Silent no-op on
+// storage error, same as saveDoc.
+export function saveLogsSplit(percent, storage = globalThis.localStorage) {
+  try {
+    if (!storage) return;
+    storage.setItem(LOGS_SPLIT_KEY, String(percent));
   } catch {
     // ignore
   }
