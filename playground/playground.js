@@ -237,14 +237,11 @@ function setStatus(msg) {
   if (statusEl) statusEl.textContent = msg;
 }
 
-function renderResults(results) {
+function renderResults(text) {
+  // `text` is already the fully-formatted multi-block output produced by
+  // anydyce.anydice.format_results in the worker; just display it.
   outputEl.classList.remove("output-placeholder");
-  if (results.length === 0) {
-    outputEl.textContent = "(no output)";
-    return;
-  }
-  const blocks = results.map(({ label, text }) => `=== ${label} ===\n${text}`);
-  outputEl.textContent = blocks.join("\n\n");
+  outputEl.textContent = text;
 }
 
 function renderError(err) {
@@ -356,10 +353,10 @@ async function handleRun() {
   resetLogs();
   const t0 = performance.now();
   try {
-    const { results, warnings } = await runAnydice(source);
+    const { text, warnings } = await runAnydice(source);
     const dt = Math.round(performance.now() - t0);
     logWarnings(warnings);
-    renderResults(results);
+    renderResults(text);
     setStatus(`Ran in ${dt} ms.`);
   } catch (err) {
     if (err instanceof CancelledError) {
