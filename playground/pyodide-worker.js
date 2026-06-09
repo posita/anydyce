@@ -15,9 +15,17 @@
 //   Worker -> Main:
 //     { type: "status", message }                   -- progress updates
 //     { type: "ready" }                             -- init complete
-//     { type: "result", results, warnings, runId }  -- successful run
+//     { type: "result", text, outputs, warnings, runId } -- successful run
 //     { type: "error", stage: "init"|"run", error,
 //                      traceback?, warnings?, runId? }
+//
+// `text` is the fully-formatted, multi-block result string produced by
+// anydyce's `format_results` -- the single source of truth for textual
+// rendering, so the playground stays in lock-step with the magic and any
+// other anydyce consumer. `outputs` is a list of {label, items} per
+// `output` statement (items = list of [outcome, count] pairs), reserved
+// for future graphical consumers (plotly etc.). The current JS only
+// renders `text` and `warnings`.
 //
 // `warnings` is an array of {category, message, filename, lineno} captured
 // by the Python-side showwarning override. It accompanies BOTH successful
@@ -51,7 +59,7 @@ warnings.simplefilter("always")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=ExperimentalWarning)
 
-from anydyce.anydice import Settings, run as _anydyce_run
+from anydyce.anydice import Settings, format_results, run as _anydyce_run
 
 _captured_warnings = []
 
@@ -70,7 +78,7 @@ def _do_run(source):
     # Fresh Settings per run so a prior cell's set directives don't leak.
     # _anydyce_run mutates this in place when the program uses
     # \`set "anydyce: display precision" to ...\` / calculation precision;
-    # we read the final display_precision back below for formatting.
+    # format_results then reads the final display_precision back.
     settings = Settings()
     try:
         results = _anydyce_run(source, settings=settings)
@@ -81,16 +89,16 @@ def _do_run(source):
             "traceback": _traceback.format_exc(),
             "warnings": list(_captured_warnings),
         }
-    precision = settings.display_precision
     return {
         "ok": True,
-        "results": [
-            {
-                "label": label,
-                "text": h.format(precision=precision) if h else "(empty distribution)",
-                "short": h.format_short(precision=precision) if h else "{}",
-                "items": list(h.items()) if h else [],
-            }
+        # Single source of truth for text rendering: anydyce's format_results.
+        # Header style, empty-distribution wording, precision handling, etc.
+        # all live in one place; the playground tracks anydyce automatically.
+        "text": format_results(results, settings=settings),
+        # Raw per-output data reserved for future graphical consumers
+        # (plotly, etc.). Not read by the JS today.
+        "outputs": [
+            {"label": label, "items": list(h.items()) if h else []}
             for label, h in results
         ],
         "warnings": list(_captured_warnings),
@@ -196,7 +204,8 @@ self.addEventListener("message", async (ev) => {
       if (out.ok) {
         self.postMessage({
           type: "result",
-          results: out.results,
+          text: out.text,
+          outputs: out.outputs,
           warnings: out.warnings,
           runId: msg.runId,
         });
