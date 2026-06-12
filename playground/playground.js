@@ -259,15 +259,39 @@ function renderResults(text) {
   showOutputViews();
 }
 
+// Last successful run's raw outputs + precision, kept so the charts can be
+// re-rendered without re-running the program (currently: when the OS
+// light/dark setting flips mid-session, since Plotly has no native
+// prefers-color-scheme reactivity and the charts bake colors in at render
+// time).
+let lastOutputs = null;
+let lastDisplayPrecision;
+
 function renderOutputBars(outputs, displayPrecision) {
   // Bars view: stacked horizontal-bar charts, one per `output` statement,
   // built from raw [{label, items}] data. Empty distributions get an
   // explicit "(empty)" placeholder so the layout matches the text view.
   // displayPrecision is the run's final `set "anydyce: display precision"`
   // value, so percent labels match the text view's formatting.
+  lastOutputs = outputs;
+  lastDisplayPrecision = displayPrecision;
   renderPlots(outputBars, outputs, Plotly, { precision: displayPrecision });
   showOutputViews();
 }
+
+// Re-render charts when the OS theme changes so they pick up the new CSS
+// palette (renderPlots re-reads the variables on every call). The rest of
+// the UI updates automatically via the media query in playground.css; the
+// charts are the only place colors get baked in.
+window
+  .matchMedia("(prefers-color-scheme: dark)")
+  .addEventListener("change", () => {
+    if (lastOutputs !== null) {
+      renderPlots(outputBars, lastOutputs, Plotly, {
+        precision: lastDisplayPrecision,
+      });
+    }
+  });
 
 function renderError(err) {
   // Output shows a short error summary only; the full traceback lives in

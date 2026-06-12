@@ -17,6 +17,7 @@ import {
   globalMaxPercent,
   itemsToPercents,
   plotSpec,
+  readCssTheme,
 } from "../plot.js";
 
 // ---- itemsToPercents ----------------------------------------------------
@@ -253,4 +254,59 @@ test("plotSpec: invalid precision falls back to the default", () => {
       `precision=${String(bad)}`,
     );
   }
+});
+
+// ---- theme -----------------------------------------------------------------
+
+const THEME = {
+  bg: "#14171c",
+  text: "#e6edf3",
+  muted: "#8b949e",
+  border: "#2d333b",
+  accent: "#4cc38a",
+  fontFamily: "TestFont, sans-serif",
+};
+
+test("plotSpec: theme drives backgrounds, text, and font", () => {
+  const spec = plotSpec("a", [[1, 1], [2, 3]], { theme: THEME });
+  assert.equal(spec.layout.paper_bgcolor, THEME.bg);
+  assert.equal(spec.layout.plot_bgcolor, THEME.bg);
+  assert.equal(spec.layout.font.color, THEME.text);
+  assert.equal(spec.layout.font.family, THEME.fontFamily);
+});
+
+test("plotSpec: theme drives bar color", () => {
+  const spec = plotSpec("a", [[1, 1]], { theme: THEME });
+  assert.equal(spec.data[0].marker.color, THEME.accent);
+});
+
+test("plotSpec: theme drives axis grid / line / tick colors", () => {
+  const spec = plotSpec("a", [[1, 1]], { theme: THEME });
+  for (const axis of [spec.layout.xaxis, spec.layout.yaxis]) {
+    assert.equal(axis.gridcolor, THEME.border);
+    assert.equal(axis.linecolor, THEME.border);
+    assert.equal(axis.tickfont.color, THEME.muted);
+  }
+});
+
+test("plotSpec: theme applies to the empty-distribution spec too", () => {
+  const spec = plotSpec("empty", [], { theme: THEME });
+  assert.equal(spec.layout.paper_bgcolor, THEME.bg);
+  assert.equal(spec.layout.annotations[0].font.color, THEME.muted);
+});
+
+test("plotSpec: without theme, Plotly defaults are left alone", () => {
+  // No color keys injected -- unit tests and themeless contexts get the
+  // spec unmodified.
+  const spec = plotSpec("a", [[1, 1]]);
+  assert.equal(spec.layout.paper_bgcolor, undefined);
+  assert.equal(spec.layout.font, undefined);
+  assert.equal(spec.data[0].marker, undefined);
+  assert.equal(spec.layout.xaxis.gridcolor, undefined);
+});
+
+test("readCssTheme: returns null outside a DOM", () => {
+  // Node has no document; the default param resolves to undefined.
+  assert.equal(readCssTheme(), null);
+  assert.equal(readCssTheme(null), null);
 });
