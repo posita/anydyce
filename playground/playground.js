@@ -32,14 +32,23 @@ import {
   runAnydice,
 } from "./pyodide-runner.js";
 import {
+  VIEW_MODE_BARS,
+  VIEW_MODE_TEXT,
   createDebouncedSaver,
   loadLogsSplit,
   loadSavedDoc,
+  loadViewMode,
   saveDoc,
   saveLogsSplit,
+  saveViewMode,
   stripUrlFragment,
 } from "./persistence.js";
 import { attachRowResizer, clampPercent } from "./resizer.js";
+import { renderPlots } from "./plot.js";
+// plotly.js-cartesian-dist-min loads via esm.sh through the importmap (see
+// index.html). UMD bundle wrapped to ESM; default export is the Plotly
+// namespace.
+import Plotly from "plotly.js-cartesian-dist-min";
 
 // Editor theme. All tunable knobs (colors, sizes, paddings) live as CSS
 // variables in playground.css; this block only handles the structural
@@ -226,33 +235,112 @@ async function fetchProgramFromUrl() {
 
 // ---- DOM refs and helpers ---------------------------------------------------
 
-const statusEl  = document.getElementById("status");
-const runBtn    = document.getElementById("run-btn");
-const shareBtn  = document.getElementById("share-btn");
-const cancelBtn = document.getElementById("cancel-btn");
-const outputEl  = document.getElementById("output");
-const logsEl    = document.getElementById("logs");
+const statusEl          = document.getElementById("status");
+const runBtn            = document.getElementById("run-btn");
+const shareBtn          = document.getElementById("share-btn");
+const cancelBtn         = document.getElementById("cancel-btn");
+const outputPlaceholder = document.getElementById("output-placeholder");
+const outputText        = document.getElementById("output-text");
+const outputBars        = document.getElementById("output-bars");
+const viewBarsBtn       = document.getElementById("view-bars-btn");
+const viewTextBtn       = document.getElementById("view-text-btn");
+const logsPlaceholder   = document.getElementById("logs-placeholder");
+const logsEl            = document.getElementById("logs");
 
 function setStatus(msg) {
   if (statusEl) statusEl.textContent = msg;
 }
 
 function renderResults(text) {
-  // `text` is already the fully-formatted multi-block output produced by
-  // anydyce.anydice.format_results in the worker; just display it.
-  outputEl.classList.remove("output-placeholder");
-  outputEl.textContent = text;
+  // Text view: anydyce.format_results produces the multi-block string in
+  // the worker; just display it. The bars view is rendered separately
+  // from the structured `outputs` array (see handleRun).
+  outputText.textContent = text;
+  showOutputViews();
+}
+
+function renderOutputBars(outputs) {
+  // Bars view: stacked horizontal-bar charts, one per `output` statement,
+  // built from raw [{label, items}] data. Empty distributions get an
+  // explicit "(empty)" placeholder so the layout matches the text view.
+  renderPlots(outputBars, outputs, Plotly);
+  showOutputViews();
 }
 
 function renderError(err) {
   // Output shows a short error summary only; the full traceback lives in
   // the logs pane (see logTraceback). Keeping output terse means the eye
   // can quickly tell "did it work?" without scrolling past 30 lines of
-  // traceback.
-  outputEl.classList.remove("output-placeholder");
+  // traceback. Surface the same summary in both views so toggling doesn't
+  // change what you see when something went wrong.
   const detail = (err && err.message) || String(err);
-  outputEl.textContent = `Error: ${detail}`;
+  const msg = `Error: ${detail}`;
+  outputText.textContent = msg;
+  outputBars.replaceChildren();
+  const div = document.createElement("div");
+  div.className = "plot-empty";
+  div.textContent = msg;
+  outputBars.appendChild(div);
+  showOutputViews();
 }
+
+// ---- View-mode toggle ------------------------------------------------------
+//
+// Output pane has two simultaneous views (text + bars); the toggle just
+// shows / hides one of them via the .hidden class. Both views are populated
+// on every run, so toggling never needs to re-render data -- which means
+// the toggle handler runs instantly.
+//
+// Plotly does NOT recompute layout while its container is display: none;
+// when we switch TO bars view, call Plotly.Plots.resize on each .plot so
+// the chart fills the now-visible space. (Switching to text view doesn't
+// need anything; <pre>-style text reflows naturally.)
+
+let viewMode = loadViewMode() || VIEW_MODE_BARS;
+// False until the first run (or error) renders something. While false, the
+// placeholder element is visible and BOTH views stay hidden regardless of
+// viewMode -- toggling before the first run only moves the active-button
+// highlight.
+let outputHasContent = false;
+
+function applyViewVisibility() {
+  const showBars = viewMode === VIEW_MODE_BARS;
+  outputBars.classList.toggle("hidden", !showBars || !outputHasContent);
+  outputText.classList.toggle("hidden", showBars || !outputHasContent);
+  viewBarsBtn.classList.toggle("active", showBars);
+  viewTextBtn.classList.toggle("active", !showBars);
+  if (showBars && outputHasContent) {
+    // Resize any Plotly charts that may have been laid out while hidden;
+    // Plotly skips layout for display: none containers.
+    for (const plot of outputBars.querySelectorAll(".plot")) {
+      Plotly.Plots.resize(plot);
+    }
+  }
+}
+
+// First content retires the placeholder permanently and reveals the active
+// view. Idempotent -- render paths call it unconditionally.
+function showOutputViews() {
+  if (!outputHasContent) {
+    outputHasContent = true;
+    outputPlaceholder.classList.add("hidden");
+  }
+  applyViewVisibility();
+}
+
+function setViewMode(mode) {
+  if (mode !== VIEW_MODE_BARS && mode !== VIEW_MODE_TEXT) return;
+  viewMode = mode;
+  applyViewVisibility();
+  saveViewMode(mode);
+}
+
+viewBarsBtn.addEventListener("click", () => setViewMode(VIEW_MODE_BARS));
+viewTextBtn.addEventListener("click", () => setViewMode(VIEW_MODE_TEXT));
+
+// Reflect the persisted (or default) view mode in the toggle buttons on
+// load. The views themselves stay hidden until first content.
+applyViewVisibility();
 
 // ---- Logs pane -------------------------------------------------------------
 //
@@ -268,7 +356,10 @@ let logsHasContent = false;
 
 function resetLogs() {
   logsEl.textContent = "";
-  logsEl.classList.remove("logs-placeholder");
+  // Same placeholder pattern as the output pane: a dedicated sibling
+  // element retires permanently on first content.
+  logsPlaceholder.classList.add("hidden");
+  logsEl.classList.remove("hidden");
   logsHasContent = true;
 }
 
@@ -348,22 +439,29 @@ async function handleRun() {
   runBtn.disabled = true;
   cancelBtn.disabled = false;
   cancelBtn.title = "Cancel the current run (terminates and re-initializes the worker)";
-  outputEl.classList.remove("output-placeholder");
-  outputEl.textContent = "";
+  outputText.textContent = "";
+  outputBars.replaceChildren();
+  showOutputViews();
   resetLogs();
   const t0 = performance.now();
   try {
-    const { text, warnings } = await runAnydice(source);
+    const { text, outputs, warnings } = await runAnydice(source);
     const dt = Math.round(performance.now() - t0);
     logWarnings(warnings);
     renderResults(text);
+    renderOutputBars(outputs);
     setStatus(`Ran in ${dt} ms.`);
   } catch (err) {
     if (err instanceof CancelledError) {
       // Cancel is a deliberate user action, not a failure. handleCancel()
       // updates the status and re-inits the runtime; don't overwrite that
       // here.
-      outputEl.textContent = "(cancelled)";
+      outputText.textContent = "(cancelled)";
+      outputBars.replaceChildren();
+      const cancelDiv = document.createElement("div");
+      cancelDiv.className = "plot-empty";
+      cancelDiv.textContent = "(cancelled)";
+      outputBars.appendChild(cancelDiv);
       logEntry("cancel", "Cancelled by user.");
     } else if (err instanceof RunError) {
       // Python-level error from the program. Output gets the short summary;
@@ -522,8 +620,10 @@ initPyodide(setStatus)
       // the wait are reflected in the run.
       runPending = false;
       handleRun();
-    } else if (outputEl.classList.contains("output-placeholder")) {
-      outputEl.textContent =
+    } else if (!outputHasContent) {
+      // Nothing rendered yet -- advance the placeholder prose from
+      // "Starting up..." to the ready prompt.
+      outputPlaceholder.textContent =
         "Click Run (or Shift+Enter in the editor). Output will appear here.";
     }
   })
@@ -566,11 +666,14 @@ async function handleShare() {
     setStatus("Share URL copied to clipboard.");
   } catch (err) {
     // Clipboard API can fail in non-secure contexts or when not focused.
-    // Fall back to surfacing the URL in the output pane so the user can
-    // copy it manually.
-    outputEl.classList.remove("output-placeholder");
-    outputEl.textContent =
+    // Fall back to surfacing the URL in the text view so the user can copy
+    // it manually. The text view is forced to be visible regardless of
+    // current view-mode setting (the bars view can't render arbitrary
+    // copy-me text usefully).
+    outputText.textContent =
       `Share URL (copy manually -- clipboard access denied):\n\n${shareUrl}`;
+    showOutputViews();
+    setViewMode(VIEW_MODE_TEXT);
     setStatus("Share URL ready (clipboard unavailable).");
   }
 }

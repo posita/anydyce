@@ -8,11 +8,16 @@ import assert from "node:assert/strict";
 import {
   LOGS_SPLIT_KEY,
   STORAGE_KEY,
+  VIEW_MODE_BARS,
+  VIEW_MODE_KEY,
+  VIEW_MODE_TEXT,
   createDebouncedSaver,
   loadLogsSplit,
   loadSavedDoc,
+  loadViewMode,
   saveDoc,
   saveLogsSplit,
+  saveViewMode,
   stripUrlFragment,
 } from "../persistence.js";
 
@@ -138,6 +143,56 @@ test("saveLogsSplit swallows storage errors silently", () => {
 test("loadLogsSplit / saveLogsSplit no-op when storage is unavailable", () => {
   assert.equal(loadLogsSplit(null), null);
   assert.doesNotThrow(() => saveLogsSplit(50, null));
+});
+
+// ---- loadViewMode / saveViewMode -----------------------------------------
+
+test("VIEW_MODE_KEY shares the playground namespace", () => {
+  assert.match(VIEW_MODE_KEY, /^anydyce-playground:/);
+  assert.notEqual(VIEW_MODE_KEY, STORAGE_KEY);
+  assert.notEqual(VIEW_MODE_KEY, LOGS_SPLIT_KEY);
+});
+
+test("saveViewMode + loadViewMode round-trip bars", () => {
+  const storage = makeStorage();
+  saveViewMode(VIEW_MODE_BARS, storage);
+  assert.equal(loadViewMode(storage), VIEW_MODE_BARS);
+});
+
+test("saveViewMode + loadViewMode round-trip text", () => {
+  const storage = makeStorage();
+  saveViewMode(VIEW_MODE_TEXT, storage);
+  assert.equal(loadViewMode(storage), VIEW_MODE_TEXT);
+});
+
+test("loadViewMode returns null when unset", () => {
+  assert.equal(loadViewMode(makeStorage()), null);
+});
+
+test("loadViewMode rejects unknown values", () => {
+  // A stale or hand-edited storage entry must not poison the runtime; the
+  // consumer falls back to its default for null.
+  const storage = makeStorage();
+  storage.setItem(VIEW_MODE_KEY, "pie-chart");
+  assert.equal(loadViewMode(storage), null);
+});
+
+test("saveViewMode ignores unknown values", () => {
+  // Defensive: callers should pass one of the constants, but a typo
+  // shouldn't write garbage into storage.
+  const storage = makeStorage();
+  saveViewMode("pie-chart", storage);
+  assert.equal(storage.getItem(VIEW_MODE_KEY), null);
+});
+
+test("loadViewMode / saveViewMode swallow storage errors", () => {
+  assert.equal(loadViewMode(makeThrowingStorage()), null);
+  assert.doesNotThrow(() => saveViewMode(VIEW_MODE_BARS, makeThrowingStorage()));
+});
+
+test("loadViewMode / saveViewMode no-op when storage is unavailable", () => {
+  assert.equal(loadViewMode(null), null);
+  assert.doesNotThrow(() => saveViewMode(VIEW_MODE_BARS, null));
 });
 
 // ---- stripUrlFragment ----------------------------------------------------
