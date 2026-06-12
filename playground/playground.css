@@ -227,25 +227,87 @@ main {
   font-size: var(--editor-font-size);
 }
 
-#output {
+/* Generic visibility utility. No !important needed: nothing else sets
+ * `display` on the elements that carry this class (the views and
+ * placeholders are plain block children of a flex pane). */
+.hidden {
+  display: none;
+}
+
+/* Two stacked-but-not-stacked views: only one is visible at a time,
+ * controlled by the .hidden class. Both occupy the pane below the header. */
+.output-view {
+  flex: 1;
+  overflow: auto;
+}
+
+/* Single-purpose placeholder element shown until its pane has content.
+ * It is a SIBLING of the content views, never the same element, so it
+ * doesn't inherit or fight their content styling (monospace, pre-wrap,
+ * per-view padding). One rule, no overrides. */
+.pane-placeholder {
   flex: 1;
   padding: 1em;
   overflow: auto;
+  color: var(--muted);
+  font-style: italic;
+  font-size: var(--editor-font-size);
+}
+
+#output-text {
+  padding: 1em;
   font-family: var(--font-mono);
   font-size: var(--editor-font-size);
   white-space: pre-wrap;
 }
-.output-placeholder {
+
+#output-bars {
+  padding: 0.5em;
+}
+
+/* One Plotly chart per AnyDice `output` statement. Fixed height keeps
+ * multiple outputs from collapsing to nothing; the parent scrolls if the
+ * total exceeds the pane. */
+.plot {
+  width: 100%;
+  height: 280px;
+  margin-bottom: 0.5em;
+}
+.plot:last-child {
+  margin-bottom: 0;
+}
+.plot-empty {
   color: var(--muted);
   font-style: italic;
-  font-family: var(--font-ui) !important;
-  /* #output normally uses pre-wrap so histogram output preserves its
-   * formatting; for placeholder prose that turns the HTML's surrounding
-   * newline + indent into a literal blank line and indent. Collapse to
-   * normal while the placeholder class is active. !important needed for
-   * the same reason font-family above does: the #output ID selector beats
-   * a bare class selector. */
-  white-space: normal !important;
+  padding: 1em;
+}
+
+/* Segmented view-mode toggle in the Output pane header. Two compact
+ * buttons with a shared border, current selection highlighted in accent. */
+.view-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  overflow: hidden;
+}
+.view-toggle button {
+  font-family: inherit;
+  font-size: 0.85em;
+  padding: 0.2em 0.7em;
+  border: none;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+}
+.view-toggle button + button {
+  border-left: 1px solid var(--border);
+}
+.view-toggle button:hover {
+  background: var(--code-bg);
+}
+.view-toggle button.active {
+  background: var(--accent);
+  color: var(--accent-fg);
 }
 
 #logs {
@@ -255,11 +317,6 @@ main {
   font-family: var(--font-mono);
   font-size: var(--editor-font-size);
   line-height: 1.35;
-}
-.logs-placeholder {
-  color: var(--muted);
-  font-style: italic;
-  font-family: var(--font-ui) !important;
 }
 
 .log-entry {

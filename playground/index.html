@@ -31,10 +31,23 @@
       <section class="pane output-pane">
         <div class="pane-header">
           <h2>Output</h2>
+          <div class="view-toggle" role="group" aria-label="Output view mode">
+            <button id="view-bars-btn" type="button" class="active" data-view="bars">Bars</button>
+            <button id="view-text-btn" type="button" data-view="text">Text</button>
+          </div>
         </div>
-        <div id="output" class="output-placeholder">
+        <!--
+          The placeholder is its own element with exactly one job: show
+          status prose until the first run produces content. It never mixes
+          with the views' content styling, so no specificity gymnastics.
+          Both views start hidden and empty; playground.js reveals the
+          active one once there's something to show.
+        -->
+        <div id="output-placeholder" class="pane-placeholder">
           Starting up...
         </div>
+        <div id="output-bars" class="output-view hidden"></div>
+        <div id="output-text" class="output-view hidden"></div>
       </section>
 
       <div id="row-resizer" class="row-resizer" role="separator" aria-orientation="horizontal" aria-label="Resize output and logs panes"></div>
@@ -43,9 +56,10 @@
         <div class="pane-header">
           <h2>Logs</h2>
         </div>
-        <div id="logs" class="logs-placeholder">
+        <div id="logs-placeholder" class="pane-placeholder">
           Warnings and errors from the current run will appear here.
         </div>
+        <div id="logs" class="hidden"></div>
       </section>
     </div>
   </main>
@@ -87,7 +101,8 @@
         "style-mod":            "https://esm.sh/style-mod@4.1.2",
         "w3c-keyname":          "https://esm.sh/w3c-keyname@2.2.8",
         "crelt":                "https://esm.sh/crelt@1.0.6",
-        "codemirror":           "https://esm.sh/*codemirror@6.0.1"
+        "codemirror":           "https://esm.sh/*codemirror@6.0.1",
+        "plotly.js-cartesian-dist-min": "https://esm.sh/plotly.js-cartesian-dist-min@2.35.2"
       }
     }
   </script>

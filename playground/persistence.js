@@ -16,6 +16,11 @@
 
 export const STORAGE_KEY = "anydyce-playground:doc";
 export const LOGS_SPLIT_KEY = "anydyce-playground:logs-split";
+export const VIEW_MODE_KEY = "anydyce-playground:view-mode";
+
+export const VIEW_MODE_BARS = "bars";
+export const VIEW_MODE_TEXT = "text";
+const _ALL_VIEW_MODES = new Set([VIEW_MODE_BARS, VIEW_MODE_TEXT]);
 
 // Read the saved editor doc, or null if absent / unreadable.
 export function loadSavedDoc(storage = globalThis.localStorage) {
@@ -62,6 +67,31 @@ export function saveLogsSplit(percent, storage = globalThis.localStorage) {
   try {
     if (!storage) return;
     storage.setItem(LOGS_SPLIT_KEY, String(percent));
+  } catch {
+    // ignore
+  }
+}
+
+// Read the persisted output-pane view mode ("bars" or "text"), or null if
+// absent or set to an unrecognized value. The consumer applies its own
+// default for null.
+export function loadViewMode(storage = globalThis.localStorage) {
+  try {
+    if (!storage) return null;
+    const raw = storage.getItem(VIEW_MODE_KEY);
+    if (raw === null) return null;
+    return _ALL_VIEW_MODES.has(raw) ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+// Persist the view mode. Silent no-op on storage error / unknown mode.
+export function saveViewMode(mode, storage = globalThis.localStorage) {
+  if (!_ALL_VIEW_MODES.has(mode)) return;
+  try {
+    if (!storage) return;
+    storage.setItem(VIEW_MODE_KEY, mode);
   } catch {
     // ignore
   }
