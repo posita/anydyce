@@ -2194,6 +2194,21 @@ class TestFunctionSeqParam:
             )
         ]
 
+    def test_seq_param_pool_via_variable_matches_literal(self) -> None:
+        # Pool structure survives variable assignment: `X: 3d6` then
+        # `[count X]` enumerates rolls exactly like the literal
+        # `[count 3d6]` -- #X = 3 for both, NOT 1 (which is what a
+        # variable-collapses-to-summed-die rule would produce; compare
+        # test_seq_param_with_die).
+        # Probed against anydice.com 2026-06-12: AnyDice outputs 3 for
+        # both forms, i.e. its preserve-structure rule is value-based,
+        # not literal-syntactic. Guards our P-through-variables semantics
+        # against future refactors.
+        literal = run(f"{self._F_COUNT}\noutput [count 3d6]")
+        via_var = run(f"{self._F_COUNT}\nX: 3d6\noutput [count X]")
+        assert literal == via_var
+        assert literal == [("output 1", H({3: 1}))]
+
 
 class TestFunctionMultiPatternDispatch:
     # AnyDice's "function name" is a function's *pattern shape* -- words at fixed
