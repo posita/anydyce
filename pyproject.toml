@@ -42,6 +42,9 @@ classifiers = [
 Homepage = "https://posita.github.io/anydyce/"
 "Source Repository" = "https://github.com/posita/anydyce/"
 
+[project.optional-dependencies]
+viz = ["matplotlib"]
+
 [build-system]
 requires = ["setuptools>=64", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
@@ -59,6 +62,7 @@ dev = [
     {include-group = "lint"},
     {include-group = "test"},
     {include-group = "tox"},
+    {include-group = "viz"},
 ]
 # Only what's needed for uv run mkdocs build
 docs = [
@@ -77,6 +81,7 @@ docs = [
     "pandas",
     "pandas-stubs",
     "pymdown-extensions",
+    {include-group = "viz"},
 ]
 # Only what's needed for uv run pre-commit run --all-files --hook-stage pre-push
 lint = [
@@ -106,6 +111,7 @@ test = [
     "pytest-beartype",
     "pytest-cov",
     {include-group = "test-pypy"},
+    {include-group = "viz"},
 ]
 # Only what's needed for uv run pytest specifically with PyPy (via Tox)
 test-pypy = [
@@ -118,6 +124,8 @@ tox = [
     "tox",
     "tox-uv",
 ]
+# Mirrors optional dependencies
+viz = ["matplotlib"]
 
 [tool.codespell]
 # Suggested pronunciations. (See WBO guides in

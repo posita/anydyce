@@ -34,7 +34,7 @@ from IPython.display import HTML, Markdown, display
 
 from . import jupyter_visualize
 from .anydice import (
-    DEFAULT_PRECISION,  # pyright: ignore[reportAttributeAccessIssue]
+    DEFAULT_PRECISION,
     Settings,
     format_results,
     run,
