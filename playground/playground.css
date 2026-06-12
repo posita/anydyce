@@ -44,10 +44,9 @@
   --control-padding-y:       0.15em;
   --textfield-padding-x:     0.4em;
   --button-padding-x:        0.6em;
-  /* Height of the draggable divider between output and logs. Must match
-   * the resizerSize argument passed to attachRowResizer in playground.js,
-   * since that's what the JS subtracts from container height when
-   * converting pointer Y to grid fr. */
+  /* Height of the draggable divider between output and logs. Single
+   * owner: playground.js reads this variable at startup and passes it to
+   * attachRowResizer, so the pointer math always matches the layout. */
   --resizer-size:            6px;
 }
 
@@ -192,15 +191,25 @@ main {
   gap: 0.4em;
   align-items: center;
 }
-.pane-actions button {
+
+/* Shared metrics for ALL pane-header controls (action buttons + view
+ * toggle): one rule owns the vertical sizing so the control families can't
+ * drift apart in height. Variant rules below add only what differs --
+ * horizontal padding, borders, colors. (The CM6 search-panel buttons are a
+ * deliberately separate, smaller family; see the editor theme.) */
+.pane-header button {
   font-family: inherit;
   font-size: 0.9em;
-  padding: 0.3em 0.9em;
+  padding-block: 0.3em;
+  cursor: pointer;
+}
+
+.pane-actions button {
+  padding-inline: 0.9em;
   border: 1px solid var(--border);
   background: var(--accent);
   color: var(--accent-fg);
-  border-radius: 3px;
-  cursor: pointer;
+  border-radius: var(--control-radius);
 }
 .pane-actions button.btn-secondary {
   background: var(--bg);
@@ -265,12 +274,12 @@ main {
   padding: 0.5em;
 }
 
-/* One Plotly chart per AnyDice `output` statement. Fixed height keeps
- * multiple outputs from collapsing to nothing; the parent scrolls if the
- * total exceeds the pane. */
+/* One Plotly chart per AnyDice `output` statement. Height comes from each
+ * chart's layout.height (computed in plot.js so every outcome row gets the
+ * same pixel allotment -> uniform bar thickness across outputs); the
+ * parent scrolls if the total exceeds the pane. */
 .plot {
   width: 100%;
-  height: 280px;
   margin-bottom: 0.5em;
 }
 .plot:last-child {
@@ -291,13 +300,13 @@ main {
   overflow: hidden;
 }
 .view-toggle button {
-  font-family: inherit;
-  font-size: 0.85em;
-  padding: 0.2em 0.7em;
+  /* Vertical metrics come from the shared .pane-header button rule.
+   * Horizontal padding is narrower than the action buttons -- the toggle
+   * reads as one segmented control, not two standalone buttons. */
+  padding-inline: 0.7em;
   border: none;
   background: var(--bg);
   color: var(--text);
-  cursor: pointer;
 }
 .view-toggle button + button {
   border-left: 1px solid var(--border);
@@ -323,6 +332,9 @@ main {
   white-space: pre-wrap;
   margin: 0.1em 0;
 }
+/* Severity suffixes pair by convention with the strings passed to
+ * logEntry() in playground.js (info / warning / error / cancel). An
+ * unrecognized severity renders unstyled -- cosmetic-only failure. */
 .log-entry-info     { color: var(--muted); }
 .log-entry-warning  { color: var(--syn-prop); }
 .log-entry-error    { color: var(--syn-str); }

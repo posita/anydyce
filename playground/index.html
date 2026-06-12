@@ -18,6 +18,14 @@
     <section class="pane editor-pane">
       <div class="pane-header">
         <h2>Source</h2>
+        <!--
+          The titles / disabled states below (and the "Starting up..."
+          strings in the status span and output placeholder) are pre-init
+          defaults; playground.js rewrites them at runtime with the same or
+          evolved wording (e.g. cancel's title in handleRun's finally).
+          Rewording means updating both places -- there is no shared
+          constant for these strings.
+        -->
         <div class="pane-actions">
           <button id="share-btn" class="btn-secondary" title="Copy a shareable URL containing this program">Share URL</button>
           <button id="cancel-btn" class="btn-secondary" disabled title="No run in progress">Cancel</button>
@@ -32,8 +40,8 @@
         <div class="pane-header">
           <h2>Output</h2>
           <div class="view-toggle" role="group" aria-label="Output view mode">
-            <button id="view-bars-btn" type="button" class="active" data-view="bars">Bars</button>
-            <button id="view-text-btn" type="button" data-view="text">Text</button>
+            <button id="view-bars-btn" type="button" class="active">Bars</button>
+            <button id="view-text-btn" type="button">Text</button>
           </div>
         </div>
         <!--

@@ -8,7 +8,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { itemsToPercents, plotSpec } from "../plot.js";
+import {
+  CHART_CHROME_PX,
+  DEFAULT_PLOT_PRECISION,
+  EMPTY_CHART_PX,
+  PX_PER_OUTCOME,
+  chartHeight,
+  globalMaxPercent,
+  itemsToPercents,
+  plotSpec,
+} from "../plot.js";
 
 // ---- itemsToPercents ----------------------------------------------------
 
@@ -148,4 +157,100 @@ test("plotSpec: outcome order preserved in trace", () => {
 test("plotSpec: hovertemplate is set (avoid the auto 'trace 0' label)", () => {
   const spec = plotSpec("output 1", [[1, 1]]);
   assert.ok(spec.data[0].hovertemplate);
+});
+
+// ---- chartHeight / uniform bar thickness ---------------------------------
+
+test("chartHeight: each additional outcome adds exactly PX_PER_OUTCOME", () => {
+  assert.equal(chartHeight(7) - chartHeight(6), PX_PER_OUTCOME);
+  assert.equal(chartHeight(1), CHART_CHROME_PX + PX_PER_OUTCOME);
+});
+
+test("plotSpec: layout.height tracks outcome count", () => {
+  const items3 = [[1, 1], [2, 1], [3, 1]];
+  const items6 = [[1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [6, 1]];
+  const spec3 = plotSpec("a", items3);
+  const spec6 = plotSpec("b", items6);
+  assert.equal(spec3.layout.height, chartHeight(3));
+  assert.equal(spec6.layout.height, chartHeight(6));
+  // The whole point: pixels-per-outcome identical across the two charts.
+  assert.equal(
+    spec6.layout.height - spec3.layout.height,
+    3 * PX_PER_OUTCOME,
+  );
+});
+
+test("plotSpec: empty spec uses the fixed empty height", () => {
+  const spec = plotSpec("the empty die", []);
+  assert.equal(spec.layout.height, EMPTY_CHART_PX);
+});
+
+// ---- shared x-axis range --------------------------------------------------
+
+test("plotSpec: xMax fixes the x-axis range", () => {
+  const spec = plotSpec("a", [[1, 1], [2, 3]], { xMax: 42 });
+  assert.deepEqual(spec.layout.xaxis.range, [0, 42]);
+});
+
+test("plotSpec: without xMax the x-axis auto-ranges from zero", () => {
+  const spec = plotSpec("a", [[1, 1], [2, 3]]);
+  assert.equal(spec.layout.xaxis.range, undefined);
+  assert.equal(spec.layout.xaxis.rangemode, "tozero");
+});
+
+test("globalMaxPercent: picks the max across all outputs", () => {
+  const outputs = [
+    { label: "a", items: [[1, 1], [2, 3]] },       // max 75%
+    { label: "b", items: [[5, 1]] },               // max 100%
+    { label: "c", items: [[1, 1], [2, 1], [3, 2]] }, // max 50%
+  ];
+  const max = globalMaxPercent(outputs);
+  assert.ok(Math.abs(max - 100) < 1e-9, `max=${max}`);
+});
+
+test("globalMaxPercent: ignores empty outputs", () => {
+  const outputs = [
+    { label: "a", items: [] },
+    { label: "b", items: [[1, 1], [2, 1]] }, // max 50%
+  ];
+  const max = globalMaxPercent(outputs);
+  assert.ok(Math.abs(max - 50) < 1e-9, `max=${max}`);
+});
+
+test("globalMaxPercent: null when every output is empty", () => {
+  assert.equal(globalMaxPercent([{ label: "a", items: [] }]), null);
+  assert.equal(globalMaxPercent([]), null);
+  assert.equal(globalMaxPercent(null), null);
+});
+
+// ---- display precision -----------------------------------------------------
+
+test("plotSpec: default precision matches anydyce's display default", () => {
+  assert.equal(DEFAULT_PLOT_PRECISION, 2);
+  const spec = plotSpec("a", [[1, 1], [2, 3]]);
+  assert.deepEqual(spec.data[0].text, ["25.00%", "75.00%"]);
+  assert.match(spec.data[0].hovertemplate, /%\{x:\.2f\}/);
+});
+
+test("plotSpec: precision 0 drops decimals", () => {
+  const spec = plotSpec("a", [[1, 1], [2, 3]], { precision: 0 });
+  assert.deepEqual(spec.data[0].text, ["25%", "75%"]);
+  assert.match(spec.data[0].hovertemplate, /%\{x:\.0f\}/);
+});
+
+test("plotSpec: precision 6 widens decimals", () => {
+  const spec = plotSpec("a", [[1, 2], [2, 1]], { precision: 6 });
+  assert.deepEqual(spec.data[0].text, ["66.666667%", "33.333333%"]);
+  assert.match(spec.data[0].hovertemplate, /%\{x:\.6f\}/);
+});
+
+test("plotSpec: invalid precision falls back to the default", () => {
+  for (const bad of [null, undefined, -1, 2.5, "high", NaN]) {
+    const spec = plotSpec("a", [[1, 1]], { precision: bad });
+    assert.match(
+      spec.data[0].hovertemplate,
+      new RegExp(`%\\{x:\\.${DEFAULT_PLOT_PRECISION}f\\}`),
+      `precision=${String(bad)}`,
+    );
+  }
 });
