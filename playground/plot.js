@@ -60,6 +60,59 @@ function normalizePrecision(precision) {
     : DEFAULT_PLOT_PRECISION;
 }
 
+// Read the chart theme from the CSS custom properties in playground.css --
+// the single source of truth for colors and fonts, including the dark-mode
+// values behind the prefers-color-scheme media query. Returns a plain
+// object consumable by plotSpec's `theme` option, or null outside a DOM
+// (Node tests). Callers re-invoke per render, so a theme flip between
+// renders is picked up automatically.
+export function readCssTheme(root = globalThis.document?.documentElement) {
+  if (!root) return null;
+  const styles = getComputedStyle(root);
+  const v = (name) => styles.getPropertyValue(name).trim();
+  return {
+    bg: v("--bg"),
+    text: v("--text"),
+    muted: v("--muted"),
+    border: v("--border"),
+    accent: v("--accent"),
+    fontFamily: v("--font-ui"),
+  };
+}
+
+// Layout-level theme injection. Returns {} when theme is null/undefined so
+// plotSpec stays usable (with Plotly's defaults) in themeless contexts
+// like unit tests.
+function themeLayoutBits(theme) {
+  if (!theme) return {};
+  return {
+    paper_bgcolor: theme.bg,
+    plot_bgcolor: theme.bg,
+    font: { color: theme.text, family: theme.fontFamily },
+    hoverlabel: {
+      bgcolor: theme.bg,
+      bordercolor: theme.border,
+      font: { color: theme.text, family: theme.fontFamily },
+    },
+    modebar: {
+      color: theme.muted,
+      activecolor: theme.text,
+      bgcolor: "transparent",
+    },
+  };
+}
+
+// Per-axis theme injection (grid / line / tick colors).
+function themeAxisBits(theme) {
+  if (!theme) return {};
+  return {
+    gridcolor: theme.border,
+    linecolor: theme.border,
+    zerolinecolor: theme.border,
+    tickfont: { color: theme.muted },
+  };
+}
+
 export function chartHeight(nOutcomes) {
   return CHART_CHROME_PX + nOutcomes * PX_PER_OUTCOME;
 }
@@ -92,6 +145,10 @@ export function globalMaxPercent(outputs) {
 // precision:  decimal places for percent labels (bar text + hover). Comes
 //             from the run's final `set "anydyce: display precision"` value
 //             so both views format numbers identically.
+// theme:      optional color/font object (see readCssTheme). When provided,
+//             backgrounds, text, axes, bars, and hover labels follow the
+//             playground's CSS theme (including dark mode); when omitted,
+//             Plotly's defaults apply (themeless unit-test contexts).
 //
 // Returns {data, layout, isEmpty}. `isEmpty` is true when the distribution
 // has no mass (empty items, all-zero counts, or null items); in that case
@@ -105,7 +162,7 @@ export function globalMaxPercent(outputs) {
 export function plotSpec(
   label,
   items,
-  { xMax = null, precision = DEFAULT_PLOT_PRECISION } = {},
+  { xMax = null, precision = DEFAULT_PLOT_PRECISION, theme = null } = {},
 ) {
   const prec = normalizePrecision(precision);
   const percents = itemsToPercents(items);
@@ -125,10 +182,11 @@ export function plotSpec(
             x: 0.5,
             y: 0.5,
             showarrow: false,
-            font: { size: 14 },
+            font: { size: 14, ...(theme ? { color: theme.muted } : {}) },
           },
         ],
         margin: { l: 40, r: 20, t: 40, b: 40 },
+        ...themeLayoutBits(theme),
       },
       isEmpty: true,
     };
@@ -147,24 +205,28 @@ export function plotSpec(
         text: barText,
         textposition: "auto",
         hovertemplate: `%{y}: %{x:.${prec}f}%<extra></extra>`,
+        ...(theme ? { marker: { color: theme.accent } } : {}),
       },
     ],
     layout: {
       title: { text: label },
       height: chartHeight(items.length),
       xaxis: {
-        title: { text: "Probability (%)" },
+        // title: { text: "Probability (%)" },
         ...(xMax !== null ? { range: [0, xMax] } : { rangemode: "tozero" }),
+        ...themeAxisBits(theme),
       },
       yaxis: {
-        title: { text: "Outcome" },
+        // title: { text: "Outcome" },
         type: "category",
         // The first item we passed has the smallest outcome; Plotly's
         // default category order would put it at the BOTTOM of the y-axis.
         // Flip so smallest is on top -- matches the text view's ordering.
         autorange: "reversed",
+        ...themeAxisBits(theme),
       },
       margin: { l: 60, r: 20, t: MARGIN_TOP_PX, b: MARGIN_BOTTOM_PX },
+      ...themeLayoutBits(theme),
     },
     isEmpty: false,
   };
@@ -177,6 +239,11 @@ export function plotSpec(
 // outputs:   array of {label, items}. label is a string, items is an array
 //            of [outcome, count] pairs.
 // precision: decimal places for percent labels; see plotSpec.
+//
+// The CSS theme is re-read on every call, so charts always reflect the
+// CURRENT light/dark palette; the caller is responsible for re-invoking on
+// a prefers-color-scheme change (see the matchMedia listener in
+// playground.js).
 export function renderPlots(container, outputs, Plotly, { precision } = {}) {
   container.replaceChildren();
   if (!outputs || outputs.length === 0) {
@@ -186,6 +253,7 @@ export function renderPlots(container, outputs, Plotly, { precision } = {}) {
     container.appendChild(empty);
     return;
   }
+  const theme = readCssTheme();
   // Shared x-axis range: every chart runs [0, global max + 5% headroom] so
   // bar lengths are comparable across outputs. Null when no output has
   // mass; each chart then auto-ranges (moot -- they're all empty).
@@ -195,7 +263,7 @@ export function renderPlots(container, outputs, Plotly, { precision } = {}) {
     const div = document.createElement("div");
     div.className = "plot";
     container.appendChild(div);
-    const spec = plotSpec(label, items, { xMax, precision });
+    const spec = plotSpec(label, items, { xMax, precision, theme });
     Plotly.newPlot(div, spec.data, spec.layout, {
       responsive: true,
       displaylogo: false,
