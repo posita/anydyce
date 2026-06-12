@@ -5,14 +5,16 @@
 //
 // Public API:
 //   await initPyodide(onStatus)  -> resolves when runtime is ready
-//   await runAnydice(source)     -> resolves to {text, outputs, warnings};
+//   await runAnydice(source)     -> resolves to {text, outputs,
+//                                   displayPrecision, warnings};
 //                                   rejects with RunError (Python exception:
 //                                   carries .traceback and .warnings) or
 //                                   CancelledError (deliberate cancel).
 //                                   `text` is the fully-rendered display
 //                                   string (anydyce's format_results).
 //                                   `outputs` is raw per-output data for
-//                                   future graphical consumers.
+//                                   the bars view. `displayPrecision` is
+//                                   the run's final display precision.
 //   cancelCurrentRun()           -> terminates the worker, rejecting any
 //                                   in-flight run with CancelledError; caller
 //                                   re-calls initPyodide() to bring runtime
@@ -73,6 +75,7 @@ function ensureWorker() {
           handler.resolve({
             text: msg.text || "",
             outputs: msg.outputs || [],
+            displayPrecision: msg.displayPrecision,
             warnings: msg.warnings || [],
           });
         }

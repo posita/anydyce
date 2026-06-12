@@ -259,11 +259,13 @@ function renderResults(text) {
   showOutputViews();
 }
 
-function renderOutputBars(outputs) {
+function renderOutputBars(outputs, displayPrecision) {
   // Bars view: stacked horizontal-bar charts, one per `output` statement,
   // built from raw [{label, items}] data. Empty distributions get an
   // explicit "(empty)" placeholder so the layout matches the text view.
-  renderPlots(outputBars, outputs, Plotly);
+  // displayPrecision is the run's final `set "anydyce: display precision"`
+  // value, so percent labels match the text view's formatting.
+  renderPlots(outputBars, outputs, Plotly, { precision: displayPrecision });
   showOutputViews();
 }
 
@@ -445,11 +447,12 @@ async function handleRun() {
   resetLogs();
   const t0 = performance.now();
   try {
-    const { text, outputs, warnings } = await runAnydice(source);
+    const { text, outputs, displayPrecision, warnings } =
+      await runAnydice(source);
     const dt = Math.round(performance.now() - t0);
     logWarnings(warnings);
     renderResults(text);
-    renderOutputBars(outputs);
+    renderOutputBars(outputs, displayPrecision);
     setStatus(`Ran in ${dt} ms.`);
   } catch (err) {
     if (err instanceof CancelledError) {
@@ -639,14 +642,22 @@ cancelBtn.addEventListener("click", handleCancel);
 
 // Restore a previously dragged split (clamped to the resizer's safe range so
 // a stale or hand-edited localStorage value can never strand a pane offscreen)
-// and wire pointer-drag handling. The resizerSize here MUST match the
-// `--resizer-size` CSS variable; see playground.css.
+// and wire pointer-drag handling. CSS owns the resizer thickness
+// (--resizer-size); read it here so the pointer math always agrees with the
+// stylesheet. The || fallback only matters if the variable is missing
+// entirely (e.g. stylesheet failed to load).
+const resizerSize =
+  parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue(
+      "--resizer-size",
+    ),
+  ) || 6;
 const savedSplit = loadLogsSplit();
 const initialSplit = savedSplit !== null ? clampPercent(savedSplit) : undefined;
 attachRowResizer({
   container: document.querySelector(".right-column"),
   resizer: document.getElementById("row-resizer"),
-  resizerSize: 6,
+  resizerSize,
   initialPercent: initialSplit ?? undefined,
   onSettled: (pct) => saveLogsSplit(pct),
 });

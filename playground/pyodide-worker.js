@@ -15,7 +15,8 @@
 //   Worker -> Main:
 //     { type: "status", message }                   -- progress updates
 //     { type: "ready" }                             -- init complete
-//     { type: "result", text, outputs, warnings, runId } -- successful run
+//     { type: "result", text, outputs, displayPrecision, warnings, runId }
+//                                                   -- successful run
 //     { type: "error", stage: "init"|"run", error,
 //                      traceback?, warnings?, runId? }
 //
@@ -23,9 +24,10 @@
 // anydyce's `format_results` -- the single source of truth for textual
 // rendering, so the playground stays in lock-step with the magic and any
 // other anydyce consumer. `outputs` is a list of {label, items} per
-// `output` statement (items = list of [outcome, count] pairs), reserved
-// for future graphical consumers (plotly etc.). The current JS only
-// renders `text` and `warnings`.
+// `output` statement (items = list of [outcome, count] pairs) consumed by
+// the bars view. `displayPrecision` is the run's final display precision
+// (after any `set "anydyce: display precision"` directives) so the bars
+// view formats percent labels consistently with the text view.
 //
 // `warnings` is an array of {category, message, filename, lineno} captured
 // by the Python-side showwarning override. It accompanies BOTH successful
@@ -95,12 +97,16 @@ def _do_run(source):
         # Header style, empty-distribution wording, precision handling, etc.
         # all live in one place; the playground tracks anydyce automatically.
         "text": format_results(results, settings=settings),
-        # Raw per-output data reserved for future graphical consumers
-        # (plotly, etc.). Not read by the JS today.
+        # Raw per-output data for the bars view (and future graphical
+        # consumers).
         "outputs": [
             {"label": label, "items": list(h.items()) if h else []}
             for label, h in results
         ],
+        # Final display precision after any \`set "anydyce: display
+        # precision"\` directives -- the bars view formats its percent
+        # labels with this so both views honor the same setting.
+        "displayPrecision": settings.display_precision,
         "warnings": list(_captured_warnings),
     }
 `;
@@ -206,6 +212,7 @@ self.addEventListener("message", async (ev) => {
           type: "result",
           text: out.text,
           outputs: out.outputs,
+          displayPrecision: out.displayPrecision,
           warnings: out.warnings,
           runId: msg.runId,
         });
