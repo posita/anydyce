@@ -7,18 +7,15 @@
   --border:       #d0d4d8;
   --text:         #1a1d22;
   --muted:        #6b7178;
-  /* Accent hue palette (Tailwind 600 for light mode). The active --accent
-   * is selected from these by the html[data-accent] rules below; --accent
-   * itself defaults to green so a fresh load (no attribute yet) matches the
-   * green swatch. amber stands in for yellow so white --accent-fg text
-   * stays legible on the button background. */
-  --accent-red:    #dc2626;
-  --accent-orange: #ea580c;
-  --accent-amber:  #d97706;
-  --accent-green:  #2a7a4f;
-  --accent-blue:   #2563eb;
-  --accent-purple: #7c3aed;
-  --accent:       var(--accent-green);
+  /* Accent: the active hue is chosen by the html[data-accent] rules below,
+   * each pointing --accent at a full-strength color slot (themes.css).
+   * Defaults to green so a fresh load (no attribute yet) matches the green
+   * swatch. Full-strength (not -muted) is the higher-contrast-against-bg
+   * variant -- dark in light mode, light in dark mode -- and --accent-fg
+   * tracks bg (white in light, near-black in dark), so it always contrasts
+   * with the accent on the Run button. --accent-fg keeps a literal per-mode
+   * value (the one accent value that's genuinely mode-specific). */
+  --accent:       var(--c-green);
   --accent-fg:    #ffffff;
   --code-bg:      #f4f6f8;
   --selection-bg: #add6ff;
@@ -28,17 +25,21 @@
    * above. rgba with low alpha lets the selection show through. */
   --active-line-bg: rgba(0, 0, 0, 0.04);
 
-  /* Syntax-highlighting palette (light) -- VSCode "Light+" inspired. */
-  --syn-keyword:  #af00db;
-  --syn-op-kw:    #af00db;
-  --syn-var:      #001080;
-  --syn-prop:     #795e26;
-  --syn-num:      #098658;
-  --syn-str:      #a31515;
-  --syn-comment:  #008000;
-  --syn-op:       #383a42;
-  --syn-bracket:  #383a42;
-  --syn-punct:    #6b7178;
+  /* Syntax highlighting maps token types onto theme color slots (themes.css).
+   * Defined ONCE here (not per light/dark) because the slots are themselves
+   * mode-authored, so var(--c-red) is already the right red in each mode.
+   * comment/operator/bracket/punctuation point at neutral slots (fg /
+   * fg-ward-muted). Tweak freely. */
+  --syn-keyword:  var(--c-magenta);
+  --syn-op-kw:    var(--c-magenta);
+  --syn-var:      var(--c-cyan);
+  --syn-prop:     var(--c-blue);
+  --syn-num:      var(--c-red);
+  --syn-str:      var(--c-yellow);
+  --syn-comment:  var(--c-fg-ward-muted);
+  --syn-op:       var(--c-fg);
+  --syn-bracket:  var(--c-fg);
+  --syn-punct:    var(--c-fg);
 
   --font-mono:   ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
   --font-ui:     -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -68,48 +69,32 @@
     --border:       #2d333b;
     --text:         #e6edf3;
     --muted:        #8b949e;
-    /* Accent hue palette (Tailwind 400 for dark mode -- lighter so it
-     * reads on the dark background and carries the dark --accent-fg). */
-    --accent-red:    #f87171;
-    --accent-orange: #fb923c;
-    --accent-amber:  #fbbf24;
-    --accent-green:  #4cc38a;
-    --accent-blue:   #60a5fa;
-    --accent-purple: #a78bfa;
-    --accent:       var(--accent-green);
+    /* --accent itself is mode-aware through the color slot (var(--c-green)
+     * in :root), so it needs no dark override. Only --accent-fg -- the text
+     * color ON the accent button -- is genuinely per-mode (dark text on the
+     * lighter dark-mode accent). Accent hues and --syn-* likewise come from
+     * the mode-authored slots, so they're not redefined here. */
     --accent-fg:    #14171c;
     --code-bg:      #1c2128;
     --selection-bg: #3a5680;
     --match-bg:     #515c6a;
     --active-line-bg: rgba(255, 255, 255, 0.05);
-
-    /* Syntax-highlighting palette (dark) -- VSCode "Dark+" inspired. */
-    --syn-keyword:  #c586c0;
-    --syn-op-kw:    #c586c0;
-    --syn-var:      #9cdcfe;
-    --syn-prop:     #dcdcaa;
-    --syn-num:      #b5cea8;
-    --syn-str:      #ce9178;
-    --syn-comment:  #6a9955;
-    --syn-op:       #d4d4d4;
-    --syn-bracket:  #d4d4d4;
-    --syn-punct:    #8b949e;
   }
 }
 
 /* Accent selection: the html[data-accent] attribute (set by playground.js
- * from the persisted choice) picks which hue --accent resolves to. Each
- * rule points --accent at a --accent-<hue> variable, which is itself
- * light/dark-aware, so a single set of rules works in both modes -- no
- * per-mode duplication. Everything that uses var(--accent) (Run button,
- * resizer hover, view-toggle active, and the chart bars via
- * readCssTheme) follows automatically. */
-html[data-accent="red"]    { --accent: var(--accent-red); }
-html[data-accent="orange"] { --accent: var(--accent-orange); }
-html[data-accent="amber"]  { --accent: var(--accent-amber); }
-html[data-accent="green"]  { --accent: var(--accent-green); }
-html[data-accent="blue"]   { --accent: var(--accent-blue); }
-html[data-accent="purple"] { --accent: var(--accent-purple); }
+ * from the persisted choice) points --accent at a full-strength color slot.
+ * The slots are mode-authored, so one set of rules works in both modes --
+ * no per-mode duplication. Everything that uses var(--accent) (Run button,
+ * resizer hover, view-toggle active, and the chart bars via readCssTheme)
+ * follows automatically; selecting a theme that redefines the slots
+ * recolors the accent for free. */
+html[data-accent="red"]     { --accent: var(--c-red); }
+html[data-accent="yellow"]  { --accent: var(--c-yellow); }
+html[data-accent="green"]   { --accent: var(--c-green); }
+html[data-accent="blue"]    { --accent: var(--c-blue); }
+html[data-accent="magenta"] { --accent: var(--c-magenta); }
+html[data-accent="cyan"]    { --accent: var(--c-cyan); }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
@@ -139,6 +124,22 @@ header h1 {
 .header-meta {
   font-size: 0.85em;
   color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+}
+
+/* Theme-family picker. A <select> (not swatches) because families are named
+ * choices, not single colors. Minimal styling that tracks the theme. */
+.theme-select {
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0.15em 0.3em;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  background: var(--bg-elev);
+  color: var(--text);
+  cursor: pointer;
 }
 
 /* Run-status line. Lives in the Logs pane header (run feedback sits with
@@ -159,9 +160,9 @@ header h1 {
 }
 
 /* Accent-color picker: a row of six swatches in the page header. Each
- * swatch shows its OWN hue (via the corresponding --accent-<hue> var, so
- * the swatches themselves track light/dark too); the selected one gets a
- * ring. Selecting sets html[data-accent], which re-points --accent. */
+ * swatch shows its OWN hue (via the corresponding --c-<hue> slot, so the
+ * swatches track both light/dark and the active theme); the selected one
+ * gets a ring. Selecting sets html[data-accent], which re-points --accent. */
 .accent-picker {
   display: inline-flex;
   gap: 0.35em;
@@ -177,12 +178,12 @@ header h1 {
   border-radius: 50%;
   cursor: pointer;
 }
-.accent-swatch[data-accent-choice="red"]    { background: var(--accent-red); }
-.accent-swatch[data-accent-choice="orange"] { background: var(--accent-orange); }
-.accent-swatch[data-accent-choice="amber"]  { background: var(--accent-amber); }
-.accent-swatch[data-accent-choice="green"]  { background: var(--accent-green); }
-.accent-swatch[data-accent-choice="blue"]   { background: var(--accent-blue); }
-.accent-swatch[data-accent-choice="purple"] { background: var(--accent-purple); }
+.accent-swatch[data-accent-choice="red"]     { background: var(--c-red); }
+.accent-swatch[data-accent-choice="yellow"]  { background: var(--c-yellow); }
+.accent-swatch[data-accent-choice="green"]   { background: var(--c-green); }
+.accent-swatch[data-accent-choice="blue"]    { background: var(--c-blue); }
+.accent-swatch[data-accent-choice="magenta"] { background: var(--c-magenta); }
+.accent-swatch[data-accent-choice="cyan"]    { background: var(--c-cyan); }
 .accent-swatch[aria-pressed="true"] {
   /* Concentric selection ring via layered box-shadow: a 1px bg-colored gap
    * then a 2px text-colored ring. box-shadow (not outline + outline-offset)

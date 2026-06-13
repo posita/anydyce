@@ -4,19 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AnyDice Playground</title>
+  <!-- themes.css (Layer 1: raw color slots per theme family) loads
+       first; playground.css (Layer 2: maps --syn-*/--accent onto those
+       slots) references them. Order is not strictly required -- the two
+       define disjoint variables and var() resolves lazily -- but data
+       before mapping reads more naturally. -->
+  <link rel="stylesheet" href="themes.css" />
   <link rel="stylesheet" href="playground.css" />
 </head>
 <body>
   <header>
     <h1>AnyDice Playground</h1>
     <div class="header-meta">
+      <select id="theme-select" class="theme-select" aria-label="Theme">
+        <option value="default">Default</option>
+        <option value="no-color">No color</option>
+      </select>
       <div class="accent-picker" role="group" aria-label="Accent color">
         <button type="button" class="accent-swatch" data-accent-choice="red" aria-label="Red accent" title="Red"></button>
-        <button type="button" class="accent-swatch" data-accent-choice="orange" aria-label="Orange accent" title="Orange"></button>
-        <button type="button" class="accent-swatch" data-accent-choice="amber" aria-label="Amber accent" title="Amber"></button>
+        <button type="button" class="accent-swatch" data-accent-choice="yellow" aria-label="Yellow accent" title="Yellow"></button>
         <button type="button" class="accent-swatch" data-accent-choice="green" aria-label="Green accent" title="Green"></button>
+        <button type="button" class="accent-swatch" data-accent-choice="cyan" aria-label="Cyan accent" title="Cyan"></button>
         <button type="button" class="accent-swatch" data-accent-choice="blue" aria-label="Blue accent" title="Blue"></button>
-        <button type="button" class="accent-swatch" data-accent-choice="purple" aria-label="Purple accent" title="Purple"></button>
+        <button type="button" class="accent-swatch" data-accent-choice="magenta" aria-label="Magenta accent" title="Magenta"></button>
       </div>
     </div>
   </header>
