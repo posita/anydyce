@@ -2,11 +2,18 @@
  * Intentionally framework-free; expand as needed. */
 
 :root {
-  --bg:           #fafafa;
-  --bg-elev:      #ffffff;
-  --border:       #d0d4d8;
-  --text:         #1a1d22;
-  --muted:        #6b7178;
+  /* Base chrome, derived from the theme color slots (themes.css) so the
+   * whole UI tracks the active family + OS light/dark from a single
+   * definition -- no per-mode block. --bg/--text are the slot extremes;
+   * --muted is the subtle fg-ward neutral (secondary text); --border and
+   * --bg-elev are small opaque nudges of bg toward fg (a hairline and a
+   * faintly-distinct surface). In light that reads as a white field with
+   * light-grey chrome; in dark, chrome lifts slightly off the background. */
+  --bg:           var(--c-bg);
+  --bg-elev:      color-mix(in srgb, var(--c-bg), var(--c-fg) 3%);
+  --border:       color-mix(in srgb, var(--c-bg), var(--c-fg) 18%);
+  --text:         var(--c-fg);
+  --muted:        var(--c-fg-ward-muted);
   /* Accent: the active hue is chosen by the html[data-accent] rules below,
    * each pointing --accent at a full-strength color slot (themes.css).
    * Defaults to cyan so a fresh load (no attribute yet) matches the cyan
@@ -63,26 +70,6 @@
    * owner: playground.js reads this variable at startup and passes it to
    * attachRowResizer, so the pointer math always matches the layout. */
   --resizer-size:            6px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg:           #14171c;
-    --bg-elev:      #1c2128;
-    --border:       #2d333b;
-    --text:         #e6edf3;
-    --muted:        #8b949e;
-    /* --accent itself is mode-aware through the color slot (var(--c-cyan)
-     * in :root), so it needs no dark override. Only --accent-fg -- the text
-     * color ON the accent button -- is genuinely per-mode (dark text on the
-     * lighter dark-mode accent). Accent hues and --syn-* likewise come from
-     * the mode-authored slots, so they're not redefined here. */
-    /* --accent-fg:    #14171c; */
-    /* --code-bg:      #1c2128; */
-    /* --selection-bg: #3a5680; */
-    /* --match-bg:     #515c6a; */
-    /* --active-line-bg: rgba(255, 255, 255, 0.05); */
-  }
 }
 
 /* Accent selection: the html[data-accent] attribute (set by playground.js
