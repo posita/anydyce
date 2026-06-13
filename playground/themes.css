@@ -6,7 +6,6 @@
  *   --c-<hue>            full-strength color (higher contrast against bg)
  *   --c-<hue>-muted      subtler variant, one step toward bg
  *   --c-fg / --c-bg      foreground / background
- *   --c-cursor           caret color
  *   --c-fg-ward[-muted]  neutral grey near fg (text-like)
  *   --c-bg-ward[-muted]  neutral grey near bg (border/fill-like)
  *
@@ -25,7 +24,6 @@
 :root {
   --c-fg:             #1f2328;
   --c-bg:             #ffffff;
-  --c-cursor:         #0969da;
   --c-fg-ward:        #24292f;
   --c-fg-ward-muted:  #57606a;
   --c-red:            #a40e26;
@@ -47,7 +45,6 @@
   :root {
     --c-fg:             #e6edf3;
     --c-bg:             #0d1117;
-    --c-cursor:         #2f81f7;
     --c-fg-ward:        #ffffff;
     --c-fg-ward-muted:  #b1bac4;
     --c-red:            #ffa198;
@@ -70,7 +67,6 @@
 html[data-theme="no-color"] {
   --c-fg:             #1f2328;
   --c-bg:             #ffffff;
-  --c-cursor:         #999999;
   --c-fg-ward:        #24292f;
   --c-fg-ward-muted:  #57606a;
   --c-red:            #24292f;
@@ -92,7 +88,6 @@ html[data-theme="no-color"] {
   html[data-theme="no-color"] {
     --c-fg:             #e6edf3;
     --c-bg:             #0d1117;
-    --c-cursor:         #666666;
     --c-fg-ward:        #ffffff;
     --c-fg-ward-muted:  #b1bac4;
     --c-red:            #ffffff;
@@ -118,7 +113,6 @@ html[data-theme="no-color"] {
 html[data-theme="colorblind"] {
   --c-fg:             #24292f;
   --c-bg:             #ffffff;
-  --c-cursor:         #0969da;
   --c-fg-ward:        #24292f;
   --c-fg-ward-muted:  #57606a;
   --c-red:            #8a4600;
@@ -140,7 +134,6 @@ html[data-theme="colorblind"] {
   html[data-theme="colorblind"] {
     --c-fg:             #c9d1d9;
     --c-bg:             #0d1117;
-    --c-cursor:         #58a6ff;
     --c-fg-ward:        #ffffff;
     --c-fg-ward-muted:  #b1bac4;
     --c-red:            #fdac54;
@@ -166,7 +159,6 @@ html[data-theme="colorblind"] {
 html[data-theme="high-contrast"] {
   --c-fg:             #0e1116;
   --c-bg:             #ffffff;
-  --c-cursor:         #0349b4;
   --c-fg-ward:        #0e1116;
   --c-fg-ward-muted:  #4b535d;
   --c-red:            #86061d;
@@ -188,7 +180,6 @@ html[data-theme="high-contrast"] {
   html[data-theme="high-contrast"] {
     --c-fg:             #f0f3f6;
     --c-bg:             #0a0c10;
-    --c-cursor:         #71b7ff;
     --c-fg-ward:        #ffffff;
     --c-fg-ward-muted:  #d9dee3;
     --c-red:            #ffb1af;

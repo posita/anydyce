@@ -16,14 +16,17 @@
    * with the accent on the Run button. --accent-fg keeps a literal per-mode
    * value (the one accent value that's genuinely mode-specific). */
   --accent:       var(--c-cyan);
-  --accent-fg:    #ffffff;
-  --code-bg:      #f4f6f8;
-  --selection-bg: #add6ff;
-  --match-bg:     #f6e0a0;
+  --accent-muted: var(--c-cyan-muted);
+  --accent-fg:    var(--c-bg);  /* #ffffff; */
+  --code-bg:      var(--c-bg);  /* #f4f6f8; */
+  --caret:        rgb(from var(--accent) r g b / 40%);
+  --selection-bg: rgb(from var(--accent-muted) r g b / 20%);  /* #add6ff; */
   /* Active-line tint MUST be semi-transparent. CM6's drawSelection layer is
    * z-index: -1, so any opaque background painted on .cm-line covers it from
    * above. rgba with low alpha lets the selection show through. */
-  --active-line-bg: rgba(0, 0, 0, 0.04);
+  --active-line-bg: rgb(from var(--accent-muted) r g b / 7%);
+  --match-bg:     color-mix(in hsl shorter hue, var(--accent) 5%, rgba(204, 153, 51, 0.4));  /* #f6e0a0; */
+  --search-bg:    color-mix(in hsl shorter hue, var(--accent-muted) 5%, rgba(255, 204, 51, 0.4));
 
   /* Syntax highlighting maps token types onto theme color slots (themes.css).
    * Defined ONCE here (not per light/dark) because the slots are themselves
@@ -48,7 +51,7 @@
    * in playground.js; centralized here so per-knob tuning doesn't require
    * touching JS. */
   --editor-font-size:        13px;
-  --cursor-opacity:          0.4;
+  /* --cursor-opacity:          0.50; */
   --cursor-width:            0.55em;
   --search-font-size:        0.95em;
   --search-close-font-size:  1.1em;
@@ -74,11 +77,11 @@
      * color ON the accent button -- is genuinely per-mode (dark text on the
      * lighter dark-mode accent). Accent hues and --syn-* likewise come from
      * the mode-authored slots, so they're not redefined here. */
-    --accent-fg:    #14171c;
-    --code-bg:      #1c2128;
-    --selection-bg: #3a5680;
-    --match-bg:     #515c6a;
-    --active-line-bg: rgba(255, 255, 255, 0.05);
+    /* --accent-fg:    #14171c; */
+    /* --code-bg:      #1c2128; */
+    /* --selection-bg: #3a5680; */
+    /* --match-bg:     #515c6a; */
+    /* --active-line-bg: rgba(255, 255, 255, 0.05); */
   }
 }
 
@@ -89,12 +92,16 @@
  * resizer hover, view-toggle active, and the chart bars via readCssTheme)
  * follows automatically; selecting a theme that redefines the slots
  * recolors the accent for free. */
-html[data-accent="red"]     { --accent: var(--c-red); }
-html[data-accent="yellow"]  { --accent: var(--c-yellow); }
-html[data-accent="green"]   { --accent: var(--c-green); }
-html[data-accent="blue"]    { --accent: var(--c-blue); }
-html[data-accent="magenta"] { --accent: var(--c-magenta); }
-html[data-accent="cyan"]    { --accent: var(--c-cyan); }
+html[data-accent="red"]     { --accent: var(--c-red); --accent-muted: var(--c-red-muted); }
+html[data-accent="yellow"]  { --accent: var(--c-yellow); --accent-muted: var(--c-yellow-muted); }
+html[data-accent="green"]   { --accent: var(--c-green); --accent-muted: var(--c-green-muted); }
+html[data-accent="blue"]    { --accent: var(--c-blue); --accent-muted: var(--c-blue-muted); }
+html[data-accent="magenta"] { --accent: var(--c-magenta); --accent-muted: var(--c-magenta-muted); }
+html[data-accent="cyan"]    { --accent: var(--c-cyan); --accent-muted: var(--c-cyan-muted); }
+
+::selection {
+  background: var(--selection-bg);
+}
 
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
