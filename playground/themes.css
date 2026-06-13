@@ -1,0 +1,113 @@
+/* Theme color palette (Layer 1). Each theme defines a set of color "slots";
+ * the semantic layer in playground.css maps display aspects (--syn-*,
+ * --accent, eventually chrome) onto them.
+ *
+ * Naming:
+ *   --c-<hue>            full-strength color (higher contrast against bg)
+ *   --c-<hue>-muted      subtler variant, one step toward bg
+ *   --c-fg / --c-bg      foreground / background
+ *   --c-cursor           caret color
+ *   --c-fg-ward[-muted]  neutral grey near fg (text-like)
+ *   --c-bg-ward[-muted]  neutral grey near bg (border/fill-like)
+ *
+ * "-muted" ALWAYS means "toward bg / lower contrast," in both light and
+ * dark. The four neutrals form a contrast ramp authored to hold in both
+ * modes:
+ *
+ *   bg -- bg-ward-muted -- bg-ward -- fg-ward-muted -- fg-ward -- fg
+ *
+ * Consequence: this is no longer a literal terminal palette. Chromatic
+ * hues can be pasted in from a source theme directly, but the neutrals
+ * must be fitted to the ramp by hand -- in dark mode their light/dark
+ * assignment is the reverse of a terminal's, so the grey steps get
+ * swapped. That juggling is the price of mode-independent semantics. */
+
+:root {
+  --c-fg:             #1f2328;
+  --c-bg:             #ffffff;
+  --c-cursor:         #0969da;
+  --c-fg-ward:        #24292f;
+  --c-fg-ward-muted:  #57606a;
+  --c-red:            #a40e26;
+  --c-red-muted:      #cf222e;
+  --c-green:          #116329;
+  --c-green-muted:    #1a7f37;
+  --c-yellow:         #4d2d00;
+  --c-yellow-muted:   #633c01;
+  --c-blue:           #0969da;
+  --c-blue-muted:     #218bff;
+  --c-magenta:        #8250df;
+  --c-magenta-muted:  #a475f9;
+  --c-cyan:           #1b7c83;
+  --c-cyan-muted:     #3192aa;
+  --c-bg-ward:        #6e7781;
+  --c-bg-ward-muted:  #8c959f;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-fg:             #e6edf3;
+    --c-bg:             #0d1117;
+    --c-cursor:         #2f81f7;
+    --c-fg-ward:        #ffffff;
+    --c-fg-ward-muted:  #b1bac4;
+    --c-red:            #ffa198;
+    --c-red-muted:      #ff7b72;
+    --c-green:          #56d364;
+    --c-green-muted:    #3fb950;
+    --c-yellow:         #e3b341;
+    --c-yellow-muted:   #d29922;
+    --c-blue:           #79c0ff;
+    --c-blue-muted:     #58a6ff;
+    --c-magenta:        #d2a8ff;
+    --c-magenta-muted:  #bc8cff;
+    --c-cyan:           #56d4dd;
+    --c-cyan-muted:     #39c5cf;
+    --c-bg-ward:        #6e7681;
+    --c-bg-ward-muted:  #484f58;
+  }
+}
+
+html[data-theme="no-color"] {
+  --c-fg:             #1f2328;
+  --c-bg:             #ffffff;
+  --c-cursor:         #999999;
+  --c-fg-ward:        #24292f;
+  --c-fg-ward-muted:  #57606a;
+  --c-red:            #24292f;
+  --c-red-muted:      #57606a;
+  --c-green:          #24292f;
+  --c-green-muted:    #57606a;
+  --c-yellow:         #24292f;
+  --c-yellow-muted:   #57606a;
+  --c-blue:           #24292f;
+  --c-blue-muted:     #57606a;
+  --c-magenta:        #24292f;
+  --c-magenta-muted:  #57606a;
+  --c-cyan:           #24292f;
+  --c-cyan-muted:     #57606a;
+  --c-bg-ward:        #6e7781;
+  --c-bg-ward-muted:  #8c959f;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme="no-color"] {
+    --c-fg:             #e6edf3;
+    --c-bg:             #0d1117;
+    --c-cursor:         #666666;
+    --c-fg-ward:        #ffffff;
+    --c-fg-ward-muted:  #b1bac4;
+    --c-red:            #ffffff;
+    --c-red-muted:      #b1bac4;
+    --c-green:          #ffffff;
+    --c-green-muted:    #b1bac4;
+    --c-yellow:         #ffffff;
+    --c-yellow-muted:   #b1bac4;
+    --c-blue:           #ffffff;
+    --c-blue-muted:     #b1bac4;
+    --c-magenta:        #ffffff;
+    --c-magenta-muted:  #b1bac4;
+    --c-cyan:           #ffffff;
+    --c-cyan-muted:     #b1bac4;
+    --c-bg-ward:        #6e7681;
+    --c-bg-ward-muted:  #484f58;
+  }
+}

@@ -9,9 +9,12 @@ import {
   ACCENTS,
   ACCENT_KEY,
   DEFAULT_ACCENT,
+  DEFAULT_THEME,
   EDITOR_SPLIT_KEY,
   LOGS_SPLIT_KEY,
   STORAGE_KEY,
+  THEMES,
+  THEME_KEY,
   VIEW_MODE_BARS,
   VIEW_MODE_KEY,
   VIEW_MODE_TEXT,
@@ -20,11 +23,13 @@ import {
   loadEditorSplit,
   loadLogsSplit,
   loadSavedDoc,
+  loadTheme,
   loadViewMode,
   saveAccent,
   saveDoc,
   saveEditorSplit,
   saveLogsSplit,
+  saveTheme,
   saveViewMode,
   stripUrlFragment,
 } from "../persistence.js";
@@ -249,9 +254,11 @@ test("DEFAULT_ACCENT is one of the valid accents", () => {
   assert.ok(ACCENTS.includes(DEFAULT_ACCENT));
 });
 
-test("ACCENTS includes amber (yellow stand-in), not yellow", () => {
-  assert.ok(ACCENTS.includes("amber"));
-  assert.ok(!ACCENTS.includes("yellow"));
+test("ACCENTS are ANSI hues (yellow, not amber; magenta, not purple; no orange)", () => {
+  assert.deepEqual(ACCENTS, ["red", "yellow", "green", "cyan", "blue", "magenta"]);
+  for (const gone of ["amber", "purple", "orange"]) {
+    assert.ok(!ACCENTS.includes(gone), `${gone} should be gone`);
+  }
 });
 
 test("saveAccent + loadAccent round-trip every valid accent", () => {
@@ -283,6 +290,41 @@ test("loadAccent / saveAccent swallow storage errors / no-op without storage", (
   assert.doesNotThrow(() => saveAccent("red", makeThrowingStorage()));
   assert.equal(loadAccent(null), null);
   assert.doesNotThrow(() => saveAccent("red", null));
+});
+
+// ---- loadTheme / saveTheme -------------------------------------------------
+
+test("THEME_KEY shares the playground namespace; DEFAULT_THEME is valid", () => {
+  assert.match(THEME_KEY, /^anydyce-playground:/);
+  assert.ok(THEMES.includes(DEFAULT_THEME));
+});
+
+test("saveTheme + loadTheme round-trip every valid theme", () => {
+  for (const theme of THEMES) {
+    const storage = makeStorage();
+    saveTheme(theme, storage);
+    assert.equal(loadTheme(storage), theme);
+  }
+});
+
+test("loadTheme returns null when unset or unknown", () => {
+  assert.equal(loadTheme(makeStorage()), null);
+  const storage = makeStorage();
+  storage.setItem(THEME_KEY, "solarized");
+  assert.equal(loadTheme(storage), null);
+});
+
+test("saveTheme ignores unknown values", () => {
+  const storage = makeStorage();
+  saveTheme("solarized", storage);
+  assert.equal(storage.getItem(THEME_KEY), null);
+});
+
+test("loadTheme / saveTheme swallow storage errors / no-op without storage", () => {
+  assert.equal(loadTheme(makeThrowingStorage()), null);
+  assert.doesNotThrow(() => saveTheme("no-color", makeThrowingStorage()));
+  assert.equal(loadTheme(null), null);
+  assert.doesNotThrow(() => saveTheme("no-color", null));
 });
 
 // ---- stripUrlFragment ----------------------------------------------------

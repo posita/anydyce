@@ -24,13 +24,21 @@ export const VIEW_MODE_TEXT = "text";
 const _ALL_VIEW_MODES = new Set([VIEW_MODE_BARS, VIEW_MODE_TEXT]);
 
 export const ACCENT_KEY = "anydyce-playground:accent";
-// Accent hue keys. Order is the display order of the swatch row. "amber"
-// stands in for yellow (true yellow can't carry white button text). Each
-// key maps to a --accent-<key> CSS variable (light + dark pairs) in
+// Accent hue keys = the ANSI color slots usable as an accent (black/white
+// excluded). Order is the swatch row's display order (roughly spectral).
+// Each maps to var(--ansi-<key>) via an html[data-accent] rule in
 // playground.css; "green" is the default and matches the base --accent.
-export const ACCENTS = ["red", "orange", "amber", "green", "blue", "purple"];
+export const ACCENTS = ["red", "yellow", "green", "cyan", "blue", "magenta"];
 export const DEFAULT_ACCENT = "green";
 const _ACCENT_SET = new Set(ACCENTS);
+
+export const THEME_KEY = "anydyce-playground:theme";
+// Theme family keys. "default" lives in themes.css's bare :root (no
+// attribute); the rest are html[data-theme="<key>"] blocks. The picker's
+// <option> values must match these.
+export const THEMES = ["default", "no-color"];
+export const DEFAULT_THEME = "default";
+const _THEME_SET = new Set(THEMES);
 
 // Read the saved editor doc, or null if absent / unreadable.
 export function loadSavedDoc(storage = globalThis.localStorage) {
@@ -141,6 +149,29 @@ export function saveAccent(accent, storage = globalThis.localStorage) {
   try {
     if (!storage) return;
     storage.setItem(ACCENT_KEY, accent);
+  } catch {
+    // ignore
+  }
+}
+
+// Read the persisted theme family, or null if absent / unrecognized. The
+// consumer applies DEFAULT_THEME for null.
+export function loadTheme(storage = globalThis.localStorage) {
+  try {
+    if (!storage) return null;
+    const raw = storage.getItem(THEME_KEY);
+    return _THEME_SET.has(raw) ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+// Persist the theme family. Silent no-op on storage error / unknown theme.
+export function saveTheme(theme, storage = globalThis.localStorage) {
+  if (!_THEME_SET.has(theme)) return;
+  try {
+    if (!storage) return;
+    storage.setItem(THEME_KEY, theme);
   } catch {
     // ignore
   }

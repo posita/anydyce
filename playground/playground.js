@@ -33,6 +33,7 @@ import {
 } from "./pyodide-runner.js";
 import {
   DEFAULT_ACCENT,
+  DEFAULT_THEME,
   VIEW_MODE_BARS,
   VIEW_MODE_TEXT,
   createDebouncedSaver,
@@ -40,11 +41,13 @@ import {
   loadEditorSplit,
   loadLogsSplit,
   loadSavedDoc,
+  loadTheme,
   loadViewMode,
   saveAccent,
   saveDoc,
   saveEditorSplit,
   saveLogsSplit,
+  saveTheme,
   saveViewMode,
   stripUrlFragment,
 } from "./persistence.js";
@@ -369,6 +372,29 @@ for (const sw of accentSwatches) {
 // Apply the persisted (or default) accent on load. rerenderCharts no-ops
 // pre-first-run, so this only sets the attribute + active swatch.
 setAccent(loadAccent() || DEFAULT_ACCENT);
+
+// ---- Theme-family picker ---------------------------------------------------
+// Picks which set of color slots is active (themes.css). "default"
+// lives in the bare :root, so it gets NO data-theme attribute; other
+// families set html[data-theme]. Syntax colors follow via CSS (CodeMirror
+// repaints itself); chart bars need the explicit re-render.
+const themeSelect = document.getElementById("theme-select");
+
+function setTheme(theme) {
+  if (theme === DEFAULT_THEME) {
+    delete document.documentElement.dataset.theme;
+  } else {
+    document.documentElement.dataset.theme = theme;
+  }
+  if (themeSelect.value !== theme) themeSelect.value = theme;
+  saveTheme(theme);
+  rerenderCharts();
+}
+
+themeSelect.addEventListener("change", () => setTheme(themeSelect.value));
+
+// Apply the persisted (or default) theme on load.
+setTheme(loadTheme() || DEFAULT_THEME);
 
 function renderError(err) {
   // Output shows a short error summary only; the full traceback lives in
