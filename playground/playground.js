@@ -35,15 +35,17 @@ import {
   VIEW_MODE_BARS,
   VIEW_MODE_TEXT,
   createDebouncedSaver,
+  loadEditorSplit,
   loadLogsSplit,
   loadSavedDoc,
   loadViewMode,
   saveDoc,
+  saveEditorSplit,
   saveLogsSplit,
   saveViewMode,
   stripUrlFragment,
 } from "./persistence.js";
-import { attachRowResizer, clampPercent } from "./resizer.js";
+import { attachResizer, clampPercent } from "./resizer.js";
 import { renderPlots } from "./plot.js";
 // plotly.js-cartesian-dist-min loads via esm.sh through the importmap (see
 // index.html). UMD bundle wrapped to ESM; default export is the Plotly
@@ -343,6 +345,18 @@ let viewMode = loadViewMode() || VIEW_MODE_BARS;
 // highlight.
 let outputHasContent = false;
 
+// Re-layout any currently-visible Plotly charts to their container's size.
+// Needed after anything that changes chart geometry outside Plotly's
+// awareness: un-hiding the bars view (Plotly skips layout for
+// display: none containers) and dragging the editor divider (Plotly's
+// `responsive: true` listens to WINDOW resize only, not container resize).
+function resizeVisibleCharts() {
+  if (outputBars.classList.contains("hidden")) return;
+  for (const plot of outputBars.querySelectorAll(".plot")) {
+    Plotly.Plots.resize(plot);
+  }
+}
+
 function applyViewVisibility() {
   const showBars = viewMode === VIEW_MODE_BARS;
   outputBars.classList.toggle("hidden", !showBars || !outputHasContent);
@@ -350,11 +364,7 @@ function applyViewVisibility() {
   viewBarsBtn.classList.toggle("active", showBars);
   viewTextBtn.classList.toggle("active", !showBars);
   if (showBars && outputHasContent) {
-    // Resize any Plotly charts that may have been laid out while hidden;
-    // Plotly skips layout for display: none containers.
-    for (const plot of outputBars.querySelectorAll(".plot")) {
-      Plotly.Plots.resize(plot);
-    }
+    resizeVisibleCharts();
   }
 }
 
@@ -690,14 +700,35 @@ const resizerSize =
       "--resizer-size",
     ),
   ) || 6;
-const savedSplit = loadLogsSplit();
-const initialSplit = savedSplit !== null ? clampPercent(savedSplit) : undefined;
-attachRowResizer({
+
+const savedLogsSplit = loadLogsSplit();
+attachResizer({
   container: document.querySelector(".right-column"),
   resizer: document.getElementById("row-resizer"),
+  axis: "row",
   resizerSize,
-  initialPercent: initialSplit ?? undefined,
+  initialPercent:
+    savedLogsSplit !== null ? (clampPercent(savedLogsSplit) ?? undefined) : undefined,
   onSettled: (pct) => saveLogsSplit(pct),
+});
+
+const savedEditorSplit = loadEditorSplit();
+attachResizer({
+  container: document.querySelector("main"),
+  resizer: document.getElementById("col-resizer"),
+  axis: "column",
+  resizerSize,
+  initialPercent:
+    savedEditorSplit !== null
+      ? (clampPercent(savedEditorSplit) ?? undefined)
+      : undefined,
+  onSettled: (pct) => {
+    saveEditorSplit(pct);
+    // Plotly only reacts to window resize; container-width changes from
+    // the divider need an explicit re-layout. On settle (not per-move)
+    // per the chosen tradeoff -- charts may letterbox briefly mid-drag.
+    resizeVisibleCharts();
+  },
 });
 
 // ---- Share URL --------------------------------------------------------------

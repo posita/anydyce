@@ -16,6 +16,7 @@
 
 export const STORAGE_KEY = "anydyce-playground:doc";
 export const LOGS_SPLIT_KEY = "anydyce-playground:logs-split";
+export const EDITOR_SPLIT_KEY = "anydyce-playground:editor-split";
 export const VIEW_MODE_KEY = "anydyce-playground:view-mode";
 
 export const VIEW_MODE_BARS = "bars";
@@ -44,14 +45,14 @@ export function saveDoc(text, storage = globalThis.localStorage) {
   }
 }
 
-// Read the persisted output/logs split as a number (the output pane's
-// percent share), or null if absent / unparsable / out of plausible range.
-// Validation is light -- the consumer clamps to its own bounds before use,
-// so we only reject obvious garbage here.
-export function loadLogsSplit(storage = globalThis.localStorage) {
+// Shared numeric load/save for the divider-position keys. Validation is
+// light -- the consumer clamps to its own bounds before use, so we only
+// reject obvious garbage here. Silent no-op / null on storage error, same
+// as saveDoc / loadSavedDoc.
+function loadNumber(key, storage) {
   try {
     if (!storage) return null;
-    const raw = storage.getItem(LOGS_SPLIT_KEY);
+    const raw = storage.getItem(key);
     if (raw === null) return null;
     const n = Number(raw);
     if (!Number.isFinite(n)) return null;
@@ -61,15 +62,31 @@ export function loadLogsSplit(storage = globalThis.localStorage) {
   }
 }
 
-// Persist the output/logs split as a percentage string. Silent no-op on
-// storage error, same as saveDoc.
-export function saveLogsSplit(percent, storage = globalThis.localStorage) {
+function saveNumber(key, value, storage) {
   try {
     if (!storage) return;
-    storage.setItem(LOGS_SPLIT_KEY, String(percent));
+    storage.setItem(key, String(value));
   } catch {
     // ignore
   }
+}
+
+// Output/logs divider position (the output pane's percent share).
+export function loadLogsSplit(storage = globalThis.localStorage) {
+  return loadNumber(LOGS_SPLIT_KEY, storage);
+}
+
+export function saveLogsSplit(percent, storage = globalThis.localStorage) {
+  saveNumber(LOGS_SPLIT_KEY, percent, storage);
+}
+
+// Editor/output divider position (the editor pane's percent share).
+export function loadEditorSplit(storage = globalThis.localStorage) {
+  return loadNumber(EDITOR_SPLIT_KEY, storage);
+}
+
+export function saveEditorSplit(percent, storage = globalThis.localStorage) {
+  saveNumber(EDITOR_SPLIT_KEY, percent, storage);
 }
 
 // Read the persisted output-pane view mode ("bars" or "text"), or null if
