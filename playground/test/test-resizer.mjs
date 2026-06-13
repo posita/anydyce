@@ -1,7 +1,8 @@
 // Tests for the resizer's pure helpers (../resizer.js).
 //
-// The DOM-bound attachRowResizer is verified by browser smoke test only;
-// these tests cover the math that's testable in isolation.
+// The DOM-bound attachResizer is verified by browser smoke test only; these
+// tests cover the math (clampPercent, pointerToPercent) and the template
+// writing (applyLayout, via a style stub).
 //
 // Run with: node --test playground/test/test-resizer.mjs
 
@@ -11,8 +12,9 @@ import assert from "node:assert/strict";
 import {
   MAX_PERCENT,
   MIN_PERCENT,
+  applyLayout,
   clampPercent,
-  pointerYToPercent,
+  pointerToPercent,
 } from "../resizer.js";
 
 // ---- clampPercent --------------------------------------------------------
@@ -47,38 +49,66 @@ test("clampPercent returns null on non-finite input", () => {
   assert.equal(clampPercent(-Infinity), null);
 });
 
-// ---- pointerYToPercent ---------------------------------------------------
+// ---- pointerToPercent ------------------------------------------------------
+// The math is axis-agnostic 1D: the same function serves the row divider
+// (pointer Y against container top/height) and the column divider (pointer
+// X against container left/width).
 
-test("pointerYToPercent computes the top-row share from pointer Y", () => {
-  // Container at viewport top=100, height=300, resizer 6px
-  // Available = 294. Pointer at viewport Y=247 -> dy=147 -> 50%.
-  assert.equal(pointerYToPercent(247, 100, 300, 6), 50);
+test("pointerToPercent computes the first-pane share from the pointer coord", () => {
+  // Container at viewport start=100, extent=300, resizer 6px.
+  // Available = 294. Pointer at 247 -> delta=147 -> 50%.
+  assert.equal(pointerToPercent(247, 100, 300, 6), 50);
 });
 
-test("pointerYToPercent at the very top yields 0 (caller will clamp)", () => {
-  assert.equal(pointerYToPercent(100, 100, 300, 6), 0);
+test("pointerToPercent at the leading edge yields 0 (caller will clamp)", () => {
+  assert.equal(pointerToPercent(100, 100, 300, 6), 0);
 });
 
-test("pointerYToPercent below the container yields > 100 (caller will clamp)", () => {
-  // Pointer well past the bottom -- formula doesn't clamp; the consumer's
-  // clampPercent does.
-  assert.equal(pointerYToPercent(500, 100, 300, 6) > 100, true);
+test("pointerToPercent past the trailing edge yields > 100 (caller will clamp)", () => {
+  // Formula doesn't clamp; the consumer's clampPercent does.
+  assert.equal(pointerToPercent(500, 100, 300, 6) > 100, true);
 });
 
-test("pointerYToPercent above the container yields negative", () => {
-  assert.equal(pointerYToPercent(50, 100, 300, 6) < 0, true);
+test("pointerToPercent before the leading edge yields negative", () => {
+  assert.equal(pointerToPercent(50, 100, 300, 6) < 0, true);
 });
 
-test("pointerYToPercent returns null when available height is non-positive", () => {
-  // Container.height <= resizerSize means there's no room for either pane.
-  assert.equal(pointerYToPercent(100, 100, 6, 6), null);
-  assert.equal(pointerYToPercent(100, 100, 5, 6), null);
-  assert.equal(pointerYToPercent(100, 100, 0, 6), null);
+test("pointerToPercent returns null when available extent is non-positive", () => {
+  // Container extent <= resizerSize means there's no room for either pane.
+  assert.equal(pointerToPercent(100, 100, 6, 6), null);
+  assert.equal(pointerToPercent(100, 100, 5, 6), null);
+  assert.equal(pointerToPercent(100, 100, 0, 6), null);
 });
 
-test("pointerYToPercent + clampPercent compose into a safe percentage", () => {
+test("pointerToPercent + clampPercent compose into a safe percentage", () => {
   // Realistic UI sequence: raw pointer math, then clamp.
-  const raw = pointerYToPercent(500, 100, 300, 6); // > 100
+  const raw = pointerToPercent(500, 100, 300, 6); // > 100
   const safe = clampPercent(raw);
   assert.equal(safe, MAX_PERCENT);
+});
+
+// ---- applyLayout -----------------------------------------------------------
+
+function makeContainerStub() {
+  return { style: {} };
+}
+
+test("applyLayout writes grid-template-rows for the row axis", () => {
+  const c = makeContainerStub();
+  applyLayout(c, 70, 6, "row");
+  assert.equal(c.style.gridTemplateRows, "70fr 6px 30fr");
+  assert.equal(c.style.gridTemplateColumns, undefined);
+});
+
+test("applyLayout writes grid-template-columns for the column axis", () => {
+  const c = makeContainerStub();
+  applyLayout(c, 40, 6, "column");
+  assert.equal(c.style.gridTemplateColumns, "40fr 6px 60fr");
+  assert.equal(c.style.gridTemplateRows, undefined);
+});
+
+test("applyLayout panes always sum to 100", () => {
+  const c = makeContainerStub();
+  applyLayout(c, 12.5, 8, "row");
+  assert.equal(c.style.gridTemplateRows, "12.5fr 8px 87.5fr");
 });

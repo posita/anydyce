@@ -6,16 +6,19 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  EDITOR_SPLIT_KEY,
   LOGS_SPLIT_KEY,
   STORAGE_KEY,
   VIEW_MODE_BARS,
   VIEW_MODE_KEY,
   VIEW_MODE_TEXT,
   createDebouncedSaver,
+  loadEditorSplit,
   loadLogsSplit,
   loadSavedDoc,
   loadViewMode,
   saveDoc,
+  saveEditorSplit,
   saveLogsSplit,
   saveViewMode,
   stripUrlFragment,
@@ -143,6 +146,42 @@ test("saveLogsSplit swallows storage errors silently", () => {
 test("loadLogsSplit / saveLogsSplit no-op when storage is unavailable", () => {
   assert.equal(loadLogsSplit(null), null);
   assert.doesNotThrow(() => saveLogsSplit(50, null));
+});
+
+// ---- loadEditorSplit / saveEditorSplit -------------------------------------
+// Same numeric load/save behavior as the logs split, distinct key.
+
+test("EDITOR_SPLIT_KEY shares the playground namespace, distinct from others", () => {
+  assert.match(EDITOR_SPLIT_KEY, /^anydyce-playground:/);
+  assert.notEqual(EDITOR_SPLIT_KEY, LOGS_SPLIT_KEY);
+  assert.notEqual(EDITOR_SPLIT_KEY, STORAGE_KEY);
+});
+
+test("saveEditorSplit + loadEditorSplit round-trip", () => {
+  const storage = makeStorage();
+  saveEditorSplit(62.5, storage);
+  assert.equal(loadEditorSplit(storage), 62.5);
+});
+
+test("editor and logs splits are independent values", () => {
+  const storage = makeStorage();
+  saveEditorSplit(30, storage);
+  saveLogsSplit(70, storage);
+  assert.equal(loadEditorSplit(storage), 30);
+  assert.equal(loadLogsSplit(storage), 70);
+});
+
+test("loadEditorSplit returns null when unset / garbage / storage error", () => {
+  assert.equal(loadEditorSplit(makeStorage()), null);
+  const storage = makeStorage();
+  storage.setItem(EDITOR_SPLIT_KEY, "nonsense");
+  assert.equal(loadEditorSplit(storage), null);
+  assert.equal(loadEditorSplit(makeThrowingStorage()), null);
+});
+
+test("saveEditorSplit swallows storage errors / no-ops without storage", () => {
+  assert.doesNotThrow(() => saveEditorSplit(50, makeThrowingStorage()));
+  assert.doesNotThrow(() => saveEditorSplit(50, null));
 });
 
 // ---- loadViewMode / saveViewMode -----------------------------------------

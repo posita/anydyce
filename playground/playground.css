@@ -111,8 +111,10 @@ header h1 {
 main {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
+  /* Editor | draggable divider | right column. The middle track is the
+   * col-resizer element; user drags reassign the fr units via inline
+   * style, same mechanism as the output/logs row divider. */
+  grid-template-columns: 1fr var(--resizer-size) 1fr;
   background: var(--border);
   overflow: hidden;
 }
@@ -130,31 +132,46 @@ main {
   overflow: hidden;
 }
 
-.row-resizer {
+/* Shared styling for both draggable dividers (output/logs row + editor
+ * column); only the cursor and the hit-area direction differ. */
+.row-resizer,
+.col-resizer {
   background: var(--border);
-  cursor: row-resize;
   /* Position so we can attach an invisible wider hit area without
-   * disturbing the visible 6px line. */
+   * disturbing the visible line. */
   position: relative;
-  /* Disable default touch scrolling on the handle so a vertical drag is
-   * captured as a resize gesture on mobile/trackpad. */
+  /* Disable default touch scrolling on the handle so a drag is captured
+   * as a resize gesture on mobile/trackpad. */
   touch-action: none;
 }
+.row-resizer { cursor: row-resize; }
+.col-resizer { cursor: col-resize; }
 
-/* Wider grab zone (3px above + 3px below the visible 6px). The actual
- * resizer row stays --resizer-size; the pseudo just extends the pointer
- * target. */
-.row-resizer::before {
+/* Wider grab zone (3px on each side of the visible --resizer-size track).
+ * The track itself stays --resizer-size; the pseudo just extends the
+ * pointer target perpendicular to the divider. */
+.row-resizer::before,
+.col-resizer::before {
   content: "";
   position: absolute;
+}
+.row-resizer::before {
   top: -3px;
   bottom: -3px;
   left: 0;
   right: 0;
 }
+.col-resizer::before {
+  left: -3px;
+  right: -3px;
+  top: 0;
+  bottom: 0;
+}
 
 .row-resizer:hover,
-.row-resizer:active {
+.row-resizer:active,
+.col-resizer:hover,
+.col-resizer:active {
   background: var(--accent);
 }
 

@@ -1,15 +1,17 @@
-// Draggable row-resizer for grid-based panes.
+// Draggable resizer for grid-based panes, supporting both axes.
 //
-// Splits a vertical CSS-grid container into top-row / resizer / bottom-row.
-// The resizer is a thin element that the user drags up/down; the container's
-// grid-template-rows is updated live to reflect the new ratio. Position is
-// expressed as `outputPercent` -- the share of the available height
-// (container minus resizer) given to the top row, in [MIN_PERCENT,
-// MAX_PERCENT] so neither pane fully disappears.
+// Splits a CSS-grid container into first-pane / resizer / second-pane along
+// either axis. The resizer is a thin element that the user drags; the
+// container's grid-template-rows (axis "row") or grid-template-columns
+// (axis "column") is updated live to reflect the new ratio. Position is
+// expressed as the FIRST pane's share of the available space (container
+// minus resizer), in [MIN_PERCENT, MAX_PERCENT] so neither pane fully
+// disappears.
 //
-// Pure helpers (clampPercent, pointerYToPercent) are exported separately so
-// they can be unit-tested without a DOM. attachRowResizer wires pointer
-// events to the actual elements.
+// Pure helpers (clampPercent, pointerToPercent) are exported separately so
+// they can be unit-tested without a DOM; applyLayout takes any object with
+// a .style and is testable with a stub. attachResizer wires pointer events
+// to the actual elements.
 
 export const MIN_PERCENT = 10;
 export const MAX_PERCENT = 90;
@@ -22,56 +24,66 @@ export function clampPercent(p, min = MIN_PERCENT, max = MAX_PERCENT) {
   return Math.max(min, Math.min(max, p));
 }
 
-// Convert a pointer Y in viewport coordinates to the top-row's share of the
-// container's content height. `containerTop` and `containerHeight` are the
-// container's viewport-relative top edge and total height (typically from
-// getBoundingClientRect). `resizerSize` is the resizer row's height in px;
-// subtracting it gives the height actually available to the two panes.
-// Returns null if the available height is non-positive (degenerate layout).
-export function pointerYToPercent(
-  pointerY,
-  containerTop,
-  containerHeight,
+// Convert a pointer coordinate (viewport x or y, depending on the axis) to
+// the first pane's share of the container's content extent. `containerStart`
+// and `containerExtent` are the container's viewport-relative leading edge
+// and total size along the drag axis (typically from getBoundingClientRect:
+// top/height for rows, left/width for columns). `resizerSize` is the
+// resizer's thickness in px; subtracting it gives the space actually
+// available to the two panes. Returns null if the available space is
+// non-positive (degenerate layout).
+export function pointerToPercent(
+  pointerCoord,
+  containerStart,
+  containerExtent,
   resizerSize,
 ) {
-  const available = containerHeight - resizerSize;
+  const available = containerExtent - resizerSize;
   if (available <= 0) return null;
-  return ((pointerY - containerTop) / available) * 100;
+  return ((pointerCoord - containerStart) / available) * 100;
 }
 
-// Apply a grid-template-rows expressed as top/bottom percentages around a
-// fixed-size resizer row. Direct DOM write; no React/no framework. Returns
-// nothing.
-export function applyRowLayout(container, outputPercent, resizerSize) {
-  container.style.gridTemplateRows =
-    `${outputPercent}fr ${resizerSize}px ${100 - outputPercent}fr`;
+// Apply a two-pane grid template around a fixed-size resizer track, on the
+// given axis. Direct DOM write; no framework.
+export function applyLayout(container, firstPercent, resizerSize, axis) {
+  const value = `${firstPercent}fr ${resizerSize}px ${100 - firstPercent}fr`;
+  if (axis === "column") {
+    container.style.gridTemplateColumns = value;
+  } else {
+    container.style.gridTemplateRows = value;
+  }
 }
 
 // Attach pointer-drag handlers to a resizer element inside a grid container.
 //
 // Options:
-//   container:      the parent grid element whose gridTemplateRows we mutate
+//   container:      the parent grid element whose template we mutate
 //   resizer:        the thin handle element that captures pointer events
-//   resizerSize:    height (px) of the resizer row; defaults to 6
-//   initialPercent: starting top-row share (in clamp range); if provided,
+//   axis:           "row" (default; drag up/down, mutates grid-template-rows)
+//                   or "column" (drag left/right, grid-template-columns)
+//   resizerSize:    thickness (px) of the resizer track; defaults to 6
+//   initialPercent: starting first-pane share (in clamp range); if provided,
 //                   layout is applied immediately. If omitted, the
 //                   container's existing CSS layout is left alone until the
 //                   user drags.
-//   onSettled:      called with the final outputPercent when the user
-//                   releases the pointer (i.e. one save per drag, not one
-//                   per pointermove)
+//   onSettled:      called with the final percent when the user releases the
+//                   pointer (i.e. one save per drag, not one per pointermove)
 //
 // Returns a cleanup function that removes the listeners (useful in tests or
 // hot-reload scenarios; not used by the playground itself).
-export function attachRowResizer({
+export function attachResizer({
   container,
   resizer,
+  axis = "row",
   resizerSize = 6,
   initialPercent,
   onSettled,
 }) {
+  const isColumn = axis === "column";
+  const cursor = isColumn ? "col-resize" : "row-resize";
+
   if (initialPercent !== undefined && initialPercent !== null) {
-    applyRowLayout(container, initialPercent, resizerSize);
+    applyLayout(container, initialPercent, resizerSize, axis);
   }
 
   let dragging = false;
@@ -86,7 +98,7 @@ export function attachRowResizer({
     // duration of the drag. Otherwise the cursor reverts to default whenever
     // the pointer crosses a child element with its own cursor rule, and the
     // browser may start selecting text in the panes as the pointer moves.
-    document.body.style.cursor = "row-resize";
+    document.body.style.cursor = cursor;
     document.body.style.userSelect = "none";
     e.preventDefault();
   }
@@ -94,15 +106,15 @@ export function attachRowResizer({
   function onPointerMove(e) {
     if (!dragging) return;
     const rect = container.getBoundingClientRect();
-    const raw = pointerYToPercent(
-      e.clientY,
-      rect.top,
-      rect.height,
+    const raw = pointerToPercent(
+      isColumn ? e.clientX : e.clientY,
+      isColumn ? rect.left : rect.top,
+      isColumn ? rect.width : rect.height,
       resizerSize,
     );
     const pct = clampPercent(raw);
     if (pct === null) return;
-    applyRowLayout(container, pct, resizerSize);
+    applyLayout(container, pct, resizerSize, axis);
     lastPct = pct;
   }
 
