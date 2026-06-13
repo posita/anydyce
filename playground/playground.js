@@ -69,14 +69,14 @@ const anydiceEditorTheme = EditorView.theme({
     color:           "var(--text)",
     height:          "100%",
   },
-  ".cm-content":         { caretColor: "var(--text)" },
+  ".cm-content":         { caretColor: "var(--caret)" },
   // Block cursor: translucent background block (vs default border-left
   // line) so the character behind shows through. See playground.css for
   // the opacity/width knobs.
   ".cm-cursor, .cm-cursor-primary": {
     border:          "none",
-    backgroundColor: "var(--text)",
-    opacity:         "var(--cursor-opacity)",
+    backgroundColor: "var(--caret)",
+    // opacity:         "var(--cursor-opacity)",
     width:           "var(--cursor-width)",
     marginLeft:      "0",
   },
@@ -99,7 +99,9 @@ const anydiceEditorTheme = EditorView.theme({
   "&.cm-focused .cm-selectionBackground": {
     backgroundColor: "var(--selection-bg) !important",
   },
-  ".cm-selectionMatch":  { backgroundColor: "var(--match-bg)" },
+  ".cm-searchMatch"   :  { backgroundColor: "var(--search-bg)" },
+  ".cm-searchMatch-selected": { backgroundColor: "var(--selection-bg)" },
+    ".cm-selectionMatch":  { backgroundColor: "var(--match-bg)" },
   ".cm-scroller":        { fontFamily: "var(--font-mono)" },
   ".cm-tooltip": {
     backgroundColor: "var(--bg-elev)",
@@ -110,6 +112,7 @@ const anydiceEditorTheme = EditorView.theme({
   ".cm-panels": {
     backgroundColor: "var(--bg-elev)",
     color:           "var(--text)",
+    accentColor:     "var(--accent)",
   },
   ".cm-panels.cm-panels-top":    { borderBottom: "1px solid var(--border)" },
   ".cm-panels.cm-panels-bottom": { borderTop:    "1px solid var(--border)" },
