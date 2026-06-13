@@ -24,19 +24,19 @@ export const VIEW_MODE_TEXT = "text";
 const _ALL_VIEW_MODES = new Set([VIEW_MODE_BARS, VIEW_MODE_TEXT]);
 
 export const ACCENT_KEY = "anydyce-playground:accent";
-// Accent hue keys = the ANSI color slots usable as an accent (black/white
+// Accent hue keys = the color slots usable as an accent (the neutrals are
 // excluded). Order is the swatch row's display order (roughly spectral).
-// Each maps to var(--ansi-<key>) via an html[data-accent] rule in
-// playground.css; "green" is the default and matches the base --accent.
+// Each maps to var(--c-<key>) via an html[data-accent] rule in
+// playground.css; "cyan" is the default and matches the base --accent.
 export const ACCENTS = ["red", "yellow", "green", "cyan", "blue", "magenta"];
-export const DEFAULT_ACCENT = "green";
+export const DEFAULT_ACCENT = "cyan";
 const _ACCENT_SET = new Set(ACCENTS);
 
 export const THEME_KEY = "anydyce-playground:theme";
 // Theme family keys. "default" lives in themes.css's bare :root (no
 // attribute); the rest are html[data-theme="<key>"] blocks. The picker's
 // <option> values must match these.
-export const THEMES = ["default", "no-color"];
+export const THEMES = ["default", "no-color", "colorblind", "high-contrast"];
 export const DEFAULT_THEME = "default";
 const _THEME_SET = new Set(THEMES);
 
