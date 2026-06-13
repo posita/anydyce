@@ -64,49 +64,6 @@
   }
 }
 
-html[data-theme="no-color"] {
-  --c-fg:             #1f2328;
-  --c-bg:             #ffffff;
-  --c-fg-ward:        #24292f;
-  --c-fg-ward-muted:  #57606a;
-  --c-red:            #24292f;
-  --c-red-muted:      #57606a;
-  --c-green:          #24292f;
-  --c-green-muted:    #57606a;
-  --c-yellow:         #24292f;
-  --c-yellow-muted:   #57606a;
-  --c-blue:           #24292f;
-  --c-blue-muted:     #57606a;
-  --c-magenta:        #24292f;
-  --c-magenta-muted:  #57606a;
-  --c-cyan:           #24292f;
-  --c-cyan-muted:     #57606a;
-  --c-bg-ward:        #6e7781;
-  --c-bg-ward-muted:  #8c959f;
-}
-@media (prefers-color-scheme: dark) {
-  html[data-theme="no-color"] {
-    --c-fg:             #e6edf3;
-    --c-bg:             #0d1117;
-    --c-fg-ward:        #ffffff;
-    --c-fg-ward-muted:  #b1bac4;
-    --c-red:            #ffffff;
-    --c-red-muted:      #b1bac4;
-    --c-green:          #ffffff;
-    --c-green-muted:    #b1bac4;
-    --c-yellow:         #ffffff;
-    --c-yellow-muted:   #b1bac4;
-    --c-blue:           #ffffff;
-    --c-blue-muted:     #b1bac4;
-    --c-magenta:        #ffffff;
-    --c-magenta-muted:  #b1bac4;
-    --c-cyan:           #ffffff;
-    --c-cyan-muted:     #b1bac4;
-    --c-bg-ward:        #6e7681;
-    --c-bg-ward-muted:  #484f58;
-  }
-}
-
 /* Colorblind (GitHub colorblind palette). "Green" remaps toward blue and
  * "red" toward orange so the red/green axis is distinguishable -- the slot
  * names stay symbolic, the hues don't match the names. */
@@ -196,5 +153,48 @@ html[data-theme="high-contrast"] {
     --c-cyan-muted:     #39c5cf;
     --c-bg-ward:        #9ea7b3;
     --c-bg-ward-muted:  #7a828e;
+  }
+}
+
+html[data-theme="no-color"] {
+  --c-fg:             #1f2328;
+  --c-bg:             #ffffff;
+  --c-fg-ward:        #24292f;
+  --c-fg-ward-muted:  #57606a;
+  --c-red:            #24292f;
+  --c-red-muted:      #57606a;
+  --c-green:          #24292f;
+  --c-green-muted:    #57606a;
+  --c-yellow:         #24292f;
+  --c-yellow-muted:   #57606a;
+  --c-blue:           #24292f;
+  --c-blue-muted:     #57606a;
+  --c-magenta:        #24292f;
+  --c-magenta-muted:  #57606a;
+  --c-cyan:           #24292f;
+  --c-cyan-muted:     #57606a;
+  --c-bg-ward:        #6e7781;
+  --c-bg-ward-muted:  #8c959f;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme="no-color"] {
+    --c-fg:             #e6edf3;
+    --c-bg:             #0d1117;
+    --c-fg-ward:        #ffffff;
+    --c-fg-ward-muted:  #b1bac4;
+    --c-red:            #ffffff;
+    --c-red-muted:      #b1bac4;
+    --c-green:          #ffffff;
+    --c-green-muted:    #b1bac4;
+    --c-yellow:         #ffffff;
+    --c-yellow-muted:   #b1bac4;
+    --c-blue:           #ffffff;
+    --c-blue-muted:     #b1bac4;
+    --c-magenta:        #ffffff;
+    --c-magenta-muted:  #b1bac4;
+    --c-cyan:           #ffffff;
+    --c-cyan-muted:     #b1bac4;
+    --c-bg-ward:        #6e7681;
+    --c-bg-ward-muted:  #484f58;
   }
 }
