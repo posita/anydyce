@@ -7,7 +7,18 @@
   --border:       #d0d4d8;
   --text:         #1a1d22;
   --muted:        #6b7178;
-  --accent:       #2a7a4f;
+  /* Accent hue palette (Tailwind 600 for light mode). The active --accent
+   * is selected from these by the html[data-accent] rules below; --accent
+   * itself defaults to green so a fresh load (no attribute yet) matches the
+   * green swatch. amber stands in for yellow so white --accent-fg text
+   * stays legible on the button background. */
+  --accent-red:    #dc2626;
+  --accent-orange: #ea580c;
+  --accent-amber:  #d97706;
+  --accent-green:  #2a7a4f;
+  --accent-blue:   #2563eb;
+  --accent-purple: #7c3aed;
+  --accent:       var(--accent-green);
   --accent-fg:    #ffffff;
   --code-bg:      #f4f6f8;
   --selection-bg: #add6ff;
@@ -57,7 +68,15 @@
     --border:       #2d333b;
     --text:         #e6edf3;
     --muted:        #8b949e;
-    --accent:       #4cc38a;
+    /* Accent hue palette (Tailwind 400 for dark mode -- lighter so it
+     * reads on the dark background and carries the dark --accent-fg). */
+    --accent-red:    #f87171;
+    --accent-orange: #fb923c;
+    --accent-amber:  #fbbf24;
+    --accent-green:  #4cc38a;
+    --accent-blue:   #60a5fa;
+    --accent-purple: #a78bfa;
+    --accent:       var(--accent-green);
     --accent-fg:    #14171c;
     --code-bg:      #1c2128;
     --selection-bg: #3a5680;
@@ -77,6 +96,20 @@
     --syn-punct:    #8b949e;
   }
 }
+
+/* Accent selection: the html[data-accent] attribute (set by playground.js
+ * from the persisted choice) picks which hue --accent resolves to. Each
+ * rule points --accent at a --accent-<hue> variable, which is itself
+ * light/dark-aware, so a single set of rules works in both modes -- no
+ * per-mode duplication. Everything that uses var(--accent) (Run button,
+ * resizer hover, view-toggle active, and the chart bars via
+ * readCssTheme) follows automatically. */
+html[data-accent="red"]    { --accent: var(--accent-red); }
+html[data-accent="orange"] { --accent: var(--accent-orange); }
+html[data-accent="amber"]  { --accent: var(--accent-amber); }
+html[data-accent="green"]  { --accent: var(--accent-green); }
+html[data-accent="blue"]   { --accent: var(--accent-blue); }
+html[data-accent="purple"] { --accent: var(--accent-purple); }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
@@ -106,6 +139,58 @@ header h1 {
 .header-meta {
   font-size: 0.85em;
   color: var(--muted);
+}
+
+/* Run-status line. Lives in the Logs pane header (run feedback sits with
+ * the run diagnostics). The .pane-header flex with space-between pushes it
+ * to the right of the "Logs" h2. Not uppercased like the h2 -- it's a
+ * sentence, not a label. min-width: 0 + ellipsis so a long status (e.g. a
+ * corpus-load URL) can't shove the header wider than the pane. */
+.status {
+  font-size: 0.85em;
+  color: var(--muted);
+  font-style: italic;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  margin-left: 0.5em;
+}
+
+/* Accent-color picker: a row of six swatches in the page header. Each
+ * swatch shows its OWN hue (via the corresponding --accent-<hue> var, so
+ * the swatches themselves track light/dark too); the selected one gets a
+ * ring. Selecting sets html[data-accent], which re-points --accent. */
+.accent-picker {
+  display: inline-flex;
+  gap: 0.35em;
+  align-items: center;
+}
+.accent-swatch {
+  /* Integer px (not em) so the circle and its selection ring don't land on
+   * fractional pixel boundaries, which rounded unevenly across zoom levels. */
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.accent-swatch[data-accent-choice="red"]    { background: var(--accent-red); }
+.accent-swatch[data-accent-choice="orange"] { background: var(--accent-orange); }
+.accent-swatch[data-accent-choice="amber"]  { background: var(--accent-amber); }
+.accent-swatch[data-accent-choice="green"]  { background: var(--accent-green); }
+.accent-swatch[data-accent-choice="blue"]   { background: var(--accent-blue); }
+.accent-swatch[data-accent-choice="purple"] { background: var(--accent-purple); }
+.accent-swatch[aria-pressed="true"] {
+  /* Concentric selection ring via layered box-shadow: a 1px bg-colored gap
+   * then a 2px text-colored ring. box-shadow (not outline + outline-offset)
+   * because the layers scale from the same border box and follow
+   * border-radius cleanly -- outline-offset rendered the ring slightly
+   * off-center at some zoom levels. Doesn't affect layout, so swatch
+   * spacing is unchanged. */
+  box-shadow: 0 0 0 1px var(--bg), 0 0 0 3px var(--text);
 }
 
 main {
@@ -265,6 +350,13 @@ main {
 .output-view {
   flex: 1;
   overflow: auto;
+  /* Reserve the vertical scrollbar's width whether or not it's currently
+   * shown, so the content width is stable. Without this, Plotly sizes the
+   * charts to the full (scrollbar-less) width at newPlot time -- the pane
+   * is momentarily empty and un-scrolled -- then the tall content brings in
+   * the scrollbar, narrowing the content box and leaving the charts
+   * overflowing horizontally. A no-op on overlay-scrollbar platforms. */
+  scrollbar-gutter: stable;
 }
 
 /* Single-purpose placeholder element shown until its pane has content.

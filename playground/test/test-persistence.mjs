@@ -6,6 +6,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  ACCENTS,
+  ACCENT_KEY,
+  DEFAULT_ACCENT,
   EDITOR_SPLIT_KEY,
   LOGS_SPLIT_KEY,
   STORAGE_KEY,
@@ -13,10 +16,12 @@ import {
   VIEW_MODE_KEY,
   VIEW_MODE_TEXT,
   createDebouncedSaver,
+  loadAccent,
   loadEditorSplit,
   loadLogsSplit,
   loadSavedDoc,
   loadViewMode,
+  saveAccent,
   saveDoc,
   saveEditorSplit,
   saveLogsSplit,
@@ -232,6 +237,52 @@ test("loadViewMode / saveViewMode swallow storage errors", () => {
 test("loadViewMode / saveViewMode no-op when storage is unavailable", () => {
   assert.equal(loadViewMode(null), null);
   assert.doesNotThrow(() => saveViewMode(VIEW_MODE_BARS, null));
+});
+
+// ---- loadAccent / saveAccent -----------------------------------------------
+
+test("ACCENT_KEY shares the playground namespace", () => {
+  assert.match(ACCENT_KEY, /^anydyce-playground:/);
+});
+
+test("DEFAULT_ACCENT is one of the valid accents", () => {
+  assert.ok(ACCENTS.includes(DEFAULT_ACCENT));
+});
+
+test("ACCENTS includes amber (yellow stand-in), not yellow", () => {
+  assert.ok(ACCENTS.includes("amber"));
+  assert.ok(!ACCENTS.includes("yellow"));
+});
+
+test("saveAccent + loadAccent round-trip every valid accent", () => {
+  for (const accent of ACCENTS) {
+    const storage = makeStorage();
+    saveAccent(accent, storage);
+    assert.equal(loadAccent(storage), accent);
+  }
+});
+
+test("loadAccent returns null when unset", () => {
+  assert.equal(loadAccent(makeStorage()), null);
+});
+
+test("loadAccent rejects unknown values", () => {
+  const storage = makeStorage();
+  storage.setItem(ACCENT_KEY, "chartreuse");
+  assert.equal(loadAccent(storage), null);
+});
+
+test("saveAccent ignores unknown values", () => {
+  const storage = makeStorage();
+  saveAccent("chartreuse", storage);
+  assert.equal(storage.getItem(ACCENT_KEY), null);
+});
+
+test("loadAccent / saveAccent swallow storage errors / no-op without storage", () => {
+  assert.equal(loadAccent(makeThrowingStorage()), null);
+  assert.doesNotThrow(() => saveAccent("red", makeThrowingStorage()));
+  assert.equal(loadAccent(null), null);
+  assert.doesNotThrow(() => saveAccent("red", null));
 });
 
 // ---- stripUrlFragment ----------------------------------------------------
