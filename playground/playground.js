@@ -32,13 +32,16 @@ import {
   runAnydice,
 } from "./pyodide-runner.js";
 import {
+  DEFAULT_ACCENT,
   VIEW_MODE_BARS,
   VIEW_MODE_TEXT,
   createDebouncedSaver,
+  loadAccent,
   loadEditorSplit,
   loadLogsSplit,
   loadSavedDoc,
   loadViewMode,
+  saveAccent,
   saveDoc,
   saveEditorSplit,
   saveLogsSplit,
@@ -322,19 +325,50 @@ function renderOutputBars(outputs, displayPrecision) {
   showOutputViews();
 }
 
-// Re-render charts when the OS theme changes so they pick up the new CSS
-// palette (renderPlots re-reads the variables on every call). The rest of
-// the UI updates automatically via the media query in playground.css; the
-// charts are the only place colors get baked in.
+// Re-render the charts from the last run's saved data so they pick up the
+// current CSS palette. Plotly bakes colors into its SVG at render time and
+// has no CSS reactivity, so any palette change -- OS light/dark flip or an
+// accent-hue selection -- needs an explicit re-render. The rest of the UI
+// follows var(--accent) / the media query automatically. No-op before the
+// first run.
+function rerenderCharts() {
+  if (lastOutputs !== null) {
+    renderPlots(outputBars, lastOutputs, Plotly, {
+      precision: lastDisplayPrecision,
+    });
+  }
+}
+
 window
   .matchMedia("(prefers-color-scheme: dark)")
-  .addEventListener("change", () => {
-    if (lastOutputs !== null) {
-      renderPlots(outputBars, lastOutputs, Plotly, {
-        precision: lastDisplayPrecision,
-      });
-    }
-  });
+  .addEventListener("change", rerenderCharts);
+
+// ---- Accent color picker ---------------------------------------------------
+// Selecting a hue sets html[data-accent], which re-points the --accent CSS
+// variable (see playground.css). Everything using var(--accent) -- Run
+// button, resizer hover, view-toggle active state -- updates declaratively;
+// only the charts need an explicit re-render (Plotly bakes colors in).
+const accentSwatches = document.querySelectorAll(".accent-swatch");
+
+function setAccent(accent) {
+  document.documentElement.dataset.accent = accent;
+  for (const sw of accentSwatches) {
+    sw.setAttribute(
+      "aria-pressed",
+      sw.dataset.accentChoice === accent ? "true" : "false",
+    );
+  }
+  saveAccent(accent);
+  rerenderCharts();
+}
+
+for (const sw of accentSwatches) {
+  sw.addEventListener("click", () => setAccent(sw.dataset.accentChoice));
+}
+
+// Apply the persisted (or default) accent on load. rerenderCharts no-ops
+// pre-first-run, so this only sets the attribute + active swatch.
+setAccent(loadAccent() || DEFAULT_ACCENT);
 
 function renderError(err) {
   // Output shows a short error summary only; the full traceback lives in

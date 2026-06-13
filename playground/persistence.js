@@ -23,6 +23,15 @@ export const VIEW_MODE_BARS = "bars";
 export const VIEW_MODE_TEXT = "text";
 const _ALL_VIEW_MODES = new Set([VIEW_MODE_BARS, VIEW_MODE_TEXT]);
 
+export const ACCENT_KEY = "anydyce-playground:accent";
+// Accent hue keys. Order is the display order of the swatch row. "amber"
+// stands in for yellow (true yellow can't carry white button text). Each
+// key maps to a --accent-<key> CSS variable (light + dark pairs) in
+// playground.css; "green" is the default and matches the base --accent.
+export const ACCENTS = ["red", "orange", "amber", "green", "blue", "purple"];
+export const DEFAULT_ACCENT = "green";
+const _ACCENT_SET = new Set(ACCENTS);
+
 // Read the saved editor doc, or null if absent / unreadable.
 export function loadSavedDoc(storage = globalThis.localStorage) {
   try {
@@ -109,6 +118,29 @@ export function saveViewMode(mode, storage = globalThis.localStorage) {
   try {
     if (!storage) return;
     storage.setItem(VIEW_MODE_KEY, mode);
+  } catch {
+    // ignore
+  }
+}
+
+// Read the persisted accent hue, or null if absent / unrecognized. The
+// consumer applies DEFAULT_ACCENT for null.
+export function loadAccent(storage = globalThis.localStorage) {
+  try {
+    if (!storage) return null;
+    const raw = storage.getItem(ACCENT_KEY);
+    return _ACCENT_SET.has(raw) ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+// Persist the accent hue. Silent no-op on storage error / unknown hue.
+export function saveAccent(accent, storage = globalThis.localStorage) {
+  if (!_ACCENT_SET.has(accent)) return;
+  try {
+    if (!storage) return;
+    storage.setItem(ACCENT_KEY, accent);
   } catch {
     // ignore
   }

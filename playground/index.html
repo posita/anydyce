@@ -10,7 +10,14 @@
   <header>
     <h1>AnyDice Playground</h1>
     <div class="header-meta">
-      <span class="status" id="status">Starting up...</span>
+      <div class="accent-picker" role="group" aria-label="Accent color">
+        <button type="button" class="accent-swatch" data-accent-choice="red" aria-label="Red accent" title="Red"></button>
+        <button type="button" class="accent-swatch" data-accent-choice="orange" aria-label="Orange accent" title="Orange"></button>
+        <button type="button" class="accent-swatch" data-accent-choice="amber" aria-label="Amber accent" title="Amber"></button>
+        <button type="button" class="accent-swatch" data-accent-choice="green" aria-label="Green accent" title="Green"></button>
+        <button type="button" class="accent-swatch" data-accent-choice="blue" aria-label="Blue accent" title="Blue"></button>
+        <button type="button" class="accent-swatch" data-accent-choice="purple" aria-label="Purple accent" title="Purple"></button>
+      </div>
     </div>
   </header>
 
@@ -68,6 +75,7 @@
       <section class="pane logs-pane">
         <div class="pane-header">
           <h2>Logs</h2>
+          <span class="status" id="status">Starting up...</span>
         </div>
         <div id="logs-placeholder" class="pane-placeholder">
           Warnings and errors from the current run will appear here.
