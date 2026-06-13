@@ -255,6 +255,7 @@ const statusEl          = document.getElementById("status");
 const runBtn            = document.getElementById("run-btn");
 const shareBtn          = document.getElementById("share-btn");
 const cancelBtn         = document.getElementById("cancel-btn");
+const csvBtn            = document.getElementById("csv-btn");
 const outputPlaceholder = document.getElementById("output-placeholder");
 const outputText        = document.getElementById("output-text");
 const outputBars        = document.getElementById("output-bars");
@@ -282,6 +283,32 @@ function renderResults(text) {
 // time).
 let lastOutputs = null;
 let lastDisplayPrecision;
+// Base64 CSV + download filename of the last successful run, both computed
+// in the worker via anydyce.csv (csv_base64 / csv_filename) so the
+// playground and the Jupyter widget produce byte-identical files with
+// identical names. Held JS-side so the download keeps working even after a
+// Cancel terminates the worker.
+let lastCsv = "";
+let lastCsvFilename = "";
+
+function setCsvAvailable(available) {
+  csvBtn.disabled = !available;
+  csvBtn.title = available
+    ? "Download results as CSV"
+    : "Run a program to enable CSV export";
+}
+
+function handleCsvDownload() {
+  if (!lastCsv) return;
+  const a = document.createElement("a");
+  a.href = `data:text/csv;base64,${lastCsv}`;
+  a.download = lastCsvFilename || "anydice-results.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+csvBtn.addEventListener("click", handleCsvDownload);
 
 function renderOutputBars(outputs, displayPrecision) {
   // Bars view: stacked horizontal-bar charts, one per `output` statement,
@@ -493,14 +520,22 @@ async function handleRun() {
   outputBars.replaceChildren();
   showOutputViews();
   resetLogs();
+  // Disable CSV export while a run is in flight; the visible panes no
+  // longer reflect what would be downloaded. Re-enabled on success only --
+  // a failed or cancelled run leaves it disabled rather than offering the
+  // prior run's data against the current panes' error text.
+  setCsvAvailable(false);
   const t0 = performance.now();
   try {
-    const { text, outputs, displayPrecision, warnings } =
+    const { text, outputs, displayPrecision, csv, csvFilename, warnings } =
       await runAnydice(source);
     const dt = Math.round(performance.now() - t0);
     logWarnings(warnings);
     renderResults(text);
     renderOutputBars(outputs, displayPrecision);
+    lastCsv = csv;
+    lastCsvFilename = csvFilename;
+    setCsvAvailable(Boolean(csv) && outputs.length > 0);
     setStatus(`Ran in ${dt} ms.`);
   } catch (err) {
     if (err instanceof CancelledError) {
