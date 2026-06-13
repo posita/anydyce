@@ -9,13 +9,13 @@
   --muted:        #6b7178;
   /* Accent: the active hue is chosen by the html[data-accent] rules below,
    * each pointing --accent at a full-strength color slot (themes.css).
-   * Defaults to green so a fresh load (no attribute yet) matches the green
+   * Defaults to cyan so a fresh load (no attribute yet) matches the cyan
    * swatch. Full-strength (not -muted) is the higher-contrast-against-bg
    * variant -- dark in light mode, light in dark mode -- and --accent-fg
    * tracks bg (white in light, near-black in dark), so it always contrasts
    * with the accent on the Run button. --accent-fg keeps a literal per-mode
    * value (the one accent value that's genuinely mode-specific). */
-  --accent:       var(--c-green);
+  --accent:       var(--c-cyan);
   --accent-fg:    #ffffff;
   --code-bg:      #f4f6f8;
   --selection-bg: #add6ff;
@@ -69,7 +69,7 @@
     --border:       #2d333b;
     --text:         #e6edf3;
     --muted:        #8b949e;
-    /* --accent itself is mode-aware through the color slot (var(--c-green)
+    /* --accent itself is mode-aware through the color slot (var(--c-cyan)
      * in :root), so it needs no dark override. Only --accent-fg -- the text
      * color ON the accent button -- is genuinely per-mode (dark text on the
      * lighter dark-mode accent). Accent hues and --syn-* likewise come from
