@@ -6,7 +6,8 @@
 // Public API:
 //   await initPyodide(onStatus)  -> resolves when runtime is ready
 //   await runAnydice(source)     -> resolves to {text, outputs,
-//                                   displayPrecision, warnings};
+//                                   displayPrecision, csv, csvFilename,
+//                                   warnings};
 //                                   rejects with RunError (Python exception:
 //                                   carries .traceback and .warnings) or
 //                                   CancelledError (deliberate cancel).
@@ -76,6 +77,8 @@ function ensureWorker() {
             text: msg.text || "",
             outputs: msg.outputs || [],
             displayPrecision: msg.displayPrecision,
+            csv: msg.csv || "",
+            csvFilename: msg.csvFilename || "",
             warnings: msg.warnings || [],
           });
         }

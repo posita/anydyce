@@ -18,7 +18,7 @@ from fractions import Fraction
 
 import matplotlib as mpl
 import pytest
-from dyce import H, P
+from dyce.d import d0, d6, d8, d10, d12, p3d6, pd12
 from ipywidgets import widgets  # type: ignore[import-untyped]
 
 from anydyce import HPlotterChooser
@@ -137,8 +137,8 @@ class TestHPlotterChooser:
         assert tab_widget.selected_index == 0
 
     def test_construction_histogram_specs(self) -> None:
-        chooser = HPlotterChooser([H(6)])
-        assert chooser.hs == (("Histogram 1", H(6), None),)
+        chooser = HPlotterChooser([d6])
+        assert chooser.hs == (("Histogram 1", d6, None),)
 
     def test_construction_controls_expanded(self) -> None:
         chooser = HPlotterChooser(controls_expanded=True)
@@ -176,39 +176,37 @@ class TestHPlotterChooser:
 
     def test_update_hs_minimal(self) -> None:
         chooser = HPlotterChooser()
-        expected = (("Histogram 1", H(6), None),)
+        expected = (("Histogram 1", d6, None),)
         assert chooser.hs != expected
-        chooser.update_hs([H(6)])
+        chooser.update_hs([d6])
         assert chooser.hs == expected
 
 
 def test_limit_for_display_identity() -> None:
-    h = H(6)
+    h = d6
     assert limit_for_display(h, Fraction(0)) is h
 
 
 def test_limit_for_display_empty() -> None:
-    assert limit_for_display(H({}), Fraction(1, 2**13)) == H({})
+    assert limit_for_display(d0, Fraction(1, 2**13)) == d0
 
 
 def test_limit_for_display_cull_everything() -> None:
-    assert limit_for_display(H(6), Fraction(1)) == H({})
+    assert limit_for_display(d6, Fraction(1)) == d0
 
 
 def test_limit_for_display_out_of_bounds() -> None:
     with pytest.raises(ValueError, match=r"\bmust be between zero and one\b"):
-        assert limit_for_display(H(6), Fraction(-1))
+        assert limit_for_display(d6, Fraction(-1))
 
     with pytest.raises(ValueError, match=r"\bmust be between zero and one\b"):
-        assert limit_for_display(H(6), Fraction(2))
+        assert limit_for_display(d6, Fraction(2))
 
 
 def test_values_xy_for_graph_type() -> None:
-    d6 = H(6)
     d6_outcomes = tuple(d6.outcomes())
-    p_3d6 = 3 @ P(d6)
-    lo = p_3d6.h(0)
-    hi = p_3d6.h(-1)
+    lo = p3d6.h(0)
+    hi = p3d6.h(-1)
 
     lo_outcomes_normal, lo_values_normal = values_xy_for_graph_type(lo, "normal")
     _, hi_values_normal = values_xy_for_graph_type(hi, "normal")
@@ -259,7 +257,7 @@ def test_csv_download_link_emtpy() -> None:
 
 
 def test_csv_download_link_single_histogram() -> None:
-    d6_csv_html = _csv_download_link([("d6", H(6), None)])
+    d6_csv_html = _csv_download_link([("d6", d6, None)])
     assert (
         d6_csv_html
         == '<a download="d6.csv" href="data:text/csv;base64,T3V0Y29tZSxkNg0KMSwwLjE2NjY2NjY2NjY2NjY2NjY2DQoyLDAuMTY2NjY2NjY2NjY2NjY2NjYNCjMsMC4xNjY2NjY2NjY2NjY2NjY2Ng0KNCwwLjE2NjY2NjY2NjY2NjY2NjY2DQo1LDAuMTY2NjY2NjY2NjY2NjY2NjYNCjYsMC4xNjY2NjY2NjY2NjY2NjY2Ng0K" target="_blank">Download raw data as CSV</a>'
@@ -267,13 +265,13 @@ def test_csv_download_link_single_histogram() -> None:
 
 
 def test_csv_download_link_secondary_histogram_ignored() -> None:
-    d8d12_csv_html = _csv_download_link([("d8d12", H(8) + H(12), None)])
-    d8d12_vs_2d10_csv_html = _csv_download_link([("d8d12", H(8) + H(12), 2 @ H(10))])
+    d8d12_csv_html = _csv_download_link([("d8d12", d8 + d12, None)])
+    d8d12_vs_2d10_csv_html = _csv_download_link([("d8d12", d8 + d12, 2 @ d10)])
     assert d8d12_csv_html == d8d12_vs_2d10_csv_html
 
 
 def test_csv_download_link_multiple_histograms() -> None:
-    d6_and_d8_csv_html = _csv_download_link([("d6", H(6), None), ("d8", H(8), None)])
+    d6_and_d8_csv_html = _csv_download_link([("d6", d6, None), ("d8", d8, None)])
     assert (
         d6_and_d8_csv_html
         == '<a download="d6-d8.csv" href="data:text/csv;base64,T3V0Y29tZSxkNixkOA0KMSwwLjE2NjY2NjY2NjY2NjY2NjY2LDAuMTI1DQoyLDAuMTY2NjY2NjY2NjY2NjY2NjYsMC4xMjUNCjMsMC4xNjY2NjY2NjY2NjY2NjY2NiwwLjEyNQ0KNCwwLjE2NjY2NjY2NjY2NjY2NjY2LDAuMTI1DQo1LDAuMTY2NjY2NjY2NjY2NjY2NjYsMC4xMjUNCjYsMC4xNjY2NjY2NjY2NjY2NjY2NiwwLjEyNQ0KNywsMC4xMjUNCjgsLDAuMTI1DQo=" target="_blank">Download raw data as CSV</a>'
@@ -285,32 +283,32 @@ def test_histogram_specs_to_h_tuples_empty() -> None:
 
 
 def test_histogram_specs_to_h_tuples_single_h_like() -> None:
-    assert _histogram_specs_to_h_tuples([H(8), P(12)]) == (
-        ("Histogram 1", H(8), None),
-        ("Histogram 2", H(12), None),
+    assert _histogram_specs_to_h_tuples([d8, pd12]) == (
+        ("Histogram 1", d8, None),
+        ("Histogram 2", d12, None),
     )
 
 
 def test_histogram_specs_to_h_tuples_two_tuple() -> None:
-    assert _histogram_specs_to_h_tuples([("d8", H(8)), ("d12", P(12))]) == (
-        ("d8", H(8), None),
-        ("d12", H(12), None),
+    assert _histogram_specs_to_h_tuples([("d8", d8), ("d12", pd12)]) == (
+        ("d8", d8, None),
+        ("d12", d12, None),
     )
 
 
 def test_histogram_specs_to_h_tuples_three_tuple() -> None:
     assert _histogram_specs_to_h_tuples(
-        [("d8d12", H(8), P(12)), ("d12d8", P(12), H(8)), ("d10", H(10), None)]
+        [("d8d12", d8, pd12), ("d12d8", pd12, d8), ("d10", d10, None)]
     ) == (
-        ("d8d12", H(8), H(12)),
-        ("d12d8", H(12), H(8)),
-        ("d10", H(10), None),
+        ("d8d12", d8, d12),
+        ("d12d8", d12, d8),
+        ("d10", d10, None),
     )
 
 
 def test_histogram_specs_to_h_tuples_none() -> None:
-    assert _histogram_specs_to_h_tuples([H(6), None, H(6)]) == (
-        ("Histogram 1", H(6), None),
-        ("", H({}), None),
-        ("Histogram 2", H(6), None),
+    assert _histogram_specs_to_h_tuples([d6, None, d6]) == (
+        ("Histogram 1", d6, None),
+        ("", d0, None),
+        ("Histogram 2", d6, None),
     )

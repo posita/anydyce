@@ -15,8 +15,8 @@
 //   Worker -> Main:
 //     { type: "status", message }                   -- progress updates
 //     { type: "ready" }                             -- init complete
-//     { type: "result", text, outputs, displayPrecision, warnings, runId }
-//                                                   -- successful run
+//     { type: "result", text, outputs, displayPrecision, csv, warnings,
+//       runId }                                     -- successful run
 //     { type: "error", stage: "init"|"run", error,
 //                      traceback?, warnings?, runId? }
 //
@@ -27,7 +27,10 @@
 // `output` statement (items = list of [outcome, count] pairs) consumed by
 // the bars view. `displayPrecision` is the run's final display precision
 // (after any `set "anydyce: display precision"` directives) so the bars
-// view formats percent labels consistently with the text view.
+// view formats percent labels consistently with the text view. `csv` and
+// `csvFilename` are the base64-encoded CSV export and its download name
+// (anydyce.csv.csv_base64 / csv_filename, same as the Jupyter widget's
+// download link) backing the CSV button.
 //
 // `warnings` is an array of {category, message, filename, lineno} captured
 // by the Python-side showwarning override. It accompanies BOTH successful
@@ -62,6 +65,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=ExperimentalWarning)
 
 from anydyce.anydice import Settings, format_results, run as _anydyce_run
+from anydyce.csv import csv_base64, csv_filename
 
 _captured_warnings = []
 
@@ -107,6 +111,13 @@ def _do_run(source):
         # precision"\` directives -- the bars view formats its percent
         # labels with this so both views honor the same setting.
         "displayPrecision": settings.display_precision,
+        # Base64 CSV + filename via the same anydyce.csv helpers the Jupyter
+        # widget uses, so both surfaces export identical files with identical
+        # names. Computed eagerly (not on demand) so the download keeps
+        # working after a Cancel terminates the worker and wipes Python-side
+        # state.
+        "csv": csv_base64([(label, h, None) for label, h in results]),
+        "csvFilename": csv_filename([label for label, _ in results]),
         "warnings": list(_captured_warnings),
     }
 `;
@@ -213,6 +224,8 @@ self.addEventListener("message", async (ev) => {
           text: out.text,
           outputs: out.outputs,
           displayPrecision: out.displayPrecision,
+          csv: out.csv,
+          csvFilename: out.csvFilename,
           warnings: out.warnings,
           runId: msg.runId,
         });

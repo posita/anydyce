@@ -319,9 +319,13 @@ main {
 .view-toggle button {
   /* Vertical metrics come from the shared .pane-header button rule.
    * Horizontal padding is narrower than the action buttons -- the toggle
-   * reads as one segmented control, not two standalone buttons. */
+   * reads as one segmented control, not two standalone buttons. The
+   * wrapper owns the border and radius; squared inner corners keep the
+   * segment backgrounds flush against it (the toggle now sits inside
+   * .pane-actions, whose button rule would otherwise round them). */
   padding-inline: 0.7em;
   border: none;
+  border-radius: 0;
   background: var(--bg);
   color: var(--text);
 }
