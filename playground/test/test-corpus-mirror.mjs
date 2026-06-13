@@ -13,6 +13,7 @@ import {
   ghMirrorUrlForProgramId,
   programIdAsHex,
   programIdAsInt,
+  provenanceHeader,
   shardedSubpathFromProgramId,
 } from "../corpus-mirror.js";
 
@@ -210,4 +211,70 @@ test("ghMirrorUrlForProgramId: well-known corpus IDs from our session", () => {
 
 test("ghMirrorUrlForProgramId: throws on invalid input", () => {
   assert.throws(() => ghMirrorUrlForProgramId("not-hex!"));
+});
+
+// ---- provenanceHeader -------------------------------------------------------
+
+test("provenanceHeader: positive ID cites the canonical anydice.com URL", () => {
+  const header = provenanceHeader("183b0", "2026-06-12T00:00:00Z");
+  assert.match(header, /AnyDice program 183b0 fetched from https:\/\/anydice\.com\/program\/183b0\n/);
+});
+
+test("provenanceHeader: negative ID cites the mirror (no fabricated anydice.com URL)", () => {
+  // Negative IDs are locally-minted fakes; they never existed on
+  // anydice.com.
+  const header = provenanceHeader("-c", "2026-06-12T00:00:00Z");
+  // The mirror URL's PATH contains "anydice.com/program/" (the repo mirrors
+  // the site's directory layout), so exclude the canonical ORIGIN
+  // specifically.
+  assert.ok(!header.includes("https://anydice.com/"), header);
+  assert.match(header, /fetched from https:\/\/raw\.githubusercontent\.com\/posita\/anydice-data\//);
+});
+
+test("provenanceHeader: includes the #id= fragment for reproducibility", () => {
+  const header = provenanceHeader("183b0", "2026-06-12T00:00:00Z");
+  assert.match(header, /#id=183b0\n/);
+});
+
+test("provenanceHeader: via overrides the bare fragment with the full URL", () => {
+  const header = provenanceHeader(
+    "183b0",
+    "2026-06-12T00:00:00Z",
+    "https://example.org/playground/#id=183b0",
+  );
+  assert.match(header, /^  https:\/\/example\.org\/playground\/#id=183b0$/m);
+  // The bare-fragment fallback must NOT also appear on its own line.
+  assert.ok(!/^  #id=183b0$/m.test(header), header);
+});
+
+test("provenanceHeader: passes the timestamp through verbatim", () => {
+  const header = provenanceHeader("1102", "STAMP-SENTINEL");
+  assert.match(header, /at STAMP-SENTINEL using:\n/);
+});
+
+test("provenanceHeader: normalizes the ID (case, leading zeros)", () => {
+  const header = provenanceHeader("0183B0", "2026-06-12T00:00:00Z");
+  assert.match(header, /AnyDice program 183b0 /);
+  assert.match(header, /#id=183b0\n/);
+});
+
+test("provenanceHeader: is a well-formed AnyDice block comment", () => {
+  // Opens with `\ ===... /`, closes with `/ ===... \`, ends with a newline
+  // so the program text concatenates onto its own line.
+  const header = provenanceHeader("183b0", "2026-06-12T00:00:00Z");
+  assert.match(header, /^\\ =+ \/\n/);
+  assert.match(header, /\n\/ =+ \\\n$/);
+});
+
+test("provenanceHeader: matches the %anyd_load header shape", () => {
+  // Line-by-line shape parity with anydyce/magic.py's anyd_load header
+  // (sans the %%anyd line, which is Jupyter-specific).
+  const lines = provenanceHeader("183b0", "2026-06-12T00:00:00Z").split("\n");
+  assert.equal(lines.length, 6); // 5 content lines + trailing ""
+  assert.match(lines[0], /^\\ =+ \/$/);
+  assert.match(lines[1], /^  AnyDice program .+ fetched from .+$/);
+  assert.match(lines[2], /^  at .+ using:$/);
+  assert.match(lines[3], /^  #id=.+$/);
+  assert.match(lines[4], /^\/ =+ \\$/);
+  assert.equal(lines[5], "");
 });

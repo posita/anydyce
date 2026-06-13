@@ -189,7 +189,11 @@ import {
   parseUrlHashForProgram,
   parseUrlHashForProgramId,
 } from "./url-fragment.js";
-import { ghMirrorUrlForProgramId, programIdAsHex } from "./corpus-mirror.js";
+import {
+  ghMirrorUrlForProgramId,
+  programIdAsHex,
+  provenanceHeader,
+} from "./corpus-mirror.js";
 
 // Pull a program from `#p=...` if present, else return null. Synchronous --
 // the inline-encoded program is decoded immediately with no I/O.
@@ -226,7 +230,17 @@ async function fetchProgramFromUrl() {
     }
     const text = await resp.text();
     setStatus(`Loaded program 0x${hexId}.`);
-    return text;
+    // Prepend a provenance comment header (same format as %anyd_load in
+    // anydyce/magic.py). It lands in the editor, so the debounced save
+    // persists it with the program -- provenance survives reloads.
+    const fetchedAt = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+    // Reconstruct the full URL with the NORMALIZED id (rather than echoing
+    // location.hash verbatim) so the recorded link matches the id cited in
+    // the header even when the original had case / leading-zero variance.
+    const via =
+      `${location.origin}${location.pathname}${location.search}` +
+      `#id=${hexId}`;
+    return provenanceHeader(hexId, fetchedAt, via) + text;
   } catch (err) {
     setStatus(`Failed to load 0x${hexId}: ${err.message || err}.`);
     return null;

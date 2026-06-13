@@ -85,3 +85,35 @@ export function shardedSubpathFromProgramId(programId) {
 export function ghMirrorUrlForProgramId(programId) {
   return _GH_MIRROR_URL_BASE + shardedSubpathFromProgramId(programId);
 }
+
+const _ANYDICE_PROGRAM_URL_BASE = "https://anydice.com/program/";
+
+// Build an AnyDice block-comment provenance header for a corpus program
+// loaded via `#id=...`. Mirrors the header `%anyd_load` prepends in
+// anydyce/magic.py so provenance reads the same across surfaces. The
+// header ends with a newline; callers prepend it directly to the fetched
+// program text.
+//
+// `fetchedAt` is a preformatted timestamp string and `via` the full
+// playground URL that triggered the load (the caller owns clock and
+// location access so this stays pure and unit-testable). `via` falls back
+// to the bare `#id=` fragment when not provided.
+//
+// Positive IDs cite the canonical anydice.com URL (user-meaningful, and
+// where the program actually originated). Negative IDs are locally-minted
+// fakes for programs that never existed on anydice.com -- citing
+// anydice.com would fabricate provenance, so those cite the mirror file
+// that actually served the fetch.
+export function provenanceHeader(programId, fetchedAt, via = null) {
+  const hexId = programIdAsHex(programId);
+  const sourceUrl = hexId.startsWith("-")
+    ? ghMirrorUrlForProgramId(hexId)
+    : _ANYDICE_PROGRAM_URL_BASE + hexId;
+  return (
+    "\\ ================================================================================ /\n" +
+    `  AnyDice program ${hexId} fetched from ${sourceUrl}\n` +
+    `  at ${fetchedAt} using:\n` +
+    `  ${via ?? `#id=${hexId}`}\n` +
+    "/ ================================================================================ \\\n"
+  );
+}
