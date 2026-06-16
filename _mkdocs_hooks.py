@@ -14,6 +14,7 @@
 # ======================================================================================
 
 import importlib.metadata
+import json
 import logging
 import os
 import re
@@ -21,8 +22,10 @@ import shutil
 import subprocess  # noqa: S404
 import sys
 import tomllib
-from collections.abc import Sequence
+import urllib.request
+from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
+from urllib.parse import urlsplit
 
 _LOGGER = logging.getLogger("mkdocs.hooks")
 
@@ -33,6 +36,10 @@ _GIT_REF = f"v{_RAW_VERSION}" if _IS_RELEASE else "main"
 # mike deploys under "major.minor"; dev builds link to "latest"
 _parts = _RAW_VERSION.split(".")
 _DOCS_VERSION = f"{_parts[0]}.{_parts[1]}" if _IS_RELEASE else "latest"
+del _parts
+_BUNDLED_PKG_NAMES = ("dyce", "lark", "optype")
+# ipywidgets and its dependencies (see uv pip tree)
+_JUPYTER_BUNDLED_PKG_NAMES = ("ipywidgets", "jupyterlab-widgets", "widgetsnbextension")
 
 
 def on_page_markdown(markdown: str, **_kwargs: object) -> str:
@@ -96,32 +103,77 @@ def on_post_build(config: dict, **_kwargs: object) -> None:
         "--output-dir",
         f"{config['site_dir']}/jupyter",
     ]
-    wheels: list[Path | str] = []
-    _, optype_urls = _version_wheel_urls(Path("uv.lock"), "optype")
-    wheels.extend(optype_urls)
-    dist_dir_path = Path("dist")
-    for pattern in ("anydyce*.whl", "dyce*.whl"):
-        try:
-            latest = max(dist_dir_path.glob(pattern), key=os.path.getmtime)
-        except ValueError:
-            pass
-        else:
-            wheels.append(latest)  # ty: ignore[invalid-argument-type]
+    wheels: list[Path | str] = [_get_latest_pkg_wheel_from_dist()]
+    wheels.extend(_bundled_wheel_urls(_BUNDLED_PKG_NAMES))
+    wheels.extend(_bundled_wheel_urls(_JUPYTER_BUNDLED_PKG_NAMES))
     # Fuck you, Jupyter Lite, for costing me hours to work through your lies. (See
     # <https://github.com/jupyterlite/jupyterlite/issues/1563>.)
     for wheel in wheels:
         cmd.extend(("--piplite-wheels", str(wheel)))
     _uv_run(cmd)
+    # TODO(posita): # noqa: TD003 - At this point, all commonly-needed wheels should be
+    # downloaded to site/jupyter/pypi/... if we ever wanted to just use those instead
+    _bundle_playground_with_wheels_and_index(Path(config["site_dir"]))
 
 
-def _version_wheel_urls(
-    uv_lock_path: Path, name: str, url_contains: str = r"\bnone-any\b"
-) -> tuple[str, list[str]]:
-    with uv_lock_path.open("rb") as f:
-        uv_lock = tomllib.load(f)
-    pkg = next(p for p in uv_lock["package"] if p["name"] == name)
-    wheels = [w for w in pkg.get("wheels", []) if re.search(url_contains, w["url"])]
-    return pkg["version"], [wheel["url"] for wheel in wheels]
+def _bundle_playground_with_wheels_and_index(site_dir: Path) -> None:
+    r"""
+    Download wheels and ship uv.lock-pinned dependencies with the playground for
+    reliability/consistency/performance. Serve same-origin to avoid CORS issues.
+    """
+    src = Path("playground")
+    dst = site_dir / src.name
+
+    if dst.exists():
+        shutil.rmtree(dst)
+    shutil.copytree(
+        src,
+        dst,
+        ignore=shutil.ignore_patterns(
+            # Dev only bits
+            "node_modules",
+            "package.json",
+            "test",
+        ),
+    )
+
+    wheels_dir = dst / "wheels"
+    wheels_dir.mkdir(parents=True, exist_ok=True)
+    names: list[str] = []
+    for url in _bundled_wheel_urls(_BUNDLED_PKG_NAMES):
+        _LOGGER.info("downloading %s", url)
+        parts = urlsplit(url)
+        filename = Path(parts.path).name
+        urllib.request.urlretrieve(url, wheels_dir / filename)  # noqa: S310
+        names.append(filename)
+    pkg_whl = _get_latest_pkg_wheel_from_dist()
+    shutil.copy2(pkg_whl, wheels_dir / pkg_whl.name)
+    names.append(pkg_whl.name)
+    (wheels_dir / "index.json").write_text(json.dumps(names, indent=2) + "\n", "utf_8")
+
+    _LOGGER.info("bundled playground -> %s (%d wheels)", dst, len(names))
+
+
+def _bundled_wheel_urls(pkg_names: Iterable[str]) -> Iterator[str]:
+    uv_lock_path = Path("uv.lock")
+    for pkg_name in pkg_names:
+        with uv_lock_path.open("rb") as f:
+            uv_lock = tomllib.load(f)
+        pkg = next(p for p in uv_lock["package"] if p["name"] == pkg_name)
+        try:
+            yield next(
+                w["url"]
+                for w in pkg.get("wheels", [])
+                if re.search(r"\bnone-any\b", w["url"])
+            )
+        except StopIteration:
+            raise RuntimeError(
+                f"no none-any wheel for {pkg!r} found in {uv_lock_path}"
+            ) from None
+
+
+def _get_latest_pkg_wheel_from_dist() -> Path:
+    return max(Path("dist").glob("anydyce*-none-any.whl"), key=os.path.getmtime)
 
 
 def _uv_run(cmd: Sequence[str]) -> None:

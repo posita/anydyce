@@ -17,23 +17,25 @@ resolution-markers = [
 name = "anydyce"
 source = { editable = "." }
 dependencies = [
-    { name = "dyce", extra = ["viz"] },
-    { name = "ipywidgets" },
+    { name = "dyce" },
     { name = "lark" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
 
 [package.optional-dependencies]
-viz = [
-    { name = "matplotlib" },
+jupyter = [
+    { name = "dyce", extra = ["viz"] },
+    { name = "ipywidgets" },
 ]
 
 [package.dev-dependencies]
 dev = [
     { name = "beartype" },
     { name = "coverage", extra = ["toml"] },
+    { name = "dyce", extra = ["viz"] },
     { name = "griffe-warnings-deprecated" },
     { name = "ipdb" },
+    { name = "ipywidgets" },
     { name = "jupyter-server" },
     { name = "jupyterlab-server" },
     { name = "jupyterlab-widgets" },
@@ -41,7 +43,6 @@ dev = [
     { name = "jupyterlite-pyodide-kernel" },
     { name = "jupytext" },
     { name = "markdown-pycon" },
-    { name = "matplotlib" },
     { name = "matplotlib-inline" },
     { name = "mike" },
     { name = "mkdocs" },
@@ -65,7 +66,9 @@ dev = [
     { name = "ty" },
 ]
 docs = [
+    { name = "dyce", extra = ["viz"] },
     { name = "griffe-warnings-deprecated" },
+    { name = "ipywidgets" },
     { name = "jupyter-server" },
     { name = "jupyterlab-server" },
     { name = "jupyterlab-widgets" },
@@ -73,7 +76,6 @@ docs = [
     { name = "jupyterlite-pyodide-kernel" },
     { name = "jupytext" },
     { name = "markdown-pycon" },
-    { name = "matplotlib" },
     { name = "mike" },
     { name = "mkdocs" },
     { name = "mkdocs-material" },
@@ -82,9 +84,15 @@ docs = [
     { name = "pandas-stubs" },
     { name = "pymdown-extensions" },
 ]
+jupyter = [
+    { name = "dyce", extra = ["viz"] },
+    { name = "ipywidgets" },
+]
 lint = [
     { name = "beartype" },
+    { name = "dyce", extra = ["viz"] },
     { name = "griffe-warnings-deprecated" },
+    { name = "ipywidgets" },
     { name = "jupyter-server" },
     { name = "jupyterlab-server" },
     { name = "jupyterlab-widgets" },
@@ -92,7 +100,6 @@ lint = [
     { name = "jupyterlite-pyodide-kernel" },
     { name = "jupytext" },
     { name = "markdown-pycon" },
-    { name = "matplotlib" },
     { name = "matplotlib-inline" },
     { name = "mike" },
     { name = "mkdocs" },
@@ -111,7 +118,9 @@ lint = [
     { name = "ty" },
 ]
 quickstart = [
+    { name = "dyce", extra = ["viz"] },
     { name = "griffe-warnings-deprecated" },
+    { name = "ipywidgets" },
     { name = "jupyter-server" },
     { name = "jupyterlab-server" },
     { name = "jupyterlab-widgets" },
@@ -119,7 +128,6 @@ quickstart = [
     { name = "jupyterlite-pyodide-kernel" },
     { name = "jupytext" },
     { name = "markdown-pycon" },
-    { name = "matplotlib" },
     { name = "mike" },
     { name = "mkdocs" },
     { name = "mkdocs-material" },
@@ -132,9 +140,10 @@ quickstart = [
 test = [
     { name = "beartype" },
     { name = "coverage", extra = ["toml"] },
+    { name = "dyce", extra = ["viz"] },
     { name = "griffe-warnings-deprecated" },
     { name = "ipdb" },
-    { name = "matplotlib" },
+    { name = "ipywidgets" },
     { name = "pandas" },
     { name = "pytest" },
     { name = "pytest-beartype" },
@@ -150,26 +159,25 @@ tox = [
     { name = "tox" },
     { name = "tox-uv" },
 ]
-viz = [
-    { name = "matplotlib" },
-]
 
 [package.metadata]
 requires-dist = [
-    { name = "dyce", extras = ["viz"], specifier = "~=0.7.0rc6" },
-    { name = "ipywidgets" },
+    { name = "dyce", specifier = "~=0.7.0rc6" },
+    { name = "dyce", extras = ["viz"], marker = "extra == 'jupyter'" },
+    { name = "ipywidgets", marker = "extra == 'jupyter'" },
     { name = "lark", specifier = ">=1.3.1" },
-    { name = "matplotlib", marker = "extra == 'viz'" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'", specifier = ">=4.5" },
 ]
-provides-extras = ["viz"]
+provides-extras = ["jupyter"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "beartype" },
     { name = "coverage", extras = ["toml"] },
+    { name = "dyce", extras = ["viz"] },
     { name = "griffe-warnings-deprecated" },
     { name = "ipdb" },
+    { name = "ipywidgets" },
     { name = "jupyter-server" },
     { name = "jupyterlab-server" },
     { name = "jupyterlab-widgets" },
@@ -177,7 +185,6 @@ dev = [
     { name = "jupyterlite-pyodide-kernel" },
     { name = "jupytext" },
     { name = "markdown-pycon" },
-    { name = "matplotlib" },
     { name = "matplotlib-inline" },
     { name = "mike" },
     { name = "mkdocs" },
@@ -201,7 +208,9 @@ dev = [
     { name = "ty" },
 ]
 docs = [
+    { name = "dyce", extras = ["viz"] },
     { name = "griffe-warnings-deprecated" },
+    { name = "ipywidgets" },
     { name = "jupyter-server" },
     { name = "jupyterlab-server" },
     { name = "jupyterlab-widgets" },
@@ -209,7 +218,6 @@ docs = [
     { name = "jupyterlite-pyodide-kernel" },
     { name = "jupytext" },
     { name = "markdown-pycon" },
-    { name = "matplotlib" },
     { name = "mike" },
     { name = "mkdocs" },
     { name = "mkdocs-material" },
@@ -218,9 +226,15 @@ docs = [
     { name = "pandas-stubs" },
     { name = "pymdown-extensions" },
 ]
+jupyter = [
+    { name = "dyce", extras = ["viz"] },
+    { name = "ipywidgets" },
+]
 lint = [
     { name = "beartype" },
+    { name = "dyce", extras = ["viz"] },
     { name = "griffe-warnings-deprecated" },
+    { name = "ipywidgets" },
     { name = "jupyter-server" },
     { name = "jupyterlab-server" },
     { name = "jupyterlab-widgets" },
@@ -228,7 +242,6 @@ lint = [
     { name = "jupyterlite-pyodide-kernel" },
     { name = "jupytext" },
     { name = "markdown-pycon" },
-    { name = "matplotlib" },
     { name = "matplotlib-inline" },
     { name = "mike" },
     { name = "mkdocs" },
@@ -247,7 +260,9 @@ lint = [
     { name = "ty" },
 ]
 quickstart = [
+    { name = "dyce", extras = ["viz"] },
     { name = "griffe-warnings-deprecated" },
+    { name = "ipywidgets" },
     { name = "jupyter-server" },
     { name = "jupyterlab-server" },
     { name = "jupyterlab-widgets" },
@@ -255,7 +270,6 @@ quickstart = [
     { name = "jupyterlite-pyodide-kernel" },
     { name = "jupytext" },
     { name = "markdown-pycon" },
-    { name = "matplotlib" },
     { name = "mike" },
     { name = "mkdocs" },
     { name = "mkdocs-material" },
@@ -268,9 +282,10 @@ quickstart = [
 test = [
     { name = "beartype" },
     { name = "coverage", extras = ["toml"] },
+    { name = "dyce", extras = ["viz"] },
     { name = "griffe-warnings-deprecated" },
     { name = "ipdb" },
-    { name = "matplotlib" },
+    { name = "ipywidgets" },
     { name = "pandas" },
     { name = "pytest" },
     { name = "pytest-beartype" },
@@ -286,7 +301,6 @@ tox = [
     { name = "tox" },
     { name = "tox-uv" },
 ]
-viz = [{ name = "matplotlib" }]
 
 [[package]]
 name = "anyio"
