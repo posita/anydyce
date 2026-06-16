@@ -90,6 +90,22 @@ html[data-accent="cyan"]    { --accent: var(--c-cyan); --accent-muted: var(--c-c
   background: var(--selection-bg);
 }
 
+h1 a {
+  font-style: italic;
+}
+
+h1 a:link, h1 a:visited {
+  color: var(--accent-muted);
+}
+
+h1 a:hover {
+  color: var(--accent);
+}
+
+h1 a:active {
+  color: color-mix(in hsl shorter hue, var(--accent) 60%, var(--c-fg) 40%);
+}
+
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
 body {
@@ -304,9 +320,12 @@ main {
 .pane-actions button {
   padding-inline: 0.9em;
   border: 1px solid var(--border);
-  background: var(--accent);
+  background: var(--accent-muted);
   color: var(--accent-fg);
   border-radius: var(--control-radius);
+}
+.pane-actions button:hover {
+  background: var(--accent);
 }
 .pane-actions button.btn-secondary {
   background: var(--bg);
@@ -420,10 +439,10 @@ main {
   border-left: 1px solid var(--border);
 }
 .view-toggle button:hover {
-  background: var(--code-bg);
+  background: var(--accent);
 }
 .view-toggle button.active {
-  background: var(--accent);
+  background: var(--accent-muted);
   color: var(--accent-fg);
 }
 
