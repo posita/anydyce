@@ -1,21 +1,11 @@
 all : \
-	notebooks/anydyce_intro.ipynb \
-	assets/plot_anydyce_intro_dark.svg \
-	assets/plot_anydyce_intro_light.svg
-
-assets/plot_%_dark.png : assets/plot_%.py assets/_plot.py ../anydyce/*.py
-	"$${PYTHON:-python3}" assets/plot_$*.py --log-level INFO --style dark --output-file $@
-
-assets/plot_%_dark.svg : assets/plot_%.py assets/_plot.py ../anydyce/*.py
-	"$${PYTHON:-python3}" assets/plot_$*.py --log-level INFO --style dark --output-file $@
-
-assets/plot_%_light.png : assets/plot_%.py assets/_plot.py ../anydyce/*.py
-	"$${PYTHON:-python3}" assets/plot_$*.py --log-level INFO --style light --output-file $@
-
-assets/plot_%_light.svg : assets/plot_%.py assets/_plot.py ../anydyce/*.py
-	"$${PYTHON:-python3}" assets/plot_$*.py --log-level INFO --style light --output-file $@
+    anydice-playground.svg \
+	notebooks/anydyce_intro.ipynb
 
 notebooks/%.ipynb : assets/nb_%.py
 	jupytext --to notebook --update $< --output $@
 	ruff check --fix $@
 	ruff format $@
+
+anydice-playground.svg : Makefile
+	curl --output $@ 'https://img.shields.io/badge/%F0%9F%A4%B7%F0%9F%8E%B2%20AnyDice-Compatible%20%F0%9F%9B%9D-teal.svg'

@@ -198,7 +198,7 @@ dev = [
     { name = "pymdown-extensions" },
     { name = "pyrefly" },
     { name = "pyright" },
-    { name = "pytest" },
+    { name = "pytest", specifier = "!=8.1.0" },
     { name = "pytest-beartype" },
     { name = "pytest-cov" },
     { name = "pytest-gitignore" },
@@ -255,7 +255,7 @@ lint = [
     { name = "pymdown-extensions" },
     { name = "pyrefly" },
     { name = "pyright" },
-    { name = "pytest" },
+    { name = "pytest", specifier = "!=8.1.0" },
     { name = "ruff" },
     { name = "ty" },
 ]
@@ -287,14 +287,14 @@ test = [
     { name = "ipdb" },
     { name = "ipywidgets" },
     { name = "pandas" },
-    { name = "pytest" },
+    { name = "pytest", specifier = "!=8.1.0" },
     { name = "pytest-beartype" },
     { name = "pytest-cov" },
     { name = "pytest-gitignore" },
 ]
 test-pypy = [
     { name = "griffe-warnings-deprecated" },
-    { name = "pytest" },
+    { name = "pytest", specifier = "!=8.1.0" },
     { name = "pytest-gitignore" },
 ]
 tox = [
