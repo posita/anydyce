@@ -33,11 +33,6 @@
 # ## Introduction to [`anydyce`](https://posita.github.io/anydyce/)&rsquo;s interactive visualization capabilities
 
 # Selected examples highlighting [`dyce`](https://posita.github.io/dyce/)&rsquo;s use and capabilities. Select `Run All Cells` from the `Run` menu above.
-#
-# %% [markdown]
-# ## AnyDice replacement
-
-# `anydyce` affords functionality similar to [AnyDice](https://anydice.com/) within [Jupyter](https://jupyter.org/) via various interface.
 
 # %% jupyter={"source_hidden": true}
 # Install additional requirements if necessary
@@ -47,11 +42,13 @@ from prerequisites import (  # pyright: ignore[reportMissingImports] # pyrefly: 
 
 await install_if_missing(  # type: ignore[top-level-await] # noqa: PGH003
     # The optional piplite_spec (third item) omits version to use the local wheel
-    ("anydyce", "anydyce~=0.5.0.dev1", "anydyce"),
+    ("anydyce[jupyter]", "anydyce~=0.5.0.dev1[jupyter]", "anydyce[jupyter]"),
 )
 
 import warnings
 
+# For some reason, this needs to be imported before matplotlib_line
+import matplotlib as mpl  # noqa: F401
 import matplotlib_inline
 from dyce.lifecycle import ExperimentalWarning
 
@@ -61,28 +58,7 @@ matplotlib_inline.backend_inline.set_matplotlib_formats("svg")
 warnings.filterwarnings("ignore", category=ExperimentalWarning)
 
 # %% [markdown]
-# ### Interactive example: comparing d8+d12 and 2d10
-
-# %%
-from dyce import P
-from dyce.d import d8, d12, h2d10
-
-from anydyce import jupyter_visualize
-
-p_3d6 = 3 @ P(6)
-jupyter_visualize(
-    (
-        ("d8+d12", d8 + d12),
-        ("2d10", h2d10),
-    ),
-    initial_markers="v^",
-    selected_name="Line Plot",
-)
-
-# %% [markdown]
-# ### Interactive example: *Powered by the Apocalypse* (PbtA)
-
-# Expected distributions from *[Apocalypse World](http://apocalypse-world.com/)&rsquo;s* core mechanic with various modifiers.
+# ### Using `dyce` to visualize *[Apocalypse World](http://apocalypse-world.com/)&rsquo;s* core mechanic with various modifiers
 
 # %%
 from enum import IntEnum, auto
@@ -117,20 +93,19 @@ jupyter_visualize(
 )
 
 # %% [markdown]
-# ### Interactive AnyDice example from [4d6 Drop Lowest](https://anydice.com/articles/4d6-drop-lowest/)
+# ### Using the `%%anyd` magic command to run an AnyDice program
 
-# TODO(posita): # noqa: TD003 - Fill this out, and include instructions for `%%anyd?`
+# See `?%%anyd` for details.
 
 # %% language="anyd"
 # %%anyd --line
-# output [highest 3 of 4d6] named "4d6 drop lowest"
-# output 3d6 named "3d6"
+# output 2d10 named "2d10"
+# output d8+d12 named "d8+d12"
 
 # %% [markdown]
-# ### Interactive AnyDice example from [4d6 Drop Lowest](https://anydice.com/articles/4d6-drop-lowest/)
+# ### Using the `%anyd_load` magic command to retrieve a previously saved AnyDice program
 
-# TODO(posita): # noqa: TD003 - Fill this out, and include instructions for
-# `%anyd_load?`
+# See `?%anyd_load` for details.
 
 # %% language="txt"
 # %anyd_load https://anydice.com/program/130e6

@@ -27,8 +27,7 @@ repos:
         exclude: |
           (?x)^(
             docs/(
-              dyce-powered\.svg|
-              assets/plot_.*\.svg
+              anydice-playground\.svg
             )
           )$
       - id: trailing-whitespace
@@ -36,8 +35,7 @@ repos:
         exclude: |
           (?x)^(
             docs/(
-              dyce-powered\.svg|
-              assets/plot_.*\.svg
+              anydice-playground\.svg
             )
           )$
 
