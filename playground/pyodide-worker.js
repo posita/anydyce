@@ -161,20 +161,19 @@ async function init() {
   }
 
   postStatus(`Installing ${wheelNames.length} local wheel(s)...`);
-  // Install non-anydyce wheels before anydyce. micropip resolves transitive
-  // deps from PyPI automatically; local wheels override.
-  wheelNames.sort((a, b) => {
-    const aA = a.startsWith("anydyce-") ? 1 : 0;
-    const bA = b.startsWith("anydyce-") ? 1 : 0;
-    return aA - bA;
-  });
-  for (const name of wheelNames) {
-    postStatus(`Installing ${name}...`);
-    // micropip requires an absolute URL with a real scheme; resolve against
-    // the worker's location so we get e.g. http://localhost:8000/wheels/X.whl.
-    const wheelUrl = new URL(`./wheels/${name}`, self.location.href).toString();
-    await micropip.install(wheelUrl);
-  }
+  // Install all bundled wheels in a SINGLE micropip call so micropip resolves
+  // the set as one transaction: inter-dependencies (dyce needs optype;
+  // anydyce needs dyce/lark) are satisfied from the provided wheels rather
+  // than fetched from PyPI, so init makes no cross-origin round-trips.
+  // (Installing one wheel at a time would let a dependency resolve from PyPI
+  // before its bundled wheel had been installed -- notably optype, which dyce
+  // pulls in -- which is why ordering the loop wasn't enough.) micropip
+  // requires absolute URLs with a real scheme, so resolve each against the
+  // worker's location (e.g. http://localhost:8000/wheels/X.whl).
+  const wheelUrls = wheelNames.map((name) =>
+    new URL(`./wheels/${name}`, self.location.href).toString(),
+  );
+  await micropip.install(wheelUrls);
 
   postStatus("Initializing AnyDice interpreter...");
   await pyodide.runPythonAsync(PYTHON_BOOTSTRAP);

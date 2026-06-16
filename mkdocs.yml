@@ -108,6 +108,7 @@ watch:
   - jupyter-lite.json
   - jupyter_lite_config.json
   - mkdocs.yml
+  - playground
 
 nav:
   - Introduction: index.md
