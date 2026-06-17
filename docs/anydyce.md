@@ -12,6 +12,14 @@
   Thank you!
 -->
 
+<!-- TODO(posita): This doesn't format well. Each package should have
+its own doc once things settle down. -->
 # `anydyce` package reference
 
-::: anydyce
+## `anydyce.magic`
+
+::: anydyce.magic
+
+## `anydyce.viz`
+
+::: anydyce.viz
