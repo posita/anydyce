@@ -27,6 +27,7 @@ from itertools import accumulate, chain, cycle, islice
 from operator import __add__, __sub__, itemgetter
 from typing import (
     Any,
+    Literal,
     TypedDict,
     TypeVar,
     cast,
@@ -112,8 +113,10 @@ _DEFAULT_RESOLUTION = 10
 _CUTOFF_BASE = 10
 _CUTOFF_EXP = 6
 
+_RcParamType = Literal["figure.facecolor", "image.cmap", "text.color"]
 
-def _get_param_for_style(style_name: str, param_name: str) -> Any:  # noqa: ANN401
+
+def _get_param_for_style(style_name: str, param_name: _RcParamType) -> Any:  # noqa: ANN401
     style = mstyle.library.get(style_name)
     default_param = mpl.rcParams[param_name]
     return style.get(param_name, default_param) if style else default_param
