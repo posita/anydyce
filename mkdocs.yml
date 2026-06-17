@@ -117,5 +117,5 @@ nav:
   - Contributing: contrib.md
   - License: license.md
   - API:
-    - Core: anydyce.md
     - AnyDice: anydyce.anydice.md
+    - Jupyter: anydyce.md
