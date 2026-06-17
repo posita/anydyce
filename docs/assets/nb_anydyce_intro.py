@@ -66,7 +66,7 @@ from enum import IntEnum, auto
 from dyce import HResult, expand
 from dyce.d import h2d6
 
-from anydyce import jupyter_visualize
+from anydyce.viz import jupyter_visualize
 
 
 class PBTA(IntEnum):

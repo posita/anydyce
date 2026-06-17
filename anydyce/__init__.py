@@ -23,42 +23,8 @@ r"""
 """
 
 from importlib.metadata import PackageNotFoundError, version
-from typing import TYPE_CHECKING, Any
 
-if TYPE_CHECKING:
-    # Type-checker-only imports.
-    # `from anydyce import HPlotterChooser` resolves against this block at
-    # type-check time; the runtime path goes through `__getattr__` below.
-    # `TYPE_CHECKING` is always False at runtime, so importing `viz` here
-    # has no effect on import-time cost.
-    from .viz import HPlotterChooser, PlotWidgets, jupyter_visualize
-
-_VIZ_ALL = frozenset(("HPlotterChooser", "PlotWidgets", "jupyter_visualize"))
-
-__all__ = (
-    "HPlotterChooser",
-    "PlotWidgets",
-    "jupyter_visualize",
-)
-
-
-def __dir__() -> list[str]:
-    # PEP 562: declare what dir(anydyce) returns. Without this, lazy names
-    # only appear after first access (when __getattr__ materializes them
-    # into the module dict). Union of real globals + the lazy names.
-    return sorted(set(globals()) | _VIZ_ALL)
-
-
-def __getattr__(name: str) -> Any:  # noqa: ANN401
-    # PEP 562 module-level __getattr__: Defer importing the viz layer (which has some
-    # heavy dependencies) until someone actually accesses one of the names in __all__,
-    # allowing consumers like the playground worker to avoid the viz import entirely.
-    if name in _VIZ_ALL:
-        from . import viz
-
-        return getattr(viz, name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
+__all__ = ()
 
 try:
     __version__: str = version("anydyce")

@@ -32,7 +32,6 @@ from IPython.core.interactiveshell import InteractiveShell
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 from IPython.display import HTML, Markdown, display
 
-from . import jupyter_visualize
 from .anydice import (
     DEFAULT_PRECISION,
     Settings,
@@ -40,7 +39,7 @@ from .anydice import (
     run,
 )
 from .anydice.fetch import fetch_anydice_program, is_pyodide
-from .viz import BurstHPlotter, HorizontalBarHPlotter, LineHPlotter
+from .viz import BurstHPlotter, HorizontalBarHPlotter, LineHPlotter, jupyter_visualize
 
 __all__ = ("load_ipython_extension",)
 

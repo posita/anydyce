@@ -107,7 +107,6 @@ quickstart = [
 test = [
     "beartype",
     "coverage[toml]",
-    "ipdb",
     "pandas",
     "pytest-beartype",
     "pytest-cov",
@@ -117,6 +116,7 @@ test = [
 # Only what's needed for uv run pytest specifically with PyPy (via Tox)
 test-pypy = [
     "griffe-warnings-deprecated",
+    "ipdb",
     "pytest",
 ]
 # Only what's needed for uv run tox [-e ...]
