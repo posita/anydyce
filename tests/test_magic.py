@@ -23,6 +23,12 @@ from dyce.lifecycle import ExperimentalWarning
 from IPython.core.interactiveshell import InteractiveShell
 from lark.exceptions import UnexpectedToken
 
+try:
+    import matplotlib as mpl  # noqa: F401
+except ImportError:
+    pytest.skip("matplotlib not available", allow_module_level=True)
+
+
 from anydyce import magic as anydyce_magic
 from anydyce.anydice import AnyDiceResultsT, Settings
 from anydyce.anydice.fetch import NetworkError, NoSuchProgramError

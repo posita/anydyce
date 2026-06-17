@@ -16,15 +16,22 @@
 import warnings
 from fractions import Fraction
 
-import matplotlib as mpl
 import pytest
 from dyce.d import d0, d6, d8, d10, d12, p3d6, pd12
-from ipywidgets import widgets  # type: ignore[import-untyped]
 
-from anydyce import HPlotterChooser
+try:
+    import matplotlib as mpl
+    from ipywidgets import widgets  # type: ignore[import-untyped]
+except ImportError:
+    pytest.skip(
+        "one or more of ipywidgets and matplotlib not available",
+        allow_module_level=True,
+    )
+
 from anydyce.viz import (
     BurstHPlotter,
     HorizontalBarHPlotter,
+    HPlotterChooser,
     LineHPlotter,
     PlotWarning,
     PlotWidgets,

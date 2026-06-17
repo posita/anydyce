@@ -150,6 +150,7 @@ test = [
 ]
 test-pypy = [
     { name = "griffe-warnings-deprecated" },
+    { name = "ipdb" },
     { name = "pytest" },
 ]
 tox = [
@@ -289,6 +290,7 @@ test = [
 ]
 test-pypy = [
     { name = "griffe-warnings-deprecated" },
+    { name = "ipdb" },
     { name = "pytest" },
 ]
 tox = [

@@ -37,5 +37,8 @@ def pytest_ignore_collect(
     if platform.python_implementation() == "PyPy":
         # Skip these because Matplotlib is not compatible with PyPy. See
         # <http://packages.pypy.org/>.
-        return collection_path.match("docs/assets/") or collection_path.name == "viz.py"
+        return collection_path.match("docs/assets/") or collection_path.name in (
+            "magic.py",
+            "viz.py",
+        )
     return False
