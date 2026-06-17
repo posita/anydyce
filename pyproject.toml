@@ -93,8 +93,7 @@ lint = [
     "pre-commit-uv",
     "pyrefly",
     "pyright",
-    # https://github.com/pytest-dev/pytest/issues/12073
-    "pytest!=8.1.0",
+    "pytest",
     "ruff",
     "ty",
     {include-group = "docs"},
@@ -118,9 +117,7 @@ test = [
 # Only what's needed for uv run pytest specifically with PyPy (via Tox)
 test-pypy = [
     "griffe-warnings-deprecated",
-    # https://github.com/pytest-dev/pytest/issues/12073
-    "pytest!=8.1.0",
-    "pytest-gitignore",
+    "pytest",
 ]
 # Only what's needed for uv run tox [-e ...]
 tox = [
