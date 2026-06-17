@@ -44,7 +44,7 @@ from anydyce.viz import (
 __all__ = ()
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True)  # noqa: RUF076
 def _suppress_experimental() -> None:
     warnings.filterwarnings("ignore", category=RuntimeWarning)
 

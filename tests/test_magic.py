@@ -49,7 +49,7 @@ class _RecordingShell:
         self.set_next_input_calls.append((text, replace))
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True)  # noqa: RUF076
 def no_real_fetch(monkeypatch: pytest.MonkeyPatch) -> None:
     r"""
     Safety net: any test that reaches `fetch_anydice_program` without first installing a fake (via the `fake_fetch` fixture) raises instead of hitting the network.
