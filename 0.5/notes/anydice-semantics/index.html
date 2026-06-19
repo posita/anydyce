@@ -1,0 +1,1273 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Interactivity tools for dyce">
+      
+      
+        <meta name="author" content="Matt Bogosian">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>AnyDice semantics: what we preserve, what we don't, and what we fixed - anydyce</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#anydice-semantics-what-we-preserve-what-we-dont-and-what-we-fixed" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="anydyce" class="md-header__button md-logo" aria-label="anydyce" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            anydyce
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AnyDice semantics: what we preserve, what we don't, and what we fixed
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="light-blue" data-md-color-accent="light-blue"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/posita/anydyce/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="anydyce" class="md-nav__button md-logo" aria-label="anydyce" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    anydyce
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/posita/anydyce/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anydice/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyDice Interpreter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contrib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anydyce.anydice/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyDice
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anydyce/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jupyter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-preserved-anydice-idiosyncrasies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Preserved AnyDice idiosyncrasies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Preserved AnyDice idiosyncrasies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#type-coercion-and-value-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Type coercion and value semantics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unary-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unary operators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-expansion-and-scoping-todo-53-family" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Function expansion and scoping (todo-53 family)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-excluded-anydice-bugs-we-deliberately-do-not-replicate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Excluded AnyDice bugs (we deliberately do not replicate)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Excluded AnyDice bugs (we deliberately do not replicate)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameter-leakage-across-expansion-iterations-per-outcome-slot-mutation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameter leakage across expansion iterations (per-outcome slot mutation)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint-n-expansion-of-two-non-uniformly-weighted-dies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Joint :n expansion of two non-uniformly-weighted dies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phantom-mass-empty-divergenceanydice-bugphantom-mass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phantom-mass empty (divergence:anydice-bug:phantom-mass)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lhs-asymmetric-d-arithmetic-bugs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LHS-asymmetric d{} arithmetic bugs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparison-against-seq-rhs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparison against seq RHS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#int64-overflow-on-outcome-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        int64 overflow on outcome values
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#int64-overflow-on-h-counts-weights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        int64 overflow on H counts (weights)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_selectionprefix-_selectionsuffix-multiplicity-dyce-side-fixed-upstream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _SelectionPrefix / _SelectionSuffix multiplicity (dyce-side, fixed upstream)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doubling-amplification-of-precision-error-under-iterated-squaring-recurrences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doubling-amplification of precision error under iterated squaring recurrences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-one-off-anomalies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Miscellaneous one-off anomalies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-fixed-our-side-bugs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Fixed our-side bugs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Fixed our-side bugs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#expansion-enumeration-order-little-endian" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expansion enumeration order (little-endian)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pool-preserving-negation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pool-preserving negation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1dpool-is-a-no-op" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1d(&lt;pool&gt;) is a no-op
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#s-parameter-pool-expansion-outer-iteration-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        :s parameter Pool expansion outer iteration order
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#h-h-h-not-0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        H({}) + H({}) = H({}), not 0
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#preserve_zero_counts-in-dyce-core-070rc3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        preserve_zero_counts in dyce-core (0.7.0rc3)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-methodology-the-rename-counterfactual-technique" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Methodology: the rename-counterfactual technique
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Methodology: the rename-counterfactual technique">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Procedure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-probe-0x11-in-tmp-probesdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: probe -0x11 in tmp-probes.db
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backlog-of-known-opens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backlog of known opens
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="anydice-semantics-what-we-preserve-what-we-dont-and-what-we-fixed">AnyDice semantics: what we preserve, what we don't, and what we fixed</h1>
+<p>A living catalog of:</p>
+<ol>
+<li><strong>Preserved AnyDice idiosyncrasies</strong> -- behaviors that are surprising or inconsistent but appear to be intended, that anydyce faithfully replicates.</li>
+<li><strong>Excluded AnyDice bugs</strong> -- behaviors we have evidence are unintended defects, that anydyce deliberately does <em>not</em> replicate (and that we annotate corpus mismatches with so AnyDice is not used as an oracle for them).</li>
+<li><strong>Fixed our-side bugs</strong> -- correctness defects we discovered in our own interpreter during corpus triage and have since fixed.</li>
+</ol>
+<p>Each entry should carry a concrete reference (a test name, a probe id, a commit, or a corpus program id) so the claim is verifiable. AnyDice is closed-source; everything here is the result of empirical reverse-engineering against the live <code>anydice.com</code> and the cached corpus output.</p>
+<p>Maintenance: update this as new behaviors are characterized. The corpus DB's <code>annotations</code> table (in <code>anydice-data</code>) holds the per-program rationale for every <code>divergence:anydice-bug</code> row; cross-reference this catalog against <code>SELECT program_id, note FROM annotations</code> when adding new bug classes. The rename-counterfactual technique (Section 4) is the standard tool for confirming a new divergence belongs to the param-leakage class.</p>
+<p>Future-investigation lead: the <code>match:approximate</code> corpus cohort (~26k programs as of 2026-05-26) is the most likely place to find more instances of Classes A and B. Programs in that cohort produce results that <em>almost</em> match AnyDice but with small residual differences — exactly the signature you'd expect if AnyDice's float-precision drift (Class A) or silent mass loss (Class B) is small enough to fall within our equivalence tolerance but visible enough to fail exact match.</p>
+<hr />
+<h2 id="1-preserved-anydice-idiosyncrasies">1. Preserved AnyDice idiosyncrasies</h2>
+<h3 id="type-coercion-and-value-semantics">Type coercion and value semantics</h3>
+<ul>
+<li>
+<p><strong>Sequence in numeric / die context is <em>uniform over elements</em>, not the sum.</strong>
+  <code>output {1,2,3}</code> yields <code>{1:33.3%, 2:33.3%, 3:33.3%}</code> (uniform over the three values), <em>not</em> <code>{6:100%}</code> (the sum). Verified by probes -21 / -22 against AnyDice. Both anydyce and AnyDice produce the uniform distribution.</p>
+</li>
+<li>
+<p><strong><code>output</code> collapses any pool / H to its sum.</strong>
+  This is <code>output</code>'s behavior, not a property of the dice or the operators that produced the value. So <code>output 2d10</code> produces the triangular sum 2..20; <code>output -(2d10)</code> collapses the negated pool to -20..-2. The pool / H structure survives every operator that doesn't itself collapse; <code>output</code> is the universal collapse site.</p>
+</li>
+<li>
+<p><strong><code>d0</code> shows 0.</strong>
+  A die with zero faces produces the constant 0 (one outcome). <code>_make_die</code> line ~630. AnyDice convention.</p>
+</li>
+<li>
+<p><strong>Outer-<code>d</code> over an empty operand still has cardinality 1 <em>if the count is die-typed</em>.</strong>
+  For an <code>NdM</code> construction, AnyDice's cardinality rule depends on whether <code>N</code> is die-typed. If <code>N</code> came from a <code>d</code>-form (so its evaluation goes through the die-counted expansion path), <code>#X = 1</code> even when <code>M</code> and/or <code>N</code> evaluate to the empty die. If <code>N</code> is a scalar or sequence literal, the emptiness propagates and <code>#X = 0</code>. So <code>d{}d{}</code>, <code>d{}d2</code>, and <code>d2d{}</code> all give <code>#X = 1</code> (with the distribution itself remaining <code>{}</code>), while <code>0d{}</code>, <code>{}d{}</code>, and the bare <code>d{}</code> all give <code>#X = 0</code>. We preserve this via <code>_EmptyPoolOfOne</code> -- a <code>P</code> subclass constructed at <code>_expand_dice_count</code> (the only construction site for die-counted <code>NdM</code>) when the result would otherwise be empty. Its <code>__len__</code> returns 1, its <code>.h()</code> returns <code>H({})</code>, and <code>[0]</code> returns <code>H({})</code>, so downstream pool operators (<code>#</code>, <code>@</code>, ...) see a one-element pool whose only die is the empty distribution. The class docstring carries the Rod Serling rationale for future readers. Verified by probe <code>-0x29</code> in <code>tmp-probes.db</code> (and corpus probe <code>-0xe</code>).</p>
+</li>
+<li>
+<p><strong>Strings are not real values.</strong>
+  Strings are only valid in <code>set</code> argument positions and in <code>output ... named ...</code>. They never appear in arithmetic, comparison, sequence, or dice context. See commit <code>STRINGS. ARE. NOT. REAL. VALUES. IN. ANYDICE.</code></p>
+</li>
+</ul>
+<h3 id="operators">Operators</h3>
+<ul>
+<li>
+<p><strong><code>a / 0</code> returns 0; division truncates toward zero.</strong>
+  No exception is raised; the substitution applies per-outcome inside H-iterated dispatch. <code>_OP_FUNCS["/"]</code>.</p>
+</li>
+<li>
+<p><strong><code>^</code> truncates fractional results toward zero.</strong>
+  So <code>2^-1 == 0</code>, <code>(-1)^-1 == -1</code>. Implemented in <code>_anydice_pow_strict</code> / <code>_anydice_pow_lenient</code>.</p>
+</li>
+<li>
+<p><strong><code>0^&lt;negative&gt;</code> splits by context.</strong>
+  In a <em>scalar^scalar</em> form AnyDice raises an error; in any H-iterated form (one or both operands are dice/pools) AnyDice substitutes a sentinel value (<code>-9223372036854776000</code>, almost certainly a PHP <code>(int)(-INF)</code> artifact) per offending per-outcome computation so the surrounding distribution survives. We mirror the split.</p>
+</li>
+<li>
+<p><strong><code>&amp;</code> / <code>|</code> have equal precedence.</strong>
+  Per commit <code>Give equal precedence to &amp; and |</code>.</p>
+</li>
+<li>
+<p><strong>Sequence arithmetic</strong> (when a seq is used in numeric / comparison context):</p>
+</li>
+<li><code>seq op number</code> -- each element compared, results summed.</li>
+<li><code>seq op die</code> -- <code>sum(seq) op die</code>.</li>
+<li>
+<p><code>seq op seq</code> -- element-by-element lex compare (Python tuple compare).</p>
+</li>
+<li>
+<p><strong>AnyDice has no modulo operator.</strong>
+  Design choice; not a divergence.</p>
+</li>
+<li>
+<p><strong>Empty-die handling is operator-specific.</strong>
+  AnyDice does not treat the empty die <code>d{}</code> uniformly across binary operators:</p>
+</li>
+<li><code>+</code>, <code>-</code>: a <em>single</em> empty operand coerces to scalar <code>0</code> (so <code>d{} + 5 = 5</code>); <em>both</em> operands empty propagates <code>H({})</code>. The both-empty case is operationally important -- it shows up when <code>result: [f] + [f]</code> hits a recursion cap from both sides; treating it as <code>0 + 0 = 0</code> would leak a spurious <code>0</code> into the parent distribution (see Section 3). AnyDice exhibits LHS-asymmetric bugs under these ops too (<code>d{} + {1,2,3}</code> returns the seq per-element rather than sum-coercing; <code>3d6 + d{}</code> preserves the pool's positional structure rather than collapsing -- as if <code>d{}</code> were a no-op identity on the non-empty side instead of a coerced scalar <code>0</code>). Our uniform scalar-0-coercion produces the principled answer; the divergence is deliberate. See annotations <code>0x42aa4</code> / <code>0x1857f</code>.</li>
+<li><code>*</code>, <code>/</code>, <code>^</code>: any empty operand propagates <code>H({})</code>. Empty is the multiplicative annihilator, not a coerced <code>0</code>.</li>
+<li><code>&amp;</code>: any empty operand propagates <code>H({})</code>.</li>
+<li><code>|</code>: same scalar-handling shape as <code>+</code> / <code>-</code> (single empty operand coerces to <code>0</code>; both empty propagates <code>H({})</code>), but <code>|</code> ALSO inherits the LHS-asymmetric AnyDice bugs documented under corpus <code>0x42aa4</code>: with <code>d{}</code> on the left and a seq on the right, AnyDice returns the seq's elements per-element (<code>d{} | {1,2,3}</code> -&gt; pool-shaped <code>{1,2,3}</code> rather than <code>0 | 6 = 1</code>); with <code>d{}</code> on either side and a pool on the other, AnyDice acts as identity on the pool (no-op preserving the pool's positional structure) rather than collapsing. Our <code>_apply_bool</code> <code>|</code>-branch implements the principled scalar-0-coercion path uniformly across these cases, so <code>d{} | &lt;nonzero scalar&gt;</code> yields <code>1</code> as expected; the seq-RHS and pool-other-side divergences are deliberate. Codified in <code>TestOr</code>'s anomaly probes and the <code>0x42aa4</code> / <code>0x1857f</code> annotations.</li>
+<li><code>d</code>: any empty operand propagates <code>H({})</code> for the <em>value</em>, but the cardinality follows the dice-counted-vs-scalar-counted rule covered above ("Outer-<code>d</code> over an empty operand").
+  All single-empty cases are codified in <code>TestAdd</code> / <code>TestSub</code> / <code>TestMul</code> / <code>TestDiv</code> / <code>TestPow</code> / <code>TestAnd</code> / <code>TestOr</code> / <code>TestDieBinary</code>; both-empty cases live as <code>test_empty_die_&lt;op&gt;_empty_die</code> across the same classes.</li>
+</ul>
+<h3 id="unary-operators">Unary operators</h3>
+<ul>
+<li>
+<p><strong><code>-&lt;seq&gt;</code> collapses, <code>+&lt;seq&gt;</code> does not.</strong>
+  Asymmetric and known-weird, but consistent in AnyDice. We codify both with our own tests.</p>
+</li>
+<li>
+<p><strong><code>-</code> on a pool is per-die (pool-preserving).</strong>
+  <code>(-N)dX</code>, <code>Nd(-X)</code>, <code>Nd(-dX)</code>, and <code>-(NdX)</code> all produce a pool of |N| negative-faced dice. Downstream pool consumers (<code>highest of</code>, <code>1@</code>, ...) see N dice, not a single collapsed-then-negated H. The bare <code>output</code> then collapses via the <code>output</code>-collapse rule above. See <code>TestNegativeDiceCountPreservesPoolStructure</code>. (Two of our <code>_apply_neg</code> / <code>_roll_n</code> paths used to collapse the pool; both fixed -- see section 3.)</p>
+</li>
+<li>
+<p><strong><code>+</code> on a pool is identity</strong> -- pool preserved. No <code>_apply_pos</code> function; PosOp just returns its operand. AnyDice agrees (probe -0x28).</p>
+</li>
+<li>
+<p><strong><code>!</code> collapses through to the sum</strong> on both sides -- <code>!(2d{0,1})</code> evaluates as <code>!(sum(2d{0,1}))</code>, not as a per-die negation. Faithful. (Probe -0x28.)</p>
+</li>
+<li>
+<p><strong><code>#&lt;pool&gt;</code> returns the dice count as a scalar</strong> -- by design, not a pool operation. (Probe -0x28.)</p>
+</li>
+</ul>
+<h3 id="function-expansion-and-scoping-todo-53-family">Function expansion and scoping (todo-53 family)</h3>
+<ul>
+<li>
+<p><strong><code>:n</code> / <code>:s</code> parameters are iteration-local.</strong>
+  When a function call expands across the outcomes of a die-typed argument, each iteration starts with the parameter reset to its entry-bound value. In-body mutations to a parameter do not carry across iterations. Verified via 5fec (<code>SEQUENCE:s</code> mutated by <code>SEQUENCE:[remove X from SEQUENCE]</code> must <em>not</em> compound across X-iterations or draw-without-replacement breaks).</p>
+</li>
+<li>
+<p><strong>Non-parameter variables are call-local.</strong>
+  In contrast to parameters, non-parameter variables persist across iterations within a single function call. Probe -7 (<code>[weird d6]</code> cumulative <code>d{1,3,6,10,15,21}</code>) demonstrates the necessary persistence.</p>
+</li>
+<li>
+<p><strong>First parameter varies fastest in expansion enumeration (little-endian).</strong>
+  For a function with multiple expanding <code>:n</code>/<code>:s</code> params, AnyDice enumerates the first argument as the innermost loop. Codified by <code>TestExpansionEnumerationOrder</code> (corpus 0x40389).</p>
+</li>
+<li>
+<p><strong><code>:s</code>-with-Pool outer iteration order is tripartite.</strong>
+  When a <code>:s</code> parameter receives a Pool, AnyDice's order over unique rolls depends on both the pool's arity and the <code>"position order"</code> setting. The order is observable only when the function body mutates a non-parameter variable across iterations (call-local persistence).</p>
+</li>
+<li><strong>Single-die pool:</strong> iterate the underlying H by outcome value ascending. Position-order-invariant. Verified by corpus <code>0xbcc</code>, probe <code>-0x2a</code>, and the <code>1d{1,3,2,1}</code> arm of probe <code>-0x2b</code>.</li>
+<li><strong>Multi-die under highest-first:</strong> sort dyce's ascending-stored roll-tuples by their reversed (highest-first canonical) form, lex-descending -- so <code>2d6</code> goes <code>(6,6), (5,6), (4,6), ..., (1,6), (5,5), (4,5), ..., (1,1)</code>. Verified by the <code>2d6</code> and <code>3d{1,2,3,1}</code> arms of probe <code>-0x2b</code>.</li>
+<li>
+<p><strong>Multi-die under lowest-first:</strong> sort dyce's ascending-stored roll-tuples lex-ascending -- so <code>2d6</code> goes <code>(1,1), (1,2), (1,3), ..., (1,6), (2,2), ..., (5,6), (6,6)</code>. Verified by probe <code>-0x2c</code>.
+  The two multi-die orderings are <em>not</em> exact reverses of each other (e.g. lowest-first iter 3 = <code>(1,3)</code>, whereas reversed highest-first iter 19 = <code>(2,2)</code>); both start at the position-order-extreme corner and end at the opposite, but the inner enumeration pattern differs. The inner per-roll tuple reverse remains conditional on highest-first, presenting each tuple in the position-order canonical form to the function body, independent of the outer sort. Codified by <code>TestSParamPoolExpansionIterationOrder</code>.</p>
+</li>
+<li>
+<p><strong>Function-body sequence return is sum-coerced.</strong>
+  If an iteration's <code>result:</code> is a tuple, it is <code>sum()</code>-ed to a single int before being added to the LCM-normalizing accumulator. Distributing the seq elements as separate outcomes (the prior buggy behavior) double-counts. Verified via 405c6.</p>
+</li>
+<li>
+<p><strong>LCM normalization across iterations.</strong>
+  If different iterations of an expanded call return values with different totals (e.g. an H of total 6 vs an H of total 1), the accumulator LCM-normalizes them before merging so per-outcome relative probabilities survive.</p>
+</li>
+<li>
+<p><strong>First-occurrence-wins for duplicate-named function parameters.</strong>
+  In <code>function: f X:n X:n {...}</code>, the first <code>X</code> binding takes effect; subsequent same-named params are bound but their values are discarded for body reads. See commit <code>Take first like-named parameter, not last</code>.</p>
+</li>
+<li>
+<p><strong>Built-in functions are looked up after user-defined functions</strong> -- but currently dispatch through a distinct execution path from user-defined functions. Consolidation is queued.</p>
+</li>
+<li>
+<p><strong>Function body with no reachable <code>result:</code> contributes zero mass.</strong>
+  When an iteration of a function call completes without hitting a <code>result:</code> statement (e.g. an <code>if</code>-chain that doesn't cover all input cases), AnyDice contributes no probability mass for that iteration. The displayed distribution then sums to less than 100% across the affected output rows. This is the "missing branch" idiosyncrasy: it's a programmer error to write a function that can fall through without a result, but AnyDice's handling (silent zero contribution rather than an error) is a deliberate design choice we replicate faithfully. Corpus examples: <code>0x11182</code> (Rune Crit: covers <code>HI=20</code> / <code>LO=20</code> / <code>HI=LO</code> cases but not <code>HI!=20 &amp; LO!=20 &amp; HI!=LO</code>; sum=14.5%), <code>0x140df</code> (Successes pool: covers <code>SUCCESSES &gt; 3</code> / <code>=2</code> / <code>=1</code> / <code>=0</code> but misses <code>=3</code>; sum=90.12% on the 4d6 row only). Both programs have NO bug annotations because we match AnyDice exactly — the sub-100% sums are present in both interpreters' outputs.</p>
+</li>
+</ul>
+<hr />
+<h2 id="2-excluded-anydice-bugs-we-deliberately-do-not-replicate">2. Excluded AnyDice bugs (we deliberately do not replicate)</h2>
+<p>These are behaviors we have evidence are unintended defects in AnyDice's implementation. Our interpreter remains mathematically correct on these; corpus mismatches caused by them get annotated <code>divergence:anydice-bug</code> so AnyDice is not used as the oracle for the affected program.</p>
+<h3 id="parameter-leakage-across-expansion-iterations-per-outcome-slot-mutation">Parameter leakage across expansion iterations (per-outcome slot mutation)</h3>
+<p>AnyDice fails to reset later-position <code>:n</code>/<code>:s</code> parameters between iterations of an earlier parameter's expansion. The leak is <em>per-outcome</em>: each outcome of the later parameter has its own mutable state cell that AnyDice carries forward as the earlier parameter sweeps its values, instead of resetting per <code>(P_outer, P_inner)</code> combo. The signature is exactly cumulative-leak across the inner-loop slots; probe -0x26 nails the model exactly (results, including weights, predicted to the last decimal).</p>
+<p>This single mechanism is responsible for the entire <code>divergence:anydice-bug</code> cluster around param-reassignment-under-expansion: ~60 corpus programs as of the full-corpus verify on 2026-05-26, including the long-parked program <code>0x1102</code> (<code>pentastar dice with penalty dice</code>). Our interpreter's faithful "params iteration-local / non-params call-local" implementation (5fec / 7f1) is what AnyDice <em>intends</em>; AnyDice's implementation of that intent has a missing isolation boundary between params and the shared per-outcome state structure used (correctly) for non-params.</p>
+<p>Evidence: probe -0x26 in <code>tmp-probes.db</code>; <code>TestCorpus1102SExpansionAggregationDivergence</code> (strict-xfail sentinel asserting the AnyDice oracle as a wrong-direction marker). The annotations table at <code>posita/anydice-data</code> carries per-program rationale for every member of this cluster.</p>
+<h3 id="joint-n-expansion-of-two-non-uniformly-weighted-dies">Joint <code>:n</code> expansion of two non-uniformly-weighted dies</h3>
+<p>A distinct expansion-time defect, separate from the slot-leak above: when a function call expands two <code>:n</code> parameters whose argument dies have <em>non-uniform</em> weight distributions, AnyDice's joint enumeration appears to mis-weight the outcome combinations. The bug is invisible at uniform weights (where each combination has equal weight regardless of enumeration ordering) and surfaces specifically when both arg dies' outcome weights differ.</p>
+<p>Evidence: corpus <code>0x4123a</code> (canonical), with isolation probes <code>0x42b13</code>, <code>0x42b15</code>, <code>0x42b16</code>, <code>0x42b20</code>-<code>0x42b23</code> annotated as <code>divergence:anydice-bug</code>. Our interpreter's joint enumeration is mathematically correct.</p>
+<h3 id="phantom-mass-empty-divergenceanydice-bugphantom-mass">Phantom-mass empty (<code>divergence:anydice-bug:phantom-mass</code>)</h3>
+<p>AnyDice's <code>:n</code>/<code>:s</code> parameter-expansion aggregator distinguishes two flavors of "empty" in a per-iter contribution:</p>
+<ul>
+<li>
+<p><strong>Regular empty <code>H({})</code></strong>: produced by a literal <code>d{}</code>, by the depth-cap handler, by <code>*</code> / <code>/</code> / <code>^</code> empty propagation, or by any expression that evaluates to an empty <code>H</code>. When this appears as an iter's result, AnyDice DROPS it from aggregation and RENORMALIZES the remaining iters' contributions to sum to 100%. Our <code>aggregate_weighted</code> does the same.</p>
+</li>
+<li>
+<p><strong>Phantom-bearing empty</strong>: produced by <code>:n</code> (and <code>:s</code>) parameter expansion <em>specifically when the call site triggers expansion over an empty distribution</em> — the param is expansion-typed (<code>:n</code>/<code>:s</code>) AND the arg has zero outcomes (so the expansion sets up over 0 iterations). When this appears as an iter's result, AnyDice DROPS it from outcome aggregation but KEEPS the iter's outer weight as "phantom mass" — the visible distribution sums to <em>less than 100%</em>, with the missing fraction equalling the dropped iter's weight.</p>
+</li>
+</ul>
+<p>We conflate both flavors into <code>H({})</code> (no phantom representation), so corpus programs that exercise the distinction show small-but-real divergences (probability mass that should be missing instead gets renormalized into other outcomes). Affects ~5 corpus programs in the small DB's <code>divergence:anydice-bug:phantom-mass</code> annotation bucket; the <code>+0</code> workaround (<code>[expr] + 0</code>, converting <code>H({})</code> to <code>H({0:1})</code>) was empirically shown to sidestep the divergence on <code>0x13dc</code> by making the inner iter non-empty.</p>
+<p>Evidence: probe <code>-0x3d</code> in <code>tmp-probes.db</code> (the <code>weird af</code> recursive program at increasing <code>max_depth</code>); corpus <code>0x13dc</code> (the <code>stress</code> -&gt; <code>check botch [botch B]</code> chain at ROLL=10).</p>
+<h3 id="lhs-asymmetric-d-arithmetic-bugs">LHS-asymmetric <code>d{}</code> arithmetic bugs</h3>
+<p>AnyDice's operator-specific empty-die handling (covered in Section 1) is mostly principled, but there are LHS-asymmetric defects under <code>+</code>, <code>-</code>, <code>|</code> when <code>d{}</code> is on the left and the right operand is a seq or pool. Specifically:</p>
+<ul>
+<li><code>d{} + {1,2,3}</code> returns the seq's elements per-element rather than sum-coercing to <code>H({3, 6, 9})</code>. Pool-shaped instead of scalar-coerced.</li>
+<li><code>3d6 + d{}</code> (and <code>|</code> variants) preserves the LHS pool's positional structure rather than collapsing — as if <code>d{}</code> were a no-op identity on the non-empty side instead of a coerced scalar <code>0</code>.</li>
+<li><code>d{} | {}</code> returns empty (propagates) where the principled bool-OR-with-empty-RHS would yield <code>0</code>.</li>
+</ul>
+<p>Our <code>_apply_arith</code> / <code>_apply_bool</code> implement uniform scalar-0-coercion across these cases (so e.g. <code>d{} | &lt;nonzero scalar&gt;</code> yields <code>1</code> as expected). The divergences are deliberate.</p>
+<p>Evidence: annotations <code>0x42aa4</code> (canonical multi-op cluster) and <code>0x1857f</code> (singleton).</p>
+<h3 id="comparison-against-seq-rhs">Comparison against seq RHS</h3>
+<p>Comparison operators (<code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>=</code>, <code>!=</code>) against a sequence right-hand-side appear to coerce the seq to its sum, then run <code>=</code> against the sum — not the documented "element-wise lex compare" or "die-vs-seq" semantics. The empty-seq case is degenerate (always-true).</p>
+<ul>
+<li><code>d6 &lt;= {2,3}</code> returns the answer for <code>d6 = 5</code> rather than the lex/elementwise interpretation. Verified: <code>0x42a2f</code>.</li>
+<li><code>d6 &lt;= {}</code> returns "always true" (vacuous truth at the empty-seq boundary). Verified: <code>0x42a34</code>.</li>
+</ul>
+<p>Our interpreter does element-wise lex compare (matching the documented semantics for sequence-vs-sequence) and sum-coerces seq-against-scalar in numeric context (matching Section 1's rule).</p>
+<h3 id="int64-overflow-on-outcome-values">int64 overflow on outcome values</h3>
+<p>AnyDice's computation appears to evaluate in signed int64; large outcome values wrap around to <code>INT64_MIN</code> or other artifacts. The <code>^</code> / power family is the canonical case: e.g., <code>2^d1024</code> produces wrap-around outcomes; <code>1d100^1d100</code> produces an outcome of exactly <code>-9223372036854775808</code> (= <code>INT64_MIN</code>). The huge-integer-literal sub-family (<code>3d6+9190283...</code>, <code>922340-9999999999999999999/100000</code>) is the same class.</p>
+<p>Roughly 30+ corpus programs are in this class. Our exact-bigint computation produces the mathematically correct result; AnyDice is an unusable oracle for these.</p>
+<p>Evidence: minimal reproducers in the corpus and <code>notes/</code>; deferred-annotate set (the original "32 overflow").</p>
+<h3 id="int64-overflow-on-h-counts-weights">int64 overflow on H counts (weights)</h3>
+<p>A related but distinct class: AnyDice's <code>^</code> is not the only path that produces huge integers. Big damage-calculator-style programs with many independent random sources produce H weight integers (denominators of outcome probabilities) that easily exceed int64. AnyDice truncates the counts, distorting the normalization for the larger outputs. Our exact-bigint counts are mathematically correct.</p>
+<p>Examples: <code>0x19a58</code>, <code>0x25d0d</code> (substantially similar programs by the same author -- different toggles, both overflow). Our counts reach <code>~10^47</code>.</p>
+<h3 id="_selectionprefix-_selectionsuffix-multiplicity-dyce-side-fixed-upstream"><code>_SelectionPrefix</code> / <code>_SelectionSuffix</code> multiplicity (dyce-side, <em>fixed upstream</em>)</h3>
+<p>Listed here for completeness even though the fix is upstream. dyce's <code>P.h(*selectors)</code> previously dropped per-position multiplicity when the duplicate-selection covered only a <em>subset</em> of pool positions (e.g. <code>.h(-2,-2)</code> on a 2-die pool). The Prefix/Suffix selection types were multiplicity-blind; selections with <code>count&gt;1</code> over a partial subset fell through to them, silently de-duplicating. AnyDice preserves multiplicity here; we did not. Fixed in dyce <code>0.7.0rc4</code>; anydyce pinned to that release.</p>
+<p>Evidence: dyce's <code>tests/test_p.py::test_analyze_selection_single_pos</code>; corpus <code>0x11caf</code> cleared by the upstream fix.</p>
+<h3 id="doubling-amplification-of-precision-error-under-iterated-squaring-recurrences">Doubling-amplification of precision error under iterated squaring recurrences</h3>
+<p>Any recurrence whose total-mass invariant has form <code>S' = S²</code> (e.g. joint enumeration that squares the sum-of-counts) amplifies AnyDice's initial float-precision error by 2× per iteration. Mathematically: if AnyDice's stored sum is <code>1 - δ</code> for some tiny precision error δ (positive or negative), then <code>S' = (1 - δ)² ≈ 1 - 2δ</code> — the deviation from 1 doubles per iteration.</p>
+<p>After enough iterations, the visible sum-of-probabilities drift can become arbitrarily large. The direction of drift depends on the sign of the original rounding error, so different starting states show drift in opposite directions on the same recurrence shape.</p>
+<p>The empirical precision estimate from probe <code>-0x48</code> (a pure <code>D: D*D</code> recurrence) is consistent with <strong>float64-level rounding</strong> — about 5e-15 initial deviation, doubling per iteration. The earlier "~17-bit" estimate from <code>-0x47</code> was an overestimate caused by additional rounding sources in the <code>minus helper</code> recurrence. AnyDice probably uses float64 (or equivalent) for probabilities; the visible bug is the structural amplification of float64's irreducible 1e-15 rounding, not an unusually-low-precision representation.</p>
+<p>This is <strong>not specific to AnyDice's representation</strong> — any finite-precision arithmetic exhibits the same amplification when the recurrence squares per step. The only way to avoid it is exact rational arithmetic, which is computationally infeasible at scale. Visible symptom: probability rows fail <code>sum ≈ 100%</code> past some iteration count.</p>
+<p>Affects (small cluster — only 2 corpus programs found):</p>
+<ul>
+<li><code>0x183b0</code>: outputs at loops 45/50/55 with sum drift 100.70% / 124.85% / 121,605.33%. The clip-with-<code>d{}</code> variant (output 4) survives because empty-die return short-circuits the broken branches.</li>
+<li><code>-0x47</code> (probe): asymmetric mass loss via <code>[minus helper D D]</code> recurrence; sum=124.85% at loop 50.</li>
+<li><code>-0x48</code> (probe): pure <code>D: D*D</code> recurrence with two starting states, demonstrating opposite-sign drift (p=0.99 drifts BELOW 100%, p=0.9 drifts ABOVE 100%).</li>
+</ul>
+<p>The corpus-wide scan flagged 4 programs total with sum != 100% — three were Class B (below) and one was this Class A. So Class A is genuinely rare; it requires both an iterated squaring recurrence AND enough loop iterations to amplify the rounding error to visible levels.</p>
+<h3 id="miscellaneous-one-off-anomalies">Miscellaneous one-off anomalies</h3>
+<p>Behaviors that don't generalize into a class but are documented for completeness:</p>
+<ul>
+<li><strong>Depth-accounting structural dependence (<code>0x1065f</code>)</strong>: AnyDice's recursion-cap accounting depends on call-site structure in a non-obvious way. The corpus program triggers a FRL↔IFL recursion that, under our principled depth count, hits an <code>if H({})</code> situation that AnyDice's documented "Boolean values can only be numbers" rule should reject — yet AnyDice emits a clean output. The visible signature is the same as the Section 1 "missing <code>result:</code> returns zero mass" idiosyncrasy (sum=98.21% on the "average total" row), but the <em>trigger</em> here is the recursion cap rather than programmer error. The mismatch with AnyDice's documented <code>if d{}</code> rule is what places this in Section 2 rather than Section 1.</li>
+</ul>
+<p>Lowering <code>max_depth</code> further doesn't change AnyDice's output, but <em>inlining</em> one of the calls (removing it from the stack) DOES make AnyDice error per the documented rule — so AnyDice's depth-accounting has additional structural dependencies we don't fully understand. Treated as bug rather than feature.</p>
+<hr />
+<h2 id="3-fixed-our-side-bugs">3. Fixed our-side bugs</h2>
+<p>Our own correctness improvements discovered during corpus triage. Git is the source of truth; this list exists for transparency.</p>
+<h3 id="expansion-enumeration-order-little-endian">Expansion enumeration order (little-endian)</h3>
+<p>Our <code>_invoke</code> used <code>itertools.product(*expansion)</code> directly, making the first param the <em>outermost</em> loop (big-endian). AnyDice enumerates the first argument as the innermost loop (varies fastest / little-endian). This was invisible until a non-parameter variable persisted across iterations and the per-iteration computation became order-sensitive; corpus <code>0x40389</code> was the canonical case. Commit: <em>Enumerate expansion parameters little-endian, matching AnyDice</em> (interpreter.py:1002). Fixed corpus programs: <code>0x40389</code>, <code>0x1122e</code>, <code>0x12426</code>, <code>0x12427</code>, <code>0x7bee</code>.</p>
+<p>Built-in dispatch (<code>_call_builtin</code>) has the same big-endian pattern but is left for separate investigation; existing builtin tests pass possibly because builtins are order-insensitive in the cases covered.</p>
+<h3 id="pool-preserving-negation">Pool-preserving negation</h3>
+<p>Two paths in our interpreter were both collapsing the pool for unary <code>-</code>: <code>_roll_n</code> for the <code>(-N)dX</code> / <code>Nd(-X)</code> / <code>Nd(-dX)</code> family, and <code>_apply_neg</code> for the explicit unary <code>-(NdX)</code> form. Both produced a flat negated H, so downstream pool consumers received the wrong shape. Both now return <code>P</code> directly. Commit: <em>Preserve pool structure through negation</em> (interpreter.py:380-390 and :656). Fixed corpus programs: <code>0x30d3a</code>, <code>0x30d3b</code>, <code>0x34534</code>, <code>0x388d2</code>, <code>0x34196</code>, <code>0x418c8</code>. Probe -0x28 confirms <code>+</code> / <code>!</code> / <code>#</code> are already faithful.</p>
+<h3 id="1dpool-is-a-no-op"><code>1d(&lt;pool&gt;)</code> is a no-op</h3>
+<p><code>1d(&lt;pool&gt;)</code> should yield <code>&lt;pool&gt;</code> unchanged so downstream pool consumers (<code>highest of</code>, <code>1@</code>, ...) see N dice rather than a single H produced by collapsing the pool and re-rolling it as a one-element pool. Previously <code>_eval</code>'s <code>DiceBinOp</code> path went straight to <code>_roll_n(1, _make_die(faces))</code>, and <code>_make_die(P)</code> invoked <code>.h()</code> on the pool, flattening it. The fix short-circuits when the count is the literal 1 and the faces evaluate to a P. Commit: <em>Treat 1d(<pool>) as a no-op</em> (interpreter.py:339-344). Canonical corpus fix: <code>0x41073</code> (<code>[highest 1 of 1d(2d6)]</code>); cleared roughly 6 corpus programs in the dynamic-sided <code>1d(&lt;expr&gt;)</code> family.</p>
+<h3 id="s-parameter-pool-expansion-outer-iteration-order"><code>:s</code> parameter Pool expansion outer iteration order</h3>
+<p>Our <code>_invoke</code> built the <code>:s</code>-expansion list from <code>arg.rolls_with_counts()</code>, which dyce yields in descending lex order over ascending-stored tuples. This matches AnyDice's order only at iterations 1, 2, and the final roll, so the divergence was invisible for function bodies that only read <code>1@ROLL</code> (e.g. bushido). Corpus <code>0xbcc</code> first surfaced the single-die case (a flat ascending H-iteration), and probe <code>-0x2b</code> discriminated the multi-die case past iteration 2.</p>
+<p>A first patch landed an unconditional sort-ascending for all pool arities, which was correct for single-die and for multi-die lowest-first but wrong for multi-die highest-first. The current fix applies the tripartite rule (see Section 1):</p>
+<ul>
+<li><code>len(arg) == 1</code> → iterate <code>arg.h().items()</code> ascending.</li>
+<li>multi-die, highest-first → <code>sorted(arg.rolls_with_counts(), key=lambda rc: rc[0][::-1], reverse=True)</code>.</li>
+<li>multi-die, lowest-first → <code>sorted(arg.rolls_with_counts())</code>.</li>
+</ul>
+<p>The inner per-roll <code>[::-1]</code> stays as the per-roll position-order presentation, independent of the outer sort. Commit: <em><code>:s</code>-param-Pool expansion iterates by AnyDice's tripartite rule</em> (interpreter.py:966-1010). Canonical corpus fix: <code>0xbcc</code> (<code>[exploding 1d6]</code> with <code>TOTALSUM</code> mutating across <code>DICE</code> outcomes). Probes <code>-0x2a</code> / <code>-0x2b</code> / <code>-0x2c</code> lock in each branch.</p>
+<h3 id="h-h-h-not-0"><code>H({}) + H({}) = H({})</code>, not <code>0</code></h3>
+<p>Our <code>_apply_arith</code>'s "treat empty die as scalar <code>0</code> for <code>+</code>/<code>-</code>" rule was applied independently per operand, so <code>H({}) + H({})</code> collapsed via <code>0 + 0 = 0</code> instead of propagating <code>H({})</code>. The split surfaced on recursion-cap paths in exploding-dice corpus programs (<code>result: 1d[explode dN] + 1d[explode dN]</code> where both inner calls hit the depth cap and returned <code>H({})</code>); our spurious <code>0</code> leaked into the parent distribution and reshaped it broadly across interior outcomes, not just the tail. The truncation warnings on these programs were red herrings -- the dominant divergence wasn't the precision-floor tail, it was this empty+empty coercion. Fix: check both-operand emptiness <em>before</em> the per-operand single-empty rule fires (interpreter.py:467-485). Canonical corpus impact: cleared 16 of 18 truncation-warning residual programs (e.g. <code>0x42f0</code>, <code>0x5d53</code>, <code>0x10517</code>, <code>0x141db</code>) plus 5 additional exact matches (<code>0x142c7</code>, <code>0x28367</code>-<code>9</code>, <code>0x286d1</code>). Verified against the recursion-cap probes <code>-0x2e</code> (smaller-die variant of <code>0x42f0</code>) and <code>-0x30</code> (multi-fallback discriminator). Codified by <code>test_empty_die_&lt;op&gt;_empty_die</code> across the binary-op test classes.</p>
+<h3 id="preserve_zero_counts-in-dyce-core-070rc3"><code>preserve_zero_counts</code> in dyce-core (0.7.0rc3)</h3>
+<p>A dyce-core change re-ported into the dyce-cleanroom branch to support our interpreter's <code>H.lowest_terms(preserve_zero_counts=...)</code> use. Not strictly an anydyce bug but called out because the integration unblocked the corpus triage.</p>
+<hr />
+<h2 id="4-methodology-the-rename-counterfactual-technique">4. Methodology: the rename-counterfactual technique</h2>
+<p>Most of the bugs in Section 2 — especially the parameter-leakage cluster — were diagnosed using a counterfactual rewrite that exploits AnyDice's <em>correct</em> handling of local-variable mutation as a baseline. The technique is the standard tool for confirming whether a corpus divergence belongs to a known bug class (or surfaces a new one).</p>
+<h3 id="procedure">Procedure</h3>
+<p>Given a function under investigation:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">function</span><span class="p">:</span> <span class="n">F</span> <span class="n">X</span><span class="p">:</span><span class="n">n</span> <span class="n">Y</span><span class="p">:</span><span class="n">n</span> <span class="p">{</span>
+  <span class="o">...</span>  <span class="n">body</span> <span class="n">that</span> <span class="n">may</span> <span class="n">mutate</span> <span class="n">X</span> <span class="ow">and</span><span class="o">/</span><span class="ow">or</span> <span class="n">Y</span> <span class="o">...</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<p>Rewrite by renaming each parameter and reassigning the renamed param to the original name as the function body's first statements:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">function</span><span class="p">:</span> <span class="n">F</span> <span class="n">_X_</span><span class="p">:</span><span class="n">n</span> <span class="n">_Y_</span><span class="p">:</span><span class="n">n</span> <span class="p">{</span>
+  <span class="n">X</span><span class="p">:</span> <span class="n">_X_</span>
+  <span class="n">Y</span><span class="p">:</span> <span class="n">_Y_</span>
+  <span class="o">...</span>  <span class="n">body</span><span class="p">,</span> <span class="n">unchanged</span><span class="p">,</span> <span class="n">still</span> <span class="n">references</span> <span class="n">X</span> <span class="ow">and</span> <span class="n">Y</span> <span class="o">...</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<p>The body is now identical to the original <em>syntactically</em>, but <code>X</code> and <code>Y</code> are now <strong>local variables</strong> (assigned from the renamed parameters at entry) rather than parameter slots. AnyDice's "call-local-mutation" semantics for non-parameters is correct (we verified this independently — locals reset per call but persist across iterations within a call, modeled faithfully by our interpreter); only its parameter-slot semantics has the per-outcome-leak defect.</p>
+<p>Then run both versions through AnyDice (and our interpreter) and compare.</p>
+<h3 id="diagnostic-matrix">Diagnostic matrix</h3>
+<p>Let <code>O_orig</code> and <code>O_rewritten</code> be AnyDice's outputs for the two programs; <code>M_orig</code> and <code>M_rewritten</code> be ours.</p>
+<table>
+<thead>
+<tr>
+<th>Observation</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>O_orig == O_rewritten</code></td>
+<td>No parameter-leak in this program. The divergence (if any) belongs to a different bug class — pursue separately (overflow, joint-expansion non-uniform-weights, phantom-mass, etc.).</td>
+</tr>
+<tr>
+<td><code>O_orig != O_rewritten</code></td>
+<td>AnyDice treats the params differently from the locals — confirms a parameter-handling bug.</td>
+</tr>
+<tr>
+<td><code>O_rewritten == M_orig</code></td>
+<td>Our interpreter matches the "as if params were locals" interpretation, which is what AnyDice <em>intends</em>. The divergence sits exactly in AnyDice's missing param-isolation. Annotate <code>divergence:anydice-bug</code>.</td>
+</tr>
+<tr>
+<td><code>O_rewritten == M_rewritten</code></td>
+<td>Sanity check — both interpreters agree on the local-variable semantics, which they should. If this fails, <em>we</em> have a bug.</td>
+</tr>
+</tbody>
+</table>
+<p>The strong signal is the conjunction: <code>O_orig != O_rewritten</code> AND <code>O_rewritten == M_orig</code>. That combination uniquely fingerprints the param-leakage bug class — different from joint-expansion bugs (which affect both versions identically) and from overflow bugs (which affect outcome values, not weights).</p>
+<h3 id="limitations">Limitations</h3>
+<ul>
+<li><strong>Programs that don't mutate parameters</strong> show no diagnostic signal — the rewrite is a no-op on behavior. Use a different technique (or skip the program; if it doesn't mutate params, it can't exhibit this bug).</li>
+<li><strong>Programs that use parameters in expansion-arg position (<code>[F X Y]</code> where X, Y are themselves params being expanded)</strong> require care — the rewrite preserves expansion behavior since renamed params are still <code>:n</code>/<code>:s</code>-typed, but the diagnostic only catches the <em>body-mutation</em> component of the leak.</li>
+<li><strong>Hand-applied per program</strong> — there's no automated rewriter. The original plan was an "auditor" that would generate Tier-2 sisters automatically and run the differential; this remains unbuilt (see Backlog).</li>
+</ul>
+<h3 id="example-probe-0x11-in-tmp-probesdb">Example: probe <code>-0x11</code> in <code>tmp-probes.db</code></h3>
+<p>Isolates the per-outcome <code>:s</code>-slot leakage for the <code>0x1102</code> (pentastar-with-penalty) family. The rewritten variant reassigns <code>PSET: _PSET_</code> at function entry; AnyDice's output for the rewritten variant matches our interpreter's output for the original, while AnyDice's output for the original differs from both. The <code>(orig != rewritten) AND (rewritten == ours)</code> signal is the canonical fingerprint.</p>
+<hr />
+<h2 id="backlog-of-known-opens">Backlog of known opens</h2>
+<p>These are characterized but not yet fixed / annotated:</p>
+<ul>
+<li><strong>Built-in expansion enumeration order</strong> (<code>_call_builtin</code>, interpreter.py:1144) -- has the same big-endian pattern as <code>_invoke</code>; not yet fixed. Whether to converge on one execution path for user-defined + built-in calls is a separate design question.</li>
+<li><strong><code>!</code> on a pool</strong> -- known to collapse on both sides (faithful), but the deeper question of whether AnyDice would <em>intend</em> per-die <code>!</code> on a pool isn't resolved. Tracked only as "collapses on both sides today."</li>
+<li><strong>Auditor tooling</strong> -- not being built. The original plan was a re-runnable verifier that auto-generates rename-counterfactual rewrites for every program in the corpus and runs the diagnostic matrix from Section 4 against the AnyDice oracle + our interpreter. The technique works fine when applied by hand, and the corpus is now fully annotated (full-corpus verify 2026-05-26: 0 unexplained <code>mismatch:values</code> across 159,821 programs), so the automation's payoff is limited. Resurface if a new corpus expansion or interpreter change motivates a re-sweep.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      <i>Copyright and other protections apply. Please see the accompanying <tt>LICENSE</tt> file for rights and restrictions governing use of this software. All rights not expressly waived or licensed are reserved. If that file is missing or appears to be modified from its original, then please contact the author before viewing or using this software in any capacity.</i>
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.annotate", "content.tabs.link", "navigation.footer", "navigation.expand", "navigation.sections"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

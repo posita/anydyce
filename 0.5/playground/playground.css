@@ -1,0 +1,476 @@
+/* AnyDice Playground -- minimal stylesheet.
+ * Intentionally framework-free; expand as needed. */
+
+:root {
+  /* Base chrome, derived from the theme color slots (themes.css) so the
+   * whole UI tracks the active family + OS light/dark from a single
+   * definition -- no per-mode block. --bg/--text are the slot extremes;
+   * --muted is the subtle fg-ward neutral (secondary text); --border and
+   * --bg-elev are small opaque nudges of bg toward fg (a hairline and a
+   * faintly-distinct surface). In light that reads as a white field with
+   * light-grey chrome; in dark, chrome lifts slightly off the background. */
+  --bg:           var(--c-bg);
+  --bg-elev:      color-mix(in srgb, var(--c-bg), var(--c-fg) 3%);
+  --border:       color-mix(in srgb, var(--c-bg), var(--c-fg) 18%);
+  --text:         var(--c-fg);
+  --muted:        var(--c-fg-ward-muted);
+  /* Accent: the active hue is chosen by the html[data-accent] rules below,
+   * each pointing --accent at a full-strength color slot (themes.css).
+   * Defaults to cyan so a fresh load (no attribute yet) matches the cyan
+   * swatch. Full-strength (not -muted) is the higher-contrast-against-bg
+   * variant -- dark in light mode, light in dark mode -- and --accent-fg
+   * tracks bg (white in light, near-black in dark), so it always contrasts
+   * with the accent on the Run button. --accent-fg keeps a literal per-mode
+   * value (the one accent value that's genuinely mode-specific). */
+  --accent:       var(--c-cyan);
+  --accent-muted: var(--c-cyan-muted);
+  --accent-fg:    var(--c-bg);  /* #ffffff; */
+  --code-bg:      var(--c-bg);  /* #f4f6f8; */
+  --caret:        rgb(from var(--accent) r g b / 40%);
+  --selection-bg: rgb(from var(--accent-muted) r g b / 20%);  /* #add6ff; */
+  /* Active-line tint MUST be semi-transparent. CM6's drawSelection layer is
+   * z-index: -1, so any opaque background painted on .cm-line covers it from
+   * above. rgba with low alpha lets the selection show through. */
+  --active-line-bg: rgb(from var(--accent-muted) r g b / 7%);
+  --match-bg:     color-mix(in hsl shorter hue, var(--accent) 5%, rgba(204, 153, 51, 0.4));  /* #f6e0a0; */
+  --search-bg:    color-mix(in hsl shorter hue, var(--accent-muted) 5%, rgba(255, 204, 51, 0.4));
+
+  /* Syntax highlighting maps token types onto theme color slots (themes.css).
+   * Defined ONCE here (not per light/dark) because the slots are themselves
+   * mode-authored, so var(--c-red) is already the right red in each mode.
+   * comment/operator/bracket/punctuation point at neutral slots (fg /
+   * fg-ward-muted). Tweak freely. */
+  --syn-keyword:  var(--c-magenta);
+  --syn-op-kw:    var(--c-magenta);
+  --syn-var:      var(--c-cyan);
+  --syn-prop:     var(--c-blue);
+  --syn-num:      var(--c-red);
+  --syn-str:      var(--c-yellow);
+  --syn-comment:  var(--c-fg-ward-muted);
+  --syn-op:       var(--c-fg);
+  --syn-bracket:  var(--c-fg);
+  --syn-punct:    var(--c-fg);
+
+  --font-mono:   ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  --font-ui:     -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+
+  /* Editor metrics. Tunable knobs that drive the EditorView.theme() rules
+   * in playground.js; centralized here so per-knob tuning doesn't require
+   * touching JS. */
+  --editor-font-size:        13px;
+  /* --cursor-opacity:          0.50; */
+  --cursor-width:            0.55em;
+  --search-font-size:        0.95em;
+  --search-close-font-size:  1.1em;
+  --control-radius:          3px;
+  --control-padding-y:       0.15em;
+  --textfield-padding-x:     0.4em;
+  --button-padding-x:        0.6em;
+  /* Height of the draggable divider between output and logs. Single
+   * owner: playground.js reads this variable at startup and passes it to
+   * attachRowResizer, so the pointer math always matches the layout. */
+  --resizer-size:            6px;
+}
+
+/* Accent selection: the html[data-accent] attribute (set by playground.js
+ * from the persisted choice) points --accent at a full-strength color slot.
+ * The slots are mode-authored, so one set of rules works in both modes --
+ * no per-mode duplication. Everything that uses var(--accent) (Run button,
+ * resizer hover, view-toggle active, and the chart bars via readCssTheme)
+ * follows automatically; selecting a theme that redefines the slots
+ * recolors the accent for free. */
+html[data-accent="red"]     { --accent: var(--c-red); --accent-muted: var(--c-red-muted); }
+html[data-accent="yellow"]  { --accent: var(--c-yellow); --accent-muted: var(--c-yellow-muted); }
+html[data-accent="green"]   { --accent: var(--c-green); --accent-muted: var(--c-green-muted); }
+html[data-accent="blue"]    { --accent: var(--c-blue); --accent-muted: var(--c-blue-muted); }
+html[data-accent="magenta"] { --accent: var(--c-magenta); --accent-muted: var(--c-magenta-muted); }
+html[data-accent="cyan"]    { --accent: var(--c-cyan); --accent-muted: var(--c-cyan-muted); }
+
+::selection {
+  background: var(--selection-bg);
+}
+
+h1 a {
+  font-style: italic;
+}
+
+h1 a:link, h1 a:visited {
+  color: var(--accent-muted);
+}
+
+h1 a:hover {
+  color: var(--accent);
+}
+
+h1 a:active {
+  color: color-mix(in hsl shorter hue, var(--accent) 60%, var(--c-fg) 40%);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.4;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.5em 1em;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elev);
+}
+header h1 {
+  font-size: 1.1em;
+  margin: 0;
+  font-weight: 600;
+}
+.header-meta {
+  font-size: 0.85em;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+}
+
+/* Theme-family picker. A <select> (not swatches) because families are named
+ * choices, not single colors. Minimal styling that tracks the theme. */
+.theme-select {
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0.15em 0.3em;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  background: var(--bg-elev);
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* Run-status line. Lives in the Logs pane header (run feedback sits with
+ * the run diagnostics). The .pane-header flex with space-between pushes it
+ * to the right of the "Logs" h2. Not uppercased like the h2 -- it's a
+ * sentence, not a label. min-width: 0 + ellipsis so a long status (e.g. a
+ * corpus-load URL) can't shove the header wider than the pane. */
+.status {
+  font-size: 0.85em;
+  color: var(--muted);
+  font-style: italic;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  margin-left: 0.5em;
+}
+
+/* Accent-color picker: a row of six swatches in the page header. Each
+ * swatch shows its OWN hue (via the corresponding --c-<hue> slot, so the
+ * swatches track both light/dark and the active theme); the selected one
+ * gets a ring. Selecting sets html[data-accent], which re-points --accent. */
+.accent-picker {
+  display: inline-flex;
+  gap: 0.35em;
+  align-items: center;
+}
+.accent-swatch {
+  /* Integer px (not em) so the circle and its selection ring don't land on
+   * fractional pixel boundaries, which rounded unevenly across zoom levels. */
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.accent-swatch[data-accent-choice="red"]     { background: var(--c-red); }
+.accent-swatch[data-accent-choice="yellow"]  { background: var(--c-yellow); }
+.accent-swatch[data-accent-choice="green"]   { background: var(--c-green); }
+.accent-swatch[data-accent-choice="blue"]    { background: var(--c-blue); }
+.accent-swatch[data-accent-choice="magenta"] { background: var(--c-magenta); }
+.accent-swatch[data-accent-choice="cyan"]    { background: var(--c-cyan); }
+.accent-swatch[aria-pressed="true"] {
+  /* Concentric selection ring via layered box-shadow: a 1px bg-colored gap
+   * then a 2px text-colored ring. box-shadow (not outline + outline-offset)
+   * because the layers scale from the same border box and follow
+   * border-radius cleanly -- outline-offset rendered the ring slightly
+   * off-center at some zoom levels. Doesn't affect layout, so swatch
+   * spacing is unchanged. */
+  box-shadow: 0 0 0 1px var(--bg), 0 0 0 3px var(--text);
+}
+
+main {
+  flex: 1;
+  display: grid;
+  /* Editor | draggable divider | right column. The middle track is the
+   * col-resizer element; user drags reassign the fr units via inline
+   * style, same mechanism as the output/logs row divider. */
+  grid-template-columns: 1fr var(--resizer-size) 1fr;
+  background: var(--border);
+  overflow: hidden;
+}
+
+/* The right column splits vertically into output (top), resizer, and logs
+ * (bottom). Output gets more vertical room than logs because results are
+ * the primary thing the user reads; the logs pane is empty during clean
+ * runs. The middle row is the draggable resizer element (--resizer-size px
+ * tall); user drags reassign output/logs fr units via inline style on this
+ * element. */
+.right-column {
+  display: grid;
+  grid-template-rows: 2fr var(--resizer-size) 1fr;
+  background: var(--border);
+  overflow: hidden;
+}
+
+/* Shared styling for both draggable dividers (output/logs row + editor
+ * column); only the cursor and the hit-area direction differ. */
+.row-resizer,
+.col-resizer {
+  background: var(--border);
+  /* Position so we can attach an invisible wider hit area without
+   * disturbing the visible line. */
+  position: relative;
+  /* Disable default touch scrolling on the handle so a drag is captured
+   * as a resize gesture on mobile/trackpad. */
+  touch-action: none;
+}
+.row-resizer { cursor: row-resize; }
+.col-resizer { cursor: col-resize; }
+
+/* Wider grab zone (3px on each side of the visible --resizer-size track).
+ * The track itself stays --resizer-size; the pseudo just extends the
+ * pointer target perpendicular to the divider. */
+.row-resizer::before,
+.col-resizer::before {
+  content: "";
+  position: absolute;
+}
+.row-resizer::before {
+  top: -3px;
+  bottom: -3px;
+  left: 0;
+  right: 0;
+}
+.col-resizer::before {
+  left: -3px;
+  right: -3px;
+  top: 0;
+  bottom: 0;
+}
+
+.row-resizer:hover,
+.row-resizer:active,
+.col-resizer:hover,
+.col-resizer:active {
+  background: var(--accent);
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* min-height ensures the Source and Output header bars are equal-height
+   * regardless of whether either contains a button. The value matches the
+   * height of a button-bearing header (0.4em top padding + ~1.6em button +
+   * 0.4em bottom padding = ~2.4em). */
+  min-height: 2.6em;
+  padding: 0.4em 1em;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elev);
+}
+.pane-header h2 {
+  font-size: 0.9em;
+  font-weight: 500;
+  margin: 0;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.pane-actions {
+  display: flex;
+  gap: 0.4em;
+  align-items: center;
+}
+
+/* Shared metrics for ALL pane-header controls (action buttons + view
+ * toggle): one rule owns the vertical sizing so the control families can't
+ * drift apart in height. Variant rules below add only what differs --
+ * horizontal padding, borders, colors. (The CM6 search-panel buttons are a
+ * deliberately separate, smaller family; see the editor theme.) */
+.pane-header button {
+  font-family: inherit;
+  font-size: 0.9em;
+  padding-block: 0.3em;
+  cursor: pointer;
+}
+
+.pane-actions button {
+  padding-inline: 0.9em;
+  border: 1px solid var(--border);
+  background: var(--accent-muted);
+  color: var(--accent-fg);
+  border-radius: var(--control-radius);
+}
+.pane-actions button:hover {
+  background: var(--accent);
+}
+.pane-actions button.btn-secondary {
+  background: var(--bg);
+  color: var(--text);
+}
+.pane-actions button.btn-secondary:hover {
+  background: var(--code-bg);
+}
+.pane-actions button:disabled {
+  background: var(--border);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+#editor {
+  flex: 1;
+  overflow: auto;
+}
+#editor .cm-editor {
+  height: 100%;
+}
+#editor .cm-content {
+  font-family: var(--font-mono);
+  font-size: var(--editor-font-size);
+}
+
+/* Generic visibility utility. No !important needed: nothing else sets
+ * `display` on the elements that carry this class (the views and
+ * placeholders are plain block children of a flex pane). */
+.hidden {
+  display: none;
+}
+
+/* Two stacked-but-not-stacked views: only one is visible at a time,
+ * controlled by the .hidden class. Both occupy the pane below the header. */
+.output-view {
+  flex: 1;
+  overflow: auto;
+  /* Reserve the vertical scrollbar's width whether or not it's currently
+   * shown, so the content width is stable. Without this, Plotly sizes the
+   * charts to the full (scrollbar-less) width at newPlot time -- the pane
+   * is momentarily empty and un-scrolled -- then the tall content brings in
+   * the scrollbar, narrowing the content box and leaving the charts
+   * overflowing horizontally. A no-op on overlay-scrollbar platforms. */
+  scrollbar-gutter: stable;
+}
+
+/* Single-purpose placeholder element shown until its pane has content.
+ * It is a SIBLING of the content views, never the same element, so it
+ * doesn't inherit or fight their content styling (monospace, pre-wrap,
+ * per-view padding). One rule, no overrides. */
+.pane-placeholder {
+  flex: 1;
+  padding: 1em;
+  overflow: auto;
+  color: var(--muted);
+  font-style: italic;
+  font-size: var(--editor-font-size);
+}
+
+#output-text {
+  padding: 1em;
+  font-family: var(--font-mono);
+  font-size: var(--editor-font-size);
+  white-space: pre-wrap;
+}
+
+#output-bars {
+  padding: 0.5em;
+}
+
+/* One Plotly chart per AnyDice `output` statement. Height comes from each
+ * chart's layout.height (computed in plot.js so every outcome row gets the
+ * same pixel allotment -> uniform bar thickness across outputs); the
+ * parent scrolls if the total exceeds the pane. */
+.plot {
+  width: 100%;
+  margin-bottom: 0.5em;
+}
+.plot:last-child {
+  margin-bottom: 0;
+}
+.plot-empty {
+  color: var(--muted);
+  font-style: italic;
+  padding: 1em;
+}
+
+/* Segmented view-mode toggle in the Output pane header. Two compact
+ * buttons with a shared border, current selection highlighted in accent. */
+.view-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  overflow: hidden;
+}
+.view-toggle button {
+  /* Vertical metrics come from the shared .pane-header button rule.
+   * Horizontal padding is narrower than the action buttons -- the toggle
+   * reads as one segmented control, not two standalone buttons. The
+   * wrapper owns the border and radius; squared inner corners keep the
+   * segment backgrounds flush against it (the toggle now sits inside
+   * .pane-actions, whose button rule would otherwise round them). */
+  padding-inline: 0.7em;
+  border: none;
+  border-radius: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+.view-toggle button + button {
+  border-left: 1px solid var(--border);
+}
+.view-toggle button:hover {
+  background: var(--accent);
+}
+.view-toggle button.active {
+  background: var(--accent-muted);
+  color: var(--accent-fg);
+}
+
+#logs {
+  flex: 1;
+  padding: 1em;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: var(--editor-font-size);
+  line-height: 1.35;
+}
+
+.log-entry {
+  white-space: pre-wrap;
+  margin: 0.1em 0;
+}
+/* Severity suffixes pair by convention with the strings passed to
+ * logEntry() in playground.js (info / warning / error / cancel). An
+ * unrecognized severity renders unstyled -- cosmetic-only failure. */
+.log-entry-info     { color: var(--muted); }
+.log-entry-warning  { color: var(--syn-prop); }
+.log-entry-error    { color: var(--syn-str); }
+.log-entry-cancel   { color: var(--syn-op-kw); }
+/* Tracebacks: indent and dim so the offending error line still stands out
+ * above the noise. */
+.log-entry-traceback {
+  color: var(--muted);
+  padding-left: 1em;
+  border-left: 2px solid var(--border);
+  margin: 0.2em 0 0.4em 0;
+}

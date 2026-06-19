@@ -1,0 +1,2711 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Interactivity tools for dyce">
+      
+      
+        <meta name="author" content="Matt Bogosian">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Anydyce interpreter - anydyce</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dyceanydyce-interpreter-notes" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="anydyce" class="md-header__button md-logo" aria-label="anydyce" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            anydyce
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Anydyce interpreter
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="light-blue" data-md-color-accent="light-blue"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/posita/anydyce/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="anydyce" class="md-nav__button md-logo" aria-label="anydyce" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    anydyce
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/posita/anydyce/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anydice/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyDice Interpreter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contrib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anydyce.anydice/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyDice
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anydyce/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jupyter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-it-is" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it is
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#value-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Value domain
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#grammar-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Grammar notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interpreter-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interpreter structure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Interpreter structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#statement-execution-_exec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Statement execution (_exec)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expression-evaluation-_eval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expression evaluation (_eval)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-operator-_eval_at" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The @ operator (_eval_at)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-dispatch-and-probabilistic-expansion-_dispatch_coercion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Function dispatch and probabilistic expansion (_dispatch_coercion)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lcm-normalization-_expand_normalized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LCM normalization (_expand_normalized)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-body-execution-_exec_function_body" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Function body execution (_exec_function_body)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dynamic-scoping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dynamic scoping
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#built-in-expansion-_coerce_args" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in expansion (_coerce_args)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weight-compression-_compress_h" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Weight compression (_compress_h)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corpus-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Corpus validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Corpus validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-results-2026-04-26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current results (2026-04-26)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#known-remaining-failure-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Known remaining failure categories
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#semantic-decisions-2026-05-04-2026-05-05" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Semantic decisions (2026-05-04 / 2026-05-05)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Semantic decisions (2026-05-04 / 2026-05-05)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-position-seq-on-left" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-position @ (seq-on-left)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#n-h-treats-h-as-a-1-element-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        N @ H treats H as a 1-element pool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d-parameter-is-lossless-on-pools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        :d parameter is lossless on pools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bareuntyped-function-parameters-pass-through-no-coercion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bare/untyped function parameters: pass-through, no coercion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operator-on-dies-and-pools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # operator on dies and pools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chained-d-is-left-associative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chained d is left-associative
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#die-in-seq-block-repeats-outcomes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Die-in-seq block-repeats outcomes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-body-sequence-returns-under-expansion-sum-coerced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Function body sequence returns under expansion: sum-coerced
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-iteration-lcm-normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-iteration LCM normalization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sub-sequences-flatten-in-seq-literals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sub-sequences flatten in seq literals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#division-by-zero-substitute-0-per-outcome" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Division by zero: substitute 0 per-outcome
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#builtins-wiring-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Builtins wiring policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort-seq-direction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [sort SEQ] direction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#explode-die-and-the-set-settings-validators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [explode DIE] and the set settings validators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#count-a-in-b-is-multiset-not-set-membership" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [count A in B] is multiset, not set membership
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-block-inside-function-mirrors-anydices-ebnf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        code block (inside function) mirrors AnyDice's EBNF
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#helper-side-defenses-against-anydice-quirks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Helper-side defenses against AnyDice quirks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-subcommand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify subcommand
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compare-subcommand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compare subcommand
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#two-stage-_pct_to_counts-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two-stage _pct_to_counts recovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anydices-joint-n-expansion-bug-for-non-uniform-dies-programs-4123a-42b16-23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AnyDice's joint :n-expansion bug for non-uniform dies (programs 4123a / 42b16-23)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implicit-collapse-pile-up-ng-design-driver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implicit-collapse pile-up (NG design driver)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bareuntyped-function-parameters-pass-through-no-coercion_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bare/untyped function parameters: pass-through, no coercion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nh-h-is-a-1-element-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        N@H: H is a 1-element pool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-body-sequence-returns-under-expansion-sum-coerced_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Function body sequence returns under expansion: sum-coerced
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-iteration-lcm-normalization_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-iteration LCM normalization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#division-by-zero-substitute-0-per-outcome_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Division by zero: substitute 0 per-outcome
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#power-strict-in-scalar-context-lenient-in-h-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ^ (power): strict in scalar context, lenient in H context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#builtins-wiring-policy_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Builtins wiring policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#undocumented-highestlowest-n-of-a-and-b-and-c-builtins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Undocumented [highest/lowest N of A and B [and C]] builtins
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#and-share-precedence-level-not-c-style" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        &amp; and | share precedence level (NOT C-style)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-subcommand_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify subcommand
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-gap-on-deep-recursion-programs-2026-05-05" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance gap on deep-recursion programs (2026-05-05)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance gap on deep-recursion programs (2026-05-05)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-the-truncationwarning-displays-the-source-line-twice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the TruncationWarning displays the source line twice
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#two-stage-_pct_to_counts-recovery_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two-stage _pct_to_counts recovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anydices-empty-die-with-seq-operator-bugs-program-42aa4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AnyDice's empty-die-with-seq operator bugs (program 42aa4)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#things-tried-outcomes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Things tried, outcomes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!---
+Design and status notes for the dyce.anydyce AnyDice interpreter.
+Captured from conversations 2026-04-25/26. Ephemeral — not intended for publication.
+-->
+
+<h1 id="dyceanydyce-interpreter-notes">dyce.anydyce Interpreter Notes</h1>
+<h2 id="what-it-is">What it is</h2>
+<p>A tree-walking interpreter for the <a href="https://anydice.com">AnyDice</a> language.
+Takes AnyDice source text, returns a list of <code>(name, H)</code> pairs — one per
+<code>output</code> statement in the program.
+Public API: <code>dyce.anydyce.run(source: str) -&gt; list[tuple[str | None, H]]</code>.</p>
+<h2 id="files">Files</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">dyce</span><span class="o">/</span><span class="n">anydyce</span><span class="o">/</span>
+  <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>        <span class="n">public</span> <span class="n">run</span><span class="p">()</span> <span class="n">entry</span> <span class="n">point</span>
+  <span class="n">grammar</span><span class="o">.</span><span class="n">lark</span>       <span class="n">Lark</span> <span class="n">LALR</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="n">grammar</span>
+  <span class="n">ast_</span><span class="o">.</span><span class="n">py</span>            <span class="n">pure</span> <span class="n">dataclass</span> <span class="n">AST</span> <span class="n">nodes</span>
+  <span class="n">transformer</span><span class="o">.</span><span class="n">py</span>     <span class="n">Lark</span> <span class="n">Transformer</span> <span class="err">→</span> <span class="n">AST</span> <span class="n">nodes</span>
+  <span class="n">interpreter</span><span class="o">.</span><span class="n">py</span>     <span class="n">tree</span><span class="o">-</span><span class="n">walking</span> <span class="n">interpreter</span> <span class="p">(</span><span class="o">~</span><span class="mi">970</span> <span class="n">lines</span><span class="p">)</span>
+  <span class="n">builtins_</span><span class="o">.</span><span class="n">py</span>       <span class="n">built</span><span class="o">-</span><span class="ow">in</span> <span class="n">function</span> <span class="n">registry</span> <span class="p">(</span><span class="n">parking</span> <span class="n">lot</span> <span class="k">for</span> <span class="n">unwired</span> <span class="n">impls</span><span class="p">)</span>
+  <span class="n">settings</span><span class="o">.</span><span class="n">py</span>        <span class="n">runtime</span> <span class="n">settings</span> <span class="p">(</span><span class="n">position</span> <span class="n">order</span><span class="p">,</span> <span class="nb">max</span> <span class="n">depth</span><span class="p">)</span>
+  <span class="n">unparser</span><span class="o">.</span><span class="n">py</span>        <span class="n">AST</span> <span class="err">→</span> <span class="n">canonical</span> <span class="n">source</span> <span class="n">text</span> <span class="p">(</span><span class="n">used</span> <span class="k">for</span> <span class="n">dedup</span> <span class="ow">in</span> <span class="n">helpers</span><span class="p">)</span>
+
+<span class="n">helpers</span><span class="o">/</span>
+  <span class="n">anydice</span><span class="o">-</span><span class="n">programs</span><span class="o">.</span><span class="n">py</span>   <span class="n">multi</span><span class="o">-</span><span class="n">subcommand</span><span class="p">:</span> <span class="n">fetch</span> <span class="o">/</span> <span class="n">link</span> <span class="o">/</span> <span class="n">recanon</span> <span class="o">/</span> <span class="n">compute</span> <span class="o">/</span>
+                        <span class="n">show</span> <span class="o">/</span> <span class="n">verify</span> <span class="p">(</span><span class="k">with</span> <span class="o">--</span><span class="n">builtins</span><span class="o">-</span><span class="n">report</span><span class="p">)</span><span class="o">.</span> <span class="n">Stores</span>
+                        <span class="n">programs</span> <span class="o">+</span> <span class="n">reference</span> <span class="n">outputs</span> <span class="ow">in</span> <span class="n">SQLite</span><span class="o">.</span>
+  <span class="n">anydice</span><span class="o">-</span><span class="n">programs</span><span class="o">.</span><span class="n">db</span>   <span class="n">small</span> <span class="n">DB</span> <span class="p">(</span><span class="o">~</span><span class="mi">1</span><span class="n">k</span> <span class="n">rows</span><span class="p">,</span> <span class="n">doc</span> <span class="n">examples</span> <span class="o">+</span> <span class="n">spot</span><span class="o">-</span><span class="n">check</span> <span class="n">probes</span><span class="p">)</span>
+  <span class="n">anydice</span><span class="o">-</span><span class="n">programs</span><span class="o">-</span><span class="nb">all</span><span class="o">.</span><span class="n">db</span>  <span class="n">full</span> <span class="n">corpus</span> <span class="n">DB</span> <span class="n">being</span> <span class="n">assembled</span> <span class="n">out</span><span class="o">-</span><span class="n">of</span><span class="o">-</span><span class="n">band</span>
+</code></pre></div></td></tr></table></div>
+<p>Module-name suffix convention: <code>ast_</code> and <code>builtins_</code> end with an underscore
+to avoid clashing with stdlib <code>ast</code> and <code>builtins</code>. The other modules don't
+need suffixes; the <code>_</code>-prefix convention used in earlier drafts has been
+dropped.</p>
+<p>The small reference corpus (<code>anydice-programs.db</code>) has ~1080 programs as of
+2026-05-04. Reference outputs are the JSON payloads returned by AnyDice's
+own evaluator (via <code>compute --allow-remote</code>).</p>
+<h2 id="value-domain">Value domain</h2>
+<p>Every expression evaluates to one of:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>int</code></td>
+<td>AnyDice number</td>
+</tr>
+<tr>
+<td><code>H</code></td>
+<td>single die / probability distribution</td>
+</tr>
+<tr>
+<td><code>P</code></td>
+<td>dice pool (preserves structure for <code>@</code>)</td>
+</tr>
+<tr>
+<td><code>tuple[int, ...]</code></td>
+<td>explicit sequence (sorted highest-first by default)</td>
+</tr>
+<tr>
+<td><code>str</code></td>
+<td>string literal (only used for output names and <code>set</code> values)</td>
+</tr>
+</tbody>
+</table>
+<p>Sequences (<code>tuple</code>) exist as a distinct type so that functions with <code>:s</code>
+parameters receive per-roll sequences, not collapsed distributions.</p>
+<h2 id="grammar-notes">Grammar notes</h2>
+<ul>
+<li><code>d</code> as a single character is a string literal in the grammar, not an
+  identifier, so it always beats <code>LOWERNAME</code> for the token <code>d</code>.
+  <code>double</code>, <code>draw</code>, etc. still lex as <code>LOWERNAME</code> because they're longer.</li>
+<li>Reserved words (<code>output</code>, <code>loop</code>, <code>if</code>, <code>function</code>, etc.) may appear as
+  parts of user function names in definitions and calls.
+  The grammar handles this by keeping all lowercase tokens in <code>fname_word</code> /
+  <code>call_word</code> rules with the <code>!</code> prefix (keep anonymous tokens).</li>
+<li>Operator precedence tightest-first:
+  unary <code>+/-</code> &gt; <code>!</code> &gt; <code>#</code> &gt; <code>d</code> &gt; <code>@</code> &gt; <code>^</code> &gt; <code>*/÷</code> &gt; <code>+/-</code> &gt; comparisons &gt; <code>&amp;</code> &gt; <code>|</code></li>
+<li>Unary <code>-/+/!</code> bind <em>looser</em> than <code>d</code> so <code>-d6</code> parses as <code>-(d6)</code>.</li>
+<li><code>#</code> binds <em>tighter</em> than <code>d</code> so <code>#3d6</code> parses as <code>(#3)d6 = 1d6</code>.</li>
+</ul>
+<h2 id="interpreter-structure">Interpreter structure</h2>
+<h3 id="statement-execution-_exec">Statement execution (<code>_exec</code>)</h3>
+<p><code>LoopStmt</code> — iterates a sequence in ascending order.
+Runs the body in a <em>child</em> environment (copy of parent env), then copies
+<em>all</em> child variables back to the parent, not just pre-existing ones.
+H values are compressed on copy-back (see <code>_compress_h</code> below) to prevent
+weight explosion across iterations.</p>
+<p><code>FunctionDef</code> — appends <code>(word_slots, params, body)</code> to <code>self._functions</code>.
+Most-recently-defined function wins on a match.</p>
+<p><code>VarAssign</code> — just stores <code>env[name] = eval(expr)</code>.
+No compression here; compression happens at loop copy-back.</p>
+<p><code>IfStmt</code> — evaluates each branch condition in order, executes first truthy body.
+Dice (<code>H</code>/<code>P</code>) are always truthy.</p>
+<h3 id="expression-evaluation-_eval">Expression evaluation (<code>_eval</code>)</h3>
+<p>Most cases are mechanical.  Key ones:</p>
+<p><code>BinOp "@"</code> — routed to <code>_eval_at()</code> before arithmetic coercion.
+Everything else — <code>_coerce_for_arith()</code> (sequences → sum int, pools → H),
+then <code>_apply_h_binop()</code>.</p>
+<p><code>_apply_h_binop</code> — distributes a 2-arg lambda over all <code>(int|H) × (int|H)</code>
+combinations by explicit cross-product iteration.</p>
+<p><code>Call</code> — <code>_eval_call()</code>.  Evaluates expression arguments, leaves word parts as
+strings, then tries user functions (reversed order) then builtins.
+Matching is positional: length must match, words must match, arg slots accept
+any non-string value.</p>
+<h3 id="the-operator-_eval_at">The @ operator (<code>_eval_at</code>)</h3>
+<p>Right operand governs dispatch:</p>
+<ul>
+<li><code>P</code> or <code>H</code> → <code>_pool_h_select(pool, positions)</code> → H distribution.
+  Uses <code>pool.h(*selectors)</code> with <code>slice</code> objects built from 1-based positions.
+  In highest-first mode position 1 is the highest die (<code>slice(-1, None)</code>),
+  position 2 is second-highest (<code>slice(-2, -1)</code>), etc.</li>
+<li><code>tuple</code> (sequence) → deterministic index: position 1 → last element in a
+  lowest-to-highest tuple (index <code>-1</code>), etc.</li>
+<li><code>int</code> → digit access (1-based into decimal digits of the integer).</li>
+</ul>
+<p>Left operand becomes the position list:
+- <code>int</code> → single position.
+- <code>tuple</code> → list of positions.
+- <code>H</code> → expand outcomes (used when positions come from another die).</p>
+<h3 id="function-dispatch-and-probabilistic-expansion-_dispatch_coercion">Function dispatch and probabilistic expansion (<code>_dispatch_coercion</code>)</h3>
+<p>This is the heart of the interpreter.  It scans parameters left-to-right for
+the first one that needs "expansion" — calling the body multiple times and
+aggregating results into a new H:</p>
+<p><strong><code>:n</code> with <code>H</code></strong> — <code>_expand_over_h</code>: calls body once per outcome of the die,
+collects <code>(outcome_weight, result)</code> pairs, passes to <code>_expand_normalized</code>.</p>
+<p><strong><code>:n</code> with <code>P</code></strong> — collapses pool to H via <code>_h_from_pool</code>, then same as above.</p>
+<p><strong><code>:n</code> with <code>tuple</code></strong> — converts to <code>sum(tuple)</code>, continues scanning.</p>
+<p><strong><code>:d</code> with <code>int</code> or <code>tuple</code></strong> — wraps in <code>H({val: 1})</code> or <code>H({sum: 1})</code>, continues.</p>
+<p><strong><code>:s</code> with <code>H</code>/<code>P</code>/<code>int</code></strong> — <code>_expand_over_s</code>: enumerates all sorted rolls from
+the pool via <code>pool.rolls_with_counts()</code>, calls body once per roll with the
+sequence as the argument, collects <code>(count, result)</code> pairs, passes to
+<code>_expand_normalized</code>.</p>
+<p><strong>No expansion needed</strong> — <code>_exec_function_body</code>.</p>
+<p><code>_dispatch_coercion</code> is called recursively by <code>_expand_over_h</code> / <code>_expand_over_s</code>
+so that multi-parameter functions with multiple expansions are handled correctly.</p>
+<h3 id="lcm-normalization-_expand_normalized">LCM normalization (<code>_expand_normalized</code>)</h3>
+<p>When a function body returns <code>int</code> for some inputs and <code>H</code> for others (or H
+values with different weight totals), naively doing <code>outer_weight * inner_weight</code>
+gives wrong relative probabilities because the inner totals are different scales.</p>
+<p><code>_expand_normalized</code> collects all <code>(outer_weight, result)</code> pairs, computes the
+LCM of all inner totals, and scales each contribution by <code>lcm / inner_total</code>
+before calling <code>_accumulate</code>.  This puts everything on a common denominator.</p>
+<p>For the common case where all inner results are the same type (all int, or all H
+with the same total), LCM normalization is a no-op and the result is identical
+to the naive approach.</p>
+<h3 id="function-body-execution-_exec_function_body">Function body execution (<code>_exec_function_body</code>)</h3>
+<p>Creates a new env: start from globals, overlay <code>caller_env</code> (dynamic scoping —
+AnyDice functions can read variables from the calling scope), then bind params.
+Runs body statements; a <code>result:</code> statement raises <code>_Result</code> to break out.
+If no <code>result:</code> is hit, returns <code>H({})</code> (empty die).</p>
+<h3 id="dynamic-scoping">Dynamic scoping</h3>
+<p>AnyDice is dynamically scoped: a called function can read variables from
+its caller's local environment.  <code>_exec_function_body</code> takes an optional
+<code>caller_env</code> and does <code>env.update(caller_env)</code> before binding params.
+<code>_dispatch_coercion</code> passes through <code>caller_env</code> to ensure it is preserved
+across the expansion loop.</p>
+<h3 id="built-in-expansion-_coerce_args">Built-in expansion (<code>_coerce_args</code>)</h3>
+<p>Same expand-and-aggregate pattern as user functions, but uses
+<code>_expand_builtin_over_h</code> / <code>_expand_builtin_over_s</code> which call <code>_accumulate</code>
+directly (no LCM normalization — builtins always return int, so all inner
+totals are 1 and LCM would be a no-op anyway).</p>
+<h3 id="weight-compression-_compress_h">Weight compression (<code>_compress_h</code>)</h3>
+<p>Two-stage:
+1. GCD-reduce all weights (lossless — same probabilities, smaller numbers).
+2. If total still exceeds <code>_MAX_H_TOTAL = 10**12</code>, apply lossy scaling via
+   <code>round(v / scale)</code> where <code>scale = total / _MAX_H_TOTAL</code>.</p>
+<p>Currently called in two places:
+- <code>LoopStmt</code> copy-back: prevents weight explosion when a loop updates a die
+  variable on each iteration (e.g. 45 iterations each squaring the total).
+- <code>_pool_h_select</code>: prevents OOM on program 140338, which does <code>1@2d[H]</code> inside
+  a 23-level recursion, squaring H's total weight on each level.</p>
+<p>The lossy scaling means the <code>_pool_h_select</code> compression can introduce tiny
+errors.  For programs that stay under 10¹² without it the compression is a
+lossless GCD reduction and the results are exact.</p>
+<h2 id="corpus-validation">Corpus validation</h2>
+<p><code>helpers/validate_anydyce.py</code> reads programs from the DB, runs each through
+the interpreter, converts both our distribution and AnyDice's reference to
+<code>{outcome: pct}</code> dicts, and diffs them with a tolerance of <code>1e-4</code> percentage
+points.</p>
+<p>Reference outputs occasionally have totals that deviate from 100% (AnyDice
+rounding artifact); <code>ref_to_pct</code> normalizes these when the deviation exceeds
+0.5 pp.</p>
+<p>Programs whose reference output is not valid JSON (AnyDice timeout) are
+silently skipped (<code>status="skip"</code>).</p>
+<h3 id="current-results-2026-04-26">Current results (2026-04-26)</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">Results</span><span class="p">:</span> <span class="mi">411</span><span class="o">/</span><span class="mi">654</span> <span class="n">passed</span>
+  <span class="k">pass</span><span class="p">:</span> <span class="mi">411</span>
+  <span class="n">skip</span><span class="p">:</span> <span class="mi">13</span>
+  <span class="n">runtime_error</span><span class="p">:</span> <span class="mi">18</span>
+  <span class="n">value_mismatch</span><span class="p">:</span> <span class="mi">212</span>
+</code></pre></div></td></tr></table></div>
+<p>The first full-corpus run that completed without OOM was with <code>_compress_h</code>
+applied in <code>_pool_h_select</code> (required to get past program 140338 at position
+315/654 in processing order).  All earlier runs were OOM-killed and the "Results:"
+line was never printed, so any pass count cited from earlier sessions should be
+considered unverified.</p>
+<h3 id="known-remaining-failure-categories">Known remaining failure categories</h3>
+<p><strong>Runtime errors (18):</strong>
+- Programs 108377, 119473-475: <code>TypeError: expected int, got H</code> or <code>got P</code> —
+  likely a builtin receiving an unexpected distribution type.
+- Programs 43706, 58639-43, 176079, 176166, 194293, 232746, 250447, 270450-56:
+  various runtime errors not yet investigated.</p>
+<p><strong>Value mismatches (212):</strong>  Not fully categorized.  Known-difficult patterns include:
+- Building sequences in loops (<code>R: {}</code>, then <code>R: {R, P@ROLL}</code> per iteration)
+  — these accumulate sequences whose semantics interact with <code>@</code> indexing in
+  non-obvious ways.
+- <code>ROLL = I</code> where ROLL is a sequence and I is an integer — should return the
+  <em>count</em> of elements equal to I, but this goes through <code>_coerce_for_arith</code>
+  which converts sequences to their sum before the comparison.
+- Dynamic scoping programs that reference multiple levels of caller env
+  (e.g. program 25893).
+- Programs using <code>1@POOL</code> inside a function body that itself receives a <code>:s</code>
+  sequence — the pool selection creates an H inside a deterministic sequence
+  context.</p>
+<h2 id="semantic-decisions-2026-05-04-2026-05-05">Semantic decisions (2026-05-04 / 2026-05-05)</h2>
+<p>A batch of AnyDice oracle-driven fixes landed, codifying behaviors that had
+been wrong or undefined in the interpreter. These supersede earlier
+sections where they conflict.</p>
+<h3 id="multi-position-seq-on-left">Multi-position <code>@</code> (seq-on-left)</h3>
+<p>A seq on the left of <code>@</code> selects multiple positions; results sum. Same
+semantic uniformly across right operands:
+- <code>{1, 4} @ {10, 20, 30, 40}</code> = 10 + 40 = 50 (positions 1 and 4 in source order).
+- <code>{1, 3} @ 3d6</code> = top-of-pool + bottom-of-pool sum distribution. Out-of-range
+  positions silently contribute 0.
+- <code>{1, 3} @ 4567</code> = digit-extract at positions 1 and 3, summed.</p>
+<p>Implementation: <code>_at_seq</code> and <code>_at_pool</code> recognize a tuple-left and dispatch
+to multi-position selection (using <code>pool.h(*selectors)</code> for pools so
+correlated positions are summed jointly, not as independent draws). Verified
+against AnyDice (program 42ad5).</p>
+<h3 id="n-h-treats-h-as-a-1-element-pool"><code>N @ H</code> treats H as a 1-element pool</h3>
+<p>A non-empty H on the right of <code>@</code> is treated as a 1-element pool:
+- <code>1 @ d6</code> returns the d6 distribution (the sole position).
+- <code>2 @ d6</code> returns <code>H({0:1})</code> (out of range on a 1-pool).
+- Empty <code>H({})</code> propagates as <code>H({})</code>.</p>
+<p>Implementation: <code>_apply_at</code> wraps <code>H</code> as <code>P(H)</code> and forwards to <code>_at_pool</code>,
+reusing the 1-based-position logic. Verified via 405c6 (<code>[ex H]</code> chain
+producing <code>H({0:1})</code>) and <code>1@d6</code> displaying as label <code>"d6"</code>.</p>
+<h3 id="d-parameter-is-lossless-on-pools"><code>:d</code> parameter is lossless on pools</h3>
+<p>A <code>:d</code> parameter binds a P argument as the actual pool (no <code>arg.h()</code>
+collapse). The body's pool-aware ops (<code>@</code>, future builtins, etc.) see the
+real pool, not its summed H. Arithmetic and comparison ops collapse P → H
+at the operator site, so keeping P in the env doesn't break those.</p>
+<p>The <code>:d</code> branch does <em>not</em> short-circuit on empty H/P: the body runs once
+regardless, and the body's conditionals (<code>if X { result: REROLL }</code> with
+REROLL = <code>d{}</code>) decide which iterations produce empty (eliminated branches)
+versus values. Verified via 17b65 (<code>[[highest 3 of 4d6] reroll {3..9} as
+d{}]</code> produces the [highest 3 of 4d6] distribution restricted to outcomes
+10..18) and 428fb (<code>[pick 1 and 3 from pool 3d6]</code> correctly multi-positions
+the pool).</p>
+<h3 id="bareuntyped-function-parameters-pass-through-no-coercion">Bare/untyped function parameters: pass-through, no coercion</h3>
+<p>When <code>function: f X { ... }</code> has no <code>:n</code> / <code>:d</code> / <code>:s</code> / <code>:?</code> annotation, the
+argument is bound to the parameter as-is, with no coercion or expansion. The
+body sees the value with its original type — int as int, seq as seq, die as
+die, pool as pool.</p>
+<p>This is <em>different</em> from any of the explicit types:
+- <code>:n</code> would sum-coerce seqs to ints, expand H/P across outcomes per
+  iteration, and bind a scalar inside the body.
+- <code>:d</code> would coerce ints/seqs to a 1-outcome H, keep P as P, and bind a
+  die-shape inside the body.
+- <code>:s</code> would coerce ints/seqs to seqs, expand pools per roll, and bind a
+  seq inside the body.
+- The bare/untyped form does <em>none</em> of those.</p>
+<p>Verified against AnyDice via probes (42ace and the <code>[f {1,2,3}]</code> / <code>#X</code>
+round-trip).</p>
+<p>For AnyDice NG, the recommendation is to make untyped a parse error and
+require explicit <code>:n</code>/<code>:d</code>/<code>:s</code> everywhere.</p>
+<h3 id="operator-on-dies-and-pools"><code>#</code> operator on dies and pools</h3>
+<ul>
+<li><code>#int</code> → digit count of <code>abs(int)</code>; <code>#0 = 1</code>.</li>
+<li><code>#seq</code> → length (with duplicates).</li>
+<li><code>#H</code> → 1 (a die is a 1-position pool); empty <code>H({})</code> → 0.</li>
+<li><code>#P</code> → <code>len(P)</code>; empty pool → 0.</li>
+</ul>
+<p>Earlier impl returned 0 for any non-empty H/P with the comment "always
+returns 0 for any die in AnyDice." That was wrong. Verified via 42af3 and
+65d9 (<code>(#DICE) d NEW</code> with DICE bound to a 2d6 pool requires <code>#DICE = 2</code> to
+produce the correct distribution).</p>
+<h3 id="chained-d-is-left-associative">Chained <code>d</code> is left-associative</h3>
+<p><code>2d2d2</code> parses as <code>(2d2)d2</code>, NOT <code>2d(2d2)</code>. The left-assoc form takes the
+first dice expression as the <em>count</em> of the next roll, and <code>_expand_dice_count</code>
+LCM-normalizes across the count's outcomes. The right-assoc form (with
+explicit parens) is just nested pools. Verified via 42af2:
+- <code>2d2d2</code> = <code>(2d2)d2</code> = <code>H({2:4, 3:12, 4:17, 5:16, 6:10, 7:4, 8:1})</code>.
+- <code>2d(2d2)</code> = <code>4d2</code> = <code>H({4:1, 5:4, 6:6, 7:4, 8:1})</code>.
+- <code>4d3d2d1</code> parses as <code>((4d3)d2)d1</code>.</p>
+<h3 id="die-in-seq-block-repeats-outcomes">Die-in-seq block-repeats outcomes</h3>
+<p>When a die appears in a sequence literal with a repeat count, the <em>block of
+distinct outcomes</em> is repeated, not each outcome individually:</p>
+<p><code>{d4:2}</code> → <code>(1, 2, 3, 4, 1, 2, 3, 4)</code>, NOT <code>(1, 1, 2, 2, 3, 3, 4, 4)</code>.</p>
+<p>This makes die-in-seq semantically equivalent to seq-in-seq: <code>{d4:2}</code> and
+<code>{{1,2,3,4}:2}</code> produce identical sequences. Verified via 42971/42974/42975
+(positional lookups disambiguate). The H output of <code>output {2d4:2}</code> is
+identical under either interpretation (because <code>output</code> collapses to a
+count dict regardless of order), which is why this bug survived our
+existing test coverage.</p>
+<h3 id="function-body-sequence-returns-under-expansion-sum-coerced">Function body sequence returns under expansion: sum-coerced</h3>
+<p>When a function with explicit n-typed (or s-typed) parameters expands across
+argument outcomes and the body returns a sequence per iteration, AnyDice
+sum-coerces the seq to a single number before accumulating. Our prior impl
+distributed seq elements as separate outcomes, which double-counted.</p>
+<p>Implementation: <code>_invoke</code> and <code>_call_builtin</code> per-iteration accumulators
+check <code>isinstance(r, tuple)</code> and replace with <code>sum(r)</code> before
+<code>_coerce_to_h</code>. <code>_coerce_to_h</code> itself still distributes seqs as multi-
+outcome H — it's the right thing for <code>output {1, 2, 3}</code> and other
+non-iteration contexts.</p>
+<p>Verified against AnyDice via 405c6 (<code>[roll 1d6 1d6]</code> with body <code>result:
+{A+B, C}</code> produces an H over <code>A+B+C</code>, not over <code>{A+B, C}</code> elements).</p>
+<h3 id="per-iteration-lcm-normalization">Per-iteration LCM normalization</h3>
+<p>Already-known but worth noting alongside the seq-coerce fix: <code>_invoke</code>,
+<code>_call_builtin</code>, and <code>_expand_dice_count</code> each LCM-normalize per-iteration
+return totals before accumulating. Without this, an iteration that returns a
+die (sum=k) contributes k× as much weight as an iteration returning a
+scalar (sum=1), which is wrong.</p>
+<p>The three sites currently duplicate this logic. A future cleanup is to
+extract a single <code>aggregate_weighted_lcm</code> primitive into <code>dyce.h</code> (todo 32
+in the cleanroom todo list); the existing <code>aggregate_weighted</code> uses
+product-of-totals as its scalar, which is correct but produces astronomical
+big-int counts for many iterations.</p>
+<h3 id="sub-sequences-flatten-in-seq-literals">Sub-sequences flatten in seq literals</h3>
+<p>When a sub-sequence appears as an element of an outer sequence literal, its
+elements concatenate into the outer sequence rather than sum-coercing. The
+common idiom <code>NEW: {NEW, val}</code> (extending a running list) depends on this.
+Verified via 663d (a <code>set element</code> function building a 7-element list one
+loop iteration at a time).</p>
+<h3 id="division-by-zero-substitute-0-per-outcome">Division by zero: substitute 0 per-outcome</h3>
+<p><code>_OP_FUNCS["/"]</code> returns <code>0</code> when the divisor is <code>0</code> rather than raising.
+For distributions, this happens per-outcome inside the cross-product in
+<code>_h_binop</code>. Verified against AnyDice (<code>output 1 / 0</code> → 0, <code>output (1/0)+5</code> →
+5, <code>output 1 / d{0, 1, 2}</code> → H({0:2, 1:1})).</p>
+<p>AnyDice does <em>not</em> support a modulo operator, so the same question doesn't
+arise there.</p>
+<h3 id="builtins-wiring-policy">Builtins wiring policy</h3>
+<p><code>builtins_.py</code> has implementations for ~13 AnyDice builtins. Wiring policy:
+enable one family at a time, with dedicated TDD coverage per family verified
+against AnyDice oracle programs before flipping the entry on.</p>
+<p>Currently wired (2026-05-05):
+- <code>[highest of A and B]</code>, <code>[highest N of P]</code>
+- <code>[lowest of A and B]</code>, <code>[lowest N of P]</code>
+- <code>[count A in B]</code> (multiset semantic, not set; verified via <code>[count {6, 6} in {6}]</code> = 2)
+- <code>[sort SEQ]</code> (direction depends on position-order setting -- see below)
+- <code>[explode DIE]</code> (with <code>set "explode depth"</code> validation; see below)</p>
+<p>Pending in the parking lot (impl present, not wired): <code>absolute</code>, <code>contains</code>,
+<code>maximum of</code>, <code>reverse</code>, <code>middle of</code>.</p>
+<h3 id="sort-seq-direction"><code>[sort SEQ]</code> direction</h3>
+<p>AnyDice's <code>[sort SEQ]</code> returns a seq whose source-order position 1 is the
+"most prominent" element under the current position-order setting:
+- Under "highest first" (default): position 1 = HIGHEST, so the seq sorts
+  DESCENDING.
+- Under "lowest first": position 1 = LOWEST, so the seq sorts ASCENDING.</p>
+<p>Verified via <code>output 1 @ [sort {3, 1, 2}]</code> and <code>output 3 @ [sort {3, 1, 2}]</code>
+under each setting (program 42afc). With a die or pool argument, <code>:s</code>
+expansion + per-iteration sum-coerce makes <code>[sort &lt;pool&gt;]</code> ≡ <code>&lt;pool&gt; sum</code>
+(observationally; no real ordering survives the accumulator). Optimizable
+in a future transpiler peephole pass (todo 38) but not in the legacy
+interpreter.</p>
+<h3 id="explode-die-and-the-set-settings-validators"><code>[explode DIE]</code> and the <code>set</code> settings validators</h3>
+<p>AnyDice's <code>[explode DIE]</code> rerolls when the max face is rolled, summing
+rerolls; default depth is 2 (up to 2 extra rolls past the original).
+<code>[explode 2d6]</code> collapses the pool to its sum H first, then explodes when
+the <em>sum</em> hits max (12). Verified via 42b00.</p>
+<p><code>set "explode depth" to V</code> and <code>set "maximum function depth" to V</code> only
+accept positive integers (≥ 1). Setting to 0, a negative value, or a string
+errors with "<key> can only be set to a positive integer (the default is N)"
+in AnyDice. Floats parse-error (no float syntax). Mirrored in
+<code>Settings.set</code> via the <code>_POSITIVE_INT_KEYS</code> allowlist. Verified via 42aff.</p>
+<p>Explode and <code>maximum function depth</code> are independent budgets (verified
+42b05): the explode-depth budget consumes its own counter, not the function
+recursion depth. AnyDice's at-recursion-limit return value is <code>H({})</code> (the
+empty die), matching our impl exactly (verified 42b06).</p>
+<h3 id="count-a-in-b-is-multiset-not-set-membership"><code>[count A in B]</code> is multiset, not set membership</h3>
+<p>The builtin counts how many <em>occurrences</em> of each element of B appear in A
+treated as a multiset, not just set membership. <code>[count {6, 6} in {6}]</code> = 2
+(verified via single-shot AnyDice oracle). Earlier impl used <code>set(values)</code>
+which silently collapsed duplicates and gave 1 for the same input. The
+existing oracle 42ad4 (<code>[count {1, 2} in {1, 2, 2, 3}]</code> = 3) didn't
+disambiguate because VALS had no duplicates.</p>
+<p>Implementation: <code>_count_in(values, seq) = sum(values.count(v) for v in seq)</code>
+in <code>builtins_.py</code>.</p>
+<h3 id="code-block-inside-function-mirrors-anydices-ebnf"><code>code block (inside function)</code> mirrors AnyDice's EBNF</h3>
+<p>AnyDice's EBNF (in <code>/home/matt/dev/sandbox/anydice/anydice.com/ebnf.txt</code>)
+defines:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">code</span> <span class="n">block</span> <span class="p">(</span><span class="n">inside</span> <span class="n">function</span><span class="p">)</span> <span class="o">=</span> <span class="s1">&#39;{&#39;</span> <span class="p">,</span> <span class="p">{</span> <span class="n">statement</span> <span class="p">}</span> <span class="p">,</span> <span class="p">[</span> <span class="n">result</span> <span class="n">definition</span> <span class="p">]</span> <span class="p">,</span> <span class="s1">&#39;}&#39;</span> <span class="p">;</span>
+</code></pre></div></td></tr></table></div>
+<p>This rule is reused by function definitions, conditional blocks (inside
+function bodies), and loop blocks (inside function bodies). Mirroring it in
+our grammar as a <code>_code_block</code> filter rule (Lark's <code>_</code> prefix inlines
+children into the parent) gives:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">_code_block</span>      <span class="p">:</span> <span class="s2">&quot;{&quot;</span> <span class="n">body_stmt</span><span class="o">*</span> <span class="n">result_stmt</span><span class="err">?</span> <span class="s2">&quot;}&quot;</span>
+<span class="n">function_def</span>     <span class="p">:</span> <span class="s2">&quot;function&quot;</span> <span class="s2">&quot;:&quot;</span> <span class="n">funcname</span> <span class="n">_code_block</span>
+<span class="n">body_loop_stmt</span>   <span class="p">:</span> <span class="s2">&quot;loop&quot;</span> <span class="n">UPPERNAME</span> <span class="s2">&quot;over&quot;</span> <span class="n">expr</span> <span class="n">_code_block</span> <span class="o">-&gt;</span> <span class="n">loop_stmt</span>
+<span class="n">body_if_stmt</span>     <span class="p">:</span> <span class="s2">&quot;if&quot;</span> <span class="n">expr</span> <span class="n">_code_block</span> <span class="n">body_elseif</span><span class="o">*</span> <span class="n">body_else_clause</span><span class="err">?</span> <span class="o">-&gt;</span> <span class="n">if_stmt</span>
+<span class="n">body_elseif</span>      <span class="p">:</span> <span class="s2">&quot;else&quot;</span> <span class="s2">&quot;if&quot;</span> <span class="n">expr</span> <span class="n">_code_block</span> <span class="o">-&gt;</span> <span class="n">elseif</span>
+<span class="n">body_else_clause</span> <span class="p">:</span> <span class="s2">&quot;else&quot;</span> <span class="n">_code_block</span> <span class="o">-&gt;</span> <span class="n">else_clause</span>
+</code></pre></div></td></tr></table></div>
+<p>The <code>result_stmt?</code> placement enforces "result: must be the last statement
+in its block" — verified via 2f5ce, which AnyDice rejects with "I was
+expecting a }" because of <code>loop THROW</code> after <code>result: NIX</code> in a function
+body. AnyDice DOES allow function definitions inside top-level loops/ifs
+(verified via 24c93); only intra-body result-position is restricted.</p>
+<p>A future audit (todo 37) should walk the rest of AnyDice's EBNF and identify
+other places we diverge.</p>
+<h3 id="helper-side-defenses-against-anydice-quirks">Helper-side defenses against AnyDice quirks</h3>
+<p><code>helpers/anydice-programs.py</code> accumulates a small library of defenses
+against AnyDice's various non-standard response shapes:</p>
+<ul>
+<li><strong>HTML-prefixed JSON.</strong> AnyDice's PHP layer occasionally emits <code>&lt;br /&gt;
+  &lt;b&gt;Fatal error&lt;/b&gt;: ...&lt;br /&gt;</code> before the structured timeout JSON. The
+  <code>_extract_json</code> helper finds the first <code>{</code> and slices from there before
+  <code>json.loads</code>. Stored at compute time and applied again at verify/show
+  time so existing dirty rows reclassify correctly.</li>
+<li><strong>Empty 500 body</strong> (resource exhaustion, e.g. <code>1d200000000</code>). Stored as
+  empty string; surfaced by show/verify as a distinct category.</li>
+<li><strong>Bad UTF-8</strong> (raw request bytes echoed back). <code>decode("utf-8",
+  errors="replace")</code> keeps the body parseable; structural JSON is ASCII so
+  only string contents take U+FFFD substitutions.</li>
+<li><strong>Calculation error with literal control chars in the message string</strong>
+  (e.g. embedded newline). <code>json.loads(..., strict=False)</code> accepts them.</li>
+<li><strong>Empty result <code>{}</code></strong> when a program completes without firing any
+  <code>output</code>. Treated as a legitimate result, distinct from <code>error</code>.</li>
+<li><strong>No-such-program returns 200 + placeholder.</strong> AnyDice returns a 200 OK
+  with <code>var loadedProgram = "output 0 \ Sorry, AnyDice does not have the
+  program you requested. \"</code>. Detected by exact program-text match,
+  with an allowlist of program IDs that legitimately saved the placeholder
+  text (<code>_NOT_FOUND_PLACEHOLDER_LEGIT_IDS = {0x790, 0x1AF0}</code>).</li>
+</ul>
+<h3 id="verify-subcommand">Verify subcommand</h3>
+<p><code>helpers/anydice-programs.py verify</code> runs every program through
+<code>dyce.anydyce.run</code>, compares the result to the stored AnyDice JSON, and
+buckets each row as match / match:approximate / mismatch:<em> / interp-error:</em>
+/ interp-timeout / anydice-* / unrun. <code>match:approximate</code> covers
+distributions whose proportions agree within <code>1e-8 %</code> absolute tolerance
+(comfortably above <code>_pct_to_counts</code> recovery noise floor of ~<code>1e-9 %</code>,
+comfortably below the smallest real-bug magnitude — e.g. a one-count
+error in a 12d4 distribution produces ~<code>6e-6 %</code>).</p>
+<p><code>--timeout SECONDS</code> bounds the per-program interpreter wall clock via
+<code>signal.SIGALRM</code>. <code>--show-max N</code> controls per-bucket sample output (0 =
+unlimited). <code>--builtins-report</code> skips verification and instead prints a
+frequency table of non-user-defined call shapes across the corpus.</p>
+<h3 id="compare-subcommand">Compare subcommand</h3>
+<p><code>helpers/anydice-programs.py compare HEX_ID...</code> does a side-by-side dump of
+every distribution from our interpreter vs the stored AnyDice output for one
+or more programs. Unlike <code>verify</code>, this does NOT short-circuit on the first
+mismatch -- all dists are printed in order with a per-dist match indicator
+(<code>match</code> / <code>match:approx</code> / <code>DIFF</code>). Useful when investigating multi-output
+programs where the interesting divergence isn't dist[0].</p>
+<h3 id="two-stage-_pct_to_counts-recovery">Two-stage <code>_pct_to_counts</code> recovery</h3>
+<p>Strategy 1 estimates <code>T = round(100 / p_min)</code> (handles common case in
+microseconds; bounded at <code>T = 10^15</code> for float-arithmetic safety). Strategy
+2 (fallback) walks <code>Fraction.limit_denominator</code> bounds 1e3..1e9. The
+Fraction-based proportion comparison in <code>_proportions_close</code> then bridges
+recovery noise vs real divergence at 1e-8 % tolerance.</p>
+<h3 id="anydices-joint-n-expansion-bug-for-non-uniform-dies-programs-4123a-42b16-23">AnyDice's joint <code>:n</code>-expansion bug for non-uniform dies (programs 4123a / 42b16-23)</h3>
+<p>Programs 4123a et al. expose a bug in AnyDice's joint <code>:n</code>-expansion when both
+arguments are non-uniformly-weighted dies (e.g. <code>d{1:5, 10:2, 100:3}</code>). The
+isolation probes 42b20/42b21/42b23 strip the function body to just <code>result:
+TRUMP_CONTROLS</code> (or TRUMP_LOSSES) -- expressions that depend ONLY on CARDS, so
+the DICE expansion is ineffectual at the marginal-distribution level. Yet
+AnyDice's aggregate doesn't match the clean Cartesian-product weighting:</p>
+<table>
+<thead>
+<tr>
+<th>body</th>
+<th>clean Cartesian</th>
+<th>AnyDice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TRUMP_CONTROLS</td>
+<td>0: 85.71%, 1: 14.29%</td>
+<td>0: 73.275%, 1: 26.725%</td>
+</tr>
+<tr>
+<td>TRUMP_LOSSES</td>
+<td>0: 64.29%, 1: 35.71%</td>
+<td>0: 71.749%, 1: 28.251%</td>
+</tr>
+</tbody>
+</table>
+<p>Independently confirmed via a pure-dyce reference implementation (no anydyce
+interpreter) using <code>expand(callback, 4 @ P(die), 1 @ P(card))</code>:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dyce</span><span class="w"> </span><span class="kn">import</span> <span class="n">H</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">PResult</span><span class="p">,</span> <span class="n">expand</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">alchemist</span><span class="p">(</span><span class="n">dice</span><span class="p">:</span> <span class="n">PResult</span><span class="p">,</span> <span class="n">cards</span><span class="p">:</span> <span class="n">PResult</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">return_which</span><span class="o">=</span><span class="s2">&quot;trump_ctrls&quot;</span><span class="p">):</span>
+    <span class="n">dice_</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">dice</span><span class="o">.</span><span class="n">roll</span><span class="p">)</span>
+    <span class="n">cards_</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">cards</span><span class="o">.</span><span class="n">roll</span><span class="p">)</span>
+    <span class="n">effects</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dice_</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">trump_ctrls</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cards_</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">trump_losses</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cards_</span><span class="p">)[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="k">return</span> <span class="nb">locals</span><span class="p">()[</span><span class="n">return_which</span><span class="p">]</span>
+
+<span class="n">die</span> <span class="o">=</span> <span class="n">H</span><span class="p">({</span><span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">:</span><span class="mi">3</span><span class="p">})</span>
+<span class="n">card</span> <span class="o">=</span> <span class="n">H</span><span class="p">({</span><span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">:</span><span class="mi">7</span><span class="p">})</span>
+<span class="n">expand</span><span class="p">(</span><span class="n">alchemist</span><span class="p">,</span> <span class="mi">4</span> <span class="o">@</span> <span class="n">P</span><span class="p">(</span><span class="n">die</span><span class="p">),</span> <span class="mi">1</span> <span class="o">@</span> <span class="n">P</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">return_which</span><span class="o">=</span><span class="s2">&quot;trump_ctrls&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format_short</span><span class="p">()</span>
+<span class="c1"># {avg: 0.14, 0: 85.71%, 1: 14.29%}    -- matches our anydyce interpreter</span>
+</code></pre></div></td></tr></table></div>
+<p>So our interpreter is consistent with the dyce-native reference (which has no
+shared code with the AnyDice interpreter), and AnyDice's output is the
+outlier. There is no consistent mental model under which AnyDice's per-call
+results (verified scalar-by-scalar via 42b13) AND its aggregate would both
+be right; the bug is in AnyDice's joint-expansion path.</p>
+<p>Filed under "AnyDice-side bugs we deliberately don't reproduce" (todo 35).</p>
+<h3 id="implicit-collapse-pile-up-ng-design-driver">Implicit-collapse pile-up (NG design driver)</h3>
+<p>A small program like <code>D: [number of 2d6 excluding 4d6]; output #D</code> exposes
+how many implicit-coercion steps stack up in legacy AnyDice:</p>
+<ol>
+<li><code>EXCL:s</code> with a P arg → expansion across <code>rolls_with_counts()</code>.</li>
+<li>Body executes once per roll, producing a per-roll value.</li>
+<li>The per-iteration accumulator merges heterogeneous returns by collapsing
+   pools to their summed H — there's no way to keep P-shape across
+   iterations that return different shapes, so the result is <em>always</em> an H.</li>
+<li>So the function call's return is an H, not a P.</li>
+<li>The caller binds <code>D</code> to that H, then <code>#D = 1</code> per the "die is a
+   1-position pool" rule.</li>
+</ol>
+<p>Each step is documented somewhere in the surface area; the cumulative
+behavior is opaque without tracing. This is the kind of implicit-coercion
+chain that AnyDice NG should eliminate, though <em>which</em> steps to expose is
+still open. Candidates:
+- Functions declare their return type explicitly, OR the caller wraps the
+  call in an <code>expand X:T over &lt;pool&gt; [...]</code> form. (Strong consensus.)
+- Pool-shape is preserved when the function says so; otherwise an explicit
+  <code>sum</code> or analogous coercion is required. (Open.)
+- Whether H and 1-pool should remain interchangeable to users is <em>not</em>
+  settled. The unified "die is a die" model is convenient and matches
+  decades of AnyDice idiom. The decision is binary:
+  - <strong>Unified (status quo / lean):</strong> <code>H</code> is a 1-pool, <code>#H = 1</code>, <code>1@H = H</code>.
+    No new syntax, the existing legacy idiom keeps working. Internal
+    representation may still distinguish for efficiency.
+  - <strong>Distinct:</strong> make histograms a first-class surface type with their
+    own annotation (e.g. <code>:h</code> alongside <code>:p</code>). Then the distinction is
+    visible <em>and</em> declarable, not just imposed at coercion sites. Don't
+    half-implement — exposing the distinction without giving users a way
+    to declare and reason about it makes the surface worse, not better.</p>
+<p>Defer; status-quo unified looks like the right default unless a concrete
+  semantic gap argues for splitting them.</p>
+<h3 id="bareuntyped-function-parameters-pass-through-no-coercion_1">Bare/untyped function parameters: pass-through, no coercion</h3>
+<p>When <code>function: f X { ... }</code> has no <code>:n</code> / <code>:d</code> / <code>:s</code> / <code>:?</code> annotation, the
+argument is bound to the parameter as-is, with no coercion or expansion. The
+body sees the value with its original type — int as int, seq as seq, die as
+die, pool as pool.</p>
+<p>This is <em>different</em> from any of the explicit types:
+- <code>:n</code> would sum-coerce seqs to ints, expand H/P across outcomes per
+  iteration, and bind a scalar inside the body.
+- <code>:d</code> would coerce ints/seqs to a 1-outcome H, collapse P to H, and bind a
+  die inside the body.
+- <code>:s</code> would coerce ints/seqs to seqs, expand pools per roll, and bind a
+  seq inside the body.
+- The bare/untyped form does <em>none</em> of those.</p>
+<p>Verified against AnyDice via probes:
+- <code>function: f X { result: X + X }; output [f d6]</code> → 2d6 sum (not 2 * d6),
+  confirming X is the die. (Program 42ace.)
+- <code>function: f X { result: # X }; output [f {1, 2, 3}]</code> → H({3:1}),
+  confirming X is the seq (not sum-coerced).</p>
+<p>Implementation: <code>_invoke</code> and <code>_call_builtin</code> both treat <code>param.type is None</code>
+as "bind <code>arg</code> directly, do not append to the expansion list." Earlier
+drafts defaulted untyped to <code>"n"</code>; that was wrong.</p>
+<p>For AnyDice NG, the recommendation is to make untyped a parse error and
+require explicit <code>:n</code>/<code>:d</code>/<code>:s</code> everywhere.</p>
+<h3 id="nh-h-is-a-1-element-pool"><code>N@H</code>: H is a 1-element pool</h3>
+<p>For the <code>@</code> operator, a non-empty <code>H</code> (a die-shaped distribution) is treated
+as a 1-element pool:
+- <code>1@H</code> returns the die unchanged (its full distribution).
+- <code>N@H</code> for <code>N != 1</code> is out-of-range on a 1-pool and returns 0.
+- <code>0@H</code> and negative N likewise return 0.
+- Empty <code>H({})</code> propagates as <code>H({})</code>.</p>
+<p>Implementation: <code>_apply_at</code> wraps <code>H</code> as <code>P(H)</code> and forwards to <code>_at_pool</code>,
+which already has 1-based-position semantics with the correct
+position-order interaction.</p>
+<p>Verified via probes (<code>output 1 @ d6</code> → d6 distribution, even labeled <code>"d6"</code>
+in AnyDice's output) and via 405c6 (<code>[ex H]</code> where ex computes <code>2 @ A</code> →
+<code>H({0: 1})</code>).</p>
+<h3 id="function-body-sequence-returns-under-expansion-sum-coerced_1">Function body sequence returns under expansion: sum-coerced</h3>
+<p>When a function with explicit n-typed (or s-typed) parameters expands across
+argument outcomes and the body returns a sequence per iteration, AnyDice
+sum-coerces the seq to a single number before accumulating. Our prior impl
+distributed seq elements as separate outcomes via <code>_coerce_to_h(tuple)</code> =
+<code>H(Counter(tuple))</code>, which double-counted.</p>
+<p>Implementation: <code>_invoke</code> and <code>_call_builtin</code> per-iteration accumulators
+check <code>isinstance(r, tuple)</code> and replace with <code>sum(r)</code> before
+<code>_coerce_to_h</code>. <code>_coerce_to_h</code> itself still distributes seqs as multi-
+outcome H — it's the right thing for <code>output {1, 2, 3}</code> and other
+non-iteration contexts.</p>
+<p>Verified against AnyDice via 405c6 (<code>[roll 1d6 1d6]</code> with body <code>result:
+{A+B, C}</code> produces an H over <code>A+B+C</code>, not over <code>{A+B, C}</code> elements).</p>
+<h3 id="per-iteration-lcm-normalization_1">Per-iteration LCM normalization</h3>
+<p>Already-known but worth noting alongside the seq-coerce fix: <code>_invoke</code>,
+<code>_call_builtin</code>, and <code>_expand_dice_count</code> each LCM-normalize per-iteration
+return totals before accumulating. Without this, an iteration that returns a
+die (sum=k) contributes k× as much weight as an iteration returning a
+scalar (sum=1), which is wrong.</p>
+<p>The three sites currently duplicate this logic. A future cleanup is to
+extract a single <code>aggregate_weighted_lcm</code> primitive into <code>dyce.h</code> (todo 32
+in the cleanroom todo list); the existing <code>aggregate_weighted</code> uses
+product-of-totals as its scalar, which is correct but produces astronomical
+big-int counts for many iterations.</p>
+<h3 id="division-by-zero-substitute-0-per-outcome_1">Division by zero: substitute 0 per-outcome</h3>
+<p><code>_OP_FUNCS["/"]</code> returns <code>0</code> when the divisor is <code>0</code> rather than raising.
+For distributions, this happens per-outcome inside the cross-product in
+<code>_h_binop</code>. Verified against AnyDice (<code>output 1 / 0</code> → 0, <code>output (1/0)+5</code> →
+5, <code>output 1 / d{0, 1, 2}</code> → H({0:2, 1:1})).</p>
+<p>AnyDice does <em>not</em> support a modulo operator, so the same question doesn't
+arise there.</p>
+<h3 id="power-strict-in-scalar-context-lenient-in-h-context"><code>^</code> (power): strict in scalar context, lenient in H context</h3>
+<p><code>0^negative</code> is mathematically undefined.
+AnyDice splits behavior by operand types:</p>
+<ul>
+<li><strong>Scalar^scalar</strong> (no H/P involved): raises an explicit error.
+  E.g. <code>output 0^-1</code> errors out.</li>
+<li><strong>Any H-involving form</strong> (<code>scalar^H</code>, <code>H^scalar</code>, <code>H^H</code>, etc.): substitutes the sentinel value <code>-9223372036854776000</code> (= <code>-(2^63 + 192)</code> = <code>-0x80000000000000C0</code>) for every offending per-outcome result, so the surrounding distribution survives.
+  E.g. <code>output 0^d{-1}</code> produces <code>H({-9223372036854776000: 1})</code>, and <code>output 0^d{-1, -2, -100}</code> produces <code>H({-9223372036854776000: 3})</code> (constant sentinel regardless of exponent).</li>
+</ul>
+<p>The split principle: errors don't compose probabilistically -- erroring on one outcome would kill the whole distribution.
+We mirror it via two <code>_anydice_pow_*</code> functions registered in parallel op tables (<code>_OP_FUNCS</code> for the scalar path, <code>_OP_FUNCS_H_ITER</code> for the H-iteration loop in <code>_h_binop</code>).
+The sentinel's specific value is almost certainly an artifact of PHP's <code>(int)(-INF)</code> cast on AnyDice's server; we adopt their exact value for verify-fidelity.</p>
+<p>Note that all other negative-exponent results (e.g. <code>2^-1 = 0</code>, <code>(-2)^-1 = 0</code>, <code>(-1)^-1 = -1</code>) come out via <code>int(a**b)</code> truncating toward zero, in both strict and lenient variants.
+The strict/lenient split only matters for the <code>0^negative</code> case.</p>
+<h3 id="builtins-wiring-policy_1">Builtins wiring policy</h3>
+<p><code>builtins_.py</code> has implementations for all AnyDice builtins we've identified, and all are currently wired into the <code>BUILTINS</code> registry.
+Originally the policy was to enable one family at a time with dedicated TDD coverage per family verified against AnyDice oracle programs before flipping the entry on; that gating is now complete.
+New families should still land under the same TDD pattern when they're added.</p>
+<h3 id="undocumented-highestlowest-n-of-a-and-b-and-c-builtins">Undocumented <code>[highest/lowest N of A and B [and C]]</code> builtins</h3>
+<p>AnyDice exposes four undocumented patterns that are NOT user-definable via the function-definition syntax (you can't write <code>function: highest N:n of A:d and B:d</code>; the parser would treat that as a same-shape user function only callable with a specific dispatch shape, but AnyDice's builtin preempts).
+They construct a heterogeneous pool from the listed dice and select the N highest / N lowest:</p>
+<ul>
+<li><code>[highest N of FIRST and SECOND]</code> ≡ <code>P(FIRST, SECOND).h(slice(-N, None))</code></li>
+<li><code>[lowest N of FIRST and SECOND]</code> ≡ <code>P(FIRST, SECOND).h(slice(0, N))</code></li>
+<li><code>[highest N of FIRST and SECOND and THIRD]</code> ≡ <code>P(FIRST, SECOND, THIRD).h(slice(-N, None))</code></li>
+<li><code>[lowest N of FIRST and SECOND and THIRD]</code> ≡ <code>P(FIRST, SECOND, THIRD).h(slice(0, N))</code></li>
+</ul>
+<p>There is NO four-or-more-die variant; the family is exactly 2-die and 3-die.
+Scalar arguments are valid (coerce to single-face dice via <code>:d</code> semantics) and pool arguments are valid too (dyce's <code>P()</code> flattens nested pools so <code>P(2d6, 1d4)</code> correctly yields a 3-die pool).
+171 corpus programs use these patterns; without them we got <code>NameError: undefined function for call</code> on dispatch shape mismatches.</p>
+<h3 id="and-share-precedence-level-not-c-style"><code>&amp;</code> and <code>|</code> share precedence level (NOT C-style)</h3>
+<p>Per AnyDice's EBNF (level 7) and verified empirically (<code>output 1 | 1 &amp; 0</code> produces <code>0</code>), <code>&amp;</code> and <code>|</code> are at the <strong>same</strong> precedence level and left-associative across both operators.
+So <code>1 | 1 &amp; 0</code> parses as <code>(1 | 1) &amp; 0</code> (= 0), not C-style <code>1 | (1 &amp; 0)</code> (= 1).</p>
+<p>Our grammar reflects this with a single <code>bool_expr</code> rule listing both operators as alternatives.
+This is a real semantic divergence from most programming languages and silently affects any corpus program that combines <code>&amp;</code> and <code>|</code> in a single expression with <code>|</code> on the left.</p>
+<h3 id="verify-subcommand_1">Verify subcommand</h3>
+<p><code>helpers/anydice-programs.py verify</code> runs every program through
+<code>dyce.anydyce.run</code>, compares the result to the stored AnyDice JSON, and
+buckets each row as match / mismatch:values / mismatch:dist-count /
+parse-fail / interp-error:&lt;ExcType&gt; / interp-timeout / anydice-error /
+anydice-empty / anydice-resource / anydice-bad-json / anydice-bad-shape /
+unrun. Comparison normalizes both sides by gcd-reduction.</p>
+<p><code>--timeout SECONDS</code> bounds the per-program interpreter wall clock via
+<code>signal.SIGALRM</code> (Linux/macOS only). <code>--show-max N</code> controls per-bucket
+sample output (0 = unlimited). <code>--builtins-report</code> skips verification and
+instead prints a frequency table of non-user-defined call shapes across the
+corpus — useful for prioritizing which builtin to wire next.</p>
+<p>Current isolation model is in-process: <code>verify</code> and <code>compare</code> enforce only
+a wall-clock budget. An OOM on a single program crashes the helper. This
+is fine for the small DB (~1100 programs) but doesn't scale to the full
+corpus (~159804 de-duped programs as of 2026-05-05, ~74580 AnyDice results
+collected so far, complete in a few days). Hardening plan tracked as todo
+40: <code>multiprocessing.Pool(forkserver)</code> with per-worker
+<code>resource.setrlimit(RLIMIT_AS, ...)</code>, per-job <code>pool.apply_async().get(
+timeout=...)</code>, new <code>interp-oom</code> (clean <code>MemoryError</code>) and <code>interp-killed</code>
+(kernel SIGKILL / <code>BrokenProcessPool</code>) buckets, <code>maxtasksperchild</code> to
+recycle workers, parallelism via <code>Pool(processes=os.cpu_count())</code>. Pool
+overhead at full-corpus scale is negligible vs. ~75ms-per-program of
+<code>subprocess.run</code> cold-start (~3.3 hours of pure overhead at 160k).</p>
+<h3 id="performance-gap-on-deep-recursion-programs-2026-05-05">Performance gap on deep-recursion programs (2026-05-05)</h3>
+<p>Nine small-DB programs time out where AnyDice returns instantly (22432,
+42074, 286e0, 183de, 183d4, 183b0, 149c7, 149bf, 149bd). Root-cause
+investigation refined the diagnosis twice:</p>
+<ol>
+<li><strong>First framing — exact vs approximate fundamental tradeoff.</strong> Wrong.
+   The user wrote a dyce-native translation of 22432's <code>function: highest
+   of N:n x D:d</code> (<code>test_highest.py</code> at the repo root) using
+   <code>dyce.evaluation.expand</code>; it runs in ~2 seconds and emits a
+   <code>TruncationWarning</code>. So dyce can do it.</li>
+<li><strong>Second framing — <code>expand</code>'s opt-in branch truncation is the
+   speedup.</strong> Also incomplete. User tested <code>precision=Fraction(1, 2**8192)</code>
+   (a threshold so absurdly small that no path probability at recursion
+   depth ~23 over a d6 should ever fall below it), and the program <em>still</em>
+   ran fast and <em>still</em> emitted the <code>TruncationWarning</code>. So truncation is
+   firing but it's trimming a tail that's tiny either way -- it isn't the
+   dominant speedup.</li>
+<li><strong>Working hypothesis — structural optimization in <code>expand</code>.</strong> Most
+   likely outcome-grouping (merging branches with identical outcomes
+   before recursing, so work scales with distinct outcomes per d6 face,
+   not paths) and/or memoization on <code>(callable, args-as-H-tuple)</code>. In
+   <code>highest_among(half_h, half_h)</code> the two arguments are identical at every
+   recursion level; a cache would collapse the recursion massively. Need to
+   read <code>dyce/evaluation.py</code> end-to-end to confirm before designing the
+   mitigation.</li>
+</ol>
+<p>Our <code>_invoke</code> / <code>_call_builtin</code> accumulators have no equivalent of either
+optimization. Mitigation tracked as todo 39 -- gated on the
+<code>expand</code>-internals investigation since the fix shape depends on what
+<code>expand</code> actually does.</p>
+<h4 id="why-the-truncationwarning-displays-the-source-line-twice">Why the <code>TruncationWarning</code> displays the source line twice</h4>
+<p>Cosmetic, surfaced during investigation: a single top-level <code>expand</code> call
+emits <em>two</em> distinct warnings, both with <code>stacklevel=2</code> pointing at the
+user's <code>return expand(...)</code> line:</p>
+<ul>
+<li><code>dyce/evaluation.py:422</code> -- <code>ExperimentalWarning</code> once per outermost
+  <code>expand</code> call (when no <code>_expand_ctxt</code> is in scope yet).</li>
+<li><code>dyce/evaluation.py:462</code> -- <code>TruncationWarning</code> if any branches were
+  dropped.</li>
+</ul>
+<p>Each renders as <code>header\n  source-line\n</code>. Adjacent emissions look like
+the source line is printed twice, but it's two different warnings whose
+tails happen to be the same source. <code>explode_n</code> at <code>evaluation.py:587</code>
+already wraps internal <code>expand</code> calls in
+<code>warnings.catch_warnings()</code> with <code>filterwarnings("ignore",
+category=ExperimentalWarning)</code> to suppress the noise from a public API
+that itself uses <code>expand</code>.</p>
+<h3 id="two-stage-_pct_to_counts-recovery_1">Two-stage <code>_pct_to_counts</code> recovery</h3>
+<p>Previously, AnyDice's percentage strings were converted to integer counts
+via <code>Fraction.limit_denominator(10**9)</code> per outcome and an LCM combine.
+That produces spurious large-denominator fits when AnyDice's printed
+precision (~13 sig figs) doesn't pin the true rational uniquely.</p>
+<p>New algorithm:
+1. <strong>Estimate-T strategy.</strong> Compute <code>T_est = round(100 / p_min)</code> where
+   <code>p_min</code> is the smallest non-zero percentage. This typically nails the
+   natural total (4^12 for 12d4, 7776 for 5d6 binomial, etc.) directly.
+   Try <code>T_est * k</code> for <code>k = 1..32</code> to handle the edge case where the
+   smallest count is &gt; 1.
+2. <strong>Fallback: <code>limit_denominator</code> walk.</strong> For pathological distributions
+   (or distributions with <code>T &gt; 10^15</code>), walk denominator bounds 1e3..1e9
+   and accept the first whose round-trip is within tight tolerance.</p>
+<p>Bounded at <code>T = 10^15</code> for float-arithmetic safety. Distributions with
+larger natural totals fall through to the fallback path with bloated but
+proportionally-correct counts.</p>
+<h3 id="anydices-empty-die-with-seq-operator-bugs-program-42aa4">AnyDice's empty-die-with-seq operator bugs (program 42aa4)</h3>
+<p>Probed 2026-05-06 via <code>notes/probe-seq-arith.txt</code> / <code>probe-seq-arith-results.txt</code>.
+The probe walks all combinations of <code>{d{}, 0d6, 1d6, 2d6}</code> × <code>{1, 2, 3}</code> (seq) ×
+<code>{+, -, *, /, &amp;, |, ^}</code> × <code>{LHS, RHS}</code> to characterize AnyDice's empty-die handling.</p>
+<p>Two distinct AnyDice bugs surfaced; we deliberately don't reproduce either.</p>
+<p><strong>Bug 1: <code>d{} + seq</code> returns the seq as a discrete distribution.</strong> AnyDice
+special-cases this single operator/position combination: when LHS is empty die
+and RHS is a sequence, AnyDice expands the seq per-element instead of
+sum-coercing or propagating emptiness:</p>
+<table>
+<thead>
+<tr>
+<th>input</th>
+<th>AnyDice</th>
+<th>our impl</th>
+<th>"correct" bool/arith semantic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>d{} + {1, 2, 3}</code></td>
+<td><code>{1: 33%, 2: 33%, 3: 33%}</code></td>
+<td><code>{6: 100%}</code></td>
+<td>sum-coerce + treat d{} as 0 → 6</td>
+</tr>
+<tr>
+<td><code>{1, 2, 3} + d{}</code></td>
+<td><code>{6: 100%}</code></td>
+<td><code>{6: 100%}</code></td>
+<td>sum-coerce + treat d{} as 0 → 6</td>
+</tr>
+<tr>
+<td><code>d{} - {1, 2, 3}</code></td>
+<td><code>{-6: 100%}</code></td>
+<td><code>{-6: 100%}</code></td>
+<td>sum-coerce + treat d{} as 0 → -6</td>
+</tr>
+<tr>
+<td><code>{1, 2, 3} - d{}</code></td>
+<td><code>{6: 100%}</code></td>
+<td><code>{6: 100%}</code></td>
+<td>sum-coerce + treat d{} as 0 → 6</td>
+</tr>
+</tbody>
+</table>
+<p><code>-</code> is consistent in both directions; only <code>+</code> has the LHS asymmetry.</p>
+<p><strong>Bug 2: <code>seq | d{}</code> returns the sum-coerced seq instead of bool-OR with 0.</strong>
+AnyDice's <code>|</code> is otherwise consistent bool-OR (<code>{1, 2, 3} | 0d6</code> returns
+<code>{1: 100%}</code> via <code>6 | 0 = 1</code>). Only the empty-die-RHS case breaks this -- looks
+like AnyDice fails to substitute d{} as 0 on RHS for <code>|</code>:</p>
+<table>
+<thead>
+<tr>
+<th>input</th>
+<th>AnyDice</th>
+<th>our impl</th>
+<th>"correct" bool semantic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>d{} | 1</code></td>
+<td><code>{1: 100%}</code></td>
+<td><code>{1: 100%}</code></td>
+<td>0 | 1 = 1</td>
+</tr>
+<tr>
+<td><code>1 | d{}</code></td>
+<td><code>{1: 100%}</code></td>
+<td><code>{1: 100%}</code></td>
+<td>1 | 0 = 1</td>
+</tr>
+<tr>
+<td><code>d{} | {1, 2, 3}</code></td>
+<td><code>{}</code> (empty propagates)</td>
+<td><code>{1: 100%}</code></td>
+<td>0 | 6 = 1</td>
+</tr>
+<tr>
+<td><code>{1, 2, 3} | d{}</code></td>
+<td><code>{6: 100%}</code> (sum-coerce, NOT bool-OR!)</td>
+<td><code>{1: 100%}</code></td>
+<td>6 | 0 = 1</td>
+</tr>
+<tr>
+<td><code>d{} &amp; {1, 2, 3}</code></td>
+<td><code>{}</code></td>
+<td><code>{}</code></td>
+<td>empty propagates</td>
+</tr>
+<tr>
+<td><code>{1, 2, 3} &amp; d{}</code></td>
+<td><code>{}</code></td>
+<td><code>{}</code></td>
+<td>empty propagates</td>
+</tr>
+</tbody>
+</table>
+<p><code>&amp;</code> is symmetric (both sides propagate emptiness); <code>|</code> is asymmetric and
+buggy in both directions.</p>
+<p><strong>Our design</strong>: <code>_EMPTY_DIE_AS_ZERO = {"+", "-", "|"}</code> and <code>_apply_arith</code> /
+<code>_apply_bool</code> apply uniform "treat empty die as scalar 0" semantics for these
+three operators in both positions. <code>*</code>, <code>/</code>, <code>^</code>, <code>&amp;</code> propagate emptiness from
+either side. This produces internally consistent semantics across the operator
+matrix and matches AnyDice on all non-empty-die cases. The two bugs above are
+on todo 35's annotation list.</p>
+<h2 id="things-tried-outcomes">Things tried, outcomes</h2>
+<table>
+<thead>
+<tr>
+<th>Change</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_compress_h</code> in <code>VarAssign</code></td>
+<td>229 regressions (restored)</td>
+</tr>
+<tr>
+<td><code>_compress_h</code> in <code>LoopStmt</code> copy-back only</td>
+<td>Fixed weight explosion in program 99248 (45-iter loop)</td>
+</tr>
+<tr>
+<td><code>_compress_h</code> in <code>_pool_h_select</code></td>
+<td>Fixed OOM on program 140338; no other programs affected</td>
+</tr>
+<tr>
+<td>LCM normalization in <code>_expand_over_h</code>/<code>_expand_over_s</code></td>
+<td>Fixed programs 235 (L5R) and 2619 (nWoD) — mixed int/H returns</td>
+</tr>
+<tr>
+<td>Loop copy-back: propagate ALL child vars (not just pre-existing)</td>
+<td>Fixed programs 99475/76/78 — loop-defined variables not visible after loop</td>
+</tr>
+<tr>
+<td>Dynamic scoping (<code>caller_env</code>)</td>
+<td>Fixed program 25893 partially (runtime_error → value_mismatch)</td>
+</tr>
+</tbody>
+</table>
+<h1 id="appendix">Appendix</h1>
+<h2 id="from-pydice">From <a href="https://pdice.arkareem.com/">PyDice</a></h2>
+<p>Source repo: <a href="https://github.com/Ar-Kareem/PythonDice">Ar-Kareem/PythonDice</a></p>
+<p>Translates this ...</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code>\ <span class="n">example</span> <span class="n">code</span> \
+<span class="n">output</span> <span class="mi">1</span><span class="n">d20</span> <span class="n">named</span> <span class="s2">&quot;Just D20&quot;</span>
+<span class="n">output</span> <span class="mi">3</span> <span class="o">@</span> <span class="mi">4</span><span class="n">d20</span> <span class="n">named</span> <span class="s2">&quot;3rd of 4D20&quot;</span>
+
+<span class="n">function</span><span class="p">:</span> <span class="n">dmg</span> <span class="n">D</span><span class="p">:</span><span class="n">n</span> <span class="n">saveroll</span> <span class="n">S</span><span class="p">:</span><span class="n">n</span> <span class="n">savetarget</span> <span class="n">T</span><span class="p">:</span><span class="n">n</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="n">S</span> <span class="o">&gt;=</span> <span class="n">T</span> <span class="p">{</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">D</span><span class="o">/</span><span class="mi">2</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">D</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">output</span> <span class="p">[</span><span class="n">dmg</span> <span class="mi">4</span><span class="n">d6</span> <span class="n">saveroll</span> <span class="n">d20</span><span class="o">+</span><span class="mi">4</span> <span class="n">savetarget</span> <span class="mi">16</span><span class="p">]</span> <span class="n">named</span> <span class="s2">&quot;Lvl 4 Fireball, +4DEX vs 16DC&quot;</span>
+</code></pre></div></td></tr></table></div>
+<p>... to this ...</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># example code</span>
+<span class="n">output</span><span class="p">(</span><span class="n">roll</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="n">named</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Just D20&quot;</span><span class="p">)</span>
+<span class="n">output</span><span class="p">((</span><span class="mi">3</span> <span class="o">@</span> <span class="n">roll</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">20</span><span class="p">)),</span> <span class="n">named</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;3rd of 4D20&quot;</span><span class="p">)</span>
+<span class="nd">@anydice_casting</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dmg_X_saveroll_X_savetarget_X</span><span class="p">(</span><span class="n">D</span><span class="p">:</span> <span class="n">T_N</span><span class="p">,</span> <span class="n">S</span><span class="p">:</span> <span class="n">T_N</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="n">T_N</span><span class="p">):</span>
+  <span class="k">if</span> <span class="n">S</span> <span class="o">&gt;=</span> <span class="n">T</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">D</span> <span class="o">//</span> <span class="mi">2</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">D</span>
+
+<span class="n">output</span><span class="p">(</span><span class="n">dmg_X_saveroll_X_savetarget_X</span><span class="p">(</span><span class="n">roll</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">roll</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="n">named</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Lvl 4 Fireball, +4DEX vs 16DC&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>From the <a href="https://github.com/Ar-Kareem/PythonDice/#complex-example">README</a>:</p>
+<h3 id="complex-example">Complex Example:</h3>
+<p>Let's try calculating the total damage of the following attack on a boss in an RPG:
+- TO HIT: 1d20 + 7 against 22 AC (less than 22 is a miss. rolling a 20 is a CRITICAL so double the damage die)
+- DAMAGE: 2d8 + 4 blunt damange
+- + 1d4 thunder damage
+- + 1d10 + 3 radiant damange (half damage if the target succeeds a 16 DC wisdom saving throw, boss has +5 wis saving throw)</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dice_calc</span><span class="w"> </span><span class="kn">import</span> <span class="n">roll</span><span class="p">,</span> <span class="n">anydice_casting</span><span class="p">,</span> <span class="n">T_N</span><span class="p">,</span> <span class="n">T_S</span><span class="p">,</span> <span class="n">T_D</span>
+
+<span class="c1"># In anydice we have (:N, :S, and :D) which are (T_N, T_S, and T_D) in here</span>
+<span class="c1"># read: https://anydice.com/docs/functions for more information</span>
+<span class="nd">@anydice_casting</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span><span class="n">to_hit_roll</span><span class="p">:</span> <span class="n">T_N</span><span class="p">,</span> <span class="n">save_roll</span><span class="p">:</span> <span class="n">T_N</span><span class="p">):</span>  <span class="c1"># type hinting as T_N REQUIRED!!!</span>
+    <span class="k">if</span> <span class="n">to_hit_roll</span> <span class="o">+</span> <span class="mi">7</span> <span class="o">&lt;</span> <span class="mi">22</span><span class="p">:</span>  <span class="c1"># miss</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="n">is_crit</span> <span class="o">=</span> <span class="p">(</span><span class="n">to_hit_roll</span> <span class="o">==</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="n">dmg_die_mult</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">is_crit</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="n">blung_dmg</span> <span class="o">=</span> <span class="n">roll</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dmg_die_mult</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span>
+    <span class="n">thund_dmg</span> <span class="o">=</span> <span class="n">roll</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">dmg_die_mult</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">radiant_dmg</span> <span class="o">=</span> <span class="n">roll</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">dmg_die_mult</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span>
+    <span class="k">if</span> <span class="n">save_roll</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">&gt;=</span> <span class="mi">16</span><span class="p">:</span>  <span class="c1"># save success</span>
+        <span class="n">radiant_dmg</span> <span class="o">=</span> <span class="n">radiant_dmg</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">blung_dmg</span> <span class="o">+</span> <span class="n">thund_dmg</span> <span class="o">+</span> <span class="n">radiant_dmg</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">calculate</span><span class="p">(</span><span class="n">roll</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span> <span class="n">roll</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+
+<span class="c1"># plotting code</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="n">vals</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">X</span><span class="o">.</span><span class="n">get_vals_probs</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">probs</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Damage&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Probability&#39;</span><span class="p">);</span>
+</code></pre></div></td></tr></table></div>
+<p><img alt="png" src="https://github.com/Ar-Kareem/PythonDice/blob/master/README_files/./README_18_0.png" /></p>
+<p>Notice how we used the decorator <code>@anydice_casting</code> to use <code>if</code> conditions on dice inside of a custom function. Typehinting the input to <code>int</code> is required, the engine knows that you want to calculate the function many times based on all possible combinations of the input random variable.</p>
+<p>The three valid typehints that the decorator <code>@anydice_casting</code> looks for are <code>: int</code>, <code>: Seq</code>, <code>: RV</code> which are equivalent to the 3 types <code>:n</code>, <code>:s</code>, and <code>:d</code> respectively in <code>anydice</code>. The casting done by <code>@anydice_casting</code> is exactly how casting is done in the <code>anydice</code> language. For more info on that please read the <a href="https://anydice.com/docs/functions/">documentation <code>functions -&gt; Parameter types</code> in the <code>anydice</code> docs</a> .</p>
+<p>Note: <code>Seq</code> and <code>RV</code> are imported from <code>dice_calc.randvar</code></p>
+<h3 id="observations">Observations</h3>
+<p><strong>The key insight is separable from the mechanism.</strong>
+<code>@anydice_casting()</code> shifts the "combinatorial expansion over outcomes" problem
+out of the function body and into the call site.
+The function body always operates on scalars, so Python's native <code>if</code>,
+arithmetic, and control flow just work.
+This is the same semantics our AST-walking interpreter needs to implement —
+the machinery just lives in a different place (the eval loop's function call
+handler rather than a Python decorator).</p>
+<p><strong><code>if</code> conditions are always scalar.</strong>
+AnyDice <code>if</code> requires its condition to resolve to an <code>int</code> at runtime (0 =
+false, nonzero = true); using a die expression as a condition is a type error
+in any context, including top-level.
+Inside a function body, this is not a problem in practice because the call
+handler has already coerced <code>:n</code> arguments to scalars before the body runs —
+the <code>if</code> never sees a die.</p>
+<p><strong>PyDice requires <code>exec</code> to run the generated code.</strong>
+Because it transpiles AnyDice to Python source strings, execution requires
+<code>exec</code>.
+This carries real costs: security exposure for untrusted programs, harder error
+attribution (stack traces point into generated strings), and the indirection of
+building valid Python source just to evaluate it immediately.
+Our AST-walking approach gets the same coerce/iterate/combine semantics without
+any code generation or <code>exec</code>.</p>
+<p><strong>We already have everything needed.</strong>
+<code>Param.type</code> in our AST captures <code>:n</code>/<code>:s</code>/<code>:d</code> for every parameter.
+The interpreter's function call handler can read those types and apply the same
+expansion logic the decorator applies — coerce arguments by type, iterate over
+outcome combinations for <code>:n</code> params backed by distributions, weight and combine
+results into a new <code>H</code>.</p>
+<hr />
+<h1 id="design-discussions-2026-04-27">Design discussions (2026-04-27)</h1>
+<p>NOTE: most of the body of this file describes a prior interpreter that was
+subsequently removed and rebuilt; the current implementation lives in
+<code>dyce/anydyce/interpreter.py</code> (no underscore prefix; modules were renamed in a
+2026-04-27 cleanup pass). Stale sections above (file paths, line counts,
+corpus pass counts, <code>_compress_h</code>/<code>_dispatch_coercion</code> references) describe
+the previous implementation. Treat the notes below as authoritative when they
+conflict.</p>
+<h2 id="current-implementation-summary">Current implementation summary</h2>
+<p>Public API is unchanged: <code>dyce.anydyce.run(source) -&gt; list[(name, H)]</code>.</p>
+<p>Module layout after rename:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">dyce</span><span class="o">/</span><span class="n">anydyce</span><span class="o">/</span>
+  <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>        <span class="n">public</span> <span class="n">parse</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">unparse</span>
+  <span class="n">grammar</span><span class="o">.</span><span class="n">lark</span>       <span class="n">Lark</span> <span class="n">LALR</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="n">grammar</span>
+  <span class="n">ast_</span><span class="o">.</span><span class="n">py</span>            <span class="n">AST</span> <span class="n">dataclasses</span> <span class="p">(</span><span class="n">suffix</span> <span class="n">_</span> <span class="n">to</span> <span class="n">avoid</span> <span class="n">stdlib</span> <span class="err">`</span><span class="n">ast</span><span class="err">`</span><span class="p">)</span>
+  <span class="n">builtins_</span><span class="o">.</span><span class="n">py</span>       <span class="n">AnyDice</span> <span class="n">builtins</span> <span class="p">(</span><span class="n">suffix</span> <span class="n">_</span> <span class="n">to</span> <span class="n">avoid</span> <span class="n">stdlib</span> <span class="err">`</span><span class="n">builtins</span><span class="err">`</span><span class="p">)</span>
+  <span class="n">interpreter</span><span class="o">.</span><span class="n">py</span>     <span class="n">tree</span><span class="o">-</span><span class="n">walking</span> <span class="n">interpreter</span> <span class="p">(</span><span class="o">~</span><span class="mi">570</span> <span class="n">lines</span><span class="p">)</span>
+  <span class="n">transformer</span><span class="o">.</span><span class="n">py</span>     <span class="n">Lark</span> <span class="n">Transformer</span> <span class="o">-&gt;</span> <span class="n">AST</span>
+  <span class="n">unparser</span><span class="o">.</span><span class="n">py</span>        <span class="n">AST</span> <span class="o">-&gt;</span> <span class="n">canonical</span> <span class="n">source</span>
+  <span class="n">settings</span><span class="o">.</span><span class="n">py</span>        <span class="n">runtime</span> <span class="n">settings</span> <span class="p">(</span><span class="n">position</span> <span class="n">order</span><span class="p">,</span> <span class="nb">max</span> <span class="n">depth</span><span class="p">,</span> <span class="n">explode</span> <span class="n">depth</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>Test count: 305+ (<code>tests/anydyce/test_interpreter.py</code>); five type checkers
+(mypy, pyright, ty, pyrefly) and ruff all clean.</p>
+<p><code>_Val</code> type alias unions <code>int | H[int] | P[int] | tuple[int,...] | str</code>.
+P retains positional info needed by <code>@</code>-selection on multi-die rolls. Once a
+P participates in arithmetic / comparisons / bool ops, dyce's <code>HableOpsMixin</code>
+collapses it to H automatically. <code>_h_binop</code> and <code>_apply_cmp</code> are the only
+sites that build outcome maps by hand; everywhere else flows through Python
+operators and the collapse is implicit.</p>
+<h2 id="hp-duality">H/P duality</h2>
+<p>Verified design after recent pass:</p>
+<ul>
+<li><code>DiceUnary</code> (<code>d6</code>) returns bare H (single die has no positional info).</li>
+<li><code>DiceBinOp</code> (<code>3d6</code>) returns P (multi-die pool).</li>
+<li>Arithmetic and comparisons consume H or P interchangeably; results are H.</li>
+<li><code>@</code> requires P (or int / tuple) on the right; bare H on the right raises.</li>
+</ul>
+<p>The defensive "bare H on right of <code>@</code>" branch we briefly added was removed
+because no real program path produces a bare H in that position.</p>
+<h2 id="naming">Naming</h2>
+<ul>
+<li><strong>AnyDice</strong> -- the AnyDice-compatible variant we have today, in
+  <code>dyce/anydyce/</code>. Accepts AnyDice programs, reproduces AnyDice's outputs
+  (warts and all). Default name with no qualifier; "AnyDice Legacy" only
+  when disambiguation is needed.</li>
+<li><strong>AnyDice NG</strong> -- the new variant being designed, target package
+  <code>dyce/anydyce_ng/</code>. Forked language with strict types, no implicit
+  coercions, principled error handling. "NG" = Next Generation; it's a
+  fork, not a deprecation of AnyDice.</li>
+</ul>
+<p>Both ship as first-class siblings under <code>dyce.</code>; they share the parser,
+AST, transformer, and unparser.</p>
+<h2 id="1-3-factoring-the-two-variant-architecture">(1) / (3) factoring (the "two-variant" architecture)</h2>
+<p>Reference for "the (1)/(3) factoring" mentioned earlier:</p>
+<ul>
+<li>
+<p><strong>(1)</strong> <strong>AnyDice NG</strong> -- a sibling interpreter in <code>dyce.anydyce_ng</code>.
+  Same parser, same AST, same transformer, same unparser. Replacement
+  <code>_apply_*</code> dispatch that drops AnyDice's surprising coercions.</p>
+</li>
+<li>
+<p><strong>(3)</strong> Documented split between H (distribution) and P (pool) in the
+  current AnyDice variant -- "keep both, document the rationale". This is
+  what we have; the comment on <code>_Val</code> explains it.</p>
+</li>
+</ul>
+<p>(Earlier we sketched <strong>(2)</strong>, an AnyDice-to-dyce-Python <em>transpiler</em>: a new
+<code>_codegen.py</code> plus a <code>dyce.anydyce_runtime</code> helper module containing the
+operator dispatch. Whether (1) and (2) coexist is an open question; the
+natural prerequisite is extracting the operator dispatch into a runtime
+helper so both AnyDice NG and any codegen back-end can call it.)</p>
+<p>The factoring summary:</p>
+<table>
+<thead>
+<tr>
+<th>Variant</th>
+<th>Reuses</th>
+<th>New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AnyDice NG (1)</td>
+<td>grammar, AST, transformer, unparser</td>
+<td><code>dyce.anydyce_ng</code> with replacement <code>_apply_*</code> methods</td>
+</tr>
+<tr>
+<td>Transpiler (2)</td>
+<td>grammar, AST, transformer</td>
+<td><code>_codegen.py</code>; runtime helpers in <code>dyce.anydyce_runtime</code></td>
+</tr>
+<tr>
+<td>AnyDice (current)</td>
+<td>(everything we have)</td>
+<td>none</td>
+</tr>
+</tbody>
+</table>
+<h2 id="anydice-ng-coercion-principles">AnyDice NG coercion principles</h2>
+<p>Distilled from the 2026-04-27 discussion. These describe AnyDice NG, NOT
+the current AnyDice interpreter.</p>
+<ol>
+<li>
+<p><strong>Operators don't coerce.</strong> Sequences in arithmetic, comparisons, or
+   boolean ops are an error. Users write <code>5 + sum({1,2,3})</code> explicitly. The
+   AnyDice rule "compared to a number -&gt; count, compared to a die -&gt; sum,
+   compared to a seq -&gt; lex" is the single biggest source of confusion;
+   replacing it with "sequences aren't operands" cuts it cleanly.</p>
+</li>
+<li>
+<p><strong>Single die type, surface-wise.</strong> AnyDice's user model is one die type
+   ("a die is a die"). H/P is implementation-only and shouldn't leak into
+   the language. Don't introduce an explicit "pool vs distribution"
+   distinction at the language surface even though the implementation uses
+   one. (User pushback on the original phrasing.)</p>
+</li>
+<li>
+<p><strong>Sequence comparison is lex tuple compare, full stop.</strong> <code>&lt;seq&gt; &lt;cmp&gt;
+   &lt;seq&gt;</code> is the only shape where sequences appear in comparisons (per
+   principle 1). Lex compare matches Python; transitive; total. As a
+   consequence, "position order" should be lowest-to-highest internally,
+   period -- no user-facing setting. Also: kill <code>#</code> and <code>@</code> where the right
+   operand is a number (i.e. raise like <code>&lt;die&gt;</code> on the left of <code>@</code>).
+   AnyDice's "digit-of-int" semantics for those is just a footgun.</p>
+</li>
+<li>
+<p><strong>Empty-die handling -- open.</strong> AnyDice silently returns <code>H({})</code> from many
+   places (<code>+/-</code> "act as 0", <code>|</code> anomaly, recursion-depth exhaustion).
+   dyce's defaults are stricter and more explicit. Compromise sketch:
+   uniform propagation by default, with a <code>set "implicit return value"</code> knob
+   for users coming from AnyDice who relied on <code>H({})</code> propagation
+   heavily.</p>
+</li>
+<li>
+<p><strong>Param types are constraints, not coercion shims.</strong> <code>:n</code> requires a
+   number; passing a die requires explicit expansion syntax at the call
+   site (<code>[double *d6]</code> or similar). <code>:d</code> requires a die. <code>:s</code> requires a
+   seq. No silent int-&gt;die wrap, no silent die-&gt;1-elem-seq wrap.
+   Auto-expansion of <code>:n</code> over a die outcomes is nice and worth keeping,
+   but only with explicit user opt-in at the call site.</p>
+</li>
+<li>
+<p><strong>Function dispatch by exact pattern match, not definition order.</strong>
+   Param type annotations participate in dispatch (unlike AnyDice Legacy,
+   where they don't). With principle 5's strict types and no coercion, the
+   relevant cases for two same-shape definitions are:</p>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Two definitions</th>
+<th>NG behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>f X:n</code> then <code>f X:n</code> (same shape, same types)</td>
+<td>redefinition; last wins, like any normal language</td>
+</tr>
+<tr>
+<td><code>f X:n</code> then <code>f X:d</code> (same shape, disjoint types)</td>
+<td>both coexist; dispatch by argument type. Each accepts arguments the other rejects, so no ambiguity.</td>
+</tr>
+<tr>
+<td><code>f X:n</code> then <code>f X:?</code> (same shape, overlapping types)</td>
+<td>register-time error: a number argument matches both, so the call is ambiguous</td>
+</tr>
+<tr>
+<td><code>f X:?</code> then <code>f X:n</code> (specific defined later)</td>
+<td>register-time error for the same reason -- definition order doesn't help</td>
+</tr>
+</tbody>
+</table>
+<p>Plain redefinition (row 1) is allowed because there is no ambiguity to
+   resolve. Disjoint overloads (row 2) coexist because strict types
+   partition the input space. Overlapping types (rows 3-4) are the
+   ambiguity case, and we error at registration time rather than picking
+   silently.</p>
+<p>AnyDice Legacy collapses all four cases into "last definition with this
+   shape replaces", because its types don't participate in dispatch.</p>
+<h2 id="grammar-question-parsing-strict-vs-permissive">Grammar question (parsing strict vs permissive)</h2>
+<p>If we add AnyDice NG, <strong>keep the grammar permissive and surface errors at
+runtime</strong>. Two reasons:</p>
+<ul>
+<li><strong>Legacy programs should parse and fail with descriptive errors.</strong> A user
+  pasting <code>5 + {1,2}</code> should see a TypeError saying <code>+ does not accept a
+  sequence; use sum({1,2})</code>, not a parse error. The error message is the
+  migration documentation.</li>
+<li><strong>Coercion rules are runtime concerns, not grammatical ones.</strong> Coercion
+  is "what types this operator accepts" -- semantic, not syntactic. Mixing
+  it into the grammar would couple the parser to the type system and force
+  us to ship two grammars for the two interpreters.</li>
+</ul>
+<p>The architectural payoff is that both interpreters share the same
+parse/AST/transformer/unparser. Fork point is the interpreter only.</p>
+<h2 id="parameter-type"><code>:?</code> parameter type</h2>
+<p>Verified by user with program <code>0x433fa</code>: <code>:?</code> is the default / bare type.
+Bare param <code>function: f X { ... }</code> and <code>function: f X:? { ... }</code> are
+identical. Currently our grammar's <code>param_type</code> regex is <code>[nds]</code>, so we
+reject <code>:?</code>. Cheapest parity fix: extend to <code>[nds?]</code> and treat <code>:?</code>
+identically to a missing type in the AST (i.e. <code>Param.type = None</code>).
+Defer until a real program needs it.</p>
+<h2 id="anydice-ebnf-gaps-2026-04-27-review">AnyDice EBNF gaps (2026-04-27 review)</h2>
+<p>Reference: <code>/home/matt/dev/sandbox/anydice/anydice.com/ebnf.txt</code> (~80 lines,
+informal).</p>
+<p>Differences from our grammar:</p>
+<ul>
+<li>AnyDice has <code>:?</code> data type (wildcard). We don't. Identical to bare param
+  in practice (verified by user); see above.</li>
+<li>AnyDice has a <code>legacy = 'legacy', string</code> value form. We don't. No real
+  program uses it; ignored.</li>
+<li>AnyDice EBNF restricts <code>output ... named &lt;string&gt;</code> and
+  <code>set &lt;string&gt; to &lt;op|string&gt;</code> to string literals. Our grammar accepts
+  arbitrary expressions. We're strictly more permissive; harmless. User
+  noted that narrowing <code>output ... named</code> to a string literal would be
+  fine since strings have no operators (no concatenation needed). For
+  <code>set ... to</code>, current behavior accepts arithmetic expressions that
+  evaluate to int -- confirmed by user as desired (e.g. <code>set "max function
+  depth" to 0 + {1..2}</code> should parse but raise at runtime since seq-&gt;int
+  coercion is not auto).</li>
+<li>AnyDice's EBNF folds <code>else if</code> into nested <code>else &lt;conditional block&gt;</code>.
+  We have an explicit <code>elseif</code> rule. Same accepted strings, different tree
+  shape. Fine.</li>
+</ul>
+<p>Mechanical check option: parse each program in
+<code>helpers/anydice-programs.db</code> (~765 entries) through our parser and report
+parse failures. Each failure is a real syntactic divergence.</p>
+<p>We already have an indirect signal of this: <code>_canonicalize()</code> falls back to
+returning the original program text when parsing fails, so any DB row where
+<code>program == canonical</code> is either a parse failure or a program that already
+happens to be in canonical form. For non-trivial programs the latter is
+rare (the unparser strips comments and normalizes whitespace), so a query
+like <code>SELECT program_id FROM programs WHERE program = canonical</code> is mostly
+indicative. The <code>recanon</code> subcommand also implicitly tests parseability
+across the whole DB. A purpose-built parse-only helper is still worth
+adding eventually because it cleanly distinguishes "parse failed" from
+"already canonical". Not urgent.</p>
+<h2 id="anydice-ng-modulo-operator">AnyDice NG: modulo operator</h2>
+<p>AnyDice has no <code>%</code>. Users are forced to write <code>X - (X / 5) * 5</code>, which
+combined with AnyDice's truncated-toward-zero division is a footgun for
+negative numbers. AnyDice NG should add a sign-preserving <code>%</code> operator
+(Python-style remainder, where <code>(-7) % 3 == 2</code>). Open question: should <code>/</code>
+also become floor-division to match? Python does both consistently;
+AnyDice's truncated <code>/</code> exists for parity with C-like languages. If we're
+breaking other AnyDice conventions for sanity, breaking division too may
+be worth it.</p>
+<h2 id="warnings-handling">Warnings handling</h2>
+<p>Open design item. AnyDice surfaces conditions like "the maximum function
+depth was exceeded, results are truncated" as warnings the user sees in
+addition to the result. We currently have no story for this -- truncation
+silently returns <code>H({})</code> and propagates per the empty-die rules.</p>
+<p>Proposed sketch:</p>
+<ul>
+<li>Define <code>AnyDiceWarning(UserWarning)</code> in <code>dyce.anydyce</code>.</li>
+<li>Interpreter calls <code>warnings.warn("...", AnyDiceWarning)</code> at guard points
+  (recursion-depth exhaustion first; later: explode depth, any other
+  truncation).</li>
+<li>Inside <code>run()</code>, use <code>warnings.catch_warnings()</code> with a filter that
+  suppresses other <code>UserWarning</code>s from dyce's internals (e.g. the
+  <code>@experimental</code> decorator) but lets <code>AnyDiceWarning</code> through.</li>
+<li>Users get warnings via standard Python machinery: <code>catch_warnings(record=
+  True)</code> to capture, <code>-W error::dyce.anydyce.AnyDiceWarning</code> to promote.</li>
+</ul>
+<p>Keeps the interface tiny, reuses stdlib mechanisms, and cleanly separates
+"the AnyDice program produced a notable behavior" from "dyce internals
+warned about something".</p>
+<p>Not urgent; revisit when we have a concrete reason to surface a runtime
+condition (recursion-depth truncation is the canonical first case).</p>
+<h2 id="anydice-ng-enumerate-and-aggregate-via-expand">AnyDice NG: enumerate-and-aggregate via <code>expand</code></h2>
+<p>Refinement of principle 5 (param types as constraints, not coercion shims).
+The earlier sketch left a gap: if <code>:s</code> strictly requires a sequence, there
+is no clean way to call <code>[top2 3d6]</code> -- the pool is not a sequence, and
+banning the implicit coercion makes that call a type error.</p>
+<p>The hybrid resolution: introduce an explicit <code>expand</code> construct that owns
+the enumerate-and-aggregate semantic AnyDice currently bakes into param
+expansion. Param types stay strict; iteration is expressed at the call
+site.</p>
+<p>Sketch:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">function</span><span class="p">:</span> <span class="n">top2</span> <span class="n">X</span><span class="p">:</span><span class="n">s</span> <span class="p">{</span> <span class="n">result</span><span class="p">:</span> <span class="mi">1</span><span class="nd">@X</span> <span class="o">+</span> <span class="mi">2</span><span class="nd">@X</span> <span class="p">}</span>      <span class="c1"># X must be a seq, period</span>
+<span class="p">[</span><span class="n">top2</span> <span class="p">{</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">}]</span>                                <span class="c1"># OK: literal seq</span>
+<span class="p">[</span><span class="n">top2</span> <span class="mi">3</span><span class="n">d6</span><span class="p">]</span>                                    <span class="c1"># type error: pool != seq</span>
+<span class="n">expand</span> <span class="n">X</span><span class="p">:</span><span class="n">s</span> <span class="n">over</span> <span class="mi">3</span><span class="n">d6</span> <span class="p">[</span><span class="n">top2</span> <span class="n">X</span><span class="p">]</span>                  <span class="c1"># explicit roll enumeration</span>
+
+<span class="n">function</span><span class="p">:</span> <span class="n">double</span> <span class="n">X</span><span class="p">:</span><span class="n">n</span> <span class="p">{</span> <span class="n">result</span><span class="p">:</span> <span class="n">X</span> <span class="o">*</span> <span class="mi">2</span> <span class="p">}</span>
+<span class="p">[</span><span class="n">double</span> <span class="mi">5</span><span class="p">]</span>                                    <span class="c1"># OK: literal number</span>
+<span class="p">[</span><span class="n">double</span> <span class="n">d6</span><span class="p">]</span>                                   <span class="c1"># type error: die != number</span>
+<span class="n">expand</span> <span class="n">X</span><span class="p">:</span><span class="n">n</span> <span class="n">over</span> <span class="n">d6</span> <span class="p">[</span><span class="n">double</span> <span class="n">X</span><span class="p">]</span>                 <span class="c1"># explicit outcome enumeration</span>
+</code></pre></div></td></tr></table></div>
+<p>Rules:</p>
+<ul>
+<li><code>expand X:n over &lt;die-or-pool&gt; EXPR</code> -- iterate distinct outcomes of the
+  summed distribution, weighted by counts; bind <code>X</code> to each outcome (int);
+  evaluate <code>EXPR</code> once per outcome; combine results into a weighted <code>H</code>.</li>
+<li><code>expand X:s over &lt;pool&gt; EXPR</code> -- iterate possible rolls of the pool,
+  weighted by multiplicities; bind <code>X</code> to each roll (sorted tuple);
+  evaluate <code>EXPR</code> once per roll; combine results.</li>
+</ul>
+<p>What this buys us:</p>
+<ul>
+<li><strong>Functions become pure.</strong> No built-in expansion machinery in call
+  dispatch. <code>:s</code>/<code>:n</code>/<code>:d</code> are pure type constraints; argument-vs-param
+  type mismatch is a runtime error.</li>
+<li><strong>Function dispatch simplifies dramatically.</strong> Exact type match; no
+  coercion, no last-defined-wins; ambiguity (e.g. <code>f X:d</code> vs <code>f X:?</code>)
+  resolves by most-specific (per principle 6).</li>
+<li><strong>One enumerate-and-aggregate rule, not three.</strong> AnyDice has separate
+  expansion semantics for <code>:n</code> over die, <code>:s</code> over die, <code>:s</code> over pool;
+  in this model they're all the same construct keyed by the binding type
+  annotation.</li>
+</ul>
+<p>Cost: verbosity for the common case. AnyDice's <code>[top2 3d6]</code> becomes
+<code>expand X:s over 3d6 [top2 X]</code>. Maybe 20 extra chars per call site that
+iterates. Worth it for the semantic clarity.</p>
+<p>Open design questions:</p>
+<ul>
+<li>Body shape: restrict to a single <code>[call_expr]</code>. Grammar:
+  <code>expand_expr : "expand" param "over" expr "[" call_expr "]"</code>. Keeps
+  <code>expand</code> from growing into a mini-language; users define a function
+  for compound logic. Easy to relax later if proven restrictive.</li>
+<li>Interaction with <code>loop</code>. They're orthogonal: <code>loop</code> is
+  sequential/deterministic over a known sequence; <code>expand</code> is
+  parallel/probabilistic over a die or pool. Both keywords coexist.</li>
+<li>Higher-order use: <code>expand X over &lt;thing&gt; [some fn X another-arg]</code> works
+  unchanged -- the call_expr is just an expression that happens to use
+  <code>X</code>; multiple words and other args slot in normally.</li>
+</ul>
+<p>Iteration mode by binding type:</p>
+<ul>
+<li><code>expand X:n over POOL [...]</code> -- collapse pool to summed H (same auto-
+  collapse dyce does at any operator boundary), iterate distinct outcomes.</li>
+<li><code>expand X:n over DIE  [...]</code> -- iterate distinct outcomes of the die.</li>
+<li><code>expand X:s over POOL [...]</code> -- iterate sorted rolls of the pool.</li>
+<li><code>expand X:s over DIE  [...]</code> -- single die: iterate over each outcome
+  with X bound to a 1-element tuple <code>(outcome,)</code>. (This matches AnyDice's
+  current <code>:s</code> with a bare die, but explicit at the call site.)</li>
+<li><code>expand X:d over ...</code>  -- error. <code>:d</code> has no meaningful iteration mode.</li>
+<li><code>expand X:? over ...</code>  -- error. The wildcard fails to disambiguate
+  outcome-iteration from roll-iteration; users must pick one.</li>
+<li><code>expand X over ...</code>    -- error. The annotation is <em>required</em>, not
+  optional. Without it, <code>expand</code> doesn't know which mode to apply.</li>
+</ul>
+<p>(In other words: function-param annotations are optional sugar for
+documentation/dispatch; <code>expand</code> annotations are load-bearing.)</p>
+<h2 id="anydice-ng-variables-are-untyped">AnyDice NG: variables are untyped</h2>
+<p>A separate observation, but worth recording: with explicit conversions
+everywhere, <strong>variables themselves never need type annotations</strong>. A
+variable's type is whatever the last assignment puts there; subsequent
+reads see that type. AnyDice already works this way (no <code>X:n: 5</code> -- only
+<code>X: 5</code>).</p>
+<p>The only places type annotations have meaning are:</p>
+<ol>
+<li><strong>Function parameter types</strong> (used for dispatch and call-site type
+   checking against actual arg types).</li>
+<li><strong><code>expand</code> binding types</strong> (used to select iteration mode).</li>
+</ol>
+<p>Both are "how do I interpret the value at this boundary?" sites, not
+"what type does this name remember?" sites. The grammar reflects that:
+<code>param</code> is the only construct carrying a type annotation, and it's reused
+for both function definitions and <code>expand</code> bindings.</p>
+<h2 id="anydice-ng-if-truthiness-rules">AnyDice NG: <code>if</code> truthiness rules</h2>
+<p><code>if</code> accepts ONLY number-shaped conditions. Sequences are NOT sum-coerced.</p>
+<ul>
+<li><code>int</code> -&gt; falsy iff 0.</li>
+<li>seq (including empty seq) -&gt; <strong>TypeError</strong> at evaluation time. Verified
+  via program 42aac: <code>if {} { ... }</code> errors on AnyDice with "Boolean
+  values can only be numbers, but you provided '{?}'". Sum-coercion does
+  NOT happen in condition position even though it does in arithmetic
+  contexts.</li>
+<li>dice (<code>H</code>, <code>P</code>) -&gt; <strong>TypeError</strong> at evaluation time. Probabilistic
+  conditions aren't deterministic, so the user must spell out their
+  intent (e.g. <code>if (#{die}) &gt; 0 { ... }</code> or <code>if (die-cmp) &gt; 0 { ... }</code>).</li>
+<li>strings -&gt; <strong>parse error</strong>. Strings are not first-class values in either
+  Legacy or NG; they only appear as STRING terminals in <code>output ... named</code>
+  and <code>set ... to</code>. The grammar should refuse STRING in condition position
+  if practical.</li>
+</ul>
+<p>This matches Legacy's documented behavior. Our <code>_is_truthy</code> previously
+sum-coerced sequences; this was too permissive even for Legacy and has
+been tightened to int-only.</p>
+<p>The earlier "probabilistic NG" idea (where <code>if d6 { A } else { B }</code> would
+weight body A by P(d6 truthy)) is rejected: not what Legacy does, not
+syntactically intuitive, conflates an <code>if</code> with an <code>expand</code> over the die's
+outcomes. If a user wants probabilistic branching, they should build it
+explicitly with <code>expand</code> plus a function whose body returns A or B.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      <i>Copyright and other protections apply. Please see the accompanying <tt>LICENSE</tt> file for rights and restrictions governing use of this software. All rights not expressly waived or licensed are reserved. If that file is missing or appears to be modified from its original, then please contact the author before viewing or using this software in any capacity.</i>
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.annotate", "content.tabs.link", "navigation.footer", "navigation.expand", "navigation.sections"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

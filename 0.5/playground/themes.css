@@ -1,0 +1,200 @@
+/* Theme color palette (Layer 1). Each theme defines a set of color "slots";
+ * the semantic layer in playground.css maps display aspects (--syn-*,
+ * --accent, eventually chrome) onto them.
+ *
+ * Naming:
+ *   --c-<hue>            full-strength color (higher contrast against bg)
+ *   --c-<hue>-muted      subtler variant, one step toward bg
+ *   --c-fg / --c-bg      foreground / background
+ *   --c-fg-ward[-muted]  neutral grey near fg (text-like)
+ *   --c-bg-ward[-muted]  neutral grey near bg (border/fill-like)
+ *
+ * "-muted" ALWAYS means "toward bg / lower contrast," in both light and
+ * dark. The four neutrals form a contrast ramp authored to hold in both
+ * modes:
+ *
+ *   bg -- bg-ward-muted -- bg-ward -- fg-ward-muted -- fg-ward -- fg
+ *
+ * Consequence: this is no longer a literal terminal palette. Chromatic
+ * hues can be pasted in from a source theme directly, but the neutrals
+ * must be fitted to the ramp by hand -- in dark mode their light/dark
+ * assignment is the reverse of a terminal's, so the grey steps get
+ * swapped. That juggling is the price of mode-independent semantics. */
+
+:root {
+  --c-fg:             #1f2328;
+  --c-bg:             #ffffff;
+  --c-fg-ward:        #24292f;
+  --c-fg-ward-muted:  #57606a;
+  --c-red:            #a40e26;
+  --c-red-muted:      #cf222e;
+  --c-green:          #116329;
+  --c-green-muted:    #1a7f37;
+  --c-yellow:         #4d2d00;
+  --c-yellow-muted:   #633c01;
+  --c-blue:           #0969da;
+  --c-blue-muted:     #218bff;
+  --c-magenta:        #8250df;
+  --c-magenta-muted:  #a475f9;
+  --c-cyan:           #1b7c83;
+  --c-cyan-muted:     #3192aa;
+  --c-bg-ward:        #6e7781;
+  --c-bg-ward-muted:  #8c959f;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-fg:             #e6edf3;
+    --c-bg:             #0d1117;
+    --c-fg-ward:        #ffffff;
+    --c-fg-ward-muted:  #b1bac4;
+    --c-red:            #ffa198;
+    --c-red-muted:      #ff7b72;
+    --c-green:          #56d364;
+    --c-green-muted:    #3fb950;
+    --c-yellow:         #e3b341;
+    --c-yellow-muted:   #d29922;
+    --c-blue:           #79c0ff;
+    --c-blue-muted:     #58a6ff;
+    --c-magenta:        #d2a8ff;
+    --c-magenta-muted:  #bc8cff;
+    --c-cyan:           #56d4dd;
+    --c-cyan-muted:     #39c5cf;
+    --c-bg-ward:        #6e7681;
+    --c-bg-ward-muted:  #484f58;
+  }
+}
+
+/* Colorblind (GitHub colorblind palette). "Green" remaps toward blue and
+ * "red" toward orange so the red/green axis is distinguishable -- the slot
+ * names stay symbolic, the hues don't match the names. */
+html[data-theme="colorblind"] {
+  --c-fg:             #24292f;
+  --c-bg:             #ffffff;
+  --c-fg-ward:        #24292f;
+  --c-fg-ward-muted:  #57606a;
+  --c-red:            #8a4600;
+  --c-red-muted:      #b35900;
+  --c-green:          #0550ae;
+  --c-green-muted:    #0969da;
+  --c-yellow:         #4d2d00;
+  --c-yellow-muted:   #633c01;
+  --c-blue:           #0969da;
+  --c-blue-muted:     #218bff;
+  --c-magenta:        #8250df;
+  --c-magenta-muted:  #a475f9;
+  --c-cyan:           #1b7c83;
+  --c-cyan-muted:     #3192aa;
+  --c-bg-ward:        #6e7781;
+  --c-bg-ward-muted:  #8c959f;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme="colorblind"] {
+    --c-fg:             #c9d1d9;
+    --c-bg:             #0d1117;
+    --c-fg-ward:        #ffffff;
+    --c-fg-ward-muted:  #b1bac4;
+    --c-red:            #fdac54;
+    --c-red-muted:      #ec8e2c;
+    --c-green:          #79c0ff;
+    --c-green-muted:    #58a6ff;
+    --c-yellow:         #e3b341;
+    --c-yellow-muted:   #d29922;
+    --c-blue:           #79c0ff;
+    --c-blue-muted:     #58a6ff;
+    --c-magenta:        #d2a8ff;
+    --c-magenta-muted:  #bc8cff;
+    --c-cyan:           #56d4dd;
+    --c-cyan-muted:     #39c5cf;
+    --c-bg-ward:        #6e7681;
+    --c-bg-ward-muted:  #484f58;
+  }
+}
+
+/* High contrast (GitHub high-contrast palette). Deeper, more saturated
+ * hues; the bg-ward neutrals sit further from bg than other themes', so
+ * chrome (borders/fills, once themed) reads more prominently. */
+html[data-theme="high-contrast"] {
+  --c-fg:             #0e1116;
+  --c-bg:             #ffffff;
+  --c-fg-ward:        #0e1116;
+  --c-fg-ward-muted:  #4b535d;
+  --c-red:            #86061d;
+  --c-red-muted:      #a0111f;
+  --c-green:          #024c1a;
+  --c-green-muted:    #055d20;
+  --c-yellow:         #3f2200;
+  --c-yellow-muted:   #4e2c00;
+  --c-blue:           #0349b4;
+  --c-blue-muted:     #1168e3;
+  --c-magenta:        #622cbc;
+  --c-magenta-muted:  #844ae7;
+  --c-cyan:           #1b7c83;
+  --c-cyan-muted:     #3192aa;
+  --c-bg-ward:        #66707b;
+  --c-bg-ward-muted:  #88929d;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme="high-contrast"] {
+    --c-fg:             #f0f3f6;
+    --c-bg:             #0a0c10;
+    --c-fg-ward:        #ffffff;
+    --c-fg-ward-muted:  #d9dee3;
+    --c-red:            #ffb1af;
+    --c-red-muted:      #ff9492;
+    --c-green:          #4ae168;
+    --c-green-muted:    #26cd4d;
+    --c-yellow:         #f7c843;
+    --c-yellow-muted:   #f0b72f;
+    --c-blue:           #91cbff;
+    --c-blue-muted:     #71b7ff;
+    --c-magenta:        #dbb7ff;
+    --c-magenta-muted:  #cb9eff;
+    --c-cyan:           #56d4dd;
+    --c-cyan-muted:     #39c5cf;
+    --c-bg-ward:        #9ea7b3;
+    --c-bg-ward-muted:  #7a828e;
+  }
+}
+
+html[data-theme="no-color"] {
+  --c-fg:             #1f2328;
+  --c-bg:             #ffffff;
+  --c-fg-ward:        #24292f;
+  --c-fg-ward-muted:  #57606a;
+  --c-red:            #24292f;
+  --c-red-muted:      #57606a;
+  --c-green:          #24292f;
+  --c-green-muted:    #57606a;
+  --c-yellow:         #24292f;
+  --c-yellow-muted:   #57606a;
+  --c-blue:           #24292f;
+  --c-blue-muted:     #57606a;
+  --c-magenta:        #24292f;
+  --c-magenta-muted:  #57606a;
+  --c-cyan:           #24292f;
+  --c-cyan-muted:     #57606a;
+  --c-bg-ward:        #6e7781;
+  --c-bg-ward-muted:  #8c959f;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme="no-color"] {
+    --c-fg:             #e6edf3;
+    --c-bg:             #0d1117;
+    --c-fg-ward:        #ffffff;
+    --c-fg-ward-muted:  #b1bac4;
+    --c-red:            #ffffff;
+    --c-red-muted:      #b1bac4;
+    --c-green:          #ffffff;
+    --c-green-muted:    #b1bac4;
+    --c-yellow:         #ffffff;
+    --c-yellow-muted:   #b1bac4;
+    --c-blue:           #ffffff;
+    --c-blue-muted:     #b1bac4;
+    --c-magenta:        #ffffff;
+    --c-magenta-muted:  #b1bac4;
+    --c-cyan:           #ffffff;
+    --c-cyan-muted:     #b1bac4;
+    --c-bg-ward:        #6e7681;
+    --c-bg-ward-muted:  #484f58;
+  }
+}

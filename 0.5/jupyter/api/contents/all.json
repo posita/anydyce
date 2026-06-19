@@ -1,0 +1,43 @@
+{
+  "content": [
+    {
+      "content": null,
+      "created": "2026-06-19T23:32:13.051241Z",
+      "format": null,
+      "hash": null,
+      "hash_algorithm": null,
+      "last_modified": "2026-06-19T23:31:56.539730Z",
+      "mimetype": null,
+      "name": "anydyce_intro.ipynb",
+      "path": "anydyce_intro.ipynb",
+      "size": 4970,
+      "type": "notebook",
+      "writable": true
+    },
+    {
+      "content": null,
+      "created": "2026-06-19T23:32:13.051592Z",
+      "format": null,
+      "hash": null,
+      "hash_algorithm": null,
+      "last_modified": "2026-06-19T23:31:56.539730Z",
+      "mimetype": "text/x-python",
+      "name": "prerequisites.py",
+      "path": "prerequisites.py",
+      "size": 2147,
+      "type": "file",
+      "writable": true
+    }
+  ],
+  "created": "2026-06-19T23:32:13.051471Z",
+  "format": "json",
+  "hash": null,
+  "hash_algorithm": null,
+  "last_modified": "2026-06-19T23:32:13.051471Z",
+  "mimetype": null,
+  "name": "",
+  "path": "",
+  "size": null,
+  "type": "directory",
+  "writable": true
+}
