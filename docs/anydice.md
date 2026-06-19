@@ -72,7 +72,7 @@ The `anydyce` interpreter relies heavily on the [`dyce` library](https://github.
 
 Truncations occur (when and how [can be tuned](#proprietary-extensions)), but `dyce` does not use typical primitives like 64-bit `int`s or `float`s.
 As such, calculations are not subject to the same limitations and errors.
-(See the [discussion on overflows](#overflows) below.)
+(See the [discussion on overflows below](#overflows).)
 
 Instead, internally when an `H` object is created (e.g., as the result of a operation like `20d20`), if the largest count exceeds the number of bits allowed by a contextual maximum, all counts are *quantized*.
 More specifically, the least significant bits are truncated and all counts are rounded off such that they all fit within that maximum.
@@ -82,18 +82,18 @@ This does not eliminate errors, but it does allow authors to arbitrarily tune pr
 
 In addition to supporting (almost[^2]) all AnyDice features, settings, library functions, etc., the `anydyce` interpreter provides two additional settings configurable via the `set ... to ...` syntax:
 
-1. `"andyce: calculation precision"` -
-   This is either a non-negative integer indicating the maximum number of bits to allow for outcome counts within a die before quantization occurs, or one of: `"default"` (equivalent to `265`), `"low"` (`64`), `"medium"` (`256`), `"high"` (`1024`), and `"exact"` (`0`, meaning do not quantize).
+1. `"anydyce: calculation precision"` -
+   This is either a non-negative integer indicating the maximum number of bits to allow for outcome counts within a die before quantization occurs, or one of: `"default"` (equivalent to `256`), `"low"` (`64`), `"medium"` (`256`), `"high"` (`1024`), and `"exact"` (`0`, meaning do not quantize).
    This setting affects computations that follow it and can be changed multiple times.
    Note that `"exact"` or `0` ***never*** quantizes, ***even where numbers and computations would exhaust all available resources***, so use those values with caution.
-   (See [the note on performance](#note-on-performance), below.)
-2. `"andyce: display precision"` -
+   (See [the note on performance below](#note-on-performance).)
+2. `"anydyce: display precision"` -
    This is either a non-negative integer indicating how many decimal places to show when displaying results, or one of: `"default"` (equivalent to `2`), `"low"` (`0`), `"medium"` (`2`), `"high"` (`6`), and `"exact"` (`13`, which isn’t ***really*** exact, but it’s probably far more detailed than you’ll ever need).
    Only the most recent value is applied to all display outputs once a program completes.
 
 ```c
-\ This illustrates quanitzation in action. Note especially the tails
-  of the distribution. More detail can be see in the text output. \
+\ This illustrates quantization in action. Note especially the tails
+  of the distribution. More detail can be seen in the text output. \
 loop P over {4, 8} {
   set "anydyce: calculation precision" to P
   output 20d6 named "20d6 with computations quantized at [P] bits"
@@ -105,7 +105,7 @@ set "anydyce: display precision" to "exact"
 
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=XCBUaGlzIGlsbHVzdHJhdGVzIHF1YW5pdHphdGlvbiBpbiBhY3Rpb24uIE5vdGUgZXNwZWNpYWxseSB0aGUgdGFpbHMKICBvZiB0aGUgZGlzdHJpYnV0aW9uLiBNb3JlIGRldGFpbCBjYW4gYmUgc2VlIGluIHRoZSB0ZXh0IG91dHB1dC4gXApsb29wIFAgb3ZlciB7NCwgOH0gewogIHNldCAiYW55ZHljZTogY2FsY3VsYXRpb24gcHJlY2lzaW9uIiB0byBQCiAgb3V0cHV0IDIwZDYgbmFtZWQgIjIwZDYgd2l0aCBjb21wdXRhdGlvbnMgcXVhbnRpemVkIGF0IFtQXSBiaXRzIgp9CnNldCAiYW55ZHljZTogY2FsY3VsYXRpb24gcHJlY2lzaW9uIiB0byAiZXhhY3QiCm91dHB1dCAyMGQ2IG5hbWVkICIyMGQ2IHdpdGhvdXQgYW55IHF1YW50aXphdGlvbiIKc2V0ICJhbnlkeWNlOiBkaXNwbGF5IHByZWNpc2lvbiIgdG8gImV4YWN0Igo)
 
-[^2]: Deliberately omitted is AnyDice’s “legacy” syntax, as noted [below](#legacy-programs).
+[^2]: Deliberately omitted is AnyDice’s “legacy” syntax, as [noted below](#legacy-programs).
 
 ### A note on performance
 
@@ -131,7 +131,7 @@ The `anydyce` interpreter and the underlying [`dyce` library](https://github.com
 AnyDice appears to have been around in some form or another since 2009, receiving a handful of updates between then and 2026.
 It is free to use by anyone, likely funded entirely by the author who invites others to offset costs through donations.
 It has amassed over a quarter million “saved” programs[^3] during its tenure.
-It enjoys substantial popularity among loyal users, many of whom post on [rpg.stackexchange.com](https://rpg.stackexchange.com/questions/tagged/anydice) providing volunteer edication and support.
+It enjoys substantial popularity among loyal users, many of whom post on [rpg.stackexchange.com](https://rpg.stackexchange.com/questions/tagged/anydice) providing volunteer education and support.
 
 Its most typical use involves typing or pasting a program conforming to a [proprietary syntax](https://anydice.com/docs/) into a text field on a [hosted website](https://anydice.com/).
 The user submits the program by activating a “Calculate” button in the interface, which transmits the program text via HTTP POST to a [PHP handler](https://anydice.com/calculator_limited.php).
@@ -147,9 +147,9 @@ In early 2026, AnyDice became completely unavailable for a week or two due to a 
 The site was eventually restored, but programs saved to its proprietary database by users over the preceding several weeks were permanently lost.
 
 The purpose of this effort is to provide a publicly-accessible reference implementation to avoid future loss of user investment.
-For convenience, a usable instance resides at [`https://posita.github.com/posita/anydyce/latest/playground/`](https://posita.github.com/posita/anydyce/latest/playground/).
+For convenience, a usable instance resides at [`https://posita.github.io/anydyce/latest/playground/`](https://posita.github.io/anydyce/latest/playground/).
 However, merely relying on a single alternate site is insufficient, as no site guarantees access in perpetuity.
-Therefore, users are encouraged to clone [this implementation's source code](https://github.com/posita/anydyce) and run or host instances of their own.
+Therefore, users are encouraged to clone [this implementation’s source code](https://github.com/posita/anydyce) and run or host instances of their own.
 
 The `anydyce` interpreter is loaded from a static site and runs in the user’s browser.
 The only infrastructure needed to run a local instance is a simple web server (e.g., the one that ships with Python’s standard library: `python3 -m http.server 8000`).
@@ -162,7 +162,7 @@ The interface allows loading of programs previously saved to AnyDice by way of a
 For any AnyDice URL containing a program ID, you can create an alternate URL using that same ID to load that program and run it with the `anydyce` interpreter.
 For example, consider the URL [`https://anydice.com/program/18106`](https://anydice.com/program/18106).
 You can run the same program by visiting [`https://posita.github.io/anydyce/latest/playground/#id=18106`](https://posita.github.io/anydyce/latest/playground/#id=18106).
-Alternatively, you can [run your own copy locally](index.md#interactive-quick-start) and adapt the same pattern to the URL of your local web server (e.g.,`https://127.0.0.1:8000/playground/#id=18106`).
+Alternatively, you can [run your own copy locally](index.md#running-locally) and adapt the same pattern to the URL of your local web server (e.g.,`https://127.0.0.1:8000/playground/#id=18106`).
 
 The program cache is intended to preserve intellectual property of program authors who assigned no royalties or rights to their programs, and who reasonably relied on the ongoing availability of an interpreter and storage mechanism to preserve each program’s accessibility and value.
 If you are the author of a particular program in the cache that you want removed, please [file an issue](https://github.com/posita/anydice-data/issues).
@@ -183,7 +183,7 @@ While the documentation was a helpful starting point, it was fairly high level, 
 
 The general workflow to iterate toward a working implementation was as follows:
 
-1. Form a hypothesis about a particular aspect of the AnyDice inpreter (e.g., structure or contextual behavior);
+1. Form a hypothesis about a particular aspect of the AnyDice interpreter (e.g., structure or contextual behavior);
 2. Design a probe (program) whose results would surface details of that particular aspect;
 3. Execute the probe with AnyDice, interpret the results, refining this implementation as necessary; and, finally,
 4. Validate this implementation produces similar results of the most recent probe as well as all prior probes.[^4]
@@ -194,13 +194,13 @@ In some cases, the `anydyce` interpreter supersedes AnyDice’s where AnyDice’
 
 [^4]: Validation probes were captured as unit tests, important for avoiding regressions as the `anydyce` interpreter evolved.
 
-[^5]: AnyDice’s save functionality implements a rudimenatry de-duplication filter.
+[^5]: AnyDice’s save functionality implements a rudimentary de-duplication filter.
       Where a user requests a program be saved that is byte-for-byte identical to a prior saved program, AnyDice often provides a link with the ID of the previously saved program.
       This still affords duplication where, e.g., the only difference is whitespace use or comment text.
       Two programs were considered equivalent if they resulted in the same AST from the parser and transformer.
       De-duping based on AST resulted in a corpus just shy of 160,000 distinct programs.
 
-      As an aside, some of those programs mirrored our own probes (e.g., AnyDice program [`39567`](../playground/#id=39567) saved by the author of [PythonDice](https://github.com/Ar-Kareem/PythonDice/)), suggesting areas where users tripped over unintuitive “hot spots” of the interpreter, surfacing and resolve questions likely very similar to our own.
+      As an aside, some of those programs mirrored our own probes (e.g., AnyDice program [`39567`](../playground/#id=39567) saved by the author of [PythonDice](https://github.com/Ar-Kareem/PythonDice/)), suggesting areas where users tripped over unintuitive “hot spots” of the interpreter, surfacing and resolving questions likely very similar to our own.
 
 ### Prior art
 
@@ -211,7 +211,7 @@ In some cases, the `anydyce` interpreter supersedes AnyDice’s where AnyDice’
 
 ## Notes on the anydice.com implementation
 
-Some basics foundationally necessary to a discussion of AnyDice is present below, but familiarity with AnyDice’s documentation[^1] is helpful for gleaning a complete picture.
+Some basics foundationally necessary to a discussion of AnyDice are presented below, but familiarity with AnyDice’s documentation[^1] is helpful for gleaning a complete picture.
 
 ### Types: numbers, sequences of numbers, and dice whose faces are numbers
 
@@ -260,7 +260,34 @@ For example, `2d6` creates a pool of two six-sided dice.
 
 The empty die is a die with zero faces.
 In AnyDice, it deserves special attention because it is fraught with inconsistencies, which are called out below.
-(See [this](#certain-operators-and-the-empty-die), [this](#dice-pool-width), and this.)
+(See [this](#certain-operators-and-the-empty-die), [this](#dice-pool-sizes), and [this](#phantom-mass).)
+
+#### On ordering
+
+AnyDice exposes a `"position order"` setting that takes one of `"lowest first"` and `"highest first"` (the default).
+This ordering ***only*** affects the order of sequences representing rolls from pools during [expansion](#functions-variable-scope-type-coercion-and-type-expansion) as well as the order in which outcomes appear in those rolls during each expansion call.
+Rolls are not repeated during expansion.
+
+For example, for highest first, rolls enumerated from a pool `2d3` would be: `{3, 3}`, `{3, 2}`, `{3, 1}`, `{2, 2}`, `{2, 1}`, `{1, 1}`.
+For lowest first, they would be: `{1, 1}`, `{1, 2}`, `{1, 3}`, `{2, 2}`, `{2, 3}`, `{3, 3}`.
+
+Order in sequences is preserved, meaning `output 2@{3, 5, 1}` yields `5`.
+Order of the outcomes of a single die are always lowest-to-highest.
+Where expansion occurs over multiple parameters, ordering is even more subtle, as [discussed below](#modifications-to-some-expanded-parameters-are-durable-across-expansion-calls), as illustrated by the following program:
+
+```c
+set "position order" to "highest first"
+N: 0
+function: N_FROM_D:n S_FROM_P:s {
+  N: N + 1
+  result: N_FROM_D * 10 ^ (N - 1) + 1@S_FROM_P * 10 ^ N + 2@S_FROM_P * 10 ^ (N + 1)
+}
+output [2d3 2d3]
+```
+
+Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=c2V0ICJwb3NpdGlvbiBvcmRlciIgdG8gImhpZ2hlc3QgZmlyc3QiCk46IDAKZnVuY3Rpb246IE5fRlJPTV9EOm4gU19GUk9NX1A6cyB7CiAgTjogTiArIDEKICByZXN1bHQ6IE5fRlJPTV9EICogMTAgXiAoTiAtIDEpICsgMUBTX0ZST01fUCAqIDEwIF4gTiArIDJAU19GUk9NX1AgKiAxMCBeIChOICsgMSkKfQpvdXRwdXQgWzJkMyAyZDJd)
+
+The `anydyce` interpreter faithfully reproduces these various ordering behaviors.
 
 ### Variables
 
@@ -339,7 +366,7 @@ Arithmetic and boolean operators convert sequence operands to numbers by summing
 The expression `{1, 2, 3} - {}` becomes `6 - 0`, or `6`.
 The expression `d6 - {4, 5, 6}` becomes `d6 - 15`.
 This is also true of the left-hand operand of the `d` operator.
-The expression `{1. 2, 3}d{2, 4, 6}` becomes `6d{2, 4, 6}`, or a pool of 6 dice, each with three faces, `2`, `4`, and `6`.
+The expression `{1, 2, 3}d{2, 4, 6}` becomes `6d{2, 4, 6}`, or a pool of 6 dice, each with three faces, `2`, `4`, and `6`.
 
 !!! warning "`<num> / 0` is ***always*** `0`, even though `{0}^-1` is `-9223372036854776000`"
 
@@ -349,11 +376,11 @@ The expression `{1. 2, 3}d{2, 4, 6}` becomes `6d{2, 4, 6}`, or a pool of 6 dice,
     For example, `{-1} ^ -2` resolves to `1`.
 
     But when the base ***collapses*** to the number `0` and the exponent is a negative number, AnyDice resolves the expression as `-9223372036854776000` (or `-0x80000000000000c0`).
-    The expression `d{-2, -1, 0, 1, 2} ^ -2` produces resolves to `d{0, 1, -9223372036854776000, 1, 0}`.
+    The expression `d{-2, -1, 0, 1, 2} ^ -2` resolves to `d{0, 1, -9223372036854776000, 1, 0}`.
     The large negative number was perhaps intended a sentinel value of some kind, but it remains inconsistent with AnyDice’s divide-by-zero behavior.
-    The `anydyce` interpreter preserves the sentinel behavior with a zero base and negative exponent, so the expression`0^-1` resolves to `-9223372036854776000`.
+    The `anydyce` interpreter preserves the sentinel behavior with a zero base and negative exponent, so the expression `0^-1` resolves to `-9223372036854776000`.
 
-!!! bug "`<num>^-1` is an error, even though `{<num>}^-1` is not"
+!!! bug "`<num>^-1` is an error, even though `<seq>^-1` is not"
 
     Confusingly, a negative exponent in AnyDice results in an error where the base is a number.
     The `anydyce` interpreter resolves negative exponents with number bases consistently with other values as well as integer division that truncates toward zero.
@@ -363,15 +390,16 @@ Unary `-` collapses sequences into numbers.
 As mentioned above, unary `+`, acts as a no-op.
 This presents an asymmetry where `-{1..4}` resolves to `-10`, while `+{1..4}` resolves to `{1..4}`.
 
-!!! bug "`<non-empty-die> <= {}` always returns `1`"
+!!! bug "`<non-empty-die> <= <seq>` is broken"
 
-    A comparison with `<=` always resolves to `1` where the left-hand operand is a non-empty die and the right-hand operand is the empty sequence (e.g., `d{-1000} <= {}`).
-    The `anydyce` interpreter deliberately avoids this behavior, instead treating `<=` comparisons consistently with others.
+    On anydice.com, `output d8 <= {1,2}` is treated as equivalent to `output d8 > {1,2}` rather than `output {1,2} >= d8`.
+    Further, a comparison with `<=` always resolves to `1` where the left-hand operand is a non-empty die and the right-hand operand is the empty sequence (e.g., `d{-1000} <= {}`).
+    The `anydyce` interpreter deliberately avoids these behaviors, instead treating `<=` comparisons consistently with others.
 
 Where `d`’s left-hand operand resolves to a negative number, the expression is treated as if the negative applies to the right-hand operand.
 In other words, `-<num>d<expr>` is treated as `<num>d(-(<expr>))`.
 In fact, `(-N)dX`, `Nd(-X)`, and `-(NdX)` are generally equivalent.
-Where `d`’s left-hand operand resolves to `0`, the result is `d0`, except where the right-hand operand resolves to `d{}`, [discussed](#certain-operators-and-the-empty-die) below.
+Where `d`’s left-hand operand resolves to `0`, the result is `d0`, except where the right-hand operand resolves to `d{}`, [discussed below](#certain-operators-and-the-empty-die).
 The expression `0d1000` resolves to `d0`.
 
 !!! warning "`<die>d<die>` probably doesn’t do what you think or want"
@@ -392,7 +420,7 @@ The expression `0d1000` resolves to `d0`.
     Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=ZnVuY3Rpb246IHJvbGwgTjpuIG9mIHRoZSBkaWUgRDpkIHsgcmVzdWx0OiBOZEQgfQpvdXRwdXQgW3JvbGwgNCBvZiB0aGUgZGllIGQzXSAgICAgICAgICAgICAgICAgICAgICAgbmFtZWQgInNhbWUgYXMgb3V0cHV0IDRkMyIKb3V0cHV0IFtyb2xsIGQyIG9mIHRoZSBkaWUgZDNdICAgICAgICAgICAgICAgICAgICAgIG5hbWVkICJzYW1lIGFzIG91dHB1dCBkMmQzIgpvdXRwdXQgW3JvbGwgMmQ0IG9mIHRoZSBkaWUgZDNdICAgICAgICAgICAgICAgICAgICAgbmFtZWQgInNhbWUgYXMgb3V0cHV0IDJkNGQzIgpvdXRwdXQgW3JvbGwgW3JvbGwgZDIgb2YgdGhlIGRpZSBkNF0gb2YgdGhlIGRpZSBkM10gbmFtZWQgInNhbWUgYXMgb3V0cHV0IGQyZDRkMyIKb3V0cHV0IFtyb2xsIDIgb2YgdGhlIGRpZSA0ZDNdICAgICAgICAgICAgICAgICAgICAgIG5hbWVkICJzYW1lIGFzIG91dHB1dCAyZCg0ZDMpIgpvdXRwdXQgW3JvbGwgZDIgb2YgdGhlIGRpZSA0ZDNdICAgICAgICAgICAgICAgICAgICAgbmFtZWQgInNhbWUgYXMgb3V0cHV0IGQyZCg0ZDMpIgo)
 
     In lay terms, where the left-hand operand is a die, this means, “roll a first die, then whatever number comes up, roll that many of a second die, then collapse the whole thing down into a single die.”
-    This isn’t incredibly useful in practice, and is often the source of confusion
+    This isn’t incredibly useful in practice, and is often the source of confusion.
     Many authors try this notation as a flawed means to create heterogeneous pools (i.e., pools of dice of different kinds).
 
 Note that a left-hand sequence is ***not*** collapsed with the `@` operator.
@@ -449,30 +477,42 @@ AnyDice follows this convention, but only ***some*** of the time, and inconsiste
    Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=ZnVuY3Rpb246IGRlbHZlIE46biB7CiAgaWYgTiA8PSAwIHsgcmVzdWx0OiAxMjMgfSBcIEFsd2F5cyByZXR1cm4gMTIzIGF0IHRoZSBib3R0b20gXAogIHJlc3VsdDogW2RlbHZlIE4gLSAxXQp9CmZ1bmN0aW9uOiBkZWx2ZSBib3RoIE06biBOOm4gewogIHJlc3VsdDogW2RlbHZlIE1dICsgW2RlbHZlIE5dICBcIERvZXMgdGhpcyByZXR1cm4gZHt9LCAxMjMsIG9yIDI0Nj8gSXQgZGVwZW5kcyEgXAp9CmZ1bmN0aW9uOiBkZWx2ZSBhbW9uZyBNOm4gTjpuIHsKICByZXN1bHQ6IFtkZWx2ZSBib3RoIE0gTV0gKyBbZGVsdmUgYm90aCBNIE5dICsgW2RlbHZlIGJvdGggTiBNXSArIFtkZWx2ZSBib3RoIE4gTl0KfQpNOiAzIE46IDMKb3V0cHV0IFtkZWx2ZSBhbW9uZyBNIE5dIG5hbWVkICJkZWx2ZSBhbW9uZyBbTV0gW05dIgpNOiAzIE46IDEwCm91dHB1dCBbZGVsdmUgYW1vbmcgTSBOXSBuYW1lZCAiZGVsdmUgYW1vbmcgW01dIFtOXSIKTTogMTAgTjogMTAKb3V0cHV0IFtkZWx2ZSBhbW9uZyBNIE5dIG5hbWVkICJkZWx2ZSBhbW9uZyBbTV0gW05dIgo)
 
    A much more subtle version of this issue can be found when comparing the second output of [`https://anydice.com/program/1065f`](https://anydice.com/program/1065f) to that [computed by the `anydyce` interpreter](../playground/#id=1065f).
+   (See also the section on [“phantom” mass](#phantom-mass).)
    At first glance, the distributions look similar, but a careful inspection will reveal that AnyDice’s results do not sum to 100%, and the values are slightly off.
 
    Detecting, much less working around this computation error in a real world program is extremely difficult.
 
 !!! bug "`d{} + {}` does not equal `{} + d{}`, even though `d{} - {}` equals `{} - d{}`"
 
-    The ***specific*** exception to this exception is that AnyDice resolves `d{} + {}` and `d{} | {}` specifically to `d{}`, even though `{} | d{}`, `{} | d{}`, `d{} - {}`, and `{} - d{}` all resolve to `0`.
+    The ***specific*** exception to this exception is that AnyDice resolves `d{} + {}` and `d{} | {}` specifically to `d{}`, even though `{} + d{}`, `{} | d{}`, `d{} - {}`, and `{} - d{}` all resolve to `0`.
     The `anydyce` interpreter does not reproduce this inconsistency.
 
-Operations involving ***multiplicative*** and ***comparative*** operators, `*`, `\`, `^`, `&`, `=`, `!=`, `<`, `<=`, `>=`, and `>` follow set convolution conventions.
+Operations involving ***multiplicative*** and ***comparative*** operators, `*`, `/`, `^`, `&`, `=`, `!=`, `<`, `<=`, `>=`, and `>` follow set convolution conventions.
 The expressions `d{} * 1`, `1 / d{}`, `8 ^ d{}`, `d{} & 8`, etc. all resolve to `d{}`.
 Likewise, where the binary `d` operator’s left-hand or right-hand operand resolves to `d{}`, the result is `d{}`, irrespective of the value of the other operand.
 The expression `1000d{}` resolves to `d{}`.
 The unary expressions `-d{}` and `!d{}` also resolve to the empty die.
 
-#### Dice pool width
+#### Dice pool sizes
 
 The `#` operator reveals the number of dice in a pool.
+Some results are perplexing, however.
 
-!!! warning "`#` is unreliable for zero-length pools or pools involving the empty die"
+For some reason, pools with zero dice (e.g., `0d100`) are treated as `1d0`.
+So `#(0d0)` is oddly `1`.
 
-    Some results are perplexing, however.
-    For example, `#(4d{})` is `0`, but `#(0d0)` and `#(d{}d{})` are `1`.
-    This inconsistency reveals an underlying implementation detail that likely affects the AnyDice interpreter in additional ways we’ll explore below.
+Pools where either the left-hand or right-hand operand is the empty die generally collapse to the empty die.
+Simple pools involving the empty die as the right-hand operand are of size `0`.
+For example, `#(4d{})` is `0`
+However, where the left-hand operand is a die, the size of pools involving the empty die perplexingly becomes `1`.
+So `#(d100d{})`, `#(d{}d100)`, and `#(d{}d{})` are all `1`.
+
+This is where our implementation of [`<die>d<die>` as a function above](#operand-interpretation-and-collapse) breaks down.
+While it produces equivalent ***outputs***, `#([roll d{} of the die d{}])` yields `0`, not `1`.
+
+In its current implementation, the `anydyce` interpreter bends over backwards to reproduce these size inconsistencies for compatibility.
+However, it’s quite possible aspects of these behaviors are bugs with anydyce.com, perhaps contributing to things like [“phantom” mass](#phantom-mass).
+In the future, the `anydyce` interpreter may diverge from anydice.com by implementing something more coherent.
 
 ### Functions, variable scope, type coercion, and type expansion
 
@@ -507,7 +547,7 @@ Beyond that, one can think of two distinct flavors of conversion: *coercion* and
 *Coercion* happens when an object is collapsed or “promoted” to that of another type (e.g., as a container).
 Where a number is passed as an argument to a function expecting a sequence or die, that number is “wrapped” by the conversion specifier type.
 A `3` becomes `{3}` with `:s` or `d{3}` with `:d`.
-Where a sequence is passed as an argument to a function expecting a number or die, that sequence is collapsed (summed) to a number and treated accordingly.
+Where a sequence is passed as an argument to a function expecting a number or die, that sequence is collapsed (summed) to a number[^7] and treated accordingly.
 
 Where a function is passed arguments that either match conversion specifiers exactly or produce only type coercions, the value returned by calling the function will be exactly that defined by its `result:` statement.
 
@@ -539,7 +579,7 @@ output [12 th face from D]  \ The face submitted to the 12th iteration of the fu
 
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=SVRFUl9DT1VOVDogMApmdW5jdGlvbjogTjpuIHRoIGZhY2UgZnJvbSBGQUNFOm4gewogIElURVJfQ09VTlQ6IElURVJfQ09VTlQgKyAxICBcIEdldCBhIGNvcHkgb2YgdGhlIGdsb2JhbCBJVEVSX0NPVU5UIHRoYXQgc3Vydml2ZXMgYWNyb3NzIHRoZSBleHBhbmRlZCBjYWxscyBcCiAgaWYgSVRFUl9DT1VOVCA9IE4geyByZXN1bHQ6IEZBQ0UgfSBcIGVsc2UgeyByZXN1bHQ6IGR7fSB9IFwKfQpEOiAzZDYgb3V0cHV0IEQgICAgICAgICAgICAgXCBUaGUgZGlzdHJpYnV0aW9uIG9mIDNkNiBcCm91dHB1dCBbNCB0aCBmYWNlIGZyb20gRF0gICBcIFRoZSBmYWNlIHN1Ym1pdHRlZCB0byB0aGUgNHRoIGl0ZXJhdGlvbiBvZiB0aGUgZnVuY3Rpb24gZnJvbSB0aGUgY29sbGFwc2VkIDNkNiAoaS5lLiwgNikgXApvdXRwdXQgWzEyIHRoIGZhY2UgZnJvbSBEXSAgXCBUaGUgZmFjZSBzdWJtaXR0ZWQgdG8gdGhlIDEydGggaXRlcmF0aW9uIG9mIHRoZSBmdW5jdGlvbiBmcm9tIHRoZSBjb2xsYXBzZWQgM2Q2IChpLmUuLCAxNCkgXAo)
 
-As one of its comment suggests, this probe works because of the way that variables are “scoped” in AnyDice, which we’ll [explore in detail](variable-scope) further on.
+As one of its comment suggests, this probe works because of the way that variables are “scoped” in AnyDice, which we’ll [explore in detail](#variable-scope) further on.
 
 Where a parameter expects a sequence, a die or pool is expanded into unique rolls, with the function being called once for each roll.
 The values in each roll are ordered according to the `"position order"` setting.
@@ -578,6 +618,10 @@ output [replace with weird die where d10 shows three]
 
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=ZnVuY3Rpb246IHJlcGxhY2Ugd2l0aCB3ZWlyZCBkaWUgd2hlcmUgRkFDRTpuIHNob3dzIHRocmVlIHsKICBpZiBGQUNFID0gMyB7IHJlc3VsdDogZHs0NCwgNDQsIDU1LCA2Nn0gfSBlbHNlIHsgcmVzdWx0OiBGQUNFIH0KfQpvdXRwdXQgW3JlcGxhY2Ugd2l0aCB3ZWlyZCBkaWUgd2hlcmUgZDEwIHNob3dzIHRocmVlXQo)
 
+[^7]: Note that for outputs ***only***, a sequence is coerced to a die.
+      `output {1, 1, 1, 2, 2, 3}` is equivalent to `output d{1, 1, 1, 2, 2, 3}`, ***not*** `output 10`.
+      It is unclear why this coercion discrepancy exists.
+
 #### Variable scope
 
 AnyDice’s [function documentation](https://anydice.com/docs/functions/) notes:
@@ -602,7 +646,7 @@ output GLOBAL named "GLOBAL after function call"   \ 100 \
 
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=ZnVuY3Rpb246IHsgR0xPQkFMOiBHTE9CQUwgKyAxMCBcXCByZXN1bHQ6IEdMT0JBTCB9CkdMT0JBTDogMApvdXRwdXQgR0xPQkFMIG5hbWVkICJHTE9CQUwgYmVmb3JlIGZ1bmN0aW9uIGNhbGwiICBcICAwIFwKb3V0cHV0IFtdIG5hbWVkICJHTE9CQUwgZnJvbSBmdW5jdGlvbiBjYWxsIiAgICAgICAgXCAxMCBcCm91dHB1dCBHTE9CQUwgbmFtZWQgIkdMT0JBTCBhZnRlciBmdW5jdGlvbiBjYWxsIiAgIFwgKnNwb2lsZXIgYWxlcnQqOiAwIFwKR0xPQkFMOiAxMDAKb3V0cHV0IEdMT0JBTCBuYW1lZCAiR0xPQkFMIGJlZm9yZSBmdW5jdGlvbiBjYWxsIiAgXCAxMDAgXApvdXRwdXQgW10gbmFtZWQgIkdMT0JBTCBmcm9tIGZ1bmN0aW9uIGNhbGwiICAgICAgICBcIDExMCBcCm91dHB1dCBHTE9CQUwgbmFtZWQgIkdMT0JBTCBhZnRlciBmdW5jdGlvbiBjYWxsIiAgIFwgMTAwIFwK)
 
-But there's another more subtle behavior not mentioned ***at all*** in AnyDice’s documentation.
+But there’s another more subtle behavior not mentioned ***at all*** in AnyDice’s documentation.
 
 !!! warning "Variables are scoped ***across*** expansion calls"
 
@@ -624,11 +668,11 @@ But there's another more subtle behavior not mentioned ***at all*** in AnyDice�
 
     That tells us two things:
 
-    1. Faces are provided to function calls from lowest-to-highest, regardless of the setting of `"position order"`.
+    1. As [mentioned above](#on-ordering), faces are provided to function calls from lowest-to-highest, regardless of the setting of `"position order"`.
        If they weren’t, the above function would crash, since `VAR` is not defined until `N = 1`.
     2. Changes to `VAR` persist between function calls for a particular expansion, but not beyond.
 
-That behavior might have useful applications beyond the [expansion probe](#expansion) above, but what follows does not.
+That behavior might have useful applications beyond the [expansion probe above](#expansion), but what follows does not.
 
 #### Modifications ***to parameters*** are durable across expansion calls
 
@@ -660,21 +704,21 @@ output [reroll 1d6 less than 4 depth 3] named "reroll under 4, up to 3 tries"
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=ZnVuY3Rpb246IHJlcm9sbCBOOm4gbGVzcyB0aGFuIFRIUkVTSE9MRDpuIGRlcHRoIERFUFRIOm4gewogIGlmIE4gPCBUSFJFU0hPTEQgJiBERVBUSCA-IDAgewogICAgREVQVEg6IERFUFRIIC0gMQogICAgcmVzdWx0OiBbcmVyb2xsIDFkNiBsZXNzIHRoYW4gVEhSRVNIT0xEIGRlcHRoIERFUFRIXQogIH0KICByZXN1bHQ6IE4KfQpvdXRwdXQgW3Jlcm9sbCAxZDYgbGVzcyB0aGFuIDQgZGVwdGggM10gbmFtZWQgInJlcm9sbCB1bmRlciA0LCB1cCB0byAzIHRyaWVzIgo)
 
 The intent of the program is clear:
-Roll a `d6`, and if it's under `4`, re-roll it up to `3` times.
+Roll a `d6`, and if it’s under `4`, re-roll it up to `3` times.
 The author provides `DEPTH` to parameterize a recursion cap and decrements it each time the function is called.
 This is a common pattern for recursion among many programming environments.
 
-What goes wrong with AnyDice is as follows.
+What goes wrong on anydice.com is as follows.
 `N` is a `:n` parameter expanded over the outer `1d6` outcomes, meaning the function will be called six times.
 Theoretically, this ***should*** be with arguments: `N=1, THRESHOLD=4, DEPTH=3`; `N=2, THRESHOLD=4, DEPTH=3`; ...;`N=6, THRESHOLD=4, DEPTH=3`.
 
 But this isn’t what happens.
 
-After the first outcome iteration triggers a re-roll (decrementing `DEPTH` from `3` to `2`), AnyDice fails to reset `DEPTH` back to `3` for the next `N`'s iteration.
+After the first outcome iteration triggers a re-roll (decrementing `DEPTH` from `3` to `2`), AnyDice fails to reset `DEPTH` back to `3` for the next `N`’s iteration.
 The second outcome iteration starts with `DEPTH=2`, the third starts with `DEPTH=1`, and the fourth with `DEPTH=0`.
 From then onward, no re-rolls happen at all because the depth-budget remains perpetually exhausted at `DEPTH=0` for all remaining iterations.
 
-It’s hard to imagine a purpose for this “parameter leakage” because expansion calls are alternative branches of a single combination of faces or rolls, not sequential events.
+It’s hard to imagine a purpose for these “parameter leaks” because expansion calls are alternative branches of a single combination of faces or rolls, not sequential events.
 It’s quite possible errors like these go unnoticed where programs are sufficiently complicated or where outputs look “close” to those expected.
 But, as we’ll see, it gets ***even stranger***.
 
@@ -753,6 +797,75 @@ Open in playground: [![Try the AnyDice-compatible playground](anydice-playground
 The `anydyce` interpreter produces the expected 54 outcomes: `{103-118, 203-218, 303-318}`.
 anydice.com, however, perplexingly, only produces three outcomes: `{118, 218, 318}`.
 
+#### Diagnosing/avoiding parameter leaks on anydice.com
+
+To reiterate, it is entirely safe to write to parameter variable names in the `anydyce` interpreter.
+However, when using anydice.com, one can avoid the parameter leak problem with a refactor work-around.
+For any function potentially affected, rename all parameters to have new, unique names.
+Then assign the new parameter names to the old ones in the body of the function.
+For example, consider the following function:
+
+```c
+function: overwrite PARAMETER:n {
+  PARAMETER: PARAMETER + 1
+  \ ... \
+}
+```
+
+Assuming `_PARAMETER_` is not used anywhere within the body of the same function, refactor it as follows:
+
+```c
+function: overwrite _PARAMETER_:n {
+  PARAMETER: _PARAMETER_
+  \ everything below remains the same as above \
+  PARAMETER: PARAMETER + 1
+  \ ... \
+}
+```
+
+Not only does this avoid the anydice.com parameter leak problem, but this approach can be a useful diagnostic as well.
+If anydice.com provides different results pre- and post-refactor, there’s a pretty good chance you’re affected by this bug.
+
+#### Function signatures and duplicate parameter names
+
+AnyDice identifies which function to call by a function signature.
+This means that a later-defined function will mask or overwrite an earlier-defined one with the same signature.
+Signatures do not take parameter names or conversion specifiers.
+Nothing prohibits a function from defining more than one parameter with the same name, but only the first is accessible.
+
+For example, the function `function: is it X:n or X:s { result: X }` has a signature `[is it ? or ?]`.
+Evaluating `[is it 1 or 2d2]` results in the function being executed three times during [expansion](#functions-variable-scope-type-coercion-and-type-expansion), each time returning the value `1`.
+
+### “Phantom” Mass
+
+Some interactions with the empty die may accumulate “phantom” mass that cannot be explained by floating point error.
+It is difficult to predict which programs will trigger this bug, but they are deterministic, meaning that affected programs produce the same erroneous results on anydice.com each time they are run.
+
+The effect can be seen with following probe:
+
+```c
+function: f K:n { result: K }
+function: g G:n D:d { if G = 1 { result: 5 } else { result: [f D] } }
+output [g (d2) (d0)]
+D: [g (d2) (d{})]
+output D
+D: 4dD + 0
+output D
+```
+
+Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=ZnVuY3Rpb246IGYgSzpuIHsgcmVzdWx0OiBLIH0KZnVuY3Rpb246IGcgRzpuIEQ6ZCB7IGlmIEcgPSAxIHsgcmVzdWx0OiA1IH0gZWxzZSB7IHJlc3VsdDogW2YgRF0gfSB9Cm91dHB1dCBbZyAoZDIpIChkMCldCkQ6IFtnIChkMikgKGR7fSldCm91dHB1dCBECkQ6IDRkRCArIDAKb3V0cHV0IEQ)
+
+The `anydyce` interpreter produces expected outputs that all sum to 100%.
+anydice.com’s results, however, only sum to 100% for the first output.
+The second output has a phantom that occupies 50% of the total weight.
+That is compounded to 93.75% for the third output, so the phantom is durable over at least some operations.
+
+Again, the mechanism by which this happens, and the context under which is it triggered is unclear.
+[`140df`](../playground/#id=140df) is especially illustrative.
+Despite calling the same function with `2d6`, `3d6`, ..., `6d6`, this effect is only visible when the argument is `4d6`, where the total outcome weight only sums to 90.12%.
+Additional examples include programs [`455`](../playground/#id=455) (55.56% on anydice.com), [`11182`](../playground/#id=11182) (14.5% on anydice.com).
+[`1065f`](../playground/#id=1065f) (also [making an appearance above](#certain-operators-and-the-empty-die)) is an even subtler example where the phantom mass in the second output somehow comes from the default result when exhausting recursion depth.
+
 ### Overflows
 
 AnyDice is susceptible to overflow errors in both outcomes and weights.
@@ -765,7 +878,7 @@ output 1d{9}^(1d10*10)
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=b3V0cHV0IDFkezl9XigxZDEwKjEwKQ)
 
 The `anydyce` interpreter correctly handles large integer outcomes.
-AnyDice produces four outcomes, two of which are negative, despite being mathematically impossible.
+anydice.com produces four outcomes, two of which are negative, despite being mathematically impossible.
 
 The following stresses weight accumulation (floating point) errors.
 
@@ -785,7 +898,7 @@ loop N over {1..60} {
 
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=RDogZHsxOjk5LCAwfQpsb29wIE4gb3ZlciB7MS4uNjB9IHsKICBEOiBEICogRAogIG91dHB1dCBEIG5hbWVkICJkezE6OTksIDB9IGFmdGVyIGxvb3AgW05dIgp9Cm91dHB1dCBke30gbmFtZWQgIj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09IgpEOiBkezE6OSwgMH0KbG9vcCBOIG92ZXIgezEuLjYwfSB7CiAgRDogRCAqIEQKICBvdXRwdXQgRCBuYW1lZCAiZHsxOjksIDB9IGFmdGVyIGxvb3AgW05dIgp9Cg)
 
-As described [above](#features), the `anydyce` interpreter handles these calculations reasonable, even with truncation.
+As [described above](#features), the `anydyce` interpreter handles these calculations reasonably, even with truncation.
 However, on anydice.com, later loops’ cumulative weights fail to sum to 100% (sometimes approaching zero, sometimes approaching infinity).
 
 ### “Legacy” programs
@@ -798,7 +911,7 @@ The `anydyce` interpreter does not recognize the `legacy` keyword and is incapab
 The goals of this project are as follows:
 
 1. Present a truly transparent reference implementation for Jasper Flick’s [AnyDice Dice Probability Calculator](https://anydice.com/) subject to independent inspection, validation, and improvement.
-   This includes addressing long-standing bugs persistent in the in the original platform.
+   This includes addressing long-standing bugs persistent in the original platform.
 1. Preserve existing cognitive investment in the AnyDice platform independently of the author’s ability or willingness to support it, including enabling users to:
     1. share AnyDice programs without relying on a proprietary centralized database; and
     2. execute AnyDice programs independently of accessing specific websites.
