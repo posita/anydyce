@@ -5,19 +5,19 @@
         {
           "comment_text": "",
           "digests": {
-            "md5": "74be3b712989b17555dee1b621fe542f",
-            "sha256": "88d91e7b1512603c8bad830fab04708f75d604857324f140be4b5ff2e997236a"
+            "md5": "1ebe546893a537ec2e59cb6081df2fb3",
+            "sha256": "e02114b239946debd4149400862215e30a8334a7ac4c364af043dfa58361deb6"
           },
           "downloads": -1,
           "filename": "anydyce-0.5.0rc1-py3-none-any.whl",
           "has_sig": false,
-          "md5_digest": "74be3b712989b17555dee1b621fe542f",
+          "md5_digest": "1ebe546893a537ec2e59cb6081df2fb3",
           "packagetype": "bdist_wheel",
           "python_version": "py3",
           "requires_python": ">=3.11",
           "size": 62710,
-          "upload_time": "2026-06-19T23:32:08.579532Z",
-          "upload_time_iso_8601": "2026-06-19T23:32:08.579532Z",
+          "upload_time": "2026-06-20T03:16:48.616681Z",
+          "upload_time_iso_8601": "2026-06-20T03:16:48.616681Z",
           "url": "./anydyce-0.5.0rc1-py3-none-any.whl",
           "yanked": false,
           "yanked_reason": null
@@ -172,8 +172,8 @@
           "python_version": "py3",
           "requires_python": ">=3.7",
           "size": 2196503,
-          "upload_time": "2025-11-01T21:15:56Z",
-          "upload_time_iso_8601": "2025-11-01T21:15:56Z",
+          "upload_time": "2025-11-01T21:15:55Z",
+          "upload_time_iso_8601": "2025-11-01T21:15:55Z",
           "url": "./widgetsnbextension-4.0.15-py3-none-any.whl",
           "yanked": false,
           "yanked_reason": null
