@@ -163,7 +163,7 @@ tox = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dyce", specifier = "~=0.7.0rc6" },
+    { name = "dyce", specifier = "~=0.7.0rc7" },
     { name = "dyce", extras = ["viz"], marker = "extra == 'jupyter'" },
     { name = "ipywidgets", marker = "extra == 'jupyter'" },
     { name = "lark", specifier = ">=1.3.1" },
@@ -938,16 +938,16 @@ wheels = [
 
 [[package]]
 name = "dyce"
-version = "0.7.0rc6"
+version = "0.7.0rc7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "optype", version = "0.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "optype", version = "0.18.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ac/3e/050a193f16c4a3b2402e00f1be87e9f6990701908182ca7f9b652870c2d3/dyce-0.7.0rc6.tar.gz", hash = "sha256:232fa983b0cb6f02caa504fc351866dca1bc5c6a62d016afaa0c69218c956acd", size = 964537, upload-time = "2026-06-03T21:04:04.174Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/70/70/015753a336c904b274af07f1884a0dcdfaf0aaa514660e080f37672d0068/dyce-0.7.0rc7.tar.gz", hash = "sha256:04de41ae79d4be8d5d1bf748067425e47c6e89da8d0f7ba658e94509d656b889", size = 959261, upload-time = "2026-06-22T13:44:38.719Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/89/e1/3ff2c0c3ea1296bfcc055203da3612e55bc4ee023d7581303a69af51593e/dyce-0.7.0rc6-py3-none-any.whl", hash = "sha256:9a28de453021efd77b95c1c9adffefb468865583159590151825c5befd342823", size = 63229, upload-time = "2026-06-03T21:04:02.774Z" },
+    { url = "https://files.pythonhosted.org/packages/a3/f9/f19cd74b58d2471a9bf4b9075ecc3dcbd702d5e173f261fe158bc8243f4e/dyce-0.7.0rc7-py3-none-any.whl", hash = "sha256:1e95bcd8c0140ac053187780be509b5c1ff6f64c63047027861c040938cc988d", size = 63402, upload-time = "2026-06-22T13:44:37.116Z" },
 ]
 
 [package.optional-dependencies]

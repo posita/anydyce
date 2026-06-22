@@ -115,7 +115,6 @@ The back-end can be incorporated into other projects via the [`anydyce.anydice`]
     ==== output 1 ====
     avg |   10.50
     std |    2.96
-    var |    8.75
       3 |   0.46% |
       4 |   1.39% |
       5 |   2.78% |#

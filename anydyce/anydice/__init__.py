@@ -65,9 +65,8 @@ def format_results(
         ... )
         >>> print(format_results(results, settings=settings))
         ==== 2d3 ====
-        avg |    4.00
-        std |    1.15
-        var |    1.33
+        avg |    4.000000
+        std |    1.154701
           2 |  11.111111% |#####
           3 |  22.222222% |##########
           4 |  33.333333% |###############
