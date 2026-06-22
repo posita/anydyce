@@ -35,6 +35,7 @@ import {
   DEFAULT_ACCENT,
   DEFAULT_THEME,
   VIEW_MODE_BARS,
+  VIEW_MODE_LINES,
   VIEW_MODE_TEXT,
   createDebouncedSaver,
   loadAccent,
@@ -52,7 +53,7 @@ import {
   stripUrlFragment,
 } from "./persistence.js";
 import { attachResizer, clampPercent } from "./resizer.js";
-import { renderPlots } from "./plot.js";
+import { renderLines, renderPlots } from "./plot.js";
 // plotly.js-cartesian-dist-min loads via esm.sh through the importmap (see
 // index.html). UMD bundle wrapped to ESM; default export is the Plotly
 // namespace.
@@ -265,10 +266,13 @@ const runBtn            = document.getElementById("run-btn");
 const shareBtn          = document.getElementById("share-btn");
 const cancelBtn         = document.getElementById("cancel-btn");
 const csvBtn            = document.getElementById("csv-btn");
+const maximizeBtn       = document.getElementById("maximize-btn");
 const outputPlaceholder = document.getElementById("output-placeholder");
 const outputText        = document.getElementById("output-text");
 const outputBars        = document.getElementById("output-bars");
+const outputLines       = document.getElementById("output-lines");
 const viewBarsBtn       = document.getElementById("view-bars-btn");
+const viewLinesBtn      = document.getElementById("view-lines-btn");
 const viewTextBtn       = document.getElementById("view-text-btn");
 const logsPlaceholder   = document.getElementById("logs-placeholder");
 const logsEl            = document.getElementById("logs");
@@ -319,15 +323,30 @@ function handleCsvDownload() {
 
 csvBtn.addEventListener("click", handleCsvDownload);
 
-function renderOutputBars(outputs, displayPrecision) {
-  // Bars view: stacked horizontal-bar charts, one per `output` statement,
-  // built from raw [{label, items}] data. Empty distributions get an
-  // explicit "(empty)" placeholder so the layout matches the text view.
+// Clear both chart views. With `msg`, drop a placeholder note into each so
+// the chart panes mirror whatever short text the text view shows (error
+// summary, "(cancelled)", etc.) when there's nothing to plot.
+function clearOutputCharts(msg) {
+  for (const container of [outputBars, outputLines]) {
+    container.replaceChildren();
+    if (msg) {
+      const div = document.createElement("div");
+      div.className = "plot-empty";
+      div.textContent = msg;
+      container.appendChild(div);
+    }
+  }
+}
+
+function renderOutputCharts(outputs, displayPrecision) {
+  // Both chart views (bars + lines) are built from the raw [{label, items}]
+  // data on every run, so toggling between them is instant (no re-render).
   // displayPrecision is the run's final `set "anydyce: display precision"`
   // value, so percent labels match the text view's formatting.
   lastOutputs = outputs;
   lastDisplayPrecision = displayPrecision;
   renderPlots(outputBars, outputs, Plotly, { precision: displayPrecision });
+  renderLines(outputLines, outputs, Plotly, { precision: displayPrecision });
   showOutputViews();
 }
 
@@ -340,6 +359,9 @@ function renderOutputBars(outputs, displayPrecision) {
 function rerenderCharts() {
   if (lastOutputs !== null) {
     renderPlots(outputBars, lastOutputs, Plotly, {
+      precision: lastDisplayPrecision,
+    });
+    renderLines(outputLines, lastOutputs, Plotly, {
       precision: lastDisplayPrecision,
     });
   }
@@ -408,11 +430,7 @@ function renderError(err) {
   const detail = (err && err.message) || String(err);
   const msg = `Error: ${detail}`;
   outputText.textContent = msg;
-  outputBars.replaceChildren();
-  const div = document.createElement("div");
-  div.className = "plot-empty";
-  div.textContent = msg;
-  outputBars.appendChild(div);
+  clearOutputCharts(msg);
   showOutputViews();
 }
 
@@ -441,19 +459,25 @@ let outputHasContent = false;
 // display: none containers) and dragging the editor divider (Plotly's
 // `responsive: true` listens to WINDOW resize only, not container resize).
 function resizeVisibleCharts() {
-  if (outputBars.classList.contains("hidden")) return;
-  for (const plot of outputBars.querySelectorAll(".plot")) {
-    Plotly.Plots.resize(plot);
+  for (const container of [outputBars, outputLines]) {
+    if (container.classList.contains("hidden")) continue;
+    for (const plot of container.querySelectorAll(".plot")) {
+      Plotly.Plots.resize(plot);
+    }
   }
 }
 
 function applyViewVisibility() {
-  const showBars = viewMode === VIEW_MODE_BARS;
-  outputBars.classList.toggle("hidden", !showBars || !outputHasContent);
-  outputText.classList.toggle("hidden", showBars || !outputHasContent);
-  viewBarsBtn.classList.toggle("active", showBars);
-  viewTextBtn.classList.toggle("active", !showBars);
-  if (showBars && outputHasContent) {
+  const visible = (mode) => viewMode === mode && outputHasContent;
+  outputBars.classList.toggle("hidden", !visible(VIEW_MODE_BARS));
+  outputLines.classList.toggle("hidden", !visible(VIEW_MODE_LINES));
+  outputText.classList.toggle("hidden", !visible(VIEW_MODE_TEXT));
+  viewBarsBtn.classList.toggle("active", viewMode === VIEW_MODE_BARS);
+  viewLinesBtn.classList.toggle("active", viewMode === VIEW_MODE_LINES);
+  viewTextBtn.classList.toggle("active", viewMode === VIEW_MODE_TEXT);
+  // Charts skip layout while display:none; resize whichever chart view just
+  // became visible so it fills the pane (Plotly tracks window, not container).
+  if (outputHasContent && viewMode !== VIEW_MODE_TEXT) {
     resizeVisibleCharts();
   }
 }
@@ -469,18 +493,62 @@ function showOutputViews() {
 }
 
 function setViewMode(mode) {
-  if (mode !== VIEW_MODE_BARS && mode !== VIEW_MODE_TEXT) return;
+  if (
+    mode !== VIEW_MODE_BARS &&
+    mode !== VIEW_MODE_LINES &&
+    mode !== VIEW_MODE_TEXT
+  ) {
+    return;
+  }
   viewMode = mode;
   applyViewVisibility();
   saveViewMode(mode);
 }
 
 viewBarsBtn.addEventListener("click", () => setViewMode(VIEW_MODE_BARS));
+viewLinesBtn.addEventListener("click", () => setViewMode(VIEW_MODE_LINES));
 viewTextBtn.addEventListener("click", () => setViewMode(VIEW_MODE_TEXT));
 
 // Reflect the persisted (or default) view mode in the toggle buttons on
 // load. The views themselves stay hidden until first content.
 applyViewVisibility();
+
+// ---- Maximize (pseudo-fullscreen) output view ------------------------------
+//
+// View-only zoom: collapses the editor, logs, and both dividers so the
+// output pane fills the window (see body.output-maximized in playground.css).
+// The output header -- including this button and the view toggle -- stays
+// visible. Run/Cancel live in the editor header, so re-running means
+// restoring first; that's intentional (re-running can't change anything
+// without editing the program). Not persisted: a reload always starts
+// un-maximized, so you can never get stranded with the editor hidden.
+
+let outputMaximized = false;
+
+function setMaximized(on) {
+  outputMaximized = on;
+  document.body.classList.toggle("output-maximized", on);
+  maximizeBtn.setAttribute("aria-pressed", String(on));
+  // Icon-only button: the glyph swaps via CSS keyed on [aria-pressed]; the
+  // accessible name and tooltip both come from this label.
+  const label = on
+    ? "Restore the editor and logs panes"
+    : "Maximize the output panel (hides editor and logs)";
+  maximizeBtn.setAttribute("aria-label", label);
+  maximizeBtn.title = label;
+  // The output pane changes size in both dimensions; re-layout the active
+  // chart (Plotly tracks window resize, not container resize).
+  resizeVisibleCharts();
+}
+
+maximizeBtn.addEventListener("click", () => setMaximized(!outputMaximized));
+
+// Escape exits maximize -- the familiar "leave fullscreen" gesture. Guarded
+// on the maximized state so it never swallows Escape elsewhere (e.g. the
+// editor's search panel, which is hidden while maximized anyway).
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && outputMaximized) setMaximized(false);
+});
 
 // ---- Logs pane -------------------------------------------------------------
 //
@@ -580,7 +648,7 @@ async function handleRun() {
   cancelBtn.disabled = false;
   cancelBtn.title = "Cancel the current run (terminates and re-initializes the worker)";
   outputText.textContent = "";
-  outputBars.replaceChildren();
+  clearOutputCharts();
   showOutputViews();
   resetLogs();
   // Disable CSV export while a run is in flight; the visible panes no
@@ -595,7 +663,7 @@ async function handleRun() {
     const dt = Math.round(performance.now() - t0);
     logWarnings(warnings);
     renderResults(text);
-    renderOutputBars(outputs, displayPrecision);
+    renderOutputCharts(outputs, displayPrecision);
     lastCsv = csv;
     lastCsvFilename = csvFilename;
     setCsvAvailable(Boolean(csv) && outputs.length > 0);
@@ -606,11 +674,7 @@ async function handleRun() {
       // updates the status and re-inits the runtime; don't overwrite that
       // here.
       outputText.textContent = "(cancelled)";
-      outputBars.replaceChildren();
-      const cancelDiv = document.createElement("div");
-      cancelDiv.className = "plot-empty";
-      cancelDiv.textContent = "(cancelled)";
-      outputBars.appendChild(cancelDiv);
+      clearOutputCharts("(cancelled)");
       logEntry("cancel", "Cancelled by user.");
     } else if (err instanceof RunError) {
       // Python-level error from the program. Output gets the short summary;
@@ -807,7 +871,14 @@ attachResizer({
   resizerSize,
   initialPercent:
     savedLogsSplit !== null ? (clampPercent(savedLogsSplit) ?? undefined) : undefined,
-  onSettled: (pct) => saveLogsSplit(pct),
+  onSettled: (pct) => {
+    saveLogsSplit(pct);
+    // The line view fills the pane's HEIGHT, so the output/logs divider
+    // resizes it (the bars view scrolls at a fixed height and doesn't
+    // care -- which is why this was previously only on the editor divider).
+    // Re-layout on settle, mirroring the editor divider below.
+    resizeVisibleCharts();
+  },
 });
 
 const savedEditorSplit = loadEditorSplit();

@@ -13,9 +13,11 @@ import {
   DEFAULT_PLOT_PRECISION,
   EMPTY_CHART_PX,
   PX_PER_OUTCOME,
+  alignedSeries,
   chartHeight,
   globalMaxPercent,
   itemsToPercents,
+  lineSpec,
   plotSpec,
   readCssTheme,
 } from "../plot.js";
@@ -309,4 +311,97 @@ test("readCssTheme: returns null outside a DOM", () => {
   // Node has no document; the default param resolves to undefined.
   assert.equal(readCssTheme(), null);
   assert.equal(readCssTheme(null), null);
+});
+
+// ---- alignedSeries ------------------------------------------------------
+
+test("alignedSeries: unions outcomes and zero-fills each series", () => {
+  const outputs = [
+    {
+      label: "a",
+      items: [
+        [1, 1],
+        [2, 1],
+      ],
+    },
+    {
+      label: "b",
+      items: [
+        [2, 1],
+        [3, 1],
+        [4, 2],
+      ],
+    },
+  ];
+  const { x, series } = alignedSeries(outputs);
+  assert.deepEqual(x, [1, 2, 3, 4]);
+  assert.deepEqual(series[0], { label: "a", y: [50, 50, 0, 0] });
+  assert.deepEqual(series[1], { label: "b", y: [0, 25, 25, 50] });
+});
+
+test("alignedSeries: empty distribution yields an all-zero series", () => {
+  const { x, series } = alignedSeries([
+    { label: "x", items: [[1, 1]] },
+    { label: "empty", items: [] },
+  ]);
+  assert.deepEqual(x, [1]);
+  assert.deepEqual(series[1], { label: "empty", y: [0] });
+});
+
+test("alignedSeries: no outputs -> empty x and series", () => {
+  const { x, series } = alignedSeries([]);
+  assert.deepEqual(x, []);
+  assert.deepEqual(series, []);
+});
+
+// ---- lineSpec -----------------------------------------------------------
+
+test("lineSpec: one scatter/lines trace per output, numeric x-axis", () => {
+  const spec = lineSpec([
+    { label: "a", items: [[1, 1]] },
+    { label: "b", items: [[2, 1]] },
+  ]);
+  assert.equal(spec.data.length, 2);
+  assert.equal(spec.data[0].type, "scatter");
+  assert.equal(spec.data[0].mode, "lines");
+  assert.equal(spec.data[0].name, "a");
+  // Numeric (not categorical) x so series align on a shared scale and
+  // Plotly auto-picks tick density.
+  assert.equal(spec.layout.xaxis.type, undefined);
+  assert.equal(spec.layout.yaxis.rangemode, "tozero");
+  assert.equal(spec.layout.hovermode, "x unified");
+  assert.equal(spec.isEmpty, false);
+});
+
+test("lineSpec: shared zero-filled x across traces", () => {
+  const spec = lineSpec([
+    { label: "a", items: [[1, 1]] },
+    { label: "b", items: [[3, 1]] },
+  ]);
+  assert.deepEqual(spec.data[0].x, [1, 3]);
+  assert.deepEqual(spec.data[1].x, [1, 3]);
+  assert.deepEqual(spec.data[0].y, [100, 0]);
+  assert.deepEqual(spec.data[1].y, [0, 100]);
+});
+
+test("lineSpec: precision flows into the hover template", () => {
+  const spec = lineSpec([{ label: "a", items: [[1, 1]] }], { precision: 4 });
+  assert.match(spec.data[0].hovertemplate, /%\{y:\.4f\}%/);
+});
+
+test("lineSpec: theme.series becomes layout.colorway", () => {
+  const spec = lineSpec([{ label: "a", items: [[1, 1]] }], {
+    theme: { series: ["#111", "#222"] },
+  });
+  assert.deepEqual(spec.layout.colorway, ["#111", "#222"]);
+});
+
+test("lineSpec: no theme leaves colorway unset (Plotly default palette)", () => {
+  const spec = lineSpec([{ label: "a", items: [[1, 1]] }]);
+  assert.equal(spec.layout.colorway, undefined);
+});
+
+test("lineSpec: all-empty outputs -> isEmpty", () => {
+  const spec = lineSpec([{ label: "x", items: [] }]);
+  assert.equal(spec.isEmpty, true);
 });

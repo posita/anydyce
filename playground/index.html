@@ -64,8 +64,16 @@
             <button id="csv-btn" type="button" class="btn-secondary" disabled title="Run a program to enable CSV export">CSV</button>
             <div class="view-toggle" role="group" aria-label="Output view mode">
               <button id="view-bars-btn" type="button" class="active">Bars</button>
+              <button id="view-lines-btn" type="button">Lines</button>
               <button id="view-text-btn" type="button">Text</button>
             </div>
+            <button id="maximize-btn" type="button" class="btn-secondary icon-btn" aria-pressed="false" aria-label="Maximize the output panel (hides editor and logs)" title="Maximize the output panel (hides editor and logs)">
+              <!-- Two glyphs; CSS shows one per [aria-pressed] state. Both
+                   stroke currentColor so they follow the button's theme
+                   color. aria-hidden: the button's aria-label is the name. -->
+              <svg class="icon icon-maximize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" /></svg>
+              <svg class="icon icon-restore" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5" /></svg>
+            </button>
           </div>
         </div>
         <!--
@@ -79,6 +87,7 @@
           Starting up...
         </div>
         <div id="output-bars" class="output-view hidden"></div>
+        <div id="output-lines" class="output-view hidden"></div>
         <div id="output-text" class="output-view hidden"></div>
       </section>
 

@@ -340,6 +340,33 @@ main {
   cursor: not-allowed;
 }
 
+/* Icon-only action button (maximize/restore): center the glyph and tighten
+ * the horizontal padding since it's roughly square rather than text-width.
+ * The glyph inherits the button's text color via currentColor. */
+.pane-actions button.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 0.5em;
+}
+.icon-btn .icon {
+  width: 1.15em;
+  height: 1.15em;
+}
+/* Show the maximize glyph by default, the restore glyph while maximized. */
+.icon-btn .icon-maximize {
+  display: block;
+}
+.icon-btn .icon-restore {
+  display: none;
+}
+.icon-btn[aria-pressed="true"] .icon-maximize {
+  display: none;
+}
+.icon-btn[aria-pressed="true"] .icon-restore {
+  display: block;
+}
+
 #editor {
   flex: 1;
   overflow: auto;
@@ -356,7 +383,10 @@ main {
  * `display` on the elements that carry this class (the views and
  * placeholders are plain block children of a flex pane). */
 .hidden {
-  display: none;
+  /* !important so it beats ID-level display rules -- #output-lines sets
+   * `display: flex` (specificity 1,0,0), which would otherwise win over a
+   * plain `.hidden` and leave the line view un-hideable. */
+  display: none !important;
 }
 
 /* Two stacked-but-not-stacked views: only one is visible at a time,
@@ -395,6 +425,42 @@ main {
 
 #output-bars {
   padding: 0.5em;
+}
+
+/* Line view: one consolidated chart that FILLS the pane (the bars view, by
+ * contrast, stacks fixed-height charts and scrolls). The single .plot grows
+ * to the pane height via flex, so it tracks pane resizes / maximize rather
+ * than sitting at a fixed height with whitespace below. */
+#output-lines {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5em;
+  overflow: hidden;
+}
+#output-lines .plot {
+  flex: 1;
+  min-height: 0;
+  margin-bottom: 0;
+}
+
+/* Maximize ("pseudo-fullscreen", view-only): the output pane fills <main>;
+ * the editor, logs, and both dividers collapse. The output header (with the
+ * Restore button + view toggle) stays -- to re-run you Restore first, since
+ * the editor is hidden. The grid-template overrides need !important to beat
+ * the inline templates the resizers write (resizer.js applyLayout sets
+ * gridTemplate{Columns,Rows} on these two containers); removing the class
+ * restores the prior drag split for free. */
+body.output-maximized main {
+  grid-template-columns: 1fr !important;
+}
+body.output-maximized .right-column {
+  grid-template-rows: 1fr !important;
+}
+body.output-maximized .editor-pane,
+body.output-maximized #col-resizer,
+body.output-maximized #row-resizer,
+body.output-maximized .logs-pane {
+  display: none;
 }
 
 /* One Plotly chart per AnyDice `output` statement. Height comes from each

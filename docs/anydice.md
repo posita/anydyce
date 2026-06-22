@@ -19,37 +19,9 @@
 An interactive version can be found here: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/)
 
 You can also [host your own or run it locally](index.md#running-locally).
-The interpreter can be incorporated into other projects via the [`anydyce.anydice`][anydyce.anydice] subpackage.
 
-    >>> from anydyce.anydice import format_results, run
-    >>> program = r"""
-    ...     output 3d6
-    ... """
-    >>> results = run(program)
-    >>> print(format_results(results))
-    ==== output 1 ====
-    avg |   10.50
-    std |    2.96
-    var |    8.75
-      3 |   0.46% |
-      4 |   1.39% |
-      5 |   2.78% |#
-      6 |   4.63% |##
-      7 |   6.94% |###
-      8 |   9.72% |####
-      9 |  11.57% |#####
-     10 |  12.50% |######
-     11 |  12.50% |######
-     12 |  11.57% |#####
-     13 |   9.72% |####
-     14 |   6.94% |###
-     15 |   4.63% |##
-     16 |   2.78% |#
-     17 |   1.39% |
-     18 |   0.46% |
-
-The interpreter strives to be a working replacement in all meaningful aspects, but it is ***not*** 100% compatible, favoring fundamental correctness over producing identical results.
-Besides [enumerating the goals](#conclusion) of this effort, this document primarily focuses on two categories of behaviors:
+The `anydyce` interpreter strives to be a working replacement in all meaningful aspects, but it is ***not*** 100% compatible, favoring fundamental correctness over producing identical results.
+Besides [detailing features](#features) and [enumerating goals](#conclusion), this document primarily focuses on two categories of behaviors:
 
 1. **AnyDice idiosyncrasies**, meaning surprising or inconsistent behaviors that appear intended that the `anydyce` interpreter faithfully replicates; and
 2. **Excluded AnyDice bugs**, meaning behaviors that are likely unintended defects, that the `anydyce` interpreter deliberately avoids.
@@ -63,10 +35,33 @@ Some foundation necessary to an analysis of AnyDice behaviors is present below, 
 
 ## Features
 
+The `anydyce` interpreter is primarily broken up into two major components:
+
+1. A portable, pure Python back end that relies on [`dyce`](https://github.com/posita/dyce/) for computation; and
+2. A user interface implemented in HTML, CSS, and plain JavaScript that uses [Plotly](https://plotly.com/) for visualizations and [Pyodide](https://pyodide.org/en/stable/) to run everything (including the Python interpreter) directly in-browser.
+
+### No server required
+
+The included web interface is loaded from a static site and runs in the user’s browser.
+The only infrastructure needed to run a local instance is a simple web server (e.g., the one that ships with Python’s standard library: `python3 -m http.server 8000`).
+
+### The URL ***is*** the program
+
+Similar to other browser-based sandboxes and playgrounds, the included web interface allows programs to be preserved and shared solely by creating and copying a URL that encodes the entire program in the URL itself.
+As long as you have access to the URL (e.g., via a bookmark), you have the program.
+No reliance on accessing another’s database is needed.
+
+### Loading programs saved to anydice.com by program IDs
+
+The web interface allows loading of programs previously saved to AnyDice by way of a [publicly available program cache](https://github.com/posita/anydice-data) that was retrieved prior to [AnyDice being compromised](#background-purpose).
+For any AnyDice URL containing a program ID, you can create an alternate URL using that same ID to load that program and run it with the `anydyce` interpreter.
+For example, consider the URL [`https://anydice.com/program/18106`](https://anydice.com/program/18106).
+You can run the same program by visiting [`https://posita.github.io/anydyce/latest/playground/#id=18106`](https://posita.github.io/anydyce/latest/playground/#id=18106).
+Alternatively, you can [run your own copy locally](index.md#running-locally) and adapt the same pattern to the URL of your local web server (e.g.,`https://127.0.0.1:8000/playground/#id=18106`).
+
 ### No `float`s
 
-The `anydyce` interpreter relies heavily on the [`dyce` library](https://github.com/posita/dyce/)’s [`H` object](/dyce/latest/dyce/#dyce.H) as a core primitive for computation.
-`dyce` does not use floating point arithmetic:
+The [`dyce` library](https://github.com/posita/dyce/)’s [`H` object](/dyce/latest/dyce/#dyce.H)s on which this interpreter is based do not use floating point arithmetic:
 
 > `H` objects encode finite discrete probability distributions as integer counts without any denominator.
 
@@ -74,7 +69,7 @@ Truncations occur (when and how [can be tuned](#proprietary-extensions)), but `d
 As such, calculations are not subject to the same limitations and errors.
 (See the [discussion on overflows below](#overflows).)
 
-Instead, internally when an `H` object is created (e.g., as the result of a operation like `20d20`), if the largest count exceeds the number of bits allowed by a contextual maximum, all counts are *quantized*.
+Instead, whenever any `H` object is created during execution (e.g., as the result of a operation like `20d20`) where the largest count would exceed the number of bits allowed by a contextual maximum, all counts are *quantized*.
 More specifically, the least significant bits are truncated and all counts are rounded off such that they all fit within that maximum.
 This does not eliminate errors, but it does allow authors to arbitrarily tune precision as needed (e.g., where performance takes priority).
 
@@ -105,7 +100,38 @@ set "anydyce: display precision" to "exact"
 
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=XCBUaGlzIGlsbHVzdHJhdGVzIHF1YW5pdHphdGlvbiBpbiBhY3Rpb24uIE5vdGUgZXNwZWNpYWxseSB0aGUgdGFpbHMKICBvZiB0aGUgZGlzdHJpYnV0aW9uLiBNb3JlIGRldGFpbCBjYW4gYmUgc2VlIGluIHRoZSB0ZXh0IG91dHB1dC4gXApsb29wIFAgb3ZlciB7NCwgOH0gewogIHNldCAiYW55ZHljZTogY2FsY3VsYXRpb24gcHJlY2lzaW9uIiB0byBQCiAgb3V0cHV0IDIwZDYgbmFtZWQgIjIwZDYgd2l0aCBjb21wdXRhdGlvbnMgcXVhbnRpemVkIGF0IFtQXSBiaXRzIgp9CnNldCAiYW55ZHljZTogY2FsY3VsYXRpb24gcHJlY2lzaW9uIiB0byAiZXhhY3QiCm91dHB1dCAyMGQ2IG5hbWVkICIyMGQ2IHdpdGhvdXQgYW55IHF1YW50aXphdGlvbiIKc2V0ICJhbnlkeWNlOiBkaXNwbGF5IHByZWNpc2lvbiIgdG8gImV4YWN0Igo)
 
-[^2]: Deliberately omitted is AnyDice’s “legacy” syntax, as [noted below](#legacy-programs).
+[^2]: Deliberately omitted is AnyDice’s [“legacy” syntax](#legacy-programs).
+
+### Portable Python implementation
+
+The back-end can be incorporated into other projects via the [`anydyce.anydice`][anydyce.anydice] subpackage.
+
+    >>> from anydyce.anydice import format_results, run
+    >>> program = r"""
+    ...     output 3d6
+    ... """
+    >>> results = run(program)
+    >>> print(format_results(results))
+    ==== output 1 ====
+    avg |   10.50
+    std |    2.96
+    var |    8.75
+      3 |   0.46% |
+      4 |   1.39% |
+      5 |   2.78% |#
+      6 |   4.63% |##
+      7 |   6.94% |###
+      8 |   9.72% |####
+      9 |  11.57% |#####
+     10 |  12.50% |######
+     11 |  12.50% |######
+     12 |  11.57% |#####
+     13 |   9.72% |####
+     14 |   6.94% |###
+     15 |   4.63% |##
+     16 |   2.78% |#
+     17 |   1.39% |
+     18 |   0.46% |
 
 ### A note on performance
 
@@ -126,7 +152,7 @@ By way of illustration, trying to run programs [`183b0`](../playground/#id=183b0
 
 The `anydyce` interpreter and the underlying [`dyce` library](https://github.com/posita/dyce/) on which it is built are very much works in progress, and performance improvements are a high priority item on their road maps, so this is likely to improve as time goes on.
 
-## Background &amp; Purpose
+## Background &amp; purpose
 
 AnyDice appears to have been around in some form or another since 2009, receiving a handful of updates between then and 2026.
 It is free to use by anyone, likely funded entirely by the author who invites others to offset costs through donations.
@@ -151,20 +177,7 @@ For convenience, a usable instance resides at [`https://posita.github.io/anydyce
 However, merely relying on a single alternate site is insufficient, as no site guarantees access in perpetuity.
 Therefore, users are encouraged to clone [this implementation’s source code](https://github.com/posita/anydyce) and run or host instances of their own.
 
-The `anydyce` interpreter is loaded from a static site and runs in the user’s browser.
-The only infrastructure needed to run a local instance is a simple web server (e.g., the one that ships with Python’s standard library: `python3 -m http.server 8000`).
-
-Similar to other browser-based sandboxes and playgrounds, this interface allows programs to be preserved and shared solely by creating and copying a URL that encodes the entire program in the URL itself.
-As long as you have access to the URL (e.g., via a bookmark), you have the program.
-No reliance on accessing another’s database is needed.
-
-The interface allows loading of programs previously saved to AnyDice by way of a [publicly available program cache](https://github.com/posita/anydice-data) that was retrieved prior to AnyDice being compromised.
-For any AnyDice URL containing a program ID, you can create an alternate URL using that same ID to load that program and run it with the `anydyce` interpreter.
-For example, consider the URL [`https://anydice.com/program/18106`](https://anydice.com/program/18106).
-You can run the same program by visiting [`https://posita.github.io/anydyce/latest/playground/#id=18106`](https://posita.github.io/anydyce/latest/playground/#id=18106).
-Alternatively, you can [run your own copy locally](index.md#running-locally) and adapt the same pattern to the URL of your local web server (e.g.,`https://127.0.0.1:8000/playground/#id=18106`).
-
-The program cache is intended to preserve intellectual property of program authors who assigned no royalties or rights to their programs, and who reasonably relied on the ongoing availability of an interpreter and storage mechanism to preserve each program’s accessibility and value.
+The [AnyDice program cache](https://github.com/posita/anydice-data) is intended to preserve intellectual property of program authors who assigned no royalties or rights to their programs, and who reasonably relied on the ongoing availability of an interpreter and storage mechanism to preserve each program’s accessibility and value.
 If you are the author of a particular program in the cache that you want removed, please [file an issue](https://github.com/posita/anydice-data/issues).
 
 Accesses required to create the cache were rate limited and consistent with AnyDice’s longstanding availability and encouraged use.
