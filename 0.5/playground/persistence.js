@@ -20,8 +20,13 @@ export const EDITOR_SPLIT_KEY = "anydyce-playground:editor-split";
 export const VIEW_MODE_KEY = "anydyce-playground:view-mode";
 
 export const VIEW_MODE_BARS = "bars";
+export const VIEW_MODE_LINES = "lines";
 export const VIEW_MODE_TEXT = "text";
-const _ALL_VIEW_MODES = new Set([VIEW_MODE_BARS, VIEW_MODE_TEXT]);
+const _ALL_VIEW_MODES = new Set([
+  VIEW_MODE_BARS,
+  VIEW_MODE_LINES,
+  VIEW_MODE_TEXT,
+]);
 
 export const ACCENT_KEY = "anydyce-playground:accent";
 // Accent hue keys = the color slots usable as an accent (the neutrals are

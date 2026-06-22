@@ -2,11 +2,11 @@
   "content": [
     {
       "content": null,
-      "created": "2026-06-20T03:16:52.950382Z",
+      "created": "2026-06-22T14:29:19.720418Z",
       "format": null,
       "hash": null,
       "hash_algorithm": null,
-      "last_modified": "2026-06-20T03:16:34.256721Z",
+      "last_modified": "2026-06-22T14:29:03.514472Z",
       "mimetype": null,
       "name": "anydyce_intro.ipynb",
       "path": "anydyce_intro.ipynb",
@@ -16,11 +16,11 @@
     },
     {
       "content": null,
-      "created": "2026-06-20T03:16:52.950705Z",
+      "created": "2026-06-22T14:29:19.720793Z",
       "format": null,
       "hash": null,
       "hash_algorithm": null,
-      "last_modified": "2026-06-20T03:16:34.256721Z",
+      "last_modified": "2026-06-22T14:29:03.514472Z",
       "mimetype": "text/x-python",
       "name": "prerequisites.py",
       "path": "prerequisites.py",
@@ -29,11 +29,11 @@
       "writable": true
     }
   ],
-  "created": "2026-06-20T03:16:52.950705Z",
+  "created": "2026-06-22T14:29:19.720418Z",
   "format": "json",
   "hash": null,
   "hash_algorithm": null,
-  "last_modified": "2026-06-20T03:16:52.950705Z",
+  "last_modified": "2026-06-22T14:29:19.720418Z",
   "mimetype": null,
   "name": "",
   "path": "",

@@ -375,6 +375,39 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#no-server-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No server required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-url-is-the-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The URL is the program
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading-programs-saved-to-anydicecom-by-program-ids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading programs saved to anydice.com by program IDs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#no-floats" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -390,6 +423,17 @@
     <span class="md-ellipsis">
       
         Proprietary extensions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#portable-python-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Portable Python implementation
       
     </span>
   </a>
@@ -416,7 +460,7 @@
   <a href="#background-purpose" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Background &amp; Purpose
+        Background &amp; purpose
       
     </span>
   </a>
@@ -962,6 +1006,39 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#no-server-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No server required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-url-is-the-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The URL is the program
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading-programs-saved-to-anydicecom-by-program-ids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading programs saved to anydice.com by program IDs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#no-floats" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -977,6 +1054,17 @@
     <span class="md-ellipsis">
       
         Proprietary extensions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#portable-python-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Portable Python implementation
       
     </span>
   </a>
@@ -1003,7 +1091,7 @@
   <a href="#background-purpose" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Background &amp; Purpose
+        Background &amp; purpose
       
     </span>
   </a>
@@ -1341,62 +1429,9 @@
 <h1 id="anydyces-mostly-compatible-anydice-interpreter"><code>anydyce</code>’s <em>Mostly</em>-Compatible AnyDice Interpreter</h1>
 <p><code>anydyce</code> now includes an Open Source, pure Python, cleanroom implementation of Jasper Flick’s <a href="https://anydice.com/">AnyDice Dice Probability Calculator</a>.</p>
 <p>An interactive version can be found here: <a href="../playground/"><img alt="Try the AnyDice-compatible playground" src="../anydice-playground.svg" /></a></p>
-<p>You can also <a href="../#running-locally">host your own or run it locally</a>.
-The interpreter can be incorporated into other projects via the <a class="autorefs autorefs-internal" href="../anydyce.anydice/#anydyce.anydice"><code>anydyce.anydice</code></a> subpackage.</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">anydyce.anydice</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_results</span><span class="p">,</span> <span class="n">run</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">program</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">...     output 3d6</span>
-<span class="s2">... &quot;&quot;&quot;</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">results</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">format_results</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
-<span class="o">====</span> <span class="n">output</span> <span class="mi">1</span> <span class="o">====</span>
-<span class="n">avg</span> <span class="o">|</span>   <span class="mf">10.50</span>
-<span class="n">std</span> <span class="o">|</span>    <span class="mf">2.96</span>
-<span class="n">var</span> <span class="o">|</span>    <span class="mf">8.75</span>
-  <span class="mi">3</span> <span class="o">|</span>   <span class="mf">0.46</span><span class="o">%</span> <span class="o">|</span>
-  <span class="mi">4</span> <span class="o">|</span>   <span class="mf">1.39</span><span class="o">%</span> <span class="o">|</span>
-  <span class="mi">5</span> <span class="o">|</span>   <span class="mf">2.78</span><span class="o">%</span> <span class="o">|</span><span class="c1">#</span>
-  <span class="mi">6</span> <span class="o">|</span>   <span class="mf">4.63</span><span class="o">%</span> <span class="o">|</span><span class="c1">##</span>
-  <span class="mi">7</span> <span class="o">|</span>   <span class="mf">6.94</span><span class="o">%</span> <span class="o">|</span><span class="c1">###</span>
-  <span class="mi">8</span> <span class="o">|</span>   <span class="mf">9.72</span><span class="o">%</span> <span class="o">|</span><span class="c1">####</span>
-  <span class="mi">9</span> <span class="o">|</span>  <span class="mf">11.57</span><span class="o">%</span> <span class="o">|</span><span class="c1">#####</span>
- <span class="mi">10</span> <span class="o">|</span>  <span class="mf">12.50</span><span class="o">%</span> <span class="o">|</span><span class="c1">######</span>
- <span class="mi">11</span> <span class="o">|</span>  <span class="mf">12.50</span><span class="o">%</span> <span class="o">|</span><span class="c1">######</span>
- <span class="mi">12</span> <span class="o">|</span>  <span class="mf">11.57</span><span class="o">%</span> <span class="o">|</span><span class="c1">#####</span>
- <span class="mi">13</span> <span class="o">|</span>   <span class="mf">9.72</span><span class="o">%</span> <span class="o">|</span><span class="c1">####</span>
- <span class="mi">14</span> <span class="o">|</span>   <span class="mf">6.94</span><span class="o">%</span> <span class="o">|</span><span class="c1">###</span>
- <span class="mi">15</span> <span class="o">|</span>   <span class="mf">4.63</span><span class="o">%</span> <span class="o">|</span><span class="c1">##</span>
- <span class="mi">16</span> <span class="o">|</span>   <span class="mf">2.78</span><span class="o">%</span> <span class="o">|</span><span class="c1">#</span>
- <span class="mi">17</span> <span class="o">|</span>   <span class="mf">1.39</span><span class="o">%</span> <span class="o">|</span>
- <span class="mi">18</span> <span class="o">|</span>   <span class="mf">0.46</span><span class="o">%</span> <span class="o">|</span>
-</code></pre></div></td></tr></table></div>
-<p>The interpreter strives to be a working replacement in all meaningful aspects, but it is <strong><em>not</em></strong> 100% compatible, favoring fundamental correctness over producing identical results.
-Besides <a href="#conclusion">enumerating the goals</a> of this effort, this document primarily focuses on two categories of behaviors:</p>
+<p>You can also <a href="../#running-locally">host your own or run it locally</a>.</p>
+<p>The <code>anydyce</code> interpreter strives to be a working replacement in all meaningful aspects, but it is <strong><em>not</em></strong> 100% compatible, favoring fundamental correctness over producing identical results.
+Besides <a href="#features">detailing features</a> and <a href="#conclusion">enumerating goals</a>, this document primarily focuses on two categories of behaviors:</p>
 <ol>
 <li><strong>AnyDice idiosyncrasies</strong>, meaning surprising or inconsistent behaviors that appear intended that the <code>anydyce</code> interpreter faithfully replicates; and</li>
 <li><strong>Excluded AnyDice bugs</strong>, meaning behaviors that are likely unintended defects, that the <code>anydyce</code> interpreter deliberately avoids.</li>
@@ -1406,16 +1441,33 @@ Inconsistencies, both individually and collectively were unintuitive and difficu
 Also discovered were several latent “foot guns” likely to silently result in mathematical errors in real world programs.
 Some foundation necessary to an analysis of AnyDice behaviors is present below, but familiarity with AnyDice’s documentation<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> is helpful for gleaning a complete picture.</p>
 <h2 id="features">Features</h2>
+<p>The <code>anydyce</code> interpreter is primarily broken up into two major components:</p>
+<ol>
+<li>A portable, pure Python back end that relies on <a href="https://github.com/posita/dyce/"><code>dyce</code></a> for computation; and</li>
+<li>A user interface implemented in HTML, CSS, and plain JavaScript that uses <a href="https://plotly.com/">Plotly</a> for visualizations and <a href="https://pyodide.org/en/stable/">Pyodide</a> to run everything (including the Python interpreter) directly in-browser.</li>
+</ol>
+<h3 id="no-server-required">No server required</h3>
+<p>The included web interface is loaded from a static site and runs in the user’s browser.
+The only infrastructure needed to run a local instance is a simple web server (e.g., the one that ships with Python’s standard library: <code>python3 -m http.server 8000</code>).</p>
+<h3 id="the-url-is-the-program">The URL <strong><em>is</em></strong> the program</h3>
+<p>Similar to other browser-based sandboxes and playgrounds, the included web interface allows programs to be preserved and shared solely by creating and copying a URL that encodes the entire program in the URL itself.
+As long as you have access to the URL (e.g., via a bookmark), you have the program.
+No reliance on accessing another’s database is needed.</p>
+<h3 id="loading-programs-saved-to-anydicecom-by-program-ids">Loading programs saved to anydice.com by program IDs</h3>
+<p>The web interface allows loading of programs previously saved to AnyDice by way of a <a href="https://github.com/posita/anydice-data">publicly available program cache</a> that was retrieved prior to <a href="#background-purpose">AnyDice being compromised</a>.
+For any AnyDice URL containing a program ID, you can create an alternate URL using that same ID to load that program and run it with the <code>anydyce</code> interpreter.
+For example, consider the URL <a href="https://anydice.com/program/18106"><code>https://anydice.com/program/18106</code></a>.
+You can run the same program by visiting <a href="https://posita.github.io/anydyce/latest/playground/#id=18106"><code>https://posita.github.io/anydyce/latest/playground/#id=18106</code></a>.
+Alternatively, you can <a href="../#running-locally">run your own copy locally</a> and adapt the same pattern to the URL of your local web server (e.g.,<code>https://127.0.0.1:8000/playground/#id=18106</code>).</p>
 <h3 id="no-floats">No <code>float</code>s</h3>
-<p>The <code>anydyce</code> interpreter relies heavily on the <a href="https://github.com/posita/dyce/"><code>dyce</code> library</a>’s <a href="/dyce/latest/dyce/#dyce.H"><code>H</code> object</a> as a core primitive for computation.
-<code>dyce</code> does not use floating point arithmetic:</p>
+<p>The <a href="https://github.com/posita/dyce/"><code>dyce</code> library</a>’s <a href="/dyce/latest/dyce/#dyce.H"><code>H</code> object</a>s on which this interpreter is based do not use floating point arithmetic:</p>
 <blockquote>
 <p><code>H</code> objects encode finite discrete probability distributions as integer counts without any denominator.</p>
 </blockquote>
 <p>Truncations occur (when and how <a href="#proprietary-extensions">can be tuned</a>), but <code>dyce</code> does not use typical primitives like 64-bit <code>int</code>s or <code>float</code>s.
 As such, calculations are not subject to the same limitations and errors.
 (See the <a href="#overflows">discussion on overflows below</a>.)</p>
-<p>Instead, internally when an <code>H</code> object is created (e.g., as the result of a operation like <code>20d20</code>), if the largest count exceeds the number of bits allowed by a contextual maximum, all counts are <em>quantized</em>.
+<p>Instead, whenever any <code>H</code> object is created during execution (e.g., as the result of a operation like <code>20d20</code>) where the largest count would exceed the number of bits allowed by a contextual maximum, all counts are <em>quantized</em>.
 More specifically, the least significant bits are truncated and all counts are rounded off such that they all fit within that maximum.
 This does not eliminate errors, but it does allow authors to arbitrarily tune precision as needed (e.g., where performance takes priority).</p>
 <h3 id="proprietary-extensions">Proprietary extensions</h3>
@@ -1449,6 +1501,58 @@ This does not eliminate errors, but it does allow authors to arbitrarily tune pr
 <span class="n">set</span><span class="w"> </span><span class="s">&quot;anydyce: display precision&quot;</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="s">&quot;exact&quot;</span>
 </code></pre></div></td></tr></table></div>
 <p>Open in playground: <a href="../playground/#p=XCBUaGlzIGlsbHVzdHJhdGVzIHF1YW5pdHphdGlvbiBpbiBhY3Rpb24uIE5vdGUgZXNwZWNpYWxseSB0aGUgdGFpbHMKICBvZiB0aGUgZGlzdHJpYnV0aW9uLiBNb3JlIGRldGFpbCBjYW4gYmUgc2VlIGluIHRoZSB0ZXh0IG91dHB1dC4gXApsb29wIFAgb3ZlciB7NCwgOH0gewogIHNldCAiYW55ZHljZTogY2FsY3VsYXRpb24gcHJlY2lzaW9uIiB0byBQCiAgb3V0cHV0IDIwZDYgbmFtZWQgIjIwZDYgd2l0aCBjb21wdXRhdGlvbnMgcXVhbnRpemVkIGF0IFtQXSBiaXRzIgp9CnNldCAiYW55ZHljZTogY2FsY3VsYXRpb24gcHJlY2lzaW9uIiB0byAiZXhhY3QiCm91dHB1dCAyMGQ2IG5hbWVkICIyMGQ2IHdpdGhvdXQgYW55IHF1YW50aXphdGlvbiIKc2V0ICJhbnlkeWNlOiBkaXNwbGF5IHByZWNpc2lvbiIgdG8gImV4YWN0Igo"><img alt="Try the AnyDice-compatible playground" src="../anydice-playground.svg" /></a></p>
+<h3 id="portable-python-implementation">Portable Python implementation</h3>
+<p>The back-end can be incorporated into other projects via the <a class="autorefs autorefs-internal" href="../anydyce.anydice/#anydyce.anydice"><code>anydyce.anydice</code></a> subpackage.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">anydyce.anydice</span><span class="w"> </span><span class="kn">import</span> <span class="n">format_results</span><span class="p">,</span> <span class="n">run</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">program</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">...     output 3d6</span>
+<span class="s2">... &quot;&quot;&quot;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">results</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">format_results</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+<span class="o">====</span> <span class="n">output</span> <span class="mi">1</span> <span class="o">====</span>
+<span class="n">avg</span> <span class="o">|</span>   <span class="mf">10.50</span>
+<span class="n">std</span> <span class="o">|</span>    <span class="mf">2.96</span>
+  <span class="mi">3</span> <span class="o">|</span>   <span class="mf">0.46</span><span class="o">%</span> <span class="o">|</span>
+  <span class="mi">4</span> <span class="o">|</span>   <span class="mf">1.39</span><span class="o">%</span> <span class="o">|</span>
+  <span class="mi">5</span> <span class="o">|</span>   <span class="mf">2.78</span><span class="o">%</span> <span class="o">|</span><span class="c1">#</span>
+  <span class="mi">6</span> <span class="o">|</span>   <span class="mf">4.63</span><span class="o">%</span> <span class="o">|</span><span class="c1">##</span>
+  <span class="mi">7</span> <span class="o">|</span>   <span class="mf">6.94</span><span class="o">%</span> <span class="o">|</span><span class="c1">###</span>
+  <span class="mi">8</span> <span class="o">|</span>   <span class="mf">9.72</span><span class="o">%</span> <span class="o">|</span><span class="c1">####</span>
+  <span class="mi">9</span> <span class="o">|</span>  <span class="mf">11.57</span><span class="o">%</span> <span class="o">|</span><span class="c1">#####</span>
+ <span class="mi">10</span> <span class="o">|</span>  <span class="mf">12.50</span><span class="o">%</span> <span class="o">|</span><span class="c1">######</span>
+ <span class="mi">11</span> <span class="o">|</span>  <span class="mf">12.50</span><span class="o">%</span> <span class="o">|</span><span class="c1">######</span>
+ <span class="mi">12</span> <span class="o">|</span>  <span class="mf">11.57</span><span class="o">%</span> <span class="o">|</span><span class="c1">#####</span>
+ <span class="mi">13</span> <span class="o">|</span>   <span class="mf">9.72</span><span class="o">%</span> <span class="o">|</span><span class="c1">####</span>
+ <span class="mi">14</span> <span class="o">|</span>   <span class="mf">6.94</span><span class="o">%</span> <span class="o">|</span><span class="c1">###</span>
+ <span class="mi">15</span> <span class="o">|</span>   <span class="mf">4.63</span><span class="o">%</span> <span class="o">|</span><span class="c1">##</span>
+ <span class="mi">16</span> <span class="o">|</span>   <span class="mf">2.78</span><span class="o">%</span> <span class="o">|</span><span class="c1">#</span>
+ <span class="mi">17</span> <span class="o">|</span>   <span class="mf">1.39</span><span class="o">%</span> <span class="o">|</span>
+ <span class="mi">18</span> <span class="o">|</span>   <span class="mf">0.46</span><span class="o">%</span> <span class="o">|</span>
+</code></pre></div></td></tr></table></div>
 <h3 id="a-note-on-performance">A note on performance</h3>
 <p>In some cases, the <code>anydyce</code> interpreter outperforms anydice.com.
 This can be hard to gauge, since the <code>anydyce</code> interpreter runs in the user’s browser, and is subject to the limitations of that execution environment.
@@ -1461,7 +1565,7 @@ This is usually because the <code>anydyce</code> interpreter attempts to be unhe
 That can often be mitigated by selecting a <a href="#proprietary-extensions">lower quantization threshold</a>.
 By way of illustration, trying to run programs <a href="../playground/#id=183b0"><code>183b0</code></a> or <a href="../playground/#id=282d6"><code>282d6</code></a> with <a href="#proprietary-extensions"><code>"anydyce: calculation precision"</code> set to <code>"exact"</code></a> will likely fail to complete within several minutes (if ever).</p>
 <p>The <code>anydyce</code> interpreter and the underlying <a href="https://github.com/posita/dyce/"><code>dyce</code> library</a> on which it is built are very much works in progress, and performance improvements are a high priority item on their road maps, so this is likely to improve as time goes on.</p>
-<h2 id="background-purpose">Background &amp; Purpose</h2>
+<h2 id="background-purpose">Background &amp; purpose</h2>
 <p>AnyDice appears to have been around in some form or another since 2009, receiving a handful of updates between then and 2026.
 It is free to use by anyone, likely funded entirely by the author who invites others to offset costs through donations.
 It has amassed over a quarter million “saved” programs<sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup> during its tenure.
@@ -1480,17 +1584,7 @@ The site was eventually restored, but programs saved to its proprietary database
 For convenience, a usable instance resides at <a href="https://posita.github.io/anydyce/latest/playground/"><code>https://posita.github.io/anydyce/latest/playground/</code></a>.
 However, merely relying on a single alternate site is insufficient, as no site guarantees access in perpetuity.
 Therefore, users are encouraged to clone <a href="https://github.com/posita/anydyce">this implementation’s source code</a> and run or host instances of their own.</p>
-<p>The <code>anydyce</code> interpreter is loaded from a static site and runs in the user’s browser.
-The only infrastructure needed to run a local instance is a simple web server (e.g., the one that ships with Python’s standard library: <code>python3 -m http.server 8000</code>).</p>
-<p>Similar to other browser-based sandboxes and playgrounds, this interface allows programs to be preserved and shared solely by creating and copying a URL that encodes the entire program in the URL itself.
-As long as you have access to the URL (e.g., via a bookmark), you have the program.
-No reliance on accessing another’s database is needed.</p>
-<p>The interface allows loading of programs previously saved to AnyDice by way of a <a href="https://github.com/posita/anydice-data">publicly available program cache</a> that was retrieved prior to AnyDice being compromised.
-For any AnyDice URL containing a program ID, you can create an alternate URL using that same ID to load that program and run it with the <code>anydyce</code> interpreter.
-For example, consider the URL <a href="https://anydice.com/program/18106"><code>https://anydice.com/program/18106</code></a>.
-You can run the same program by visiting <a href="https://posita.github.io/anydyce/latest/playground/#id=18106"><code>https://posita.github.io/anydyce/latest/playground/#id=18106</code></a>.
-Alternatively, you can <a href="../#running-locally">run your own copy locally</a> and adapt the same pattern to the URL of your local web server (e.g.,<code>https://127.0.0.1:8000/playground/#id=18106</code>).</p>
-<p>The program cache is intended to preserve intellectual property of program authors who assigned no royalties or rights to their programs, and who reasonably relied on the ongoing availability of an interpreter and storage mechanism to preserve each program’s accessibility and value.
+<p>The <a href="https://github.com/posita/anydice-data">AnyDice program cache</a> is intended to preserve intellectual property of program authors who assigned no royalties or rights to their programs, and who reasonably relied on the ongoing availability of an interpreter and storage mechanism to preserve each program’s accessibility and value.
 If you are the author of a particular program in the cache that you want removed, please <a href="https://github.com/posita/anydice-data/issues">file an issue</a>.</p>
 <p>Accesses required to create the cache were rate limited and consistent with AnyDice’s longstanding availability and encouraged use.
 anydice.com implicitly permits anyone anywhere in the world to: visit the site; create and execute programs; save programs and share links to those programs with others; and use links to retrieve saved programs for examination, execution, illustration, etc.
@@ -2226,7 +2320,7 @@ If you have any feedback on how this project can better meet these goals, please
 <p>See the “<a href="https://anydice.com/docs/">Documentation</a>”, “<a href="https://anydice.com/docs/function-library/">Function Library</a>”, and “<a href="https://anydice.com/articles/">Articles</a>” sections of the AnyDice website.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
 <li id="fn:2">
-<p>Deliberately omitted is AnyDice’s “legacy” syntax, as <a href="#legacy-programs">noted below</a>.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+<p>Deliberately omitted is AnyDice’s <a href="#legacy-programs">“legacy” syntax</a>.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
 </li>
 <li id="fn:3">
 <p>At a user’s request, AnyDice has ability to save a program in its own proprietary, server-side database, providing a link with a hexadecimal ID which can later be used to load the same program.

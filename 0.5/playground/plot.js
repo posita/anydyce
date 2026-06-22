@@ -77,6 +77,20 @@ export function readCssTheme(root = globalThis.document?.documentElement) {
     border: v("--border"),
     accent: v("--accent"),
     fontFamily: v("--font-ui"),
+    // Qualitative palette for the line view, pulled from the theme's hue
+    // slots so it follows light/dark AND the theme family (Default /
+    // Colorblind / High contrast / No color). Plotly cycles traces through
+    // layout.colorway when no per-trace color is set. (No-color collapses
+    // to one repeated hue -- lines are then distinguished only by the
+    // legend; line-style cycling is a deliberate future add.)
+      series: [
+          "blue", "red", "green",
+          "yellow", "cyan", "magenta",
+          "blue-muted", "red-muted", "green-muted",
+          "yellow-muted", "cyan-muted", "magenta-muted",
+      ]
+      .map((h) => v(`--c-${h}`))
+      .filter(Boolean),
   };
 }
 
@@ -271,4 +285,123 @@ export function renderPlots(container, outputs, Plotly, { precision } = {}) {
       modeBarButtonsToRemove: ["lasso2d", "select2d"],
     });
   }
+}
+
+// Align every output's distribution onto the sorted union of all outcomes,
+// zero-filling where a series has no mass. Each line then has a value at
+// every outcome in the combined range, so the overlay reads like
+// anydice.com's graph -- continuous lines that drop to 0 outside their own
+// support -- rather than each line spanning only its own outcomes (which
+// would interpolate straight across gaps). Returns
+// { x: number[], series: [{label, y: number[]}] }.
+export function alignedSeries(outputs) {
+  const xSet = new Set();
+  for (const { items } of outputs || []) {
+    for (const [o] of items) xSet.add(Number(o));
+  }
+  const x = [...xSet].sort((a, b) => a - b);
+  const indexOf = new Map(x.map((o, i) => [o, i]));
+  const series = (outputs || []).map(({ label, items }) => {
+    const y = new Array(x.length).fill(0);
+    const percents = itemsToPercents(items); // null for an empty distribution
+    if (percents !== null) {
+      items.forEach(([o], i) => {
+        y[indexOf.get(Number(o))] = percents[i];
+      });
+    }
+    return { label, y };
+  });
+  return { x, series };
+}
+
+// Build a single Plotly figure overlaying every output as a line trace -- one
+// consolidated chart (like anydice.com's graph view), versus plotSpec /
+// renderPlots' one-chart-per-output bars.
+//
+// outputs:   array of {label, items}; see plotSpec.
+// precision: decimal places for the percent hover labels.
+// theme:     optional color/font object (see readCssTheme). theme.series
+//            becomes layout.colorway, so traces cycle the theme palette.
+//
+// The x-axis is NUMERIC (not categorical) so series align on a shared scale
+// and Plotly auto-picks a readable tick density; the data is zero-filled
+// across the outcome union (see alignedSeries) for line continuity. No
+// per-trace color is set, so Plotly assigns from colorway.
+export function lineSpec(
+  outputs,
+  { precision = DEFAULT_PLOT_PRECISION, theme = null } = {},
+) {
+  const prec = normalizePrecision(precision);
+  const { x, series } = alignedSeries(outputs);
+  const data = series.map(({ label, y }) => ({
+    type: "scatter",
+    mode: "lines",
+    name: label,
+    x,
+    y,
+    // hovermode "x unified" (see layout) shows the outcome once as the box
+    // header and labels each row with the trace name, so the per-point
+    // template only carries the percent; <extra></extra> drops the
+    // otherwise-redundant secondary name box.
+    // hovertemplate: `%{y:.${prec}f}%<extra></extra>`,
+    hovertemplate: `%{y:.${prec}f}%`,
+  }));
+  return {
+    data,
+    layout: {
+      showlegend: true,
+      // One shared tooltip per outcome, listing every series' value --
+      // good for comparing the distributions at a glance.
+      hovermode: "x unified",
+      xaxis: {
+        title: { text: "Outcome" },
+        ...themeAxisBits(theme),
+      },
+      yaxis: {
+        title: { text: "Probability (%)" },
+        rangemode: "tozero",
+        ...themeAxisBits(theme),
+      },
+      margin: { l: 60, r: 20, t: MARGIN_TOP_PX, b: MARGIN_BOTTOM_PX },
+      ...(theme && theme.series && theme.series.length
+        ? { colorway: theme.series }
+        : {}),
+      ...themeLayoutBits(theme),
+    },
+    isEmpty: x.length === 0,
+  };
+}
+
+// Render the consolidated line overlay into `container`: a single Plotly
+// chart (cf. renderPlots, which appends one chart per output). The chart
+// fills the container via CSS (#output-lines .plot { flex: 1 }) -- its
+// height is the pane's, not a per-outcome computation. The CSS theme is
+// re-read per call, like renderPlots, so the palette tracks the current
+// light/dark + family.
+export function renderLines(container, outputs, Plotly, { precision } = {}) {
+  container.replaceChildren();
+  if (!outputs || outputs.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "plot-empty";
+    empty.textContent = "(no output)";
+    container.appendChild(empty);
+    return;
+  }
+  const theme = readCssTheme();
+  const spec = lineSpec(outputs, { precision, theme });
+  if (spec.isEmpty) {
+    const empty = document.createElement("div");
+    empty.className = "plot-empty";
+    empty.textContent = "(empty distribution)";
+    container.appendChild(empty);
+    return;
+  }
+  const div = document.createElement("div");
+  div.className = "plot";
+  container.appendChild(div);
+  Plotly.newPlot(div, spec.data, spec.layout, {
+    responsive: true,
+    displaylogo: false,
+    modeBarButtonsToRemove: ["lasso2d", "select2d"],
+  });
 }
