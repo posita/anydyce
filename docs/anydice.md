@@ -53,7 +53,9 @@ No reliance on accessing another’s database is needed.
 
 ### Loading programs saved to anydice.com by program IDs
 
-The web interface allows loading of programs previously saved to AnyDice by way of a [publicly available program cache](https://github.com/posita/anydice-data) that was retrieved prior to [AnyDice being compromised](#background-purpose).
+The web interface allows loading of programs previously saved to AnyDice by way of a [publicly available partial program cache](https://github.com/posita/anydice-data) that was retrieved prior to [AnyDice being compromised](#background-purpose).
+Be advised, however, that as of June, 2026, about 100,000 programs are still absent from the cache.
+
 For any AnyDice URL containing a program ID, you can create an alternate URL using that same ID to load that program and run it with the `anydyce` interpreter.
 For example, consider the URL [`https://anydice.com/program/18106`](https://anydice.com/program/18106).
 You can run the same program by visiting [`https://posita.github.io/anydyce/latest/playground/#id=18106`](https://posita.github.io/anydyce/latest/playground/#id=18106).
@@ -719,8 +721,8 @@ The intent of the program is clear:
 Roll a `d6`, and if it’s under `4`, re-roll it up to `3` times.
 The author provides `DEPTH` to parameterize a recursion cap and decrements it each time the function is called.
 This is a common pattern for recursion among many programming environments.
-
 What goes wrong on anydice.com is as follows.
+
 `N` is a `:n` parameter expanded over the outer `1d6` outcomes, meaning the function will be called six times.
 Theoretically, this ***should*** be with arguments: `N=1, THRESHOLD=4, DEPTH=3`; `N=2, THRESHOLD=4, DEPTH=3`; ...;`N=6, THRESHOLD=4, DEPTH=3`.
 
@@ -734,7 +736,7 @@ It’s hard to imagine a purpose for these “parameter leaks” because expansi
 It’s quite possible errors like these go unnoticed where programs are sufficiently complicated or where outputs look “close” to those expected.
 But, as we’ll see, it gets ***even stranger***.
 
-#### Modifications to ***some*** expanded parameters are durable across expansion calls
+#### Even modifications to some ***expanded*** parameters are durable (visible) across expansion calls
 
 As mentioned above, where a function call has more than one parameter to which expansion applies, it will be called with the Cartesian product of those values.
 The ***order*** of those calls iterates the leftmost parameter fastest (i.e., “little-endian” by analogy), as demonstrated by the following probe:

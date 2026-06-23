@@ -27,7 +27,7 @@ If that file is missing or appears to be modified from its original, then please
 ![Supported Python Versions](https://img.shields.io/pypi/pyversions/anydyce.svg)
 ![Supported Python Implementations](https://img.shields.io/pypi/implementation/anydyce.svg)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
-[![`dyce`-powered!](https://raw.githubusercontent.com/posita/dyce/latest/docs/dyce-powered.svg)](https://posita.github.io/dyce/)
+[![`dyce`-powered!](https://posita.github.io/dyce/latest/dyce-powered.svg)](https://posita.github.io/dyce/)
 [![Bear-ified™](https://raw.githubusercontent.com/beartype/beartype-assets/main/badge/bear-ified.svg)](https://beartype.rtfd.io/)
 
 # `anydyce` – Application experiments for [`dyce`](https://posita.github.io/dyce/)
@@ -39,7 +39,7 @@ Currently, it includes:
     * Try it! 👉 [![Try dyce](https://jupyterlite.readthedocs.io/en/latest/_static/badge.svg)](https://posita.github.io/anydyce/latest/jupyter/lab/?path=anydyce_intro.ipynb)  👈
 1. 💥 ***New!*** 💥 A fully functioning, (mostly[^1]) compatible, pure-Python [AnyDice](https://anydice.com/) language interpreter and interactive playground.
    [Quite a bit of detail is provided](anydice.md) on how it was built, how it differs from the original, and all the pitfalls and nuances discovered along the way.
-    * Try it! 👉 [![Try the AnyDice-compatible playground](anydice-playground.svg)](https://posita.github.io/anydyce/latest/playground/) 👈
+    * Try it! 👉 [![Try the AnyDice-compatible playground](https://posita.github.io/anydyce/latest/anydice-playground.svg)](https://posita.github.io/anydyce/latest/playground/) 👈
 
 !!! danger "JupyterLite may not save your work!"
 
