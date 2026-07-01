@@ -405,3 +405,270 @@ export function renderLines(container, outputs, Plotly, { precision } = {}) {
     modeBarButtonsToRemove: ["lasso2d", "select2d"],
   });
 }
+
+// Vertical geometry for the ridgeline view, in data-space units. Each output's
+// band sits one ROW_STEP above the next; a ridge's tallest point rises
+// RIDGE_OVERLAP * ROW_STEP, so with overlap > 1 a ridge pokes up behind the
+// band above it -- the characteristic ridgeline / "joy plot" look. ROW_STEP is
+// arbitrary (the y-axis range is derived from it), so only their RATIO matters.
+const ROW_STEP = 1;
+const RIDGE_OVERLAP = 2.4;
+
+// Fill translucency for ridges: the area under each curve is drawn at this
+// alpha so overlapping ridges show THROUGH one another -- a tighter, more
+// overlapped stack stays legible -- while the line on top stays fully opaque so
+// each ridge's silhouette stays crisp. Trace-level opacity can't separate fill
+// from line (it dims both), so the alpha is baked into the fillcolor below.
+const FILL_ALPHA = 0.4;
+
+// Return `color` as an "rgba(...)" string at the given alpha, so a ridge's fill
+// can be translucent while its line stays solid. Accepts the hex the theme uses
+// (#rgb / #rrggbb, with or without an alpha nibble) and rgb()/rgba() forms;
+// anything it can't parse is returned unchanged (an opaque but still-valid
+// fill, so a surprising theme value degrades rather than breaks).
+function withAlpha(color, alpha) {
+  if (!color) return color;
+  const c = color.trim();
+  let r, g, b;
+  if (c[0] === "#") {
+    const h = c.slice(1);
+    if (h.length === 3 || h.length === 4) {
+      [r, g, b] = [h[0], h[1], h[2]].map((d) => parseInt(d + d, 16));
+    } else if (h.length === 6 || h.length === 8) {
+      [r, g, b] = [h.slice(0, 2), h.slice(2, 4), h.slice(4, 6)].map((p) =>
+        parseInt(p, 16),
+      );
+    } else {
+      return color;
+    }
+  } else {
+    const m = c.match(/rgba?\(([^)]+)\)/i);
+    if (!m) return color;
+    [r, g, b] = m[1].split(",").map((s) => parseFloat(s));
+  }
+  if (![r, g, b].every(Number.isFinite)) return color;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// Build a single Plotly figure stacking every output as a filled "ridge" -- a
+// third consolidated view (cf. lineSpec's overlay and plotSpec's per-output
+// bars). Each output becomes a horizontal band whose distribution is drawn as a
+// filled curve rising from a baseline; the bands are offset vertically and
+// overlap. The visible LINE stays true to each output's own outcomes -- unlike
+// the line view it is NOT zero-filled across the outcome union, so it (and the
+// tooltips) cover just the outcomes that output actually has, bridging internal
+// "gaps" (an outcome a neighbor has but this output lacks) rather than running
+// flat out to other outputs' min/max. The fill drops straight to the baseline
+// at each end (vertical edges, below) so the area closes without overhanging
+// the real outcomes -- except a lone single-outcome spike, which gets a small
+// foot so it doesn't collapse to zero width.
+//
+// outputs:   array of {label, items}; see plotSpec.
+// precision: decimal places for the percent hover labels.
+// theme:     optional color/font object (see readCssTheme). theme.series colors
+//            the ridges (cycled, one hue per output); without it Plotly's
+//            defaults apply (themeless unit-test contexts).
+// overlap:   how far a ridge may rise, in row-steps (default RIDGE_OVERLAP);
+//            > 1 makes ridges overlap, smaller values separate them.
+// normalize: "shared" (default) scales every ridge by the SAME factor so peak
+//            heights stay comparable across outputs -- matching the bars view's
+//            shared x-range. "each" scales every ridge to its own max so all
+//            peaks reach the same height (the classic ridgeline aesthetic, but
+//            relative magnitude across outputs is no longer readable).
+//
+// Output order: outputs[0] is the TOP band, descending. Ridges rise upward and
+// are emitted top band first, bottom band last, so Plotly draws the lower /
+// front ridge over the one behind it where they overlap (mountains receding).
+//
+// Each ridge is two traces: a self-closed FILL polygon (the curve dropped
+// vertically to the baseline at each end -- a single-outcome spike gets a small
+// foot instead so it doesn't vanish -- drawn with no visible line) and then the
+// visible LINE over it. The line carries the REAL percents in customdata
+// (the plotted y is offset + scaled and never shown to the user); the label is
+// a left-aligned annotation at the ridge's baseline (so long names extend
+// rightward over the ridge instead of clipping in a gutter) -- no legend.
+//
+// Returns {data, layout, isEmpty}; isEmpty is true only when there are no
+// outcomes at all (every output empty), matching lineSpec.
+export function ridgeSpec(
+  outputs,
+  {
+    precision = DEFAULT_PLOT_PRECISION,
+    theme = null,
+    overlap = RIDGE_OVERLAP,
+    normalize = "shared",
+  } = {},
+) {
+  const prec = normalizePrecision(precision);
+  // Each ridge keeps ONLY its own outcomes (no union zero-fill); xs/ys are
+  // empty for an output with no mass.
+  const ridges = outputs.map(({ label, items }) => {
+    const percents = itemsToPercents(items); // null for an empty distribution
+    return {
+      label,
+      xs: percents ? items.map(([o]) => Number(o)) : [],
+      ys: percents || [],
+    };
+  });
+  const n = ridges.length;
+  const palette =
+    theme && theme.series && theme.series.length ? theme.series : null;
+  const peakHeight = overlap * ROW_STEP;
+  // Shared scale: one percent->height factor for every ridge, sized so the
+  // single global tallest outcome reaches peakHeight. ("each" recomputes this
+  // per ridge below.) globalMax is 0 only when every output is empty.
+  const globalMax = ridges.reduce(
+    (m, { ys }) => ys.reduce((mm, v) => (v > mm ? v : mm), m),
+    0,
+  );
+  if (globalMax <= 0) {
+    return { data: [], layout: {}, isEmpty: true };
+  }
+  const data = [];
+  const annotations = [];
+  ridges.forEach(({ label, xs, ys }, i) => {
+    // outputs[0] on top: highest baseline at i=0, descending to 0.
+    const baseline = (n - 1 - i) * ROW_STEP;
+    // Label each ridge with a LEFT-aligned annotation pinned to the left edge of
+    // the plot (paper x=0) at its baseline -- not a y-axis tick. A y-axis tick
+    // is right-justified into the left margin, so a long output name grows
+    // leftward and clips; this way it grows rightward, overlapping the ridge.
+    annotations.push({
+      xref: "paper",
+      x: 0,
+      xanchor: "left",
+      xshift: 4,
+      yref: "y",
+      y: baseline,
+      yanchor: "bottom",
+      yshift: 2,
+      text: label,
+      showarrow: false,
+      align: "left",
+      // A translucent "pill" (the theme background) with a little padding keeps
+      // the label legible where it overlaps a ridge's fill/line.
+      ...(theme
+        ? {
+            font: { color: theme.muted, family: theme.fontFamily },
+            bgcolor: withAlpha(theme.bg, 0.72),
+            borderpad: 2,
+          }
+        : {}),
+    });
+    const localMax =
+      normalize === "each" ? ys.reduce((mm, v) => (v > mm ? v : mm), 0) : globalMax;
+    const scale = localMax > 0 ? peakHeight / localMax : 0;
+    const color = palette ? palette[i % palette.length] : undefined;
+    const curveY = ys.map((v) => baseline + v * scale);
+    // A single-outcome ridge (common -- an always-true/false question like
+    // "2d6 > 1" lands 100% on one outcome) would collapse to a zero-width sliver
+    // with vertical edges, so give it a small foot instead.
+    const single = xs.length === 1;
+    const foot = single ? 0.5 : 0;
+    // FILL: a self-closed polygon -- the curve plus a baseline point at each end
+    // so the area drops to the baseline. A multi-outcome ridge anchors those at
+    // the SAME x as min/max (vertical edges, no horizontal overhang past the
+    // real outcomes); a single-outcome ridge uses a +/-0.5 foot so its lone
+    // spike fills a visible unit-wide triangle. Internal "gaps" are bridged, NOT
+    // dropped: a gap only means a neighbor has an outcome this output lacks, so
+    // the area spans them like the line. No visible line (the line trace below
+    // is the stroke) and no hover.
+    const fillX = xs.length
+      ? [xs[0] - foot, ...xs, xs[xs.length - 1] + foot]
+      : [];
+    const fillY = xs.length ? [baseline, ...curveY, baseline] : [];
+    data.push({
+      type: "scatter",
+      mode: "lines",
+      x: fillX,
+      y: fillY,
+      fill: "toself",
+      line: { width: 0 },
+      hoverinfo: "skip",
+      showlegend: false,
+      ...(color ? { fillcolor: withAlpha(color, FILL_ALPHA) } : {}),
+    });
+    // LINE: the visible stroke, true to the actual outcomes (no tails, no gap
+    // padding), opaque over the translucent fill so it stays crisp where ridges
+    // overlap. Carries the tooltips; the REAL percents ride in customdata (the
+    // plotted y is offset + scaled and never shown). A single outcome has no
+    // segment to stroke, so it also gets a marker -- a visible, hoverable dot.
+    data.push({
+      type: "scatter",
+      mode: single ? "lines+markers" : "lines",
+      x: xs,
+      y: curveY,
+      name: label,
+      customdata: ys,
+      hovertemplate: `${label}<br>%{x}: %{customdata:.${prec}f}%<extra></extra>`,
+      showlegend: false,
+      ...(color
+        ? {
+            line: { color, width: 1.5 },
+            ...(single ? { marker: { color } } : {}),
+          }
+        : {}),
+    });
+  });
+  return {
+    data,
+    layout: {
+      showlegend: false,
+      hovermode: "closest",
+      xaxis: {
+        title: { text: "Outcome" },
+        ...themeAxisBits(theme),
+      },
+      yaxis: {
+        // Labels are annotations (see above) and the baselines are the only
+        // reference lines, so the y-axis carries no ticks, grid, or zeroline.
+        showticklabels: false,
+        showgrid: false,
+        zeroline: false,
+        range: [
+          -0.5 * ROW_STEP,
+          (n - 1) * ROW_STEP + peakHeight + 0.5 * ROW_STEP,
+        ],
+        ...themeAxisBits(theme),
+      },
+      annotations,
+      // Slim left margin now that labels live inside the plot rather than in a
+      // y-axis gutter (just enough for the leftmost x-axis tick label).
+      margin: { l: 40, r: 20, t: MARGIN_TOP_PX, b: MARGIN_BOTTOM_PX },
+      ...themeLayoutBits(theme),
+    },
+    isEmpty: false,
+  };
+}
+
+// Render the consolidated ridgeline into `container`: a single Plotly chart
+// (cf. renderLines). Like the line view it fills the pane via CSS rather than a
+// per-outcome height computation, and re-reads the CSS theme per call so the
+// palette tracks the current light/dark + family.
+export function renderRidge(container, outputs, Plotly, { precision } = {}) {
+  container.replaceChildren();
+  if (!outputs || outputs.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "plot-empty";
+    empty.textContent = "(no output)";
+    container.appendChild(empty);
+    return;
+  }
+  const theme = readCssTheme();
+  const spec = ridgeSpec(outputs, { precision, theme });
+  if (spec.isEmpty) {
+    const empty = document.createElement("div");
+    empty.className = "plot-empty";
+    empty.textContent = "(empty distribution)";
+    container.appendChild(empty);
+    return;
+  }
+  const div = document.createElement("div");
+  div.className = "plot";
+  container.appendChild(div);
+  Plotly.newPlot(div, spec.data, spec.layout, {
+    responsive: true,
+    displaylogo: false,
+    modeBarButtonsToRemove: ["lasso2d", "select2d"],
+  });
+}

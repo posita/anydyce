@@ -36,6 +36,7 @@ import {
   DEFAULT_THEME,
   VIEW_MODE_BARS,
   VIEW_MODE_LINES,
+  VIEW_MODE_RIDGE,
   VIEW_MODE_TEXT,
   createDebouncedSaver,
   loadAccent,
@@ -53,7 +54,7 @@ import {
   stripUrlFragment,
 } from "./persistence.js";
 import { attachResizer, clampPercent } from "./resizer.js";
-import { renderLines, renderPlots } from "./plot.js";
+import { renderLines, renderPlots, renderRidge } from "./plot.js";
 // plotly.js-cartesian-dist-min loads via esm.sh through the importmap (see
 // index.html). UMD bundle wrapped to ESM; default export is the Plotly
 // namespace.
@@ -271,8 +272,10 @@ const outputPlaceholder = document.getElementById("output-placeholder");
 const outputText        = document.getElementById("output-text");
 const outputBars        = document.getElementById("output-bars");
 const outputLines       = document.getElementById("output-lines");
+const outputRidge       = document.getElementById("output-ridge");
 const viewBarsBtn       = document.getElementById("view-bars-btn");
 const viewLinesBtn      = document.getElementById("view-lines-btn");
+const viewRidgeBtn      = document.getElementById("view-ridge-btn");
 const viewTextBtn       = document.getElementById("view-text-btn");
 const logsPlaceholder   = document.getElementById("logs-placeholder");
 const logsEl            = document.getElementById("logs");
@@ -327,7 +330,7 @@ csvBtn.addEventListener("click", handleCsvDownload);
 // the chart panes mirror whatever short text the text view shows (error
 // summary, "(cancelled)", etc.) when there's nothing to plot.
 function clearOutputCharts(msg) {
-  for (const container of [outputBars, outputLines]) {
+  for (const container of [outputBars, outputLines, outputRidge]) {
     container.replaceChildren();
     if (msg) {
       const div = document.createElement("div");
@@ -339,14 +342,15 @@ function clearOutputCharts(msg) {
 }
 
 function renderOutputCharts(outputs, displayPrecision) {
-  // Both chart views (bars + lines) are built from the raw [{label, items}]
-  // data on every run, so toggling between them is instant (no re-render).
-  // displayPrecision is the run's final `set "anydyce: display precision"`
-  // value, so percent labels match the text view's formatting.
+  // All three chart views (bars + lines + ridge) are built from the raw
+  // [{label, items}] data on every run, so toggling between them is instant
+  // (no re-render). displayPrecision is the run's final `set "anydyce: display
+  // precision"` value, so percent labels match the text view's formatting.
   lastOutputs = outputs;
   lastDisplayPrecision = displayPrecision;
   renderPlots(outputBars, outputs, Plotly, { precision: displayPrecision });
   renderLines(outputLines, outputs, Plotly, { precision: displayPrecision });
+  renderRidge(outputRidge, outputs, Plotly, { precision: displayPrecision });
   showOutputViews();
 }
 
@@ -362,6 +366,9 @@ function rerenderCharts() {
       precision: lastDisplayPrecision,
     });
     renderLines(outputLines, lastOutputs, Plotly, {
+      precision: lastDisplayPrecision,
+    });
+    renderRidge(outputRidge, lastOutputs, Plotly, {
       precision: lastDisplayPrecision,
     });
   }
@@ -459,7 +466,7 @@ let outputHasContent = false;
 // display: none containers) and dragging the editor divider (Plotly's
 // `responsive: true` listens to WINDOW resize only, not container resize).
 function resizeVisibleCharts() {
-  for (const container of [outputBars, outputLines]) {
+  for (const container of [outputBars, outputLines, outputRidge]) {
     if (container.classList.contains("hidden")) continue;
     for (const plot of container.querySelectorAll(".plot")) {
       Plotly.Plots.resize(plot);
@@ -471,9 +478,11 @@ function applyViewVisibility() {
   const visible = (mode) => viewMode === mode && outputHasContent;
   outputBars.classList.toggle("hidden", !visible(VIEW_MODE_BARS));
   outputLines.classList.toggle("hidden", !visible(VIEW_MODE_LINES));
+  outputRidge.classList.toggle("hidden", !visible(VIEW_MODE_RIDGE));
   outputText.classList.toggle("hidden", !visible(VIEW_MODE_TEXT));
   viewBarsBtn.classList.toggle("active", viewMode === VIEW_MODE_BARS);
   viewLinesBtn.classList.toggle("active", viewMode === VIEW_MODE_LINES);
+  viewRidgeBtn.classList.toggle("active", viewMode === VIEW_MODE_RIDGE);
   viewTextBtn.classList.toggle("active", viewMode === VIEW_MODE_TEXT);
   // Charts skip layout while display:none; resize whichever chart view just
   // became visible so it fills the pane (Plotly tracks window, not container).
@@ -496,6 +505,7 @@ function setViewMode(mode) {
   if (
     mode !== VIEW_MODE_BARS &&
     mode !== VIEW_MODE_LINES &&
+    mode !== VIEW_MODE_RIDGE &&
     mode !== VIEW_MODE_TEXT
   ) {
     return;
@@ -507,6 +517,7 @@ function setViewMode(mode) {
 
 viewBarsBtn.addEventListener("click", () => setViewMode(VIEW_MODE_BARS));
 viewLinesBtn.addEventListener("click", () => setViewMode(VIEW_MODE_LINES));
+viewRidgeBtn.addEventListener("click", () => setViewMode(VIEW_MODE_RIDGE));
 viewTextBtn.addEventListener("click", () => setViewMode(VIEW_MODE_TEXT));
 
 // Reflect the persisted (or default) view mode in the toggle buttons on
