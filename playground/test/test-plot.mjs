@@ -13,11 +13,11 @@ import {
   DEFAULT_PLOT_PRECISION,
   EMPTY_CHART_PX,
   PX_PER_OUTCOME,
-  alignedSeries,
   chartHeight,
   globalMaxPercent,
   itemsToPercents,
   lineSpec,
+  perOutputSeries,
   plotSpec,
   readCssTheme,
   ridgeSpec,
@@ -314,45 +314,28 @@ test("readCssTheme: returns null outside a DOM", () => {
   assert.equal(readCssTheme(null), null);
 });
 
-// ---- alignedSeries ------------------------------------------------------
+// ---- perOutputSeries ----------------------------------------------------
 
-test("alignedSeries: unions outcomes and zero-fills each series", () => {
-  const outputs = [
-    {
-      label: "a",
-      items: [
-        [1, 1],
-        [2, 1],
-      ],
-    },
-    {
-      label: "b",
-      items: [
-        [2, 1],
-        [3, 1],
-        [4, 2],
-      ],
-    },
-  ];
-  const { x, series } = alignedSeries(outputs);
-  assert.deepEqual(x, [1, 2, 3, 4]);
-  assert.deepEqual(series[0], { label: "a", y: [50, 50, 0, 0] });
-  assert.deepEqual(series[1], { label: "b", y: [0, 25, 25, 50] });
+test("perOutputSeries: keeps each output's own outcomes and percents", () => {
+  const series = perOutputSeries([
+    { label: "a", items: [[1, 1], [2, 1]] },
+    { label: "b", items: [[2, 1], [3, 1], [4, 2]] },
+  ]);
+  // No union fill: each keeps only the outcomes it has (b's counts -> 25/25/50).
+  assert.deepEqual(series[0], { label: "a", xs: [1, 2], ys: [50, 50] });
+  assert.deepEqual(series[1], { label: "b", xs: [2, 3, 4], ys: [25, 25, 50] });
 });
 
-test("alignedSeries: empty distribution yields an all-zero series", () => {
-  const { x, series } = alignedSeries([
+test("perOutputSeries: empty distribution yields empty xs/ys", () => {
+  const series = perOutputSeries([
     { label: "x", items: [[1, 1]] },
     { label: "empty", items: [] },
   ]);
-  assert.deepEqual(x, [1]);
-  assert.deepEqual(series[1], { label: "empty", y: [0] });
+  assert.deepEqual(series[1], { label: "empty", xs: [], ys: [] });
 });
 
-test("alignedSeries: no outputs -> empty x and series", () => {
-  const { x, series } = alignedSeries([]);
-  assert.deepEqual(x, []);
-  assert.deepEqual(series, []);
+test("perOutputSeries: no outputs -> empty array", () => {
+  assert.deepEqual(perOutputSeries([]), []);
 });
 
 // ---- lineSpec -----------------------------------------------------------
@@ -364,25 +347,27 @@ test("lineSpec: one scatter/lines trace per output, numeric x-axis", () => {
   ]);
   assert.equal(spec.data.length, 2);
   assert.equal(spec.data[0].type, "scatter");
-  assert.equal(spec.data[0].mode, "lines");
+  assert.equal(spec.data[0].mode, "lines+markers");
   assert.equal(spec.data[0].name, "a");
   // Numeric (not categorical) x so series align on a shared scale and
   // Plotly auto-picks tick density.
   assert.equal(spec.layout.xaxis.type, undefined);
   assert.equal(spec.layout.yaxis.rangemode, "tozero");
-  assert.equal(spec.layout.hovermode, "x unified");
+  assert.equal(spec.layout.hovermode, "x");
   assert.equal(spec.isEmpty, false);
 });
 
-test("lineSpec: shared zero-filled x across traces", () => {
+test("lineSpec: each line keeps its own outcomes (no union zero-fill)", () => {
   const spec = lineSpec([
     { label: "a", items: [[1, 1]] },
-    { label: "b", items: [[3, 1]] },
+    { label: "b", items: [[3, 1], [4, 1]] },
   ]);
-  assert.deepEqual(spec.data[0].x, [1, 3]);
-  assert.deepEqual(spec.data[1].x, [1, 3]);
-  assert.deepEqual(spec.data[0].y, [100, 0]);
-  assert.deepEqual(spec.data[1].y, [0, 100]);
+  // a covers only outcome 1, b only 3,4 -- no dip-to-zero across the other's
+  // outcomes, so markers land only on real outcomes.
+  assert.deepEqual(spec.data[0].x, [1]);
+  assert.deepEqual(spec.data[0].y, [100]);
+  assert.deepEqual(spec.data[1].x, [3, 4]);
+  assert.deepEqual(spec.data[1].y, [50, 50]);
 });
 
 test("lineSpec: precision flows into the hover template", () => {
@@ -435,7 +420,7 @@ test("ridgeSpec: two traces per output (fill polygon + true-to-outcome line)", (
   // Line trace: the visible stroke -- no fill, carries name + hover.
   assert.equal(lineTrace(spec, 0).fill, undefined);
   assert.equal(lineTrace(spec, 0).name, "a");
-  assert.equal(lineTrace(spec, 0).mode, "lines");
+  assert.equal(lineTrace(spec, 0).mode, "lines+markers"); // dots on each outcome
   assert.equal(spec.isEmpty, false);
 });
 
@@ -457,7 +442,7 @@ test("ridgeSpec: outputs[0] is the top band, labelled via a left-aligned annotat
   assert.equal(spec.layout.yaxis.showticklabels, false);
 });
 
-test("ridgeSpec: line true to outcomes; fill vertical edges, single-outcome spike gets a foot", () => {
+test("ridgeSpec: line true to outcomes; fill closes to baseline with a small foot", () => {
   const spec = ridgeSpec([
     { label: "a", items: [[1, 1]] }, // single outcome
     { label: "b", items: [[3, 1], [4, 1]] }, // outcomes 3,4
@@ -468,13 +453,14 @@ test("ridgeSpec: line true to outcomes; fill vertical edges, single-outcome spik
   assert.deepEqual(lineTrace(spec, 0).customdata, [100]);
   assert.deepEqual(lineTrace(spec, 1).x, [3, 4]);
   assert.deepEqual(lineTrace(spec, 1).customdata, [50, 50]);
-  // Fill: a multi-outcome output drops vertically to the baseline at min/max
-  // (baseline points at the SAME x, no overhang); a single-outcome output gets
-  // a +/-0.5 foot so its lone spike still shows, and its line adds a marker.
-  assert.deepEqual(fillTrace(spec, 0).x, [0.5, 1, 1.5]);
-  assert.deepEqual(fillTrace(spec, 1).x, [3, 3, 4, 4]);
-  assert.match(lineTrace(spec, 0).mode, /markers/);
-  assert.equal(lineTrace(spec, 1).mode, "lines");
+  // Fill: every ridge closes to the baseline with a +/-0.1 foot at each end
+  // (single or multi) -- so a lone spike (a) is a narrow triangle, not a sliver.
+  assert.deepEqual(fillTrace(spec, 0).x, [0.9, 1, 1.1]);
+  assert.deepEqual(fillTrace(spec, 1).x, [2.9, 3, 4, 4.1]);
+  // Both lines carry markers (a dot per outcome); for the single-outcome ridge
+  // the marker is also what makes its segment-less line visible.
+  assert.equal(lineTrace(spec, 0).mode, "lines+markers");
+  assert.equal(lineTrace(spec, 1).mode, "lines+markers");
 });
 
 test("ridgeSpec: shared scaling keeps peak heights comparable", () => {
