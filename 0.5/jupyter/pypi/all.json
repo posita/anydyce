@@ -1,24 +1,24 @@
 {
   "anydyce": {
     "releases": {
-      "0.5.0rc2": [
+      "0.5.0rc3": [
         {
           "comment_text": "",
           "digests": {
-            "md5": "c9eb07701dac81aa1bc5a0aa27ff3003",
-            "sha256": "8fb897cac241954ad28791f6ae4f8e7c0a8d78bb0c39ae1dcbfc87ecd02af693"
+            "md5": "dc61df01c1647cddc9bbe847b68b6586",
+            "sha256": "e247cde1d5a9b5ce51e9273a0c07a53d85f4ac49df61ac39f2636b9f548991d9"
           },
           "downloads": -1,
-          "filename": "anydyce-0.5.0rc2-py3-none-any.whl",
+          "filename": "anydyce-0.5.0rc3-py3-none-any.whl",
           "has_sig": false,
-          "md5_digest": "c9eb07701dac81aa1bc5a0aa27ff3003",
+          "md5_digest": "dc61df01c1647cddc9bbe847b68b6586",
           "packagetype": "bdist_wheel",
           "python_version": "py3",
           "requires_python": ">=3.11",
-          "size": 63931,
-          "upload_time": "2026-06-22T14:29:15.099433Z",
-          "upload_time_iso_8601": "2026-06-22T14:29:15.099433Z",
-          "url": "./anydyce-0.5.0rc2-py3-none-any.whl",
+          "size": 63940,
+          "upload_time": "2026-07-02T03:31:52.076274Z",
+          "upload_time_iso_8601": "2026-07-02T03:31:52.076274Z",
+          "url": "./anydyce-0.5.0rc3-py3-none-any.whl",
           "yanked": false,
           "yanked_reason": null
         }

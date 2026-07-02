@@ -427,17 +427,19 @@ main {
   padding: 0.5em;
 }
 
-/* Line view: one consolidated chart that FILLS the pane (the bars view, by
- * contrast, stacks fixed-height charts and scrolls). The single .plot grows
- * to the pane height via flex, so it tracks pane resizes / maximize rather
- * than sitting at a fixed height with whitespace below. */
-#output-lines {
+/* Line and ridge views: one consolidated chart that FILLS the pane (the bars
+ * view, by contrast, stacks fixed-height charts and scrolls). The single .plot
+ * grows to the pane height via flex, so it tracks pane resizes / maximize
+ * rather than sitting at a fixed height with whitespace below. */
+#output-lines,
+#output-ridge {
   display: flex;
   flex-direction: column;
   padding: 0.5em;
   overflow: hidden;
 }
-#output-lines .plot {
+#output-lines .plot,
+#output-ridge .plot {
   flex: 1;
   min-height: 0;
   margin-bottom: 0;

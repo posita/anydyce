@@ -675,10 +675,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#modifications-to-some-expanded-parameters-are-durable-across-expansion-calls" class="md-nav__link">
+  <a href="#even-modifications-to-some-expanded-parameters-are-durable-visible-across-expansion-calls" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modifications to some expanded parameters are durable across expansion calls
+        Even modifications to some expanded parameters are durable (visible) across expansion calls
       
     </span>
   </a>
@@ -1306,10 +1306,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#modifications-to-some-expanded-parameters-are-durable-across-expansion-calls" class="md-nav__link">
+  <a href="#even-modifications-to-some-expanded-parameters-are-durable-visible-across-expansion-calls" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modifications to some expanded parameters are durable across expansion calls
+        Even modifications to some expanded parameters are durable (visible) across expansion calls
       
     </span>
   </a>
@@ -1454,8 +1454,9 @@ The only infrastructure needed to run a local instance is a simple web server (e
 As long as you have access to the URL (e.g., via a bookmark), you have the program.
 No reliance on accessing another’s database is needed.</p>
 <h3 id="loading-programs-saved-to-anydicecom-by-program-ids">Loading programs saved to anydice.com by program IDs</h3>
-<p>The web interface allows loading of programs previously saved to AnyDice by way of a <a href="https://github.com/posita/anydice-data">publicly available program cache</a> that was retrieved prior to <a href="#background-purpose">AnyDice being compromised</a>.
-For any AnyDice URL containing a program ID, you can create an alternate URL using that same ID to load that program and run it with the <code>anydyce</code> interpreter.
+<p>The web interface allows loading of programs previously saved to AnyDice by way of a <a href="https://github.com/posita/anydice-data">publicly available partial program cache</a> that was retrieved prior to <a href="#background-purpose">AnyDice being compromised</a>.
+Be advised, however, that as of June, 2026, about 100,000 programs are still absent from the cache.</p>
+<p>For any AnyDice URL containing a program ID, you can create an alternate URL using that same ID to load that program and run it with the <code>anydyce</code> interpreter.
 For example, consider the URL <a href="https://anydice.com/program/18106"><code>https://anydice.com/program/18106</code></a>.
 You can run the same program by visiting <a href="https://posita.github.io/anydyce/latest/playground/#id=18106"><code>https://posita.github.io/anydyce/latest/playground/#id=18106</code></a>.
 Alternatively, you can <a href="../#running-locally">run your own copy locally</a> and adapt the same pattern to the URL of your local web server (e.g.,<code>https://127.0.0.1:8000/playground/#id=18106</code>).</p>
@@ -2108,9 +2109,9 @@ The <code>anydyce</code> interpreter does not reproduce this behavior.</p>
 <p>The intent of the program is clear:
 Roll a <code>d6</code>, and if it’s under <code>4</code>, re-roll it up to <code>3</code> times.
 The author provides <code>DEPTH</code> to parameterize a recursion cap and decrements it each time the function is called.
-This is a common pattern for recursion among many programming environments.</p>
-<p>What goes wrong on anydice.com is as follows.
-<code>N</code> is a <code>:n</code> parameter expanded over the outer <code>1d6</code> outcomes, meaning the function will be called six times.
+This is a common pattern for recursion among many programming environments.
+What goes wrong on anydice.com is as follows.</p>
+<p><code>N</code> is a <code>:n</code> parameter expanded over the outer <code>1d6</code> outcomes, meaning the function will be called six times.
 Theoretically, this <strong><em>should</em></strong> be with arguments: <code>N=1, THRESHOLD=4, DEPTH=3</code>; <code>N=2, THRESHOLD=4, DEPTH=3</code>; ...;<code>N=6, THRESHOLD=4, DEPTH=3</code>.</p>
 <p>But this isn’t what happens.</p>
 <p>After the first outcome iteration triggers a re-roll (decrementing <code>DEPTH</code> from <code>3</code> to <code>2</code>), AnyDice fails to reset <code>DEPTH</code> back to <code>3</code> for the next <code>N</code>’s iteration.
@@ -2119,7 +2120,7 @@ From then onward, no re-rolls happen at all because the depth-budget remains per
 <p>It’s hard to imagine a purpose for these “parameter leaks” because expansion calls are alternative branches of a single combination of faces or rolls, not sequential events.
 It’s quite possible errors like these go unnoticed where programs are sufficiently complicated or where outputs look “close” to those expected.
 But, as we’ll see, it gets <strong><em>even stranger</em></strong>.</p>
-<h4 id="modifications-to-some-expanded-parameters-are-durable-across-expansion-calls">Modifications to <strong><em>some</em></strong> expanded parameters are durable across expansion calls</h4>
+<h4 id="even-modifications-to-some-expanded-parameters-are-durable-visible-across-expansion-calls">Even modifications to some <strong><em>expanded</em></strong> parameters are durable (visible) across expansion calls</h4>
 <p>As mentioned above, where a function call has more than one parameter to which expansion applies, it will be called with the Cartesian product of those values.
 The <strong><em>order</em></strong> of those calls iterates the leftmost parameter fastest (i.e., “little-endian” by analogy), as demonstrated by the following probe:</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>

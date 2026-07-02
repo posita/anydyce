@@ -21,10 +21,12 @@ export const VIEW_MODE_KEY = "anydyce-playground:view-mode";
 
 export const VIEW_MODE_BARS = "bars";
 export const VIEW_MODE_LINES = "lines";
+export const VIEW_MODE_RIDGE = "ridge";
 export const VIEW_MODE_TEXT = "text";
 const _ALL_VIEW_MODES = new Set([
   VIEW_MODE_BARS,
   VIEW_MODE_LINES,
+  VIEW_MODE_RIDGE,
   VIEW_MODE_TEXT,
 ]);
 
