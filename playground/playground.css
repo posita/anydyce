@@ -305,6 +305,27 @@ main {
   align-items: center;
 }
 
+/* CSV export is a plain text link, not a button, so it reads distinctly from
+ * the view-toggle buttons beside it and is far less prone to accidental
+ * clicks while flipping through visualizations. .disabled hides it entirely
+ * between runs (when there is nothing to download). */
+.pane-actions .csv-link {
+  font-size: 0.9em;
+  white-space: nowrap;
+  cursor: pointer;
+  color: var(--accent-muted);
+  text-decoration: underline;
+  /* A little extra separation from the view-toggle group beside it (on top
+   * of the .pane-actions gap). */
+  margin-inline-end: 0.4em;
+}
+.pane-actions .csv-link:hover {
+  color: var(--accent);
+}
+.pane-actions .csv-link.disabled {
+  display: none;
+}
+
 /* Shared metrics for ALL pane-header controls (action buttons + view
  * toggle): one rule owns the vertical sizing so the control families can't
  * drift apart in height. Variant rules below add only what differs --
