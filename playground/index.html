@@ -38,17 +38,17 @@
       <div class="pane-header">
         <h2>Source</h2>
         <!--
-          The titles / disabled states below (and the "Starting up..."
-          strings in the status span and output placeholder) are pre-init
-          defaults; playground.js rewrites them at runtime with the same or
-          evolved wording (e.g. cancel's title in handleRun's finally).
-          Rewording means updating both places -- there is no shared
-          constant for these strings.
+          The Run button starts in its "Loading..." shape (disabled, with a
+          startup tooltip); playground.js morphs it through Run / Running... at
+          runtime via the enter*State helpers (Cancel lives in the output
+          pane's run-in-progress indicator, not here). The "Starting up..."
+          strings in the status span and output placeholder are likewise
+          pre-init defaults rewritten at runtime. There is no shared constant
+          for these strings, so rewording means updating both places.
         -->
         <div class="pane-actions">
-          <button id="share-btn" class="btn-secondary" title="Copy a shareable URL containing this program">Share URL</button>
-          <button id="cancel-btn" class="btn-secondary" disabled title="No run in progress">Cancel</button>
-          <button id="run-btn" disabled title="Starting up...">Run</button>
+          <button id="share-btn" class="btn btn-secondary" title="Copy a shareable URL containing this program">Share URL</button>
+          <button id="run-btn" class="btn" disabled title="Starting the runtime...">Loading...</button>
         </div>
       </div>
       <div id="editor"></div>
@@ -68,7 +68,7 @@
               <button id="view-ridge-btn" type="button">Ridge</button>
               <button id="view-text-btn" type="button">Text</button>
             </div>
-            <button id="maximize-btn" type="button" class="btn-secondary icon-btn" aria-pressed="false" aria-label="Maximize the output panel (hides editor and logs)" title="Maximize the output panel (hides editor and logs)">
+            <button id="maximize-btn" type="button" class="btn btn-secondary icon-btn" aria-pressed="false" aria-label="Maximize the output panel (hides editor and logs)" title="Maximize the output panel (hides editor and logs)">
               <!-- Two glyphs; CSS shows one per [aria-pressed] state. Both
                    stroke currentColor so they follow the button's theme
                    color. aria-hidden: the button's aria-label is the name. -->
@@ -78,14 +78,17 @@
           </div>
         </div>
         <!--
-          The placeholder is its own element with exactly one job: show
-          status prose until the first run produces content. It never mixes
-          with the views' content styling, so no specificity gymnastics.
-          Both views start hidden and empty; playground.js reveals the
-          active one once there's something to show.
+          Single message surface: the ONE place any non-result text appears --
+          the startup / ready prompt, "Running..." (with Cancel), "(cancelled)",
+          and error summaries. playground.js's showMessage / showOutputViews
+          toggle it against the result views (never both at once), so every
+          status message shares one location and style rather than each render
+          path styling its own. The Cancel button shows only in the running
+          state, and only once the run outlasts CANCEL_REVEAL_MS.
         -->
-        <div id="output-placeholder" class="pane-placeholder">
-          Starting up...
+        <div id="output-message" class="output-message">
+          <span id="output-message-text" class="output-message-text">Starting up...</span>
+          <button id="output-cancel" type="button" class="btn btn-secondary hidden">Cancel</button>
         </div>
         <div id="output-bars" class="output-view hidden"></div>
         <div id="output-lines" class="output-view hidden"></div>

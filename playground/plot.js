@@ -262,8 +262,8 @@ const PLOTLY_CONFIG = {
   modeBarButtonsToRemove: ["lasso2d", "select2d"],
 };
 
-// Append a "(...)" status line (e.g. "(no output)") into an empty chart
-// container.
+// Append a "(...)" status line (e.g. "(empty distribution)") into an empty
+// chart container.
 function appendPlaceholder(container, text) {
   const div = document.createElement("div");
   div.className = "plot-empty";
@@ -285,11 +285,9 @@ function renderConsolidated(
   buildSpec,
   { precision } = {},
 ) {
+  // Callers pass at least one output; the zero-output case is a whole-pane
+  // message handled upstream (playground.js showMessage), not here.
   container.replaceChildren();
-  if (!outputs || outputs.length === 0) {
-    appendPlaceholder(container, "(no output)");
-    return;
-  }
   const spec = buildSpec(outputs, { precision, theme: readCssTheme() });
   if (spec.isEmpty) {
     appendPlaceholder(container, "(empty distribution)");
@@ -314,11 +312,9 @@ function renderConsolidated(
 // a prefers-color-scheme change (see the matchMedia listener in
 // playground.js).
 export function renderPlots(container, outputs, Plotly, { precision } = {}) {
+  // Callers pass at least one output; the zero-output case is a whole-pane
+  // message handled upstream (playground.js showMessage), not here.
   container.replaceChildren();
-  if (!outputs || outputs.length === 0) {
-    appendPlaceholder(container, "(no output)");
-    return;
-  }
   const theme = readCssTheme();
   // Shared x-axis range: every chart runs [0, global max + 5% headroom] so
   // bar lengths are comparable across outputs. Null when no output has
