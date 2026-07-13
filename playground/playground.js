@@ -266,7 +266,7 @@ const statusEl          = document.getElementById("status");
 const runBtn            = document.getElementById("run-btn");
 const shareBtn          = document.getElementById("share-btn");
 const cancelBtn         = document.getElementById("cancel-btn");
-const csvBtn            = document.getElementById("csv-btn");
+const csvLink           = document.getElementById("csv-link");
 const maximizeBtn       = document.getElementById("maximize-btn");
 const outputPlaceholder = document.getElementById("output-placeholder");
 const outputText        = document.getElementById("output-text");
@@ -307,24 +307,25 @@ let lastDisplayPrecision;
 let lastCsv = "";
 let lastCsvFilename = "";
 
+// The CSV export is a native download link: point its href at the data URL
+// when a run makes one available, and neutralize it (no href, aria-disabled,
+// pointer-events off via .disabled) otherwise. A plain link -- rather than a
+// button in the pane-actions row -- is much harder to hit by accident while
+// flipping through the visualization toggles.
 function setCsvAvailable(available) {
-  csvBtn.disabled = !available;
-  csvBtn.title = available
-    ? "Download results as CSV"
-    : "Run a program to enable CSV export";
+  if (available) {
+    csvLink.href = `data:text/csv;base64,${lastCsv}`;
+    csvLink.download = lastCsvFilename || "anydice-results.csv";
+    csvLink.classList.remove("disabled");
+    csvLink.removeAttribute("aria-disabled");
+    csvLink.title = "Download results as CSV";
+  } else {
+    csvLink.removeAttribute("href");
+    csvLink.classList.add("disabled");
+    csvLink.setAttribute("aria-disabled", "true");
+    csvLink.title = "Run a program to enable CSV export";
+  }
 }
-
-function handleCsvDownload() {
-  if (!lastCsv) return;
-  const a = document.createElement("a");
-  a.href = `data:text/csv;base64,${lastCsv}`;
-  a.download = lastCsvFilename || "anydice-results.csv";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-csvBtn.addEventListener("click", handleCsvDownload);
 
 // Clear both chart views. With `msg`, drop a placeholder note into each so
 // the chart panes mirror whatever short text the text view shows (error
