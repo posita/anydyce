@@ -265,10 +265,11 @@ async function fetchProgramFromUrl() {
 const statusEl          = document.getElementById("status");
 const runBtn            = document.getElementById("run-btn");
 const shareBtn          = document.getElementById("share-btn");
-const cancelBtn         = document.getElementById("cancel-btn");
 const csvLink           = document.getElementById("csv-link");
 const maximizeBtn       = document.getElementById("maximize-btn");
-const outputPlaceholder = document.getElementById("output-placeholder");
+const outputMessage     = document.getElementById("output-message");
+const outputMessageText = document.getElementById("output-message-text");
+const outputCancel      = document.getElementById("output-cancel");
 const outputText        = document.getElementById("output-text");
 const outputBars        = document.getElementById("output-bars");
 const outputLines       = document.getElementById("output-lines");
@@ -327,18 +328,12 @@ function setCsvAvailable(available) {
   }
 }
 
-// Clear both chart views. With `msg`, drop a placeholder note into each so
-// the chart panes mirror whatever short text the text view shows (error
-// summary, "(cancelled)", etc.) when there's nothing to plot.
-function clearOutputCharts(msg) {
+// Empty the chart views, freeing their Plotly DOM between runs. Status text
+// (errors, "(cancelled)", etc.) no longer lives here -- it goes to the single
+// message surface via showMessage.
+function clearOutputCharts() {
   for (const container of [outputBars, outputLines, outputRidge]) {
     container.replaceChildren();
-    if (msg) {
-      const div = document.createElement("div");
-      div.className = "plot-empty";
-      div.textContent = msg;
-      container.appendChild(div);
-    }
   }
 }
 
@@ -430,16 +425,12 @@ themeSelect.addEventListener("change", () => setTheme(themeSelect.value));
 setTheme(loadTheme() || DEFAULT_THEME);
 
 function renderError(err) {
-  // Output shows a short error summary only; the full traceback lives in
-  // the logs pane (see logTraceback). Keeping output terse means the eye
-  // can quickly tell "did it work?" without scrolling past 30 lines of
-  // traceback. Surface the same summary in both views so toggling doesn't
-  // change what you see when something went wrong.
+  // Output shows a short error summary only (in the message surface); the full
+  // traceback lives in the logs pane (see logTraceback). Keeping output terse
+  // means the eye can quickly tell "did it work?" without scrolling past 30
+  // lines of traceback.
   const detail = (err && err.message) || String(err);
-  const msg = `Error: ${detail}`;
-  outputText.textContent = msg;
-  clearOutputCharts(msg);
-  showOutputViews();
+  showMessage(`Error: ${detail}`);
 }
 
 // ---- View-mode toggle ------------------------------------------------------
@@ -459,7 +450,13 @@ let viewMode = loadViewMode() || VIEW_MODE_BARS;
 // placeholder element is visible and BOTH views stay hidden regardless of
 // viewMode -- toggling before the first run only moves the active-button
 // highlight.
-let outputHasContent = false;
+// The output pane shows EITHER a message (startup prompt, Running..., the
+// (cancelled) note, an error summary) OR the result views -- never both.
+// showingMessage is true in the former case; it gates the views hidden (see
+// applyViewVisibility) so a mid-run / mid-error view-toggle can't reveal stale
+// content behind the message. Starts true: the startup prompt is up on load.
+let showingMessage = true;
+let outputCancelTimer = null;
 
 // Re-layout any currently-visible Plotly charts to their container's size.
 // Needed after anything that changes chart geometry outside Plotly's
@@ -476,7 +473,7 @@ function resizeVisibleCharts() {
 }
 
 function applyViewVisibility() {
-  const visible = (mode) => viewMode === mode && outputHasContent;
+  const visible = (mode) => viewMode === mode && !showingMessage;
   outputBars.classList.toggle("hidden", !visible(VIEW_MODE_BARS));
   outputLines.classList.toggle("hidden", !visible(VIEW_MODE_LINES));
   outputRidge.classList.toggle("hidden", !visible(VIEW_MODE_RIDGE));
@@ -487,19 +484,50 @@ function applyViewVisibility() {
   viewTextBtn.classList.toggle("active", viewMode === VIEW_MODE_TEXT);
   // Charts skip layout while display:none; resize whichever chart view just
   // became visible so it fills the pane (Plotly tracks window, not container).
-  if (outputHasContent && viewMode !== VIEW_MODE_TEXT) {
+  if (!showingMessage && viewMode !== VIEW_MODE_TEXT) {
     resizeVisibleCharts();
   }
 }
 
-// First content retires the placeholder permanently and reveals the active
-// view. Idempotent -- render paths call it unconditionally.
+// Reveal the result views, hiding the message surface. Every render path
+// (results, error, cancel) funnels through here once its content is in place.
 function showOutputViews() {
-  if (!outputHasContent) {
-    outputHasContent = true;
-    outputPlaceholder.classList.add("hidden");
-  }
+  showingMessage = false;
+  clearOutputCancelTimer();
+  outputMessage.classList.add("hidden");
   applyViewVisibility();
+}
+
+function clearOutputCancelTimer() {
+  if (outputCancelTimer !== null) {
+    clearTimeout(outputCancelTimer);
+    outputCancelTimer = null;
+  }
+}
+
+// Show a status message in the pane's single message surface, hiding the
+// result views (via the showingMessage gate in applyViewVisibility). This is
+// the ONE place any non-result text is displayed. `cancelable` -- the running
+// state only -- puts the Cancel button in play and arms its delayed reveal, so
+// fast runs never flash it; every other message keeps Cancel out entirely.
+function showMessage(text, { cancelable = false } = {}) {
+  showingMessage = true;
+  outputMessageText.textContent = text;
+  clearOutputCancelTimer();
+  outputCancel.classList.remove("revealed");
+  outputCancel.classList.toggle("hidden", !cancelable);
+  outputMessage.classList.remove("hidden");
+  applyViewVisibility();
+  if (cancelable) {
+    outputCancelTimer = setTimeout(revealOutputCancel, CANCEL_REVEAL_MS);
+  }
+}
+
+function revealOutputCancel() {
+  outputCancelTimer = null;
+  if (runInFlight) {
+    outputCancel.classList.add("revealed");
+  }
 }
 
 function setViewMode(mode) {
@@ -630,7 +658,45 @@ let runPending = false;
 // disabled during a run, but the Shift-Enter keymap binding bypasses the
 // disabled state, so a separate flag is needed to make the guard work for
 // both code paths.
+// How long a run must keep going before the output pane offers a Cancel
+// control. Fast runs -- the overwhelming majority -- finish inside this window
+// and never show it, keeping things calm and not offering the heavyweight
+// cancel (worker teardown + re-init) for runs that never need it. Tune here.
+const CANCEL_REVEAL_MS = 1000;
+
 let runInFlight = false;
+
+// The primary button is a pure state readout that morphs through three shapes
+// in one fixed slot (so nothing reflows and each carries an honest label). It
+// never becomes Cancel -- cancellation lives in the output pane's message
+// surface (see showMessage). Two shapes carry a title:
+//   loading -> "Loading..."  disabled  (tooltip: what the runtime is doing)
+//   run     -> "Run"         enabled   (tooltip: the Shift+Enter shortcut)
+//   running -> "Running..."  disabled
+function setRunButton(label, { enabled, title } = {}) {
+  runBtn.textContent = label;
+  runBtn.disabled = !enabled;
+  if (title) {
+    runBtn.title = title;
+  } else {
+    runBtn.removeAttribute("title");
+  }
+}
+
+function enterLoadingState(context) {
+  setRunButton("Loading...", { enabled: false, title: context });
+}
+
+function enterRestState() {
+  setRunButton("Run", {
+    enabled: true,
+    title: "Shortcut: Shift+Enter in the editor",
+  });
+}
+
+function enterRunningState() {
+  setRunButton("Running...", { enabled: false });
+}
 
 async function handleRun() {
   if (!runtimeReady) {
@@ -656,12 +722,10 @@ async function handleRun() {
   // the run; the rAF yield from the prior single-threaded version is no
   // longer needed.)
   setStatus("Running...");
-  runBtn.disabled = true;
-  cancelBtn.disabled = false;
-  cancelBtn.title = "Cancel the current run (terminates and re-initializes the worker)";
+  enterRunningState();
   outputText.textContent = "";
   clearOutputCharts();
-  showOutputViews();
+  showMessage("Running...", { cancelable: true });
   resetLogs();
   // Disable CSV export while a run is in flight; the visible panes no
   // longer reflect what would be downloaded. Re-enabled on success only --
@@ -674,8 +738,15 @@ async function handleRun() {
       await runAnydice(source);
     const dt = Math.round(performance.now() - t0);
     logWarnings(warnings);
-    renderResults(text);
-    renderOutputCharts(outputs, displayPrecision);
+    if (outputs.length === 0) {
+      // Zero outputs is a whole-pane state, so it goes to the message surface
+      // like every other pane message -- not a per-view placeholder.
+      lastOutputs = null;
+      showMessage("(no output)");
+    } else {
+      renderResults(text);
+      renderOutputCharts(outputs, displayPrecision);
+    }
     lastCsv = csv;
     lastCsvFilename = csvFilename;
     setCsvAvailable(Boolean(csv) && outputs.length > 0);
@@ -685,8 +756,7 @@ async function handleRun() {
       // Cancel is a deliberate user action, not a failure. handleCancel()
       // updates the status and re-inits the runtime; don't overwrite that
       // here.
-      outputText.textContent = "(cancelled)";
-      clearOutputCharts("(cancelled)");
+      showMessage("(cancelled)");
       logEntry("cancel", "Cancelled by user.");
     } else if (err instanceof RunError) {
       // Python-level error from the program. Output gets the short summary;
@@ -705,39 +775,36 @@ async function handleRun() {
     }
   } finally {
     runInFlight = false;
-    runBtn.disabled = false;
-    cancelBtn.disabled = true;
-    cancelBtn.title = "No run in progress";
+    enterRestState();
   }
 }
 
 async function handleCancel() {
   if (!runInFlight) return;
-  // Disable Cancel immediately to avoid double-clicks during the (brief)
-  // teardown + re-init window.
-  cancelBtn.disabled = true;
-  cancelBtn.title = "Cancelling...";
   setStatus("Cancelling and re-initializing runtime...");
   // Mark runtime as not-ready so any Run / Shift-Enter triggered during
   // re-init gets queued (handleRun checks runtimeReady).
   runtimeReady = false;
+  // Show the loading shape immediately for feedback.
+  enterLoadingState("Restarting the runtime...");
   // Terminate the worker. The pending run's Promise rejects with
   // CancelledError; handleRun's catch handles the UI for that, and its
-  // finally re-enables runBtn. We disable it again below for the re-init
-  // window.
+  // finally runs enterRestState() -- we re-assert the loading shape after the
+  // yield below so the button doesn't flip to "Run" mid-re-init.
   cancelCurrentRun();
   // Yield once so handleRun's catch + finally run before we proceed.
   await Promise.resolve();
-  runBtn.disabled = true;
+  enterLoadingState("Restarting the runtime...");
   try {
     await initPyodide(setStatus);
     runtimeReady = true;
-    runBtn.disabled = false;
     if (runPending) {
       // Same queued-run logic as the initial-load path: if the user clicked
       // Run while re-init was in progress, honor it now.
       runPending = false;
       handleRun();
+    } else {
+      enterRestState();
     }
   } catch (err) {
     setStatus("Runtime failed to re-initialize. Reload to recover.");
@@ -836,8 +903,7 @@ if (programFromUrl() === null) {
 initPyodide(setStatus)
   .then(() => {
     runtimeReady = true;
-    runBtn.disabled = false;
-    runBtn.title = "Run the program (Shift+Enter)";
+    enterRestState();
     if (runPending) {
       // User clicked Run / hit Shift-Enter while loading; honor the
       // queued click now that the runtime is up. handleRun() reads from
@@ -845,11 +911,10 @@ initPyodide(setStatus)
       // the wait are reflected in the run.
       runPending = false;
       handleRun();
-    } else if (!outputHasContent) {
-      // Nothing rendered yet -- advance the placeholder prose from
-      // "Starting up..." to the ready prompt.
-      outputPlaceholder.textContent =
-        "Click Run (or Shift+Enter in the editor). Output will appear here.";
+    } else if (showingMessage) {
+      // Nothing rendered yet -- advance the message from "Starting up..." to
+      // the ready prompt.
+      showMessage("Click Run (or Shift+Enter in the editor). Output will appear here.");
     }
   })
   .catch((err) => {
@@ -858,7 +923,9 @@ initPyodide(setStatus)
   });
 
 runBtn.addEventListener("click", handleRun);
-cancelBtn.addEventListener("click", handleCancel);
+// Cancel lives in the output pane's message surface (running state only),
+// revealed only after a run outlasts CANCEL_REVEAL_MS.
+outputCancel.addEventListener("click", handleCancel);
 
 // ---- Output / logs resizer --------------------------------------------------
 
