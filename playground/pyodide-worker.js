@@ -128,6 +128,10 @@ function postStatus(message) {
   self.postMessage({ type: "status", message });
 }
 
+function errMessage(err) {
+  return (err && err.message) || String(err);
+}
+
 async function discoverLocalWheels() {
   try {
     const url = new URL("./wheels/index.json", self.location.href);
@@ -208,15 +212,13 @@ self.addEventListener("message", async (ev) => {
       self.postMessage({
         type: "error",
         stage: "init",
-        error: (err && err.message) || String(err),
+        error: errMessage(err),
       });
     }
   } else if (msg.type === "run") {
     try {
+      // _do_run returns {ok:true, ...} or {ok:false, error, traceback, ...}.
       const out = runSource(msg.source);
-      // out is the structured result from _do_run: either {ok:true,
-      // results, warnings} or {ok:false, error, traceback, warnings}.
-      // We translate to the existing result/error message split.
       if (out.ok) {
         self.postMessage({
           type: "result",
@@ -244,7 +246,7 @@ self.addEventListener("message", async (ev) => {
       self.postMessage({
         type: "error",
         stage: "run",
-        error: (err && err.message) || String(err),
+        error: errMessage(err),
         traceback: null,
         warnings: [],
         runId: msg.runId,

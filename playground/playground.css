@@ -8,7 +8,7 @@
    * --muted is the subtle fg-ward neutral (secondary text); --border and
    * --bg-elev are small opaque nudges of bg toward fg (a hairline and a
    * faintly-distinct surface). In light that reads as a white field with
-   * light-grey chrome; in dark, chrome lifts slightly off the background. */
+   * light-gray chrome; in dark, chrome lifts slightly off the background. */
   --bg:           var(--c-bg);
   --bg-elev:      color-mix(in srgb, var(--c-bg), var(--c-fg) 3%);
   --border:       color-mix(in srgb, var(--c-bg), var(--c-fg) 18%);

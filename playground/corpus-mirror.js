@@ -75,8 +75,7 @@ export function shardedSubpathFromProgramId(programId) {
   const padded = sign + paddedBody;
   const sub1 = padded.slice(-4, -2);
   const sub2 = padded.slice(-2);
-  const filename = `${programIdAsHex(programId)}.txt`;
-  return `${sub1}/${sub2}/${filename}`;
+  return `${sub1}/${sub2}/${n.toString(16)}.txt`;
 }
 
 // Return the absolute raw-GitHub URL for a program's mirrored source file.
