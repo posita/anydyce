@@ -153,12 +153,6 @@ export function runAnydice(source) {
   });
 }
 
-// Returns true if there's at least one run currently waiting for a result.
-// Useful for the UI to decide whether the Cancel button should be enabled.
-export function hasInFlightRun() {
-  return pendingRuns.size > 0;
-}
-
 // Terminate the worker, killing any in-flight run. The pending Promise(s)
 // reject with CancelledError. State is reset so the next initPyodide() call
 // creates a fresh worker -- there's no way to "resume" a terminated worker,

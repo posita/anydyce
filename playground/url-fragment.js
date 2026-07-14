@@ -35,15 +35,18 @@ export function b64urlDecode(b64url) {
   return new TextDecoder().decode(bytes);
 }
 
-// Parse a URL hash string (e.g. "#p=abc" or "p=abc&id=xyz") and return the
-// decoded program text from the `p` parameter, or null if not present /
-// malformed. Accepts hash with or without leading "#".
-export function parseUrlHashForProgram(hashStr) {
+// Parse a URL hash (e.g. "#p=abc" or "p=abc&id=xyz", with or without the
+// leading "#") into URLSearchParams, or null if empty.
+function hashParams(hashStr) {
   if (!hashStr) return null;
   const stripped = hashStr.replace(/^#/, "");
-  if (!stripped) return null;
-  const params = new URLSearchParams(stripped);
-  const p = params.get("p");
+  return stripped ? new URLSearchParams(stripped) : null;
+}
+
+// Decoded program text from the hash's `p` parameter, or null if absent /
+// malformed.
+export function parseUrlHashForProgram(hashStr) {
+  const p = hashParams(hashStr)?.get("p");
   if (!p) return null;
   try {
     return b64urlDecode(p);
@@ -52,15 +55,9 @@ export function parseUrlHashForProgram(hashStr) {
   }
 }
 
-// Parse a URL hash string and return the value of the `id` parameter (a hex
-// program ID), or null if not present. Returns the raw string -- normalization
-// (case, leading-zero stripping, validation) is the caller's responsibility
-// via corpus-mirror's helpers. Accepts hash with or without leading "#".
+// The hash's `id` parameter (a hex program ID), or null if absent. Raw string
+// -- normalization (case, leading-zero stripping, validation) is the caller's
+// job via corpus-mirror's helpers.
 export function parseUrlHashForProgramId(hashStr) {
-  if (!hashStr) return null;
-  const stripped = hashStr.replace(/^#/, "");
-  if (!stripped) return null;
-  const params = new URLSearchParams(stripped);
-  const id = params.get("id");
-  return id || null;
+  return hashParams(hashStr)?.get("id") || null;
 }

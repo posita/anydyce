@@ -17,21 +17,6 @@ export const KEYWORDS = new Set([
   "set", "to", "named",
 ]);
 
-// Token-name vocabulary returned by token(). The CodeMirror integration maps
-// each of these to a @lezer/highlight tag via TOKEN_TABLE in anydice-mode.js.
-export const TOKEN_NAMES = Object.freeze([
-  "comment",
-  "string",
-  "number",
-  "variableName",
-  "propertyName",
-  "keyword",
-  "operatorKeyword",
-  "operator",
-  "bracket",
-  "punctuation",
-]);
-
 export function startState() {
   return { inComment: false };
 }

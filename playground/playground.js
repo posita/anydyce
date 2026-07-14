@@ -281,6 +281,16 @@ const viewTextBtn       = document.getElementById("view-text-btn");
 const logsPlaceholder   = document.getElementById("logs-placeholder");
 const logsEl            = document.getElementById("logs");
 
+// The four output views paired with their toggle buttons: the single source
+// for view visibility, the toggle listeners, and mode validation below.
+const VIEWS = [
+  { mode: VIEW_MODE_BARS, el: outputBars, btn: viewBarsBtn },
+  { mode: VIEW_MODE_LINES, el: outputLines, btn: viewLinesBtn },
+  { mode: VIEW_MODE_RIDGE, el: outputRidge, btn: viewRidgeBtn },
+  { mode: VIEW_MODE_TEXT, el: outputText, btn: viewTextBtn },
+];
+const CHART_VIEWS = [outputBars, outputLines, outputRidge];
+
 function setStatus(msg) {
   if (statusEl) statusEl.textContent = msg;
 }
@@ -328,11 +338,8 @@ function setCsvAvailable(available) {
   }
 }
 
-// Empty the chart views, freeing their Plotly DOM between runs. Status text
-// (errors, "(cancelled)", etc.) no longer lives here -- it goes to the single
-// message surface via showMessage.
 function clearOutputCharts() {
-  for (const container of [outputBars, outputLines, outputRidge]) {
+  for (const container of CHART_VIEWS) {
     container.replaceChildren();
   }
 }
@@ -446,25 +453,18 @@ function renderError(err) {
 // need anything; <pre>-style text reflows naturally.)
 
 let viewMode = loadViewMode() || VIEW_MODE_BARS;
-// False until the first run (or error) renders something. While false, the
-// placeholder element is visible and BOTH views stay hidden regardless of
-// viewMode -- toggling before the first run only moves the active-button
-// highlight.
 // The output pane shows EITHER a message (startup prompt, Running..., the
-// (cancelled) note, an error summary) OR the result views -- never both.
-// showingMessage is true in the former case; it gates the views hidden (see
-// applyViewVisibility) so a mid-run / mid-error view-toggle can't reveal stale
-// content behind the message. Starts true: the startup prompt is up on load.
+// (cancelled) note, an error) OR the result views, never both. This gates the
+// views hidden (see applyViewVisibility) so a mid-run view-toggle can't reveal
+// stale content. Starts true: the startup prompt is up on load.
 let showingMessage = true;
 let outputCancelTimer = null;
 
-// Re-layout any currently-visible Plotly charts to their container's size.
-// Needed after anything that changes chart geometry outside Plotly's
-// awareness: un-hiding the bars view (Plotly skips layout for
-// display: none containers) and dragging the editor divider (Plotly's
-// `responsive: true` listens to WINDOW resize only, not container resize).
+// Plotly skips layout for display:none containers and its `responsive:true`
+// tracks only WINDOW resize, so charts must be resized by hand after anything
+// that changes their container geometry (un-hiding a view, dragging a divider).
 function resizeVisibleCharts() {
-  for (const container of [outputBars, outputLines, outputRidge]) {
+  for (const container of CHART_VIEWS) {
     if (container.classList.contains("hidden")) continue;
     for (const plot of container.querySelectorAll(".plot")) {
       Plotly.Plots.resize(plot);
@@ -473,17 +473,10 @@ function resizeVisibleCharts() {
 }
 
 function applyViewVisibility() {
-  const visible = (mode) => viewMode === mode && !showingMessage;
-  outputBars.classList.toggle("hidden", !visible(VIEW_MODE_BARS));
-  outputLines.classList.toggle("hidden", !visible(VIEW_MODE_LINES));
-  outputRidge.classList.toggle("hidden", !visible(VIEW_MODE_RIDGE));
-  outputText.classList.toggle("hidden", !visible(VIEW_MODE_TEXT));
-  viewBarsBtn.classList.toggle("active", viewMode === VIEW_MODE_BARS);
-  viewLinesBtn.classList.toggle("active", viewMode === VIEW_MODE_LINES);
-  viewRidgeBtn.classList.toggle("active", viewMode === VIEW_MODE_RIDGE);
-  viewTextBtn.classList.toggle("active", viewMode === VIEW_MODE_TEXT);
-  // Charts skip layout while display:none; resize whichever chart view just
-  // became visible so it fills the pane (Plotly tracks window, not container).
+  for (const { mode, el, btn } of VIEWS) {
+    el.classList.toggle("hidden", !(mode === viewMode && !showingMessage));
+    btn.classList.toggle("active", mode === viewMode);
+  }
   if (!showingMessage && viewMode !== VIEW_MODE_TEXT) {
     resizeVisibleCharts();
   }
@@ -505,11 +498,9 @@ function clearOutputCancelTimer() {
   }
 }
 
-// Show a status message in the pane's single message surface, hiding the
-// result views (via the showingMessage gate in applyViewVisibility). This is
-// the ONE place any non-result text is displayed. `cancelable` -- the running
-// state only -- puts the Cancel button in play and arms its delayed reveal, so
-// fast runs never flash it; every other message keeps Cancel out entirely.
+// The one place any non-result text is shown: fills the message surface and
+// hides the views. `cancelable` (the running state only) arms the Cancel
+// button's delayed reveal, so fast runs never flash it.
 function showMessage(text, { cancelable = false } = {}) {
   showingMessage = true;
   outputMessageText.textContent = text;
@@ -531,26 +522,18 @@ function revealOutputCancel() {
 }
 
 function setViewMode(mode) {
-  if (
-    mode !== VIEW_MODE_BARS &&
-    mode !== VIEW_MODE_LINES &&
-    mode !== VIEW_MODE_RIDGE &&
-    mode !== VIEW_MODE_TEXT
-  ) {
-    return;
-  }
+  if (!VIEWS.some((v) => v.mode === mode)) return;
   viewMode = mode;
   applyViewVisibility();
   saveViewMode(mode);
 }
 
-viewBarsBtn.addEventListener("click", () => setViewMode(VIEW_MODE_BARS));
-viewLinesBtn.addEventListener("click", () => setViewMode(VIEW_MODE_LINES));
-viewRidgeBtn.addEventListener("click", () => setViewMode(VIEW_MODE_RIDGE));
-viewTextBtn.addEventListener("click", () => setViewMode(VIEW_MODE_TEXT));
+for (const { mode, btn } of VIEWS) {
+  btn.addEventListener("click", () => setViewMode(mode));
+}
 
-// Reflect the persisted (or default) view mode in the toggle buttons on
-// load. The views themselves stay hidden until first content.
+// Reflect the persisted (or default) view mode in the toggle buttons on load;
+// the views themselves stay hidden until first content.
 applyViewVisibility();
 
 // ---- Maximize (pseudo-fullscreen) output view ------------------------------
@@ -649,22 +632,17 @@ function logTraceback(traceback) {
 // call later in this file.
 let editor;
 let runtimeReady = false;
-// Set when the user hits Run / Shift-Enter before the runtime is ready.
-// The initPyodide .then() callback checks this flag and auto-fires
-// handleRun() the moment Pyodide finishes loading, so the user's click
-// isn't lost to timing.
+// Set when Run / Shift+Enter fires before the runtime is ready; initPyodide's
+// .then() auto-fires handleRun() once loaded, so the click isn't lost.
 let runPending = false;
-// Lock: at most one in-flight run per output pane. The Run button is
-// disabled during a run, but the Shift-Enter keymap binding bypasses the
-// disabled state, so a separate flag is needed to make the guard work for
-// both code paths.
-// How long a run must keep going before the output pane offers a Cancel
-// control. Fast runs -- the overwhelming majority -- finish inside this window
-// and never show it, keeping things calm and not offering the heavyweight
-// cancel (worker teardown + re-init) for runs that never need it. Tune here.
-const CANCEL_REVEAL_MS = 1000;
-
+// Guard: one in-flight run at a time. The Shift+Enter keymap bypasses the
+// disabled Run button, so a flag -- not the button state -- is what enforces it.
 let runInFlight = false;
+
+// How long a run must run before the pane offers a Cancel control. Fast runs
+// finish inside this window and never show it, so we don't offer the heavyweight
+// cancel (worker teardown + re-init) for runs that don't need it.
+const CANCEL_REVEAL_MS = 1000;
 
 // The primary button is a pure state readout that morphs through three shapes
 // in one fixed slot (so nothing reflows and each carries an honest label). It
@@ -712,25 +690,17 @@ async function handleRun() {
   }
   runInFlight = true;
   const source = editor.state.doc.toString();
-  // Visual run-in-progress state: clear the output pane, disable the Run
-  // button, enable the Cancel button, and reflect running in the corner
-  // status. The Shift-Enter keymap binding calls into handleRun() the same
-  // way the button click does, so both paths get this behavior. Restoration
-  // happens in the `finally` block below, regardless of whether the run
-  // succeeded, threw, or was cancelled.
-  // (With Pyodide now in a worker, the main thread stays responsive during
-  // the run; the rAF yield from the prior single-threaded version is no
-  // longer needed.)
+  // Shift+Enter routes here too, so both entry points share this setup; the
+  // finally block restores the resting state whether the run succeeds, throws,
+  // or is cancelled.
   setStatus("Running...");
   enterRunningState();
   outputText.textContent = "";
   clearOutputCharts();
   showMessage("Running...", { cancelable: true });
   resetLogs();
-  // Disable CSV export while a run is in flight; the visible panes no
-  // longer reflect what would be downloaded. Re-enabled on success only --
-  // a failed or cancelled run leaves it disabled rather than offering the
-  // prior run's data against the current panes' error text.
+  // Re-enabled on success only, so a failed or cancelled run doesn't offer the
+  // prior run's data for download against the current error text.
   setCsvAvailable(false);
   const t0 = performance.now();
   try {
@@ -757,7 +727,7 @@ async function handleRun() {
       // updates the status and re-inits the runtime; don't overwrite that
       // here.
       showMessage("(cancelled)");
-      logEntry("cancel", "Cancelled by user.");
+      logEntry("cancel", "Canceled by user.");
     } else if (err instanceof RunError) {
       // Python-level error from the program. Output gets the short summary;
       // logs get the traceback (and any warnings emitted before the throw).
