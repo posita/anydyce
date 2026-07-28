@@ -24,7 +24,7 @@ from IPython.core.interactiveshell import InteractiveShell
 from lark.exceptions import UnexpectedToken
 
 try:
-    import matplotlib as mpl  # noqa: F401
+    import matplotlib as mpl  # ruff: ignore[unused-import]
 except ImportError:
     pytest.skip("matplotlib not available", allow_module_level=True)
 
@@ -49,7 +49,7 @@ class _RecordingShell:
         self.set_next_input_calls.append((text, replace))
 
 
-@pytest.fixture(autouse=True)  # noqa: RUF076
+@pytest.fixture(autouse=True)
 def no_real_fetch(monkeypatch: pytest.MonkeyPatch) -> None:
     r"""
     Safety net: any test that reaches `fetch_anydice_program` without first installing a fake (via the `fake_fetch` fixture) raises instead of hitting the network.
@@ -314,7 +314,7 @@ class TestAnydLoadMagicBasic:
         self,
         fake_fetch: Callable[[_FetchImpl], None],
         # Present for the side-effect of patching anydyce.magic.get_python
-        recording_shell: _RecordingShell,  # noqa: ARG002
+        recording_shell: _RecordingShell,  # ruff: ignore[unused-method-argument]
     ) -> None:
         captured: list[str] = []
 

@@ -44,7 +44,7 @@ from anydyce.viz import (
 __all__ = ()
 
 
-@pytest.fixture(autouse=True)  # noqa: RUF076
+@pytest.fixture(autouse=True)
 def _suppress_experimental() -> None:
     warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -62,7 +62,10 @@ class TestPlotWidgets:
             initial_markers="xo",
             initial_plot_style="default",
         )
-        assert plot_widgets.alpha.value == 0.125  # 1/(2**3) # noqa: RUF069
+        assert (
+            plot_widgets.alpha.value  # ruff: ignore[float-equality-comparison]
+            == 0.125  # 1/(2**3)
+        )
         assert plot_widgets.enable_cutoff.value is True
         assert plot_widgets.graph_type.value == "at_least"
         assert plot_widgets.markers.value == "xo"
@@ -130,13 +133,13 @@ class TestHPlotterChooser:
         chooser = HPlotterChooser(plot_widgets=plot_widgets)
         assert chooser.hs == ()
         assert set(
-            chooser._plotters_by_name.keys()  # noqa: SLF001
+            chooser._plotters_by_name.keys()  # ruff: ignore[private-member-access]
         ) == {
             "Line Plot",
             "Horizontal Bar Plots",
             "Burst Plots",
         }
-        accordion_widget = chooser._out.children[0]  # noqa: SLF001
+        accordion_widget = chooser._out.children[0]  # ruff: ignore[private-member-access]
         assert isinstance(accordion_widget, widgets.Accordion)
         assert accordion_widget.selected_index is None
         tab_widget = accordion_widget.children[0]
@@ -149,7 +152,7 @@ class TestHPlotterChooser:
 
     def test_construction_controls_expanded(self) -> None:
         chooser = HPlotterChooser(controls_expanded=True)
-        accordion_widget = chooser._out.children[0]  # noqa: SLF001
+        accordion_widget = chooser._out.children[0]  # ruff: ignore[private-member-access]
         assert isinstance(accordion_widget, widgets.Accordion)
         assert accordion_widget.selected_index == 0
 
@@ -158,7 +161,7 @@ class TestHPlotterChooser:
             plotters_or_factories=(BurstHPlotter, LineHPlotter),
             selected_name="Line Plot",
         )
-        accordion_widget = chooser._out.children[0]  # noqa: SLF001
+        accordion_widget = chooser._out.children[0]  # ruff: ignore[private-member-access]
         assert isinstance(accordion_widget, widgets.Accordion)
         tab_widget = accordion_widget.children[0]
         assert isinstance(tab_widget, widgets.Tab)
