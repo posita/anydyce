@@ -48,8 +48,8 @@ def _to_seq(v: AnyVal) -> tuple[int, ...]:
     elif isinstance(v, tuple):
         return v
     elif isinstance(v, H):
-        # TODO(posita): # noqa: TD003 - Should we export dyce.h.aggregate_weighted for
-        # this?
+        # TODO(posita): # ruff: ignore[missing-todo-link] - Should we export
+        # dyce.h.aggregate_weighted for this?
         # Expand weighted outcomes (duplicates for weight > 1), sort highest first.
         items: list[int] = []
         for outcome, count in v.items():

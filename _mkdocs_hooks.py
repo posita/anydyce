@@ -19,7 +19,7 @@ import logging
 import os
 import re
 import shutil
-import subprocess  # noqa: S404
+import subprocess  # ruff: ignore[suspicious-subprocess-import]
 import sys
 import tomllib
 import urllib.request
@@ -93,7 +93,7 @@ def on_pre_build(**_kwargs: object) -> None:
 def on_post_build(config: dict, **_kwargs: object) -> None:
     cmd = ["uv", "build", "--wheel"]
     _LOGGER.info("running %s", " ".join(cmd))
-    subprocess.run(cmd, check=True)  # noqa: S603
+    subprocess.run(cmd, check=True)  # ruff: ignore[subprocess-without-shell-equals-true]
 
     cmd = [
         "jupyter",
@@ -111,8 +111,9 @@ def on_post_build(config: dict, **_kwargs: object) -> None:
     for wheel in wheels:
         cmd.extend(("--piplite-wheels", str(wheel)))
     _uv_run(cmd)
-    # TODO(posita): # noqa: TD003 - At this point, all commonly-needed wheels should be
-    # downloaded to site/jupyter/pypi/... if we ever wanted to just use those instead
+    # TODO(posita): # ruff: ignore[missing-todo-link] - At this point, all
+    # commonly-needed wheels should be downloaded to site/jupyter/pypi/... if we ever
+    # wanted to just use those instead
     _bundle_playground_with_wheels_and_index(Path(config["site_dir"]))
 
 
@@ -144,7 +145,7 @@ def _bundle_playground_with_wheels_and_index(site_dir: Path) -> None:
         _LOGGER.info("downloading %s", url)
         parts = urlsplit(url)
         filename = Path(parts.path).name
-        urllib.request.urlretrieve(url, wheels_dir / filename)  # noqa: S310
+        urllib.request.urlretrieve(url, wheels_dir / filename)  # ruff: ignore[suspicious-url-open-usage]
         names.append(filename)
     pkg_whl = _get_latest_pkg_wheel_from_dist()
     shutil.copy2(pkg_whl, wheels_dir / pkg_whl.name)
@@ -184,4 +185,4 @@ def _uv_run(cmd: Sequence[str]) -> None:
         uv_cmd.append("--active")
     uv_cmd.extend(cmd)
     _LOGGER.info("running %s", " ".join(uv_cmd))
-    subprocess.run(uv_cmd, check=True)  # noqa: S603
+    subprocess.run(uv_cmd, check=True)  # ruff: ignore[subprocess-without-shell-equals-true]

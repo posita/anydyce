@@ -216,7 +216,7 @@ def _pattern_shape(pattern: list[str | Param]) -> tuple[str | None, ...]:
     return tuple(p if isinstance(p, str) else None for p in pattern)
 
 
-class _ResultReturn(Exception):  # noqa: N818
+class _ResultReturn(Exception):  # ruff: ignore[error-suffix-on-exception-name]
     r"""Internal control-flow signal: a `result:` statement fired in a function body.
 
     Carries the result value so the function-call machinery can return it.
@@ -326,7 +326,7 @@ class AnyDiceInterpreter:
 
     # ---- Statement execution -------------------------------------------------------------
 
-    def _exec(self, stmt: Stmt) -> None:  # noqa: C901
+    def _exec(self, stmt: Stmt) -> None:  # ruff: ignore[complex-structure]
         if isinstance(stmt, OutputStmt):
             value = self._eval(stmt.expr)
             h = self._coerce_to_h(value)
@@ -399,7 +399,7 @@ class AnyDiceInterpreter:
 
     # ---- Expression evaluation -----------------------------------------------------------
 
-    def _eval(self, node: Expr) -> _Val:  # noqa: C901
+    def _eval(self, node: Expr) -> _Val:  # ruff: ignore[complex-structure]
         if isinstance(node, EmptySeq):
             return ()
         elif isinstance(node, Number):
@@ -543,7 +543,7 @@ class AnyDiceInterpreter:
 
         return dempty if l_empty or r_empty else self._h_binop(op, left, right)
 
-    def _apply_cmp(self, op: str, left: _Val, right: _Val) -> int | H[int]:  # noqa: C901
+    def _apply_cmp(self, op: str, left: _Val, right: _Val) -> int | H[int]:  # ruff: ignore[complex-structure]
         if isinstance(left, P):
             left = left.h()
         if isinstance(right, P):
@@ -898,7 +898,7 @@ class AnyDiceInterpreter:
             raise NameError(f"undefined function for call: {call.parts!r}")
         return self._invoke(entry, args)
 
-    def _bind_and_expand(  # noqa: C901
+    def _bind_and_expand(  # ruff: ignore[complex-structure]
         self,
         param_types: list[str | None],
         args: list[_Val],
@@ -943,7 +943,7 @@ class AnyDiceInterpreter:
                 bound[i] = arg
             elif ptype == "n":
                 if isinstance(arg, P):
-                    arg = arg.h()  # noqa: PLW2901
+                    arg = arg.h()  # ruff: ignore[redefined-loop-name]
                 if isinstance(arg, tuple):
                     # AnyDice sum-coerces a seq arg to `:n`, then wraps it as
                     # a 1-outcome die at that sum so the call still routes
@@ -955,7 +955,7 @@ class AnyDiceInterpreter:
                     # once with N=0 rather than eliminating the call.
                     # Verified via tmp-probes -0x40 (weighted-seq body), -0x41
                     # (scalar body), and -0x42 (empty-seq edge case).
-                    arg = H({sum(arg): 1})  # noqa: PLW2901
+                    arg = H({sum(arg): 1})  # ruff: ignore[redefined-loop-name]
                 if isinstance(arg, int):
                     bound[i] = arg
                 elif isinstance(arg, H):
@@ -979,11 +979,11 @@ class AnyDiceInterpreter:
                 # with REROLL bound to d{} only eliminates the X-matching
                 # branches, not the whole call).
                 if isinstance(arg, int):
-                    arg = H({arg: 1})  # noqa: PLW2901
+                    arg = H({arg: 1})  # ruff: ignore[redefined-loop-name]
                 elif isinstance(arg, tuple):
                     # AnyDice sum-coerces a seq to an int, then wraps as a 1-outcome die
                     # (NOT distinct outcomes)
-                    arg = H({sum(arg): 1})  # noqa: PLW2901
+                    arg = H({sum(arg): 1})  # ruff: ignore[redefined-loop-name]
                 if not isinstance(arg, (H, P)):
                     raise TypeError(
                         f"{err_label(i)}: expected die, got {type(arg).__name__}"
@@ -1037,7 +1037,7 @@ class AnyDiceInterpreter:
         if isinstance(entry, FunctionDef):
             params = [p for p in entry.pattern if isinstance(p, Param)]
             param_types = [p.type for p in params]
-            err_label = lambda i: f"function param {params[i].name}"  # noqa: E731
+            err_label = lambda i: f"function param {params[i].name}"  # ruff: ignore[lambda-assignment]
             bind = self._bind_and_expand(param_types, args, err_label=err_label)
             if bind is None:
                 return H({})
@@ -1045,7 +1045,7 @@ class AnyDiceInterpreter:
             return self._invoke_user(entry, params, bound, expansion)
         else:
             param_types, impl = entry
-            err_label = lambda i: f"builtin param {i}"  # noqa: E731
+            err_label = lambda i: f"builtin param {i}"  # ruff: ignore[lambda-assignment]
             bind = self._bind_and_expand(param_types, args, err_label=err_label)
             if bind is None:
                 return H({})
@@ -1202,7 +1202,7 @@ class AnyDiceInterpreter:
         def _gen() -> Iterator[tuple[H[int], int]]:
             for combo in product(*items_list):
                 if reverse_combos:
-                    combo = combo[::-1]  # noqa: PLW2901
+                    combo = combo[::-1]  # ruff: ignore[redefined-loop-name]
                 weight = 1
                 for _, w in combo:
                     weight *= w

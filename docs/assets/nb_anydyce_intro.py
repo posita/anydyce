@@ -40,7 +40,7 @@ from prerequisites import (  # pyright: ignore[reportMissingImports] # pyrefly: 
     install_if_missing,
 )
 
-await install_if_missing(  # type: ignore[top-level-await] # noqa: PGH003
+await install_if_missing(  # type: ignore[top-level-await]
     # The optional piplite_spec (third item) omits version to use the local wheel
     ("anydyce[jupyter]", "anydyce~=0.5.0.dev1[jupyter]", "anydyce[jupyter]"),
 )
@@ -48,11 +48,11 @@ await install_if_missing(  # type: ignore[top-level-await] # noqa: PGH003
 import warnings
 
 # For some reason, this needs to be imported before matplotlib_line
-import matplotlib as mpl  # noqa: F401
+import matplotlib as mpl  # ruff: ignore[unused-import]
 import matplotlib_inline
 from dyce.lifecycle import ExperimentalWarning
 
-import anydyce.magic  # noqa: F401
+import anydyce.magic  # ruff: ignore[unused-import]
 
 matplotlib_inline.backend_inline.set_matplotlib_formats("svg")
 warnings.filterwarnings("ignore", category=ExperimentalWarning)

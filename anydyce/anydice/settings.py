@@ -92,7 +92,7 @@ class Settings:
         else:
             raise KeyError(f"unknown setting: {key!r}")
 
-    def set(self, key: str, value: int | str) -> None:  # noqa: C901
+    def set(self, key: str, value: int | str) -> None:  # ruff: ignore[complex-structure]
         if key not in self._data:
             raise KeyError(f"unknown setting: {key!r}")
         if key in _VALID_STRINGS:

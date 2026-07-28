@@ -116,7 +116,7 @@ _CUTOFF_EXP = 6
 _RcParamType = Literal["figure.facecolor", "image.cmap", "text.color"]
 
 
-def _get_param_for_style(style_name: str, param_name: _RcParamType) -> Any:  # noqa: ANN401
+def _get_param_for_style(style_name: str, param_name: _RcParamType) -> Any:  # ruff: ignore[any-type]
     style = mstyle.library.get(style_name)
     default_param = mpl.rcParams[param_name]
     return style.get(param_name, default_param) if style else default_param
@@ -196,7 +196,7 @@ class _SvgImg:
         else:
             self._file_name = file_name + ".svg"
 
-    def _repr_svg_(self) -> str | None:  # noqa: PLW3201
+    def _repr_svg_(self) -> str | None:  # ruff: ignore[bad-dunder-method-name]
         r"""
         [Rich
         display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display)
@@ -625,7 +625,7 @@ class HPlotter:
 
     @property
     @abstractmethod
-    def NAME(self) -> str:  # noqa: N802
+    def NAME(self) -> str:  # ruff: ignore[invalid-function-name]
         r"""
         The display name of the plotter.
         """
@@ -661,7 +661,7 @@ class HPlotter:
         """
         raise NotImplementedError
 
-    def transparent(self, *, requested: bool) -> bool:  # noqa: ARG002
+    def transparent(self, *, requested: bool) -> bool:  # ruff: ignore[unused-method-argument]
         r"""
         Returns whether this plotter produces plots which support transparency if
         *requested*. The default implementation always returns `False`.
@@ -764,7 +764,7 @@ class BurstHPlotter(HPlotter):
         h_outer: H | None
         for i, (label, h_inner, h_outer) in enumerate(hs):
             if h_outer is not None and settings["burst_swap"]:
-                h_inner, h_outer = h_outer, h_inner  # noqa: PLW2901
+                h_inner, h_outer = h_outer, h_inner  # ruff: ignore[redefined-loop-name]
             logical_row = i // cols
             actual_row_start = logical_row * (actual_rows_per_gap + actual_rows_per_fig)
             ax = plt.subplot2grid(
@@ -1120,7 +1120,7 @@ class HPlotterChooser:
 
     def plot(
         self,
-        **kw,  # noqa: ANN003
+        **kw,  # ruff: ignore[missing-type-kwargs]
     ) -> None:
         r"""
         Callback for updating the visualization in response to configuration or data
@@ -1282,7 +1282,7 @@ def values_xy_for_graph_type(
     elif graph_type == "normal":
         pass
     else:
-        assert False, f"unrecognized graph type {graph_type}"  # noqa: B011, PT015
+        assert False, f"unrecognized graph type {graph_type}"  # ruff: ignore[assert-false, pytest-assert-always-false]
 
     return outcomes, probabilities
 

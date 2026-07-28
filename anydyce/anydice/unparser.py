@@ -159,7 +159,7 @@ def _func_part(part: str | Param) -> str:
 # ---- Expressions ---------------------------------------------------------------------
 
 
-def _expr(node: Expr, min_prec: int = 0) -> str:  # noqa: C901
+def _expr(node: Expr, min_prec: int = 0) -> str:  # ruff: ignore[complex-structure]
     if isinstance(node, Number):
         return str(node.value)
     elif isinstance(node, Var):
