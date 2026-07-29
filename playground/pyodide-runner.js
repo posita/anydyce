@@ -44,6 +44,11 @@ export class RunError extends Error {
 
 let worker = null;
 let initPromise = null;
+// The reject of the in-flight init promise, held so a worker-level "error"
+// event can settle the promise the caller is awaiting. A crash posts no
+// message, so the message listener in initPyodide never fires. Null once init
+// has settled.
+let initReject = null;
 let onStatusCallback = null;
 let nextRunId = 0;
 const pendingRuns = new Map(); // runId -> { resolve, reject }
@@ -111,8 +116,9 @@ function ensureWorker() {
         `(${ev.filename || "?"}:${ev.lineno || "?"}). ` +
         "Please reload the page.",
     );
-    if (initPromise && initPromise.then) {
-      initPromise = Promise.reject(workerCrashError);
+    if (initReject) {
+      initReject(workerCrashError);
+      initReject = null;
     }
     for (const { reject } of pendingRuns.values()) reject(workerCrashError);
     pendingRuns.clear();
@@ -126,13 +132,16 @@ export function initPyodide(onStatus = () => {}) {
   onStatusCallback = onStatus;
 
   initPromise = new Promise((resolve, reject) => {
+    initReject = reject;
     const onMessage = (ev) => {
       const msg = ev.data;
       if (msg.type === "ready") {
         worker.removeEventListener("message", onMessage);
+        initReject = null;
         resolve();
       } else if (msg.type === "error" && msg.stage === "init") {
         worker.removeEventListener("message", onMessage);
+        initReject = null;
         reject(new Error(msg.error));
       }
     };
