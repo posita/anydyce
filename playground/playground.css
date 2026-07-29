@@ -24,15 +24,15 @@
    * value (the one accent value that's genuinely mode-specific). */
   --accent:       var(--c-cyan);
   --accent-muted: var(--c-cyan-muted);
-  --accent-fg:    var(--c-bg);  /* #ffffff; */
-  --code-bg:      var(--c-bg);  /* #f4f6f8; */
+  --accent-fg:    var(--c-bg);
+  --code-bg:      var(--c-bg);
   --caret:        rgb(from var(--accent) r g b / 40%);
-  --selection-bg: rgb(from var(--accent-muted) r g b / 20%);  /* #add6ff; */
+  --selection-bg: rgb(from var(--accent-muted) r g b / 20%);
   /* Active-line tint MUST be semi-transparent. CM6's drawSelection layer is
    * z-index: -1, so any opaque background painted on .cm-line covers it from
    * above. rgba with low alpha lets the selection show through. */
   --active-line-bg: rgb(from var(--accent-muted) r g b / 7%);
-  --match-bg:     color-mix(in hsl shorter hue, var(--accent) 5%, rgba(204, 153, 51, 0.4));  /* #f6e0a0; */
+  --match-bg:     color-mix(in hsl shorter hue, var(--accent) 5%, rgba(204, 153, 51, 0.4));
   --search-bg:    color-mix(in hsl shorter hue, var(--accent-muted) 5%, rgba(255, 204, 51, 0.4));
 
   /* Syntax highlighting maps token types onto theme color slots (themes.css).
@@ -58,7 +58,6 @@
    * in playground.js; centralized here so per-knob tuning doesn't require
    * touching JS. */
   --editor-font-size:        13px;
-  /* --cursor-opacity:          0.50; */
   --cursor-width:            0.55em;
   --search-font-size:        0.95em;
   --search-close-font-size:  1.1em;
@@ -610,10 +609,9 @@ body.output-maximized .logs-pane {
   white-space: pre-wrap;
   margin: 0.1em 0;
 }
-/* Severity suffixes pair by convention with the strings passed to
- * logEntry() in playground.js (info / warning / error / cancel). An
- * unrecognized severity renders unstyled -- cosmetic-only failure. */
-.log-entry-info     { color: var(--muted); }
+/* Severity suffixes pair by convention with the strings passed to logEntry()
+ * in playground.js. An unrecognized severity renders unstyled (cosmetic-only
+ * failure). */
 .log-entry-warning  { color: var(--syn-prop); }
 .log-entry-error    { color: var(--syn-str); }
 .log-entry-cancel   { color: var(--syn-op-kw); }

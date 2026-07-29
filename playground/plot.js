@@ -233,12 +233,10 @@ export function plotSpec(
       title: { text: label },
       height: chartHeight(items.length),
       xaxis: {
-        // title: { text: "Probability (%)" },
         ...(xMax !== null ? { range: [0, xMax] } : { rangemode: "tozero" }),
         ...themeAxisBits(theme),
       },
       yaxis: {
-        // title: { text: "Outcome" },
         type: "category",
         // The first item we passed has the smallest outcome; Plotly's
         // default category order would put it at the BOTTOM of the y-axis.

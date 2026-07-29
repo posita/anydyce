@@ -52,7 +52,7 @@ export function token(stream, state) {
     return "comment";
   }
 
-  // String literal (no escapes; AnyDice strings can't contain a literal ").
+  // String literal (no escapes, since AnyDice strings can't contain a literal ").
   if (ch === '"') {
     stream.next();
     while (!stream.eol()) {
