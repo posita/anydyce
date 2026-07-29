@@ -26,39 +26,7 @@ from dyce import H, P
 
 __all__ = ("BUILTINS",)
 
-AnyVal = int | H | P | tuple[int, ...]
-
 # ---- Helpers ---------------------------------------------------------------------------
-
-
-def _to_int(v: AnyVal) -> int:
-    r"""Coerce a value to int: sequences sum to int, H and P are not supported."""
-    if isinstance(v, int):
-        return v
-    elif isinstance(v, tuple):
-        return sum(v)
-    else:
-        raise TypeError(f"expected number, got {type(v).__name__}")
-
-
-def _to_seq(v: AnyVal) -> tuple[int, ...]:
-    r"""Coerce to sequence, highest-first."""
-    if isinstance(v, int):
-        return (v,)
-    elif isinstance(v, tuple):
-        return v
-    elif isinstance(v, H):
-        # TODO(posita): # ruff: ignore[missing-todo-link] - Should we export
-        # dyce.h.aggregate_weighted for this?
-        # Expand weighted outcomes (duplicates for weight > 1), sort highest first.
-        items: list[int] = []
-        for outcome, count in v.items():
-            items.extend([outcome] * count)
-        return tuple(sorted(items, reverse=True))
-    elif isinstance(v, P):
-        raise TypeError("cannot coerce pool to sequence directly -- use :s parameter")
-    else:
-        raise TypeError(f"cannot coerce {type(v).__name__} to sequence")
 
 
 def _h_from_pool(p: P) -> H:
@@ -164,11 +132,6 @@ def _explode(die: H | P, depth: int) -> H:
 
 BUILTINS: list[tuple[list[str | None], list[str | None], Callable[..., Any]]] = [
     # pattern               param_types          impl
-    #
-    # Entries below are written but not yet wired -- we are enabling builtin families
-    # one at a time, with dedicated tests per family before lighting them up.
-    # Uncomment as each family passes its tests.
-    #
     (["absolute", None], ["n"], lambda _s, x: _absolute(x)),
     ([None, "contains", None], ["s", "n"], lambda _s, seq, val: _contains(seq, val)),
     (

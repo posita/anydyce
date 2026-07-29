@@ -20,6 +20,7 @@ import sys
 from collections import Counter
 from collections.abc import Callable, Iterator
 from contextlib import ExitStack
+from itertools import product
 
 from dyce import H, P, RollT, quantize_hs
 from dyce.d import dempty, dzero
@@ -1059,12 +1060,13 @@ class AnyDiceInterpreter:
         bound: _BoundT,
         expansion: _ExpansionT,
     ) -> _Val:
-        # No-expansion fast path: invoke the body once with `bound` installed
-        # in the env. Truncate the return when it's an H -- important for deep-
-        # recursion programs whose recursive calls are all-passthrough (e.g.
-        # `function: f N:n D:d { ... [f N/2 D] ... }` -- both args bypass
-        # expansion, so the body's bigint-growing operations would otherwise
-        # propagate untruncated).
+        # No-expansion fast path: invoke the body once with `bound` installed in
+        # the env. Any returned H is kept bounded by the ambient `quantize_hs`
+        # context (see _apply_calc_precision), not truncated here. That matters
+        # for deep-recursion programs whose recursive calls are all-passthrough
+        # (e.g. `function: f N:n D:d { ... [f N/2 D] ... }`, where both args
+        # bypass expansion), whose bigint-growing operations would otherwise
+        # propagate untruncated.
         if not expansion:
             return self._invoke_with_bound(func, params, bound)
 
@@ -1192,8 +1194,6 @@ class AnyDiceInterpreter:
               distinct for user-defined bodies that read mutated non-param
               env vars.
         """
-        from itertools import product
-
         if reverse_combos:
             items_list = [items for _, items in reversed(expansion)]
         else:

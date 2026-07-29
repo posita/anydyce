@@ -15,8 +15,8 @@
 //   Worker -> Main:
 //     { type: "status", message }                   -- progress updates
 //     { type: "ready" }                             -- init complete
-//     { type: "result", text, outputs, displayPrecision, csv, warnings,
-//       runId }                                     -- successful run
+//     { type: "result", text, outputs, displayPrecision, csv, csvFilename,
+//       warnings, runId }                           -- successful run
 //     { type: "error", stage: "init"|"run", error,
 //                      traceback?, warnings?, runId? }
 //

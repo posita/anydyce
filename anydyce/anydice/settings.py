@@ -15,7 +15,7 @@
 
 from typing import cast
 
-from dyce.h import DEFAULT_PRECISION  # , DEFAULT_QUANTIZATION_BIT_WIDTH
+from dyce.h import DEFAULT_PRECISION, DEFAULT_QUANTIZATION_BIT_WIDTH
 
 __all__ = ("Settings",)
 
@@ -30,7 +30,7 @@ __all__ = ("Settings",)
 # `dyce.h.DEFAULT_PRECISION = 2`. The float64 noise floor for values in
 # the [0.0, 100.0] percent range sits around 13 decimal places, so values
 # above ~13 just print binary-to-decimal-conversion garbage.
-_DEFAULT_CALC_BIT_WIDTH: int = 256  # DEFAULT_QUANTIZATION_BIT_WIDTH
+_DEFAULT_CALC_BIT_WIDTH: int = DEFAULT_QUANTIZATION_BIT_WIDTH
 _DEFAULT_DISPLAY_PRECISION: int = DEFAULT_PRECISION
 
 # Symbolic resolution tables. The user may write either an integer literal

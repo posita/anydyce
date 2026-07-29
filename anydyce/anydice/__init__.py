@@ -18,7 +18,6 @@ r"""
 """
 
 from pathlib import Path
-from typing import cast
 
 from dyce.h import DEFAULT_PRECISION
 from dyce.lifecycle import experimental
@@ -54,7 +53,7 @@ def format_results(
     Formats output results from [`run`][anydyce.anydice.run].
 
     Reads `display_precision` from *settings*, if provided.
-    Pass the same [`Settings`][anydyce.anydice.Settings] object passed to `run` will ensure settings modifications in the program are honored during formatting.
+    Passing the same [`Settings`][anydyce.anydice.Settings] object given to `run` ensures settings modifications made by the program are honored during formatting.
 
         >>> from anydyce.anydice import Settings, format_results, run
         >>> settings = Settings()
@@ -114,11 +113,11 @@ def parse(source: str) -> Program:
     r"""
     Parses AnyDice source text into an AST [`Program`][anydyce.anydice.Program].
 
-    Useful for (e.g.) passing to [`AnyDiceInterpreter.run`][anydice.anydice.AnyDiceInterpreter.run].
+    Useful for (e.g.) passing to [`AnyDiceInterpreter.run`][anydyce.anydice.AnyDiceInterpreter.run].
     """
     program = _PARSER.parse(source)
     if isinstance(program, Program):  # expected return value of our transformer
-        return cast("Program", program)
+        return program
     else:
         raise TypeError(
             f"expected type of program ({program!r}) to be {Program!r}, not {type(program)!r}"  # pragma: no cover
@@ -130,8 +129,8 @@ def run(source: str, *, settings: Settings | None = None) -> AnyDiceResultsT:
     r"""
     Shorthand for `AnyDiceInterpreter().run(parse(source), settings=settings)`, returning one `(name, distribution)` pair per `output` statement.
 
-    If *settings* is provided, the interpreter mutates it during execution (e.g. when the program contains `set "anydyce: display precision" to ...`), so the caller or others can observe its final state (e.g., [`format_results`][anydyce.anydice.format_result]’ examination of `settings.display_precision`).
+    If *settings* is provided, the interpreter mutates it during execution (e.g. when the program contains `set "anydyce: display precision" to ...`), so the caller can observe its final state (e.g. via [`format_results`][anydyce.anydice.format_results] reading `settings.display_precision`).
 
-    See [`format_results`][anydyce.anydice.format_results], [`parse`][anydyce.anydice.parse], and [`AnyDiceInterpreter.run`][anydice.anydice.AnyDiceInterpreter.run] for additional detail.
+    See [`format_results`][anydyce.anydice.format_results], [`parse`][anydyce.anydice.parse], and [`AnyDiceInterpreter.run`][anydyce.anydice.AnyDiceInterpreter.run] for additional detail.
     """
     return AnyDiceInterpreter().run(parse(source), settings=settings)

@@ -1,5 +1,5 @@
 // AnyDice CodeMirror 6 integration. The tokenization logic lives in the pure-JS
-// ./anydice-tokenizer.js so it can be tested without CodeMirror; this file just
+// ./anydice-tokenizer.js so it can be tested without CodeMirror. This file just
 // wraps that tokenizer in a StreamLanguage and maps token names to highlight
 // tags.
 

@@ -72,13 +72,11 @@ const anydiceEditorTheme = EditorView.theme({
     height:          "100%",
   },
   ".cm-content":         { caretColor: "var(--caret)" },
-  // Block cursor: translucent background block (vs default border-left
-  // line) so the character behind shows through. See playground.css for
-  // the opacity/width knobs.
+  // Block cursor: translucent background block (vs default border-left line) so
+  // the character behind shows through. See --cursor-width in playground.css.
   ".cm-cursor, .cm-cursor-primary": {
     border:          "none",
     backgroundColor: "var(--caret)",
-    // opacity:         "var(--cursor-opacity)",
     width:           "var(--cursor-width)",
     marginLeft:      "0",
   },
@@ -289,18 +287,18 @@ const VIEWS = [
   { mode: VIEW_MODE_RIDGE, el: outputRidge, btn: viewRidgeBtn },
   { mode: VIEW_MODE_TEXT, el: outputText, btn: viewTextBtn },
 ];
-const CHART_VIEWS = [outputBars, outputLines, outputRidge];
+const CHART_VIEWS = VIEWS.filter((v) => v.mode !== VIEW_MODE_TEXT).map(
+  (v) => v.el,
+);
 
 function setStatus(msg) {
   if (statusEl) statusEl.textContent = msg;
 }
 
+// text is anydyce.format_results' multi-block string, built in the worker. The
+// caller follows with renderOutputCharts, which reveals the views.
 function renderResults(text) {
-  // Text view: anydyce.format_results produces the multi-block string in
-  // the worker; just display it. The bars view is rendered separately
-  // from the structured `outputs` array (see handleRun).
   outputText.textContent = text;
-  showOutputViews();
 }
 
 // Last successful run's raw outputs + precision, kept so the charts can be
@@ -344,36 +342,30 @@ function clearOutputCharts() {
   }
 }
 
+// All three chart views (bars, lines, ridge) are built from the same raw
+// [{label, items}] data, so toggling between them needs no re-render.
+function paintCharts(outputs, precision) {
+  renderPlots(outputBars, outputs, Plotly, { precision });
+  renderLines(outputLines, outputs, Plotly, { precision });
+  renderRidge(outputRidge, outputs, Plotly, { precision });
+}
+
 function renderOutputCharts(outputs, displayPrecision) {
-  // All three chart views (bars + lines + ridge) are built from the raw
-  // [{label, items}] data on every run, so toggling between them is instant
-  // (no re-render). displayPrecision is the run's final `set "anydyce: display
-  // precision"` value, so percent labels match the text view's formatting.
+  // displayPrecision is the run's final `set "anydyce: display precision"`
+  // value, so the charts' percent labels match the text view's formatting.
   lastOutputs = outputs;
   lastDisplayPrecision = displayPrecision;
-  renderPlots(outputBars, outputs, Plotly, { precision: displayPrecision });
-  renderLines(outputLines, outputs, Plotly, { precision: displayPrecision });
-  renderRidge(outputRidge, outputs, Plotly, { precision: displayPrecision });
+  paintCharts(outputs, displayPrecision);
   showOutputViews();
 }
 
-// Re-render the charts from the last run's saved data so they pick up the
-// current CSS palette. Plotly bakes colors into its SVG at render time and
-// has no CSS reactivity, so any palette change -- OS light/dark flip or an
-// accent-hue selection -- needs an explicit re-render. The rest of the UI
-// follows var(--accent) / the media query automatically. No-op before the
-// first run.
+// Re-paint from the last run's saved data to pick up the current CSS palette.
+// Plotly bakes colors into its SVG at render time and has no CSS reactivity, so
+// a palette change (OS light/dark flip or accent-hue selection) needs an
+// explicit re-render. No-op before the first run.
 function rerenderCharts() {
   if (lastOutputs !== null) {
-    renderPlots(outputBars, lastOutputs, Plotly, {
-      precision: lastDisplayPrecision,
-    });
-    renderLines(outputLines, lastOutputs, Plotly, {
-      precision: lastDisplayPrecision,
-    });
-    renderRidge(outputRidge, lastOutputs, Plotly, {
-      precision: lastDisplayPrecision,
-    });
+    paintCharts(lastOutputs, lastDisplayPrecision);
   }
 }
 
@@ -580,8 +572,8 @@ document.addEventListener("keydown", (e) => {
 // panes together represent one run: output for results, logs for
 // diagnostic messages. The Run button doubles as the clear action.
 //
-// Severity classes (.log-entry-info / -warning / -error / -cancel /
-// -traceback) drive CSS colors; see playground.css.
+// Severity classes (.log-entry-warning / -error / -cancel / -traceback) drive
+// CSS colors. See playground.css.
 
 let logsHasContent = false;
 
@@ -727,7 +719,7 @@ async function handleRun() {
       // updates the status and re-inits the runtime; don't overwrite that
       // here.
       showMessage("(cancelled)");
-      logEntry("cancel", "Canceled by user.");
+      logEntry("cancel", "Cancelled by user.");
     } else if (err instanceof RunError) {
       // Python-level error from the program. Output gets the short summary;
       // logs get the traceback (and any warnings emitted before the throw).
