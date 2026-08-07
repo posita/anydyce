@@ -938,16 +938,16 @@ wheels = [
 
 [[package]]
 name = "dyce"
-version = "0.7.0rc7"
+version = "0.7.0rc8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "optype", version = "0.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "optype", version = "0.18.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/70/70/015753a336c904b274af07f1884a0dcdfaf0aaa514660e080f37672d0068/dyce-0.7.0rc7.tar.gz", hash = "sha256:04de41ae79d4be8d5d1bf748067425e47c6e89da8d0f7ba658e94509d656b889", size = 959261, upload-time = "2026-06-22T13:44:38.719Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b7/7d/c7a7726b403c6b805e1041bdf70e7de1a6b16495ed6b529801310a4c9510/dyce-0.7.0rc8.tar.gz", hash = "sha256:b68cc36db5811376c0835f2a60cc029930e5346620ae3c6be2427b5ddc3d9d34", size = 963862, upload-time = "2026-08-06T05:27:09.967Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a3/f9/f19cd74b58d2471a9bf4b9075ecc3dcbd702d5e173f261fe158bc8243f4e/dyce-0.7.0rc7-py3-none-any.whl", hash = "sha256:1e95bcd8c0140ac053187780be509b5c1ff6f64c63047027861c040938cc988d", size = 63402, upload-time = "2026-06-22T13:44:37.116Z" },
+    { url = "https://files.pythonhosted.org/packages/04/e1/cd918607344edcb1edfb85f1ae4ef45a8f9c0fd205a7176a0dc4c7078816/dyce-0.7.0rc8-py3-none-any.whl", hash = "sha256:b111bd015e1df1386443988d4d2ad6eb07bf038d64a134b7613be7f6f2654289", size = 61730, upload-time = "2026-08-06T05:27:08.285Z" },
 ]
 
 [package.optional-dependencies]
@@ -2268,7 +2268,7 @@ resolution-markers = [
     "python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+    { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/9b/86/e6f1f6f3487492dfcf3b7a2d4e2534d27af6ac05b364b276706906c34865/optype-0.17.1.tar.gz", hash = "sha256:07bfa32b795dea28fba8605a6288d36370d072f25183fb9c29b5a90f4b6f5638", size = 53572, upload-time = "2026-05-17T22:13:28.725Z" }
 wheels = [
@@ -2291,7 +2291,7 @@ resolution-markers = [
     "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version == '3.12.*'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/99/51/51dc9b1009e020f44703933d4d1ee3429c647c026ce7806b37ee2b257998/optype-0.18.0.tar.gz", hash = "sha256:ea10dee61b15ca299ed0d97025d362585c4dfc5481159bb999a1d0d414bbcb04", size = 59967, upload-time = "2026-06-07T22:13:17.534Z" }
 wheels = [
@@ -2425,7 +2425,7 @@ name = "pexpect"
 version = "4.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "ptyprocess", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "ptyprocess" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f", size = 166450, upload-time = "2023-11-25T09:07:26.339Z" }
 wheels = [
