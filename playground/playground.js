@@ -282,9 +282,9 @@ const logsEl            = document.getElementById("logs");
 // The four output views paired with their toggle buttons: the single source
 // for view visibility, the toggle listeners, and mode validation below.
 const VIEWS = [
+  { mode: VIEW_MODE_RIDGE, el: outputRidge, btn: viewRidgeBtn },
   { mode: VIEW_MODE_BARS, el: outputBars, btn: viewBarsBtn },
   { mode: VIEW_MODE_LINES, el: outputLines, btn: viewLinesBtn },
-  { mode: VIEW_MODE_RIDGE, el: outputRidge, btn: viewRidgeBtn },
   { mode: VIEW_MODE_TEXT, el: outputText, btn: viewTextBtn },
 ];
 const CHART_VIEWS = VIEWS.filter((v) => v.mode !== VIEW_MODE_TEXT).map(
@@ -444,7 +444,7 @@ function renderError(err) {
 // the chart fills the now-visible space. (Switching to text view doesn't
 // need anything; <pre>-style text reflows naturally.)
 
-let viewMode = loadViewMode() || VIEW_MODE_BARS;
+let viewMode = loadViewMode() || VIEW_MODE_RIDGE;
 // The output pane shows EITHER a message (startup prompt, Running..., the
 // (cancelled) note, an error) OR the result views, never both. This gates the
 // views hidden (see applyViewVisibility) so a mid-run view-toggle can't reveal
