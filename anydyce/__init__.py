@@ -22,6 +22,11 @@ r"""
     [Feedback, suggestions, and contributions](contrib.md) are welcome and appreciated.
 """
 
+if True:  # so ruff won't complain imports are out-of-order, but still sort the others
+    from dyce.types import beartype_this_package
+
+    beartype_this_package()
+
 from importlib.metadata import PackageNotFoundError, version
 
 __all__ = ()
