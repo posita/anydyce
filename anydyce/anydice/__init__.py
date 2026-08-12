@@ -36,6 +36,7 @@ __all__ = (
     "AnyDiceTransformer",
     "Program",
     "Settings",
+    "format_results",
     "parse",
     "run",
     "unparse",

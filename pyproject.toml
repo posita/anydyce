@@ -86,7 +86,6 @@ docs = [
 jupyter = ["dyce[viz-mpl]", "ipywidgets"]
 # Only what's needed for uv run pre-commit run --all-files --hook-stage pre-push
 lint = [
-    "beartype",
     "matplotlib_inline",
     "mypy",
     "pre-commit",
@@ -95,7 +94,7 @@ lint = [
     "pyright",
     "pytest",
     "ruff",
-    "ty",
+    "ty>=0.0.70",  # TODO(posita): https://github.com/astral-sh/ty/issues/4222
     {include-group = "docs"},
 ]
 # Only what's needed for quickstart-local.sh
@@ -105,13 +104,15 @@ quickstart = [
 ]
 # Only what's needed for uv run pytest --cov
 test = [
-    "beartype",
     "coverage[toml]",
     "pandas",
-    "pytest-beartype",
     "pytest-cov",
     {include-group = "jupyter"},
     {include-group = "test-pypy"},
+]
+test-beartype = [
+    "beartype>=0.23.0rc0",
+    {include-group = "test"},
 ]
 # Only what's needed for uv run pytest specifically with PyPy (via Tox)
 test-pypy = [
