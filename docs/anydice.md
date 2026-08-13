@@ -157,7 +157,7 @@ The `anydyce` interpreter and the underlying [`dyce` library](https://github.com
 
 AnyDice appears to have been around in some form or another since 2009, receiving a handful of updates between then and 2026.
 It is free to use by anyone, likely funded entirely by the author who invites others to offset costs through donations.
-It has amassed over a quarter million “saved” programs[^3] during its tenure.
+As of early August, 2026, it has amassed over a quarter million “saved” programs[^3] during its tenure.
 It enjoys substantial popularity among loyal users, many of whom post on [rpg.stackexchange.com](https://rpg.stackexchange.com/questions/tagged/anydice) providing volunteer education and support.
 
 Its most typical use involves typing or pasting a program conforming to a [proprietary syntax](https://anydice.com/docs/) into a text field on a [hosted website](https://anydice.com/).
@@ -172,6 +172,8 @@ Many meaningful details important to more sophisticated computations are left to
 
 In early 2026, AnyDice became completely unavailable for a week or two due to a system compromise.
 The site was eventually restored, but programs saved to its proprietary database by users over the preceding several weeks were permanently lost.
+Between May and late July/early August of 2026, AnyDice’s ability to save new programs or retrieve existing ones again went offline, but the rest of the site remained functional.
+The cause for this partial outage is unknown.
 
 The purpose of this effort is to provide a publicly-accessible reference implementation to avoid future loss of user investment.
 For convenience, a usable instance resides at [`https://posita.github.io/anydyce/latest/playground/`](https://posita.github.io/anydyce/latest/playground/).
@@ -186,8 +188,6 @@ anydice.com implicitly permits anyone anywhere in the world to: visit the site; 
 As of this writing, no limitations are presented or appear to be enforced.
 
 [^3]: At a user’s request, AnyDice has ability to save a program in its own proprietary, server-side database, providing a link with a hexadecimal ID which can later be used to load the same program.
-      As of this writing, AnyDice’s ability to save new programs or retrieve existing ones seems to be offline.
-      The highest program ID known to this author prior to this reduction in functionality was [`4327d`](../playground/#id=4327d).
 
 ## Reverse-engineering methodology
 
