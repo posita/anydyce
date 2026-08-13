@@ -5,7 +5,7 @@
 //
 // Public API:
 //   await initPyodide(onStatus)  -> resolves when runtime is ready
-//   await runAnydice(source)     -> resolves to {text, outputs,
+//   await runAnydice(source)     -> resolves to {text, outputs, ridgeSpec,
 //                                   displayPrecision, csv, csvFilename,
 //                                   warnings};
 //                                   rejects with RunError (Python exception:
@@ -81,6 +81,7 @@ function ensureWorker() {
           handler.resolve({
             text: msg.text || "",
             outputs: msg.outputs || [],
+            ridgeSpec: msg.ridgeSpec || null,
             displayPrecision: msg.displayPrecision,
             csv: msg.csv || "",
             csvFilename: msg.csvFilename || "",

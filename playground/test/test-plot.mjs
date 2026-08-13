@@ -20,7 +20,7 @@ import {
   perOutputSeries,
   plotSpec,
   readCssTheme,
-  ridgeSpec,
+  themeRidgeSpec,
 } from "../plot.js";
 
 // ---- itemsToPercents ----------------------------------------------------
@@ -392,143 +392,79 @@ test("lineSpec: all-empty outputs -> isEmpty", () => {
   assert.equal(spec.isEmpty, true);
 });
 
-// ---- ridgeSpec ----------------------------------------------------------
+// ---- themeRidgeSpec -----------------------------------------------------
 
-const approx = (a, b, eps = 1e-9) =>
-  assert.ok(Math.abs(a - b) < eps, `expected ${a} ~= ${b}`);
-
-// A ridge is two traces: the fill polygon (even index) and the visible line
-// (odd index). The line is true to the actual outcomes and carries the hover;
-// its max-above-baseline is what "scaling" controls.
-const fillTrace = (spec, i) => spec.data[2 * i];
-const lineTrace = (spec, i) => spec.data[2 * i + 1];
-const ridgeHeight = (spec, i) => {
-  const baseline = spec.layout.annotations[i].y; // labels sit at each baseline
-  return Math.max(...lineTrace(spec, i).y) - baseline;
+const portableRidge = {
+  data: [
+    {
+      x: [0.9, 1, 1.1],
+      y: [0, 2.4, 0],
+      fill: "toself",
+      fillcolor: "rgba(0, 0, 0, 0.4)",
+      line: { width: 0 },
+      meta: { ridge: 0, role: "fill" },
+    },
+    {
+      x: [1],
+      y: [2.4],
+      customdata: [100],
+      line: { color: "#000000", width: 1.5 },
+      marker: { color: "#000000", size: 4 },
+      meta: { ridge: 0, role: "line" },
+    },
+  ],
+  layout: {
+    xaxis: { title: { text: "Outcome" } },
+    yaxis: { showticklabels: false },
+    annotations: [
+      { text: "a", bgcolor: "rgba(0, 0, 0, 0.72)", borderpad: 2 },
+    ],
+  },
+  config: { responsive: true, displaylogo: false },
 };
 
-test("ridgeSpec: two traces per output (fill polygon + true-to-outcome line)", () => {
-  const spec = ridgeSpec([
-    { label: "a", items: [[1, 1], [2, 1]] },
-    { label: "b", items: [[3, 1], [4, 1]] },
-  ]);
-  assert.equal(spec.data.length, 4);
-  // Fill trace: self-closed polygon, no visible line, no hover.
-  assert.equal(fillTrace(spec, 0).fill, "toself");
-  assert.equal(fillTrace(spec, 0).line.width, 0);
-  assert.equal(fillTrace(spec, 0).hoverinfo, "skip");
-  // Line trace: the visible stroke -- no fill, carries name + hover.
-  assert.equal(lineTrace(spec, 0).fill, undefined);
-  assert.equal(lineTrace(spec, 0).name, "a");
-  assert.equal(lineTrace(spec, 0).mode, "lines+markers"); // dots on each outcome
-  assert.equal(spec.isEmpty, false);
+const ridgeTheme = {
+  series: ["#112233"],
+  bg: "#ffffff",
+  text: "#222222",
+  muted: "#666666",
+  border: "#cccccc",
+  fontFamily: "sans-serif",
+};
+
+test("themeRidgeSpec preserves dyce geometry, structure, and config", () => {
+  const spec = themeRidgeSpec(portableRidge, ridgeTheme);
+  assert.deepEqual(spec.data[0].x, portableRidge.data[0].x);
+  assert.deepEqual(spec.data[0].y, portableRidge.data[0].y);
+  assert.deepEqual(spec.data[1].customdata, [100]);
+  assert.equal(spec.data[0].fill, "toself");
+  assert.deepEqual(spec.config, portableRidge.config);
 });
 
-test("ridgeSpec: outputs[0] is the top band, labelled via a left-aligned annotation", () => {
-  const spec = ridgeSpec([
-    { label: "a", items: [[1, 1]] },
-    { label: "b", items: [[2, 1]] },
-  ]);
-  const [a, b] = spec.layout.annotations;
-  assert.equal(a.text, "a");
-  assert.equal(b.text, "b");
-  // Pinned left-aligned to the plot's left edge (paper x=0), not a y-axis tick.
-  assert.equal(a.xref, "paper");
-  assert.equal(a.x, 0);
-  assert.equal(a.xanchor, "left");
-  // a (index 0) sits above b (index 1).
-  assert.ok(a.y > b.y);
-  // The y-axis carries no tick labels now.
-  assert.equal(spec.layout.yaxis.showticklabels, false);
+test("themeRidgeSpec themes matching ridge fills, lines, and tooltips", () => {
+  const spec = themeRidgeSpec(portableRidge, ridgeTheme);
+  assert.equal(spec.data[0].fillcolor, "rgba(17, 34, 51, 0.4)");
+  assert.equal(spec.data[1].line.color, "#112233");
+  assert.equal(spec.data[1].marker.color, "#112233");
+  assert.equal(spec.data[1].hoverlabel.bgcolor, "#112233");
 });
 
-test("ridgeSpec: line true to outcomes; fill closes to baseline with a small foot", () => {
-  const spec = ridgeSpec([
-    { label: "a", items: [[1, 1]] }, // single outcome
-    { label: "b", items: [[3, 1], [4, 1]] }, // outcomes 3,4
-  ]);
-  // Line: exactly the output's own outcomes -- no union fill, no tail padding,
-  // so it never runs flat out to another output's extent.
-  assert.deepEqual(lineTrace(spec, 0).x, [1]);
-  assert.deepEqual(lineTrace(spec, 0).customdata, [100]);
-  assert.deepEqual(lineTrace(spec, 1).x, [3, 4]);
-  assert.deepEqual(lineTrace(spec, 1).customdata, [50, 50]);
-  // Fill: every ridge closes to the baseline with a +/-0.1 foot at each end
-  // (single or multi) -- so a lone spike (a) is a narrow triangle, not a sliver.
-  assert.deepEqual(fillTrace(spec, 0).x, [0.9, 1, 1.1]);
-  assert.deepEqual(fillTrace(spec, 1).x, [2.9, 3, 4, 4.1]);
-  // Both lines carry markers (a dot per outcome); for the single-outcome ridge
-  // the marker is also what makes its segment-less line visible.
-  assert.equal(lineTrace(spec, 0).mode, "lines+markers");
-  assert.equal(lineTrace(spec, 1).mode, "lines+markers");
+test("themeRidgeSpec themes label pill while preserving dyce opacity", () => {
+  const spec = themeRidgeSpec(portableRidge, ridgeTheme);
+  assert.equal(spec.layout.annotations[0].bgcolor, "rgba(255, 255, 255, 0.72)");
+  assert.equal(spec.layout.annotations[0].font.color, "#666666");
+  assert.equal(spec.layout.annotations[0].borderpad, 2);
 });
 
-test("ridgeSpec: shared scaling keeps peak heights comparable", () => {
-  // a peaks at 100%, b at 50%; shared scale -> b's ridge is half as tall, and
-  // the global peak reaches exactly overlap*ROW_STEP. Pin overlap so the test
-  // asserts the scaling, not the current default.
-  const spec = ridgeSpec(
-    [
-      { label: "a", items: [[1, 1]] },
-      { label: "b", items: [[1, 1], [2, 1]] },
-    ],
-    { overlap: 2 },
+test("themeRidgeSpec does not mutate the portable input", () => {
+  const before = structuredClone(portableRidge);
+  themeRidgeSpec(portableRidge, ridgeTheme);
+  assert.deepEqual(portableRidge, before);
+});
+
+test("themeRidgeSpec recognizes an empty portable figure", () => {
+  assert.equal(
+    themeRidgeSpec({ data: [], layout: {}, config: {} }, ridgeTheme).isEmpty,
+    true,
   );
-  approx(ridgeHeight(spec, 0), 2);
-  approx(ridgeHeight(spec, 1), 1);
-});
-
-test("ridgeSpec: normalize 'each' makes every ridge reach the same peak", () => {
-  const spec = ridgeSpec(
-    [
-      { label: "a", items: [[1, 1]] },
-      { label: "b", items: [[1, 1], [2, 1]] },
-    ],
-    { normalize: "each", overlap: 2 },
-  );
-  approx(ridgeHeight(spec, 0), 2);
-  approx(ridgeHeight(spec, 1), 2);
-});
-
-test("ridgeSpec: overlap option scales the peak height", () => {
-  const spec = ridgeSpec([{ label: "a", items: [[1, 1]] }], { overlap: 3 });
-  approx(ridgeHeight(spec, 0), 3);
-});
-
-test("ridgeSpec: precision flows into the hover template", () => {
-  const spec = ridgeSpec([{ label: "a", items: [[1, 1]] }], { precision: 4 });
-  assert.match(lineTrace(spec, 0).hovertemplate, /%\{customdata:\.4f\}%/);
-});
-
-test("ridgeSpec: theme.series colors ridges; opaque line, translucent fill", () => {
-  const spec = ridgeSpec(
-    [
-      { label: "a", items: [[1, 1]] },
-      { label: "b", items: [[2, 1]] },
-    ],
-    { theme: { series: ["#112233", "#445566"] } },
-  );
-  // Line keeps the solid theme hue; the separate fill polygon is that hue at
-  // FILL_ALPHA so overlapping ridges read through. No trace-level opacity --
-  // that would dim the crisp line along with the fill.
-  assert.equal(lineTrace(spec, 0).line.color, "#112233");
-  assert.equal(lineTrace(spec, 0).opacity, undefined);
-  assert.equal(fillTrace(spec, 0).fillcolor, "rgba(17, 34, 51, 0.4)");
-  assert.equal(lineTrace(spec, 1).line.color, "#445566");
-  assert.equal(fillTrace(spec, 1).fillcolor, "rgba(68, 85, 102, 0.4)");
-});
-
-test("ridgeSpec: themed label gets a translucent pill for legibility", () => {
-  const spec = ridgeSpec([{ label: "a", items: [[1, 1]] }], {
-    theme: { series: ["#112233"], bg: "#ffffff", muted: "#666666" },
-  });
-  const ann = spec.layout.annotations[0];
-  // Background pill from the theme bg at partial alpha; muted theme text on top.
-  assert.match(ann.bgcolor, /^rgba\(255, 255, 255, /);
-  assert.equal(ann.font.color, "#666666");
-});
-
-test("ridgeSpec: no outcomes -> isEmpty", () => {
-  const spec = ridgeSpec([{ label: "x", items: [] }]);
-  assert.equal(spec.isEmpty, true);
 });

@@ -269,13 +269,13 @@ function appendPlaceholder(container, text) {
   container.appendChild(div);
 }
 
-// Render a single consolidated chart -- the shared body of the line and ridge
-// views. Clears `container`, builds the figure via `buildSpec(outputs,
+// Render a consolidated chart from a local JavaScript spec builder. Clears
+// `container`, builds the figure via `buildSpec(outputs,
 // {precision, theme})`, and hands it to Plotly. The chart fills the pane via CSS
 // (its .plot grows to the container height) rather than a per-outcome height
 // computation, and the CSS theme is re-read per call so the palette tracks the
-// current light/dark + family. `buildSpec` (lineSpec or ridgeSpec) is the ONLY
-// thing that differs between the two views' rendering.
+// current light/dark + family. The dyce-backed ridge view has its own thin
+// renderer below because its portable spec arrives from the worker.
 function renderConsolidated(
   container,
   outputs,
@@ -333,8 +333,7 @@ export function renderPlots(container, outputs, Plotly, { precision } = {}) {
 // "gap" (an outcome a neighboring output has but this one lacks) rather than
 // dipping to the axis there, and putting a marker only on real outcomes. xs/ys
 // are empty for an output with no mass. Returns
-// [{label, xs: number[], ys: number[]}] -- the shared input to lineSpec and
-// ridgeSpec.
+// [{label, xs: number[], ys: number[]}] -- the input to lineSpec.
 export function perOutputSeries(outputs) {
   return (outputs || []).map(({ label, items }) => {
     const percents = itemsToPercents(items); // null for an empty distribution
@@ -409,32 +408,15 @@ export function renderLines(container, outputs, Plotly, opts = {}) {
   renderConsolidated(container, outputs, Plotly, lineSpec, opts);
 }
 
-// Vertical geometry for the ridgeline view, in data-space units. Each output's
-// band sits one ROW_STEP above the next; a ridge's tallest point rises
-// RIDGE_OVERLAP * ROW_STEP, so with overlap > 1 a ridge pokes up behind the
-// band above it -- the characteristic ridgeline / "joy plot" look. ROW_STEP is
-// arbitrary (the y-axis range is derived from it), so only their RATIO matters.
-const ROW_STEP = 1;
-const RIDGE_OVERLAP = 2.4;
+// Return `color` with the alpha encoded by `template`. dyce owns structural
+// opacity; the browser substitutes only the current theme's hue.
+function withTemplateAlpha(color, template) {
+  const match = String(template || "").match(
+    /^rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\s*\)$/i,
+  );
+  return match ? withAlpha(color, Number(match[1])) : color;
+}
 
-// Fill translucency for ridges: the area under each curve is drawn at this
-// alpha so overlapping ridges show THROUGH one another -- a tighter, more
-// overlapped stack stays legible -- while the line on top stays fully opaque so
-// each ridge's silhouette stays crisp. Trace-level opacity can't separate fill
-// from line (it dims both), so the alpha is baked into the fillcolor below.
-const FILL_ALPHA = 0.4;
-
-// Every ridge's fill gets a small "foot" -- a baseline point this far outside
-// each end -- so the polygon seats on the baseline with a slight taper rather
-// than a hard vertical edge, and a lone single-outcome spike renders as a narrow
-// triangle instead of a zero-width sliver.
-const FILL_FOOT = 0.1;
-
-// Return `color` as an "rgba(...)" string at the given alpha, so a ridge's fill
-// can be translucent while its line stays solid. Accepts the hex the theme uses
-// (#rgb / #rrggbb, with or without an alpha nibble) and rgb()/rgba() forms;
-// anything it can't parse is returned unchanged (an opaque but still-valid
-// fill, so a surprising theme value degrades rather than breaks).
 function withAlpha(color, alpha) {
   if (!color) return color;
   const c = color.trim();
@@ -459,183 +441,74 @@ function withAlpha(color, alpha) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-// Build a single Plotly figure stacking every output as a filled "ridge" -- a
-// third consolidated view (cf. lineSpec's overlay and plotSpec's per-output
-// bars). Each output becomes a horizontal band whose distribution is drawn as a
-// filled curve rising from a baseline; the bands are offset vertically and
-// overlap. The visible LINE stays true to each output's own outcomes -- unlike
-// the line view it is NOT zero-filled across the outcome union, so it (and the
-// tooltips) cover just the outcomes that output actually has, bridging internal
-// "gaps" (an outcome a neighbor has but this output lacks) rather than running
-// flat out to other outputs' min/max. The fill seats on the baseline via a small
-// foot at each end (below), so the area closes with just a slight taper, and a
-// lone single-outcome spike still renders.
-//
-// outputs:   array of {label, items}; see plotSpec.
-// precision: decimal places for the percent hover labels.
-// theme:     optional color/font object (see readCssTheme). theme.series colors
-//            the ridges (cycled, one hue per output); without it Plotly's
-//            defaults apply (themeless unit-test contexts).
-// overlap:   how far a ridge may rise, in row-steps (default RIDGE_OVERLAP);
-//            > 1 makes ridges overlap, smaller values separate them.
-// normalize: "shared" (default) scales every ridge by the SAME factor so peak
-//            heights stay comparable across outputs -- matching the bars view's
-//            shared x-range. "each" scales every ridge to its own max so all
-//            peaks reach the same height (the classic ridgeline aesthetic, but
-//            relative magnitude across outputs is no longer readable).
-//
-// Output order: outputs[0] is the TOP band, descending. Ridges rise upward and
-// are emitted top band first, bottom band last, so Plotly draws the lower /
-// front ridge over the one behind it where they overlap (mountains receding).
-//
-// Each ridge is two traces: a self-closed FILL polygon (the curve plus a small
-// foot at each end that seats it on the baseline, drawn with no visible line)
-// and then the
-// visible LINE over it. The line carries the REAL percents in customdata
-// (the plotted y is offset + scaled and never shown to the user); the label is
-// a left-aligned annotation at the ridge's baseline (so long names extend
-// rightward over the ridge instead of clipping in a gutter) -- no legend.
-//
-// Returns {data, layout, isEmpty}; isEmpty is true only when there are no
-// outcomes at all (every output empty), matching lineSpec.
-export function ridgeSpec(
-  outputs,
-  {
-    precision = DEFAULT_PLOT_PRECISION,
-    theme = null,
-    overlap = RIDGE_OVERLAP,
-    normalize = "shared",
-  } = {},
-) {
-  const prec = normalizePrecision(precision);
-  const ridges = perOutputSeries(outputs); // each ridge keeps only its own outcomes
-  const n = ridges.length;
+// Apply the page's current CSS theme to dyce's portable ridge PlotSpec without
+// changing its geometry, ordering, hover text, or configuration. Trace metadata
+// identifies each ridge and its fill/line role, so presentation does not depend
+// on trace position. The input remains unchanged for later light/dark re-renders.
+export function themeRidgeSpec(spec, theme = null) {
+  if (!spec) return null;
   const palette = themePalette(theme);
-  const peakHeight = overlap * ROW_STEP;
-  // Shared scale: one percent->height factor for every ridge, sized so the
-  // single global tallest outcome reaches peakHeight. ("each" recomputes this
-  // per ridge below.) globalMax is 0 only when every output is empty.
-  const globalMax = ridges.reduce(
-    (m, { ys }) => ys.reduce((mm, v) => (v > mm ? v : mm), m),
-    0,
-  );
-  if (globalMax <= 0) {
-    return { data: [], layout: {}, isEmpty: true };
-  }
-  const data = [];
-  const annotations = [];
-  ridges.forEach(({ label, xs, ys }, i) => {
-    // outputs[0] on top: highest baseline at i=0, descending to 0.
-    const baseline = (n - 1 - i) * ROW_STEP;
-    // Label each ridge with a LEFT-aligned annotation pinned to the left edge of
-    // the plot (paper x=0) at its baseline -- not a y-axis tick. A y-axis tick
-    // is right-justified into the left margin, so a long output name grows
-    // leftward and clips; this way it grows rightward, overlapping the ridge.
-    annotations.push({
-      xref: "paper",
-      x: 0,
-      xanchor: "left",
-      xshift: 4,
-      yref: "y",
-      y: baseline,
-      yanchor: "bottom",
-      yshift: 2,
-      text: label,
-      showarrow: false,
-      align: "left",
-      // A translucent "pill" (the theme background) with a little padding keeps
-      // the label legible where it overlaps a ridge's fill/line.
-      ...(theme
-        ? {
-            font: { color: theme.muted, family: theme.fontFamily },
-            bgcolor: withAlpha(theme.bg, 0.72),
-            borderpad: 2,
-          }
-        : {}),
-    });
-    const localMax =
-      normalize === "each" ? ys.reduce((mm, v) => (v > mm ? v : mm), 0) : globalMax;
-    const scale = localMax > 0 ? peakHeight / localMax : 0;
-    const color = palette ? palette[i % palette.length] : undefined;
-    const curveY = ys.map((v) => baseline + v * scale);
-    // FILL: a self-closed polygon -- the curve plus a baseline point a FILL_FOOT
-    // outside each end, so the area seats on the baseline (a slight taper at the
-    // tails; a lone single-outcome spike, common for an always-true/false
-    // question like "2d6 > 1", becomes a narrow triangle rather than a zero-width
-    // sliver). Internal "gaps" are bridged, NOT dropped: a gap only means a
-    // neighbor has an outcome this output lacks, so the area spans them like the
-    // line. No visible line (the line trace below is the stroke) and no hover.
-    const fillX = xs.length
-      ? [xs[0] - FILL_FOOT, ...xs, xs[xs.length - 1] + FILL_FOOT]
-      : [];
-    const fillY = xs.length ? [baseline, ...curveY, baseline] : [];
-    data.push({
-      type: "scatter",
-      mode: "lines",
-      x: fillX,
-      y: fillY,
-      fill: "toself",
-      line: { width: 0 },
-      hoverinfo: "skip",
-      showlegend: false,
-      ...(color ? { fillcolor: withAlpha(color, FILL_ALPHA) } : {}),
-    });
-    // LINE: the visible stroke, true to the actual outcomes (no tails, no gap
-    // padding), opaque over the translucent fill so it stays crisp where ridges
-    // overlap. A marker on each outcome (like the line view, a touch smaller
-    // since the ridge is denser) pins the discrete points -- and it's also what
-    // makes a single-outcome ridge, whose line has no segment to stroke, visible
-    // at all. Carries the tooltips; the REAL percents ride in customdata (the
-    // plotted y is offset + scaled and never shown).
-    data.push({
-      type: "scatter",
-      mode: "lines+markers",
-      x: xs,
-      y: curveY,
-      name: label,
-      customdata: ys,
-      hovertemplate: `${label}<br>%{x}: %{customdata:.${prec}f}%<extra></extra>`,
-      showlegend: false,
-      marker: { size: 4, ...(color ? { color } : {}) },
-      ...(color ? { line: { color, width: 1.5 } } : {}),
-    });
+  const data = (spec.data || []).map((trace) => {
+    const themed = {
+      ...trace,
+      ...(trace.line ? { line: { ...trace.line } } : {}),
+      ...(trace.marker ? { marker: { ...trace.marker } } : {}),
+    };
+    const ridge = trace.meta?.ridge;
+    const color = palette?.length ? palette[ridge % palette.length] : null;
+    if (color && trace.meta?.role === "fill") {
+      themed.fillcolor = withTemplateAlpha(color, trace.fillcolor);
+    } else if (color && trace.meta?.role === "line") {
+      themed.line = { ...themed.line, color };
+      themed.marker = { ...themed.marker, color };
+      themed.hoverlabel = {
+        ...(trace.hoverlabel || {}),
+        bgcolor: color,
+        bordercolor: color,
+        font: { ...(trace.hoverlabel?.font || {}), color: theme.bg },
+      };
+    }
+    return themed;
   });
+  const annotations = (spec.layout?.annotations || []).map((annotation) => ({
+    ...annotation,
+    ...(theme
+      ? {
+          font: {
+            ...(annotation.font || {}),
+            color: theme.muted,
+            family: theme.fontFamily,
+          },
+          bgcolor: withTemplateAlpha(theme.bg, annotation.bgcolor),
+        }
+      : {}),
+  }));
   return {
     data,
     layout: {
-      showlegend: false,
-      // "x" (not "x unified"): a separate per-point tooltip for EACH ridge at
-      // the outcome nearest the cursor's horizontal position, all at once --
-      // the fill traces are hoverinfo:"skip", so it's exactly one per ridge.
-      hovermode: "x",
-      xaxis: {
-        title: { text: "Outcome" },
-        ...themeAxisBits(theme),
-      },
-      yaxis: {
-        // Labels are annotations (see above) and the baselines are the only
-        // reference lines, so the y-axis carries no ticks, grid, or zeroline.
-        showticklabels: false,
-        showgrid: false,
-        zeroline: false,
-        range: [
-          -0.5 * ROW_STEP,
-          (n - 1) * ROW_STEP + peakHeight + 0.5 * ROW_STEP,
-        ],
-        ...themeAxisBits(theme),
-      },
+      ...(spec.layout || {}),
+      xaxis: { ...(spec.layout?.xaxis || {}), ...themeAxisBits(theme) },
+      yaxis: { ...(spec.layout?.yaxis || {}), ...themeAxisBits(theme) },
       annotations,
-      // Slim left margin now that labels live inside the plot rather than in a
-      // y-axis gutter (just enough for the leftmost x-axis tick label).
       margin: { l: 40, r: 20, t: MARGIN_TOP_PX, b: MARGIN_BOTTOM_PX },
       ...themeLayoutBits(theme),
     },
-    isEmpty: false,
+    config: { ...(spec.config || {}) },
+    isEmpty: data.every((trace) => !trace.x?.length),
   };
 }
 
-// Render the consolidated ridgeline -- one chart stacking every output as a
-// filled ridge (cf. renderLines). See renderConsolidated.
-export function renderRidge(container, outputs, Plotly, opts = {}) {
-  renderConsolidated(container, outputs, Plotly, ridgeSpec, opts);
+// Render the portable ridge figure emitted by dyce. AnyDice owns only the
+// surrounding page theme and container presentation.
+export function renderRidge(container, portableSpec, Plotly) {
+  container.replaceChildren();
+  const spec = themeRidgeSpec(portableSpec, readCssTheme());
+  if (!spec || spec.isEmpty) {
+    appendPlaceholder(container, "(empty distribution)");
+    return;
+  }
+  const div = document.createElement("div");
+  div.className = "plot";
+  container.appendChild(div);
+  Plotly.newPlot(div, spec.data, spec.layout, spec.config);
 }
