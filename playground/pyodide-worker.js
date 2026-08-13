@@ -15,8 +15,8 @@
 //   Worker -> Main:
 //     { type: "status", message }                   -- progress updates
 //     { type: "ready" }                             -- init complete
-//     { type: "result", text, outputs, displayPrecision, csv, csvFilename,
-//       warnings, runId }                           -- successful run
+//     { type: "result", text, outputs, ridgeSpec, displayPrecision, csv,
+//       csvFilename, warnings, runId }                -- successful run
 //     { type: "error", stage: "init"|"run", error,
 //                      traceback?, warnings?, runId? }
 //
@@ -53,6 +53,7 @@ const PYTHON_BOOTSTRAP = `
 import traceback as _traceback
 import warnings
 from dyce.lifecycle import ExperimentalWarning
+from dyce.viz_plotly import ridge_spec
 # Default action is "default" (print first occurrence per location). The
 # playground UI shows every warning explicitly in the logs pane, so we
 # switch to "always" -- a recurring TruncationWarning at the same site
@@ -107,6 +108,16 @@ def _do_run(source):
             {"label": label, "items": list(h.items()) if h else []}
             for label, h in results
         ],
+        # Portable Plotly structure generated alongside the results. Neutral
+        # colors make the fill/label alpha part of dyce's specification while
+        # leaving the browser free to apply its current CSS palette.
+        "ridgeSpec": ridge_spec(
+            *(h for _, h in results),
+            labels=[label for label, _ in results],
+            colors=["#000000"],
+            label_bgcolor="rgba(0, 0, 0, 0.72)",
+            precision=settings.display_precision,
+        ).as_dict(),
         # Final display precision after any \`set "anydyce: display
         # precision"\` directives -- the bars view formats its percent
         # labels with this so both views honor the same setting.
@@ -224,6 +235,7 @@ self.addEventListener("message", async (ev) => {
           type: "result",
           text: out.text,
           outputs: out.outputs,
+          ridgeSpec: out.ridgeSpec,
           displayPrecision: out.displayPrecision,
           csv: out.csv,
           csvFilename: out.csvFilename,

@@ -308,6 +308,7 @@ function renderResults(text) {
 // time).
 let lastOutputs = null;
 let lastDisplayPrecision;
+let lastRidgeSpec = null;
 // Base64 CSV + download filename of the last successful run, both computed
 // in the worker via anydyce.csv (csv_base64 / csv_filename) so the
 // playground and the Jupyter widget produce byte-identical files with
@@ -344,18 +345,19 @@ function clearOutputCharts() {
 
 // All three chart views (bars, lines, ridge) are built from the same raw
 // [{label, items}] data, so toggling between them needs no re-render.
-function paintCharts(outputs, precision) {
+function paintCharts(outputs, precision, ridgeSpec) {
   renderPlots(outputBars, outputs, Plotly, { precision });
   renderLines(outputLines, outputs, Plotly, { precision });
-  renderRidge(outputRidge, outputs, Plotly, { precision });
+  renderRidge(outputRidge, ridgeSpec, Plotly);
 }
 
-function renderOutputCharts(outputs, displayPrecision) {
+function renderOutputCharts(outputs, displayPrecision, ridgeSpec) {
   // displayPrecision is the run's final `set "anydyce: display precision"`
   // value, so the charts' percent labels match the text view's formatting.
   lastOutputs = outputs;
   lastDisplayPrecision = displayPrecision;
-  paintCharts(outputs, displayPrecision);
+  lastRidgeSpec = ridgeSpec;
+  paintCharts(outputs, displayPrecision, ridgeSpec);
   showOutputViews();
 }
 
@@ -365,7 +367,7 @@ function renderOutputCharts(outputs, displayPrecision) {
 // explicit re-render. No-op before the first run.
 function rerenderCharts() {
   if (lastOutputs !== null) {
-    paintCharts(lastOutputs, lastDisplayPrecision);
+    paintCharts(lastOutputs, lastDisplayPrecision, lastRidgeSpec);
   }
 }
 
@@ -696,7 +698,15 @@ async function handleRun() {
   setCsvAvailable(false);
   const t0 = performance.now();
   try {
-    const { text, outputs, displayPrecision, csv, csvFilename, warnings } =
+    const {
+      text,
+      outputs,
+      ridgeSpec,
+      displayPrecision,
+      csv,
+      csvFilename,
+      warnings,
+    } =
       await runAnydice(source);
     const dt = Math.round(performance.now() - t0);
     logWarnings(warnings);
@@ -707,7 +717,7 @@ async function handleRun() {
       showMessage("(no output)");
     } else {
       renderResults(text);
-      renderOutputCharts(outputs, displayPrecision);
+      renderOutputCharts(outputs, displayPrecision, ridgeSpec);
     }
     lastCsv = csv;
     lastCsvFilename = csvFilename;
