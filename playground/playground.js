@@ -301,13 +301,12 @@ function renderResults(text) {
   outputText.textContent = text;
 }
 
-// Last successful run's raw outputs + precision, kept so the charts can be
+// Last successful run's raw outputs and specs, kept so the charts can be
 // re-rendered without re-running the program (currently: when the OS
 // light/dark setting flips mid-session, since Plotly has no native
 // prefers-color-scheme reactivity and the charts bake colors in at render
 // time).
 let lastOutputs = null;
-let lastDisplayPrecision;
 let lastBarSpecs = [];
 let lastLineSpec = null;
 let lastRidgeSpec = null;
@@ -345,19 +344,15 @@ function clearOutputCharts() {
   }
 }
 
-// All three chart views (bars, lines, ridge) are built from the same raw
-// [{label, items}] data, so toggling between them needs no re-render.
+// All three chart views are rendered from dyce's portable specifications.
 function paintCharts(barSpecs, lineSpec, ridgeSpec) {
   renderPlots(outputBars, barSpecs, Plotly);
   renderLines(outputLines, lineSpec, Plotly);
   renderRidge(outputRidge, ridgeSpec, Plotly);
 }
 
-function renderOutputCharts(outputs, displayPrecision, barSpecs, lineSpec, ridgeSpec) {
-  // displayPrecision is the run's final `set "anydyce: display precision"`
-  // value, so the charts' percent labels match the text view's formatting.
+function renderOutputCharts(outputs, barSpecs, lineSpec, ridgeSpec) {
   lastOutputs = outputs;
-  lastDisplayPrecision = displayPrecision;
   lastBarSpecs = barSpecs;
   lastLineSpec = lineSpec;
   lastRidgeSpec = ridgeSpec;
@@ -708,7 +703,6 @@ async function handleRun() {
       barSpecs,
       lineSpec,
       ridgeSpec,
-      displayPrecision,
       csv,
       csvFilename,
       warnings,
@@ -723,7 +717,7 @@ async function handleRun() {
       showMessage("(no output)");
     } else {
       renderResults(text);
-      renderOutputCharts(outputs, displayPrecision, barSpecs, lineSpec, ridgeSpec);
+      renderOutputCharts(outputs, barSpecs, lineSpec, ridgeSpec);
     }
     lastCsv = csv;
     lastCsvFilename = csvFilename;

@@ -1,32 +1,4 @@
-// Plotly figure-spec construction for AnyDice histograms.
-//
-// `plotSpec(label, items)` is pure (no DOM, no Plotly imports) so its math
-// can be unit-tested under Node. The actual rendering wrapper
-// `renderPlots(container, outputs)` lives below and requires Plotly to be
-// loaded; it's the only DOM-bound bit.
-
-// Retained for consumers of raw worker output; Plotly views now receive their
-// percentages directly in dyce's portable specifications.
-const PERCENT_SCALE = 10n ** 15n;
-const PERCENT_DIVISOR = 1e13;
-
-function asBigInt(x) {
-  return typeof x === "bigint" ? x : BigInt(x);
-}
-
-export function itemsToPercents(items) {
-  if (!items || items.length === 0) return null;
-  let total = 0n;
-  const counts = items.map(([, count]) => {
-    const value = asBigInt(count);
-    total += value;
-    return value;
-  });
-  if (total === 0n) return null;
-  return counts.map(
-    (count) => Number((count * PERCENT_SCALE) / total) / PERCENT_DIVISOR,
-  );
-}
+// Plotly rendering and theme adaptation for dyce's portable figure specs.
 
 // Vertical sizing: every outcome row gets the same pixel allotment in every
 // chart, so bar thickness is uniform across outputs regardless of how many
@@ -40,14 +12,6 @@ export const MARGIN_TOP_PX = 40;
 export const MARGIN_BOTTOM_PX = 50;
 export const CHART_CHROME_PX = MARGIN_TOP_PX + MARGIN_BOTTOM_PX;
 export const EMPTY_CHART_PX = 120;
-
-export const DEFAULT_PLOT_PRECISION = 2;
-
-function normalizePrecision(precision) {
-  return Number.isInteger(precision) && precision >= 0
-    ? precision
-    : DEFAULT_PLOT_PRECISION;
-}
 
 // Read the chart theme from the CSS custom properties in playground.css --
 // the single source of truth for colors and fonts, including the dark-mode
@@ -127,119 +91,6 @@ export function chartHeight(nOutcomes) {
   return CHART_CHROME_PX + nOutcomes * PX_PER_OUTCOME;
 }
 
-// The largest single-outcome percent across ALL outputs, or null when no
-// output has mass. Used to give every chart the same x-axis range so bar
-// lengths are comparable across outputs, not just within one.
-export function globalMaxPercent(outputs) {
-  let max = null;
-  for (const { items } of outputs || []) {
-    const percents = itemsToPercents(items);
-    if (percents === null) continue;
-    for (const v of percents) {
-      if (max === null || v > max) max = v;
-    }
-  }
-  return max;
-}
-
-// Build a Plotly figure spec for a single output's histogram.
-//
-// label:      text to display as the plot title (the AnyDice output's name).
-// items:      array of [outcome, count] pairs in outcome order. Counts may
-//             be BigInt or Number; outcomes are integers.
-// xMax:       optional shared x-axis maximum (percent). When provided, the
-//             x-axis range is fixed to [0, xMax] so bar lengths are
-//             comparable across charts; when omitted, the axis auto-ranges
-//             to this chart alone. renderPlots passes the padded global max
-//             across outputs.
-// precision:  decimal places for percent labels (bar text + hover). Comes
-//             from the run's final `set "anydyce: display precision"` value
-//             so both views format numbers identically.
-// theme:      optional color/font object (see readCssTheme). When provided,
-//             backgrounds, text, axes, bars, and hover labels follow the
-//             playground's CSS theme (including dark mode); when omitted,
-//             Plotly's defaults apply (themeless unit-test contexts).
-//
-// Returns {data, layout, isEmpty}. `isEmpty` is true when the distribution
-// has no mass (empty items, all-zero counts, or null items); in that case
-// `data` is a no-trace spec and `layout` carries an "(empty)" annotation,
-// so the layout still renders a labeled placeholder rather than an empty
-// container with no context.
-//
-// layout.height is computed via chartHeight so that every outcome row gets
-// PX_PER_OUTCOME pixels regardless of how many outcomes this particular
-// output has -- uniform bar thickness across charts.
-export function plotSpec(
-  label,
-  items,
-  { xMax = null, precision = DEFAULT_PLOT_PRECISION, theme = null } = {},
-) {
-  const prec = normalizePrecision(precision);
-  const percents = itemsToPercents(items);
-  if (percents === null) {
-    return {
-      data: [],
-      layout: {
-        title: { text: `${label} (empty)` },
-        height: EMPTY_CHART_PX,
-        xaxis: { visible: false },
-        yaxis: { visible: false },
-        annotations: [
-          {
-            text: "(empty distribution)",
-            xref: "paper",
-            yref: "paper",
-            x: 0.5,
-            y: 0.5,
-            showarrow: false,
-            font: { size: 14, ...(theme ? { color: theme.muted } : {}) },
-          },
-        ],
-        margin: { l: 40, r: 20, t: 40, b: 40 },
-        ...themeLayoutBits(theme),
-      },
-      isEmpty: true,
-    };
-  }
-  // Horizontal bars: outcomes on the y-axis (treated as categories so
-  // non-contiguous integers don't leave gaps), percent on the x-axis.
-  const y = items.map(([o]) => String(o));
-  const barText = percents.map((p) => `${p.toFixed(prec)}%`);
-  return {
-    data: [
-      {
-        type: "bar",
-        orientation: "h",
-        x: percents,
-        y,
-        text: barText,
-        textposition: "auto",
-        hovertemplate: `%{y}: %{x:.${prec}f}%<extra></extra>`,
-        ...(theme ? { marker: { color: theme.accent } } : {}),
-      },
-    ],
-    layout: {
-      title: { text: label },
-      height: chartHeight(items.length),
-      xaxis: {
-        ...(xMax !== null ? { range: [0, xMax] } : { rangemode: "tozero" }),
-        ...themeAxisBits(theme),
-      },
-      yaxis: {
-        type: "category",
-        // The first item we passed has the smallest outcome; Plotly's
-        // default category order would put it at the BOTTOM of the y-axis.
-        // Flip so smallest is on top -- matches the text view's ordering.
-        autorange: "reversed",
-        ...themeAxisBits(theme),
-      },
-      margin: { l: 60, r: 20, t: MARGIN_TOP_PX, b: MARGIN_BOTTOM_PX },
-      ...themeLayoutBits(theme),
-    },
-    isEmpty: false,
-  };
-}
-
 // Config passed to every Plotly.newPlot in this module: responsive to window
 // resizes, no Plotly logo, and a lean modebar (we don't ship the geo / 3d /
 // etc. plugins, so drop their leftover buttons).
@@ -256,34 +107,6 @@ function appendPlaceholder(container, text) {
   div.className = "plot-empty";
   div.textContent = text;
   container.appendChild(div);
-}
-
-// Render a consolidated chart from a local JavaScript spec builder. Clears
-// `container`, builds the figure via `buildSpec(outputs,
-// {precision, theme})`, and hands it to Plotly. The chart fills the pane via CSS
-// (its .plot grows to the container height) rather than a per-outcome height
-// computation, and the CSS theme is re-read per call so the palette tracks the
-// current light/dark + family. The dyce-backed ridge view has its own thin
-// renderer below because its portable spec arrives from the worker.
-function renderConsolidated(
-  container,
-  outputs,
-  Plotly,
-  buildSpec,
-  { precision } = {},
-) {
-  // Callers pass at least one output; the zero-output case is a whole-pane
-  // message handled upstream (playground.js showMessage), not here.
-  container.replaceChildren();
-  const spec = buildSpec(outputs, { precision, theme: readCssTheme() });
-  if (spec.isEmpty) {
-    appendPlaceholder(container, "(empty distribution)");
-    return;
-  }
-  const div = document.createElement("div");
-  div.className = "plot";
-  container.appendChild(div);
-  Plotly.newPlot(div, spec.data, spec.layout, PLOTLY_CONFIG);
 }
 
 // Render a list of outputs as stacked horizontal bar charts inside `container`.
@@ -330,82 +153,7 @@ export function renderPlots(container, portableSpecs, Plotly) {
   }
 }
 
-// Each output's OWN outcomes and percents -- no union zero-fill. A line or ridge
-// then spans just the outcomes that output actually has, bridging any interior
-// "gap" (an outcome a neighboring output has but this one lacks) rather than
-// dipping to the axis there, and putting a marker only on real outcomes. xs/ys
-// are empty for an output with no mass. Returns
-// [{label, xs: number[], ys: number[]}] -- the input to lineSpec.
-export function perOutputSeries(outputs) {
-  return (outputs || []).map(({ label, items }) => {
-    const percents = itemsToPercents(items); // null for an empty distribution
-    return {
-      label,
-      xs: percents ? items.map(([o]) => Number(o)) : [],
-      ys: percents || [],
-    };
-  });
-}
-
-// Build a single Plotly figure overlaying every output as a line trace -- one
-// consolidated chart (like anydice.com's graph view), versus plotSpec /
-// renderPlots' one-chart-per-output bars.
-//
-// outputs:   array of {label, items}; see plotSpec.
-// precision: decimal places for the percent hover labels.
-// theme:     optional color/font object (see readCssTheme). theme.series
-//            becomes layout.colorway, so traces cycle the theme palette.
-//
-// Each line spans only its OWN outcomes (see perOutputSeries) -- no union
-// zero-fill -- so lines bridge interior gaps instead of saw-toothing down to the
-// axis, and the markers land only on real outcomes. The x-axis is NUMERIC (not
-// categorical) so the lines align on a shared scale and Plotly auto-picks a
-// readable tick density. No per-trace color is set, so Plotly assigns from
-// colorway.
-export function lineSpec(
-  outputs,
-  { precision = DEFAULT_PLOT_PRECISION, theme = null } = {},
-) {
-  const prec = normalizePrecision(precision);
-  const series = perOutputSeries(outputs);
-  const palette = themePalette(theme);
-  const data = series.map(({ label, xs, ys }) => ({
-    type: "scatter",
-    mode: "lines+markers",
-    name: label,
-    x: xs,
-    y: ys,
-    marker: { size: 5 },
-    hovertemplate: `%{y:.${prec}f}%`,
-  }));
-  return {
-    data,
-    layout: {
-      showlegend: true,
-      // "x": a separate per-line tooltip at the outcome nearest the cursor's
-      // horizontal position (like the ridge view). Alternative: "x unified" --
-      // one combined box listing every series, which reads cleaner when the
-      // lines bunch together on the shared y-axis.
-      hovermode: "x",
-      xaxis: {
-        title: { text: "Outcome" },
-        ...themeAxisBits(theme),
-      },
-      yaxis: {
-        title: { text: "Probability (%)" },
-        rangemode: "tozero",
-        ...themeAxisBits(theme),
-      },
-      margin: { l: 60, r: 20, t: MARGIN_TOP_PX, b: MARGIN_BOTTOM_PX },
-      ...(palette ? { colorway: palette } : {}),
-      ...themeLayoutBits(theme),
-    },
-    isEmpty: series.every(({ xs }) => xs.length === 0),
-  };
-}
-
-// Render the consolidated line overlay -- one chart overlaying every output as a
-// line (cf. renderPlots' one-chart-per-output bars). See renderConsolidated.
+// Render the consolidated line overlay emitted by dyce.
 export function renderLines(container, portableSpec, Plotly) {
   container.replaceChildren();
   const spec = themePortableSpec(portableSpec, readCssTheme());
