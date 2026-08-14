@@ -6,17 +6,14 @@
 // Public API:
 //   await initPyodide(onStatus)  -> resolves when runtime is ready
 //   await runAnydice(source)     -> resolves to {text, outputs, barSpecs,
-//                                   lineSpec, ridgeSpec,
-//                                   displayPrecision, csv, csvFilename,
+//                                   lineSpec, ridgeSpec, csv, csvFilename,
 //                                   warnings};
 //                                   rejects with RunError (Python exception:
 //                                   carries .traceback and .warnings) or
 //                                   CancelledError (deliberate cancel).
 //                                   `text` is the fully-rendered display
 //                                   string (anydyce's format_results).
-//                                   `outputs` is raw per-output data for
-//                                   the bars view. `displayPrecision` is
-//                                   the run's final display precision.
+//                                   `outputs` is raw per-output data.
 //   cancelCurrentRun()           -> terminates the worker, rejecting any
 //                                   in-flight run with CancelledError; caller
 //                                   re-calls initPyodide() to bring runtime
@@ -85,7 +82,6 @@ function ensureWorker() {
             barSpecs: msg.barSpecs || [],
             lineSpec: msg.lineSpec || null,
             ridgeSpec: msg.ridgeSpec || null,
-            displayPrecision: msg.displayPrecision,
             csv: msg.csv || "",
             csvFilename: msg.csvFilename || "",
             warnings: msg.warnings || [],

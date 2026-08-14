@@ -16,7 +16,7 @@
 //     { type: "status", message }                   -- progress updates
 //     { type: "ready" }                             -- init complete
 //     { type: "result", text, outputs, barSpecs, lineSpec, ridgeSpec,
-//       displayPrecision, csv, csvFilename, warnings, runId }
+//       csv, csvFilename, warnings, runId }
 //                                                     -- successful run
 //     { type: "error", stage: "init"|"run", error,
 //                      traceback?, warnings?, runId? }
@@ -25,10 +25,7 @@
 // anydyce's `format_results` -- the single source of truth for textual
 // rendering, so the playground stays in lock-step with the magic and any
 // other anydyce consumer. `outputs` is a list of {label, items} per
-// `output` statement (items = list of [outcome, count] pairs) consumed by
-// the bars view. `displayPrecision` is the run's final display precision
-// (after any `set "anydyce: display precision"` directives) so the bars
-// view formats percent labels consistently with the text view. `csv` and
+// `output` statement (items = list of [outcome, count] pairs). `csv` and
 // `csvFilename` are the base64-encoded CSV export and its download name
 // (anydyce.csv.csv_base64 / csv_filename, same as the Jupyter widget's
 // download link) backing the CSV button.
@@ -142,10 +139,6 @@ def _do_run(source):
             label_bgcolor="rgba(0, 0, 0, 0.72)",
             precision=settings.display_precision,
         ).as_dict(),
-        # Final display precision after any \`set "anydyce: display
-        # precision"\` directives -- the bars view formats its percent
-        # labels with this so both views honor the same setting.
-        "displayPrecision": settings.display_precision,
         # Base64 CSV + filename via the same anydyce.csv helpers the Jupyter
         # widget uses, so both surfaces export identical files with identical
         # names. Computed eagerly (not on demand) so the download keeps
@@ -262,7 +255,6 @@ self.addEventListener("message", async (ev) => {
           barSpecs: out.barSpecs,
           lineSpec: out.lineSpec,
           ridgeSpec: out.ridgeSpec,
-          displayPrecision: out.displayPrecision,
           csv: out.csv,
           csvFilename: out.csvFilename,
           warnings: out.warnings,
