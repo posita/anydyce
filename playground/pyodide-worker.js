@@ -15,8 +15,9 @@
 //   Worker -> Main:
 //     { type: "status", message }                   -- progress updates
 //     { type: "ready" }                             -- init complete
-//     { type: "result", text, outputs, ridgeSpec, displayPrecision, csv,
-//       csvFilename, warnings, runId }                -- successful run
+//     { type: "result", text, outputs, barSpecs, lineSpec, ridgeSpec,
+//       displayPrecision, csv, csvFilename, warnings, runId }
+//                                                     -- successful run
 //     { type: "error", stage: "init"|"run", error,
 //                      traceback?, warnings?, runId? }
 //
@@ -53,7 +54,7 @@ const PYTHON_BOOTSTRAP = `
 import traceback as _traceback
 import warnings
 from dyce.lifecycle import ExperimentalWarning
-from dyce.viz_plotly import ridge_spec
+from dyce.viz_plotly import bar_spec, line_spec, ridge_spec
 # Default action is "default" (print first occurrence per location). The
 # playground UI shows every warning explicitly in the logs pane, so we
 # switch to "always" -- a recurring TruncationWarning at the same site
@@ -102,12 +103,35 @@ def _do_run(source):
         # Header style, empty-distribution wording, precision handling, etc.
         # all live in one place; the playground tracks anydyce automatically.
         "text": format_results(results, settings=settings),
-        # Raw per-output data for the bars view (and future graphical
-        # consumers).
+        # Raw per-output data remains useful outside Plotly (and for exports).
         "outputs": [
             {"label": label, "items": list(h.items()) if h else []}
             for label, h in results
         ],
+        "barSpecs": [
+            bar_spec(
+                h,
+                labels=[label],
+                colors=["#000000"],
+                horizontal=True,
+                max_percent=max(
+                    (
+                        float(probability) * 105.0
+                        for _, result_h in results
+                        for _, probability in result_h.probability_items()
+                    ),
+                    default=None,
+                ),
+                precision=settings.display_precision,
+            ).as_dict()
+            for label, h in results
+        ],
+        "lineSpec": line_spec(
+            *(h for _, h in results),
+            labels=[label for label, _ in results],
+            colors=["#000000"],
+            precision=settings.display_precision,
+        ).as_dict(),
         # Portable Plotly structure generated alongside the results. Neutral
         # colors make the fill/label alpha part of dyce's specification while
         # leaving the browser free to apply its current CSS palette.
@@ -235,6 +259,8 @@ self.addEventListener("message", async (ev) => {
           type: "result",
           text: out.text,
           outputs: out.outputs,
+          barSpecs: out.barSpecs,
+          lineSpec: out.lineSpec,
           ridgeSpec: out.ridgeSpec,
           displayPrecision: out.displayPrecision,
           csv: out.csv,
