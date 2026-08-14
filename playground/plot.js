@@ -5,11 +5,8 @@
 // `renderPlots(container, outputs)` lives below and requires Plotly to be
 // loaded; it's the only DOM-bound bit.
 
-// Items can contain BigInt counts (Python ints > 2^53 cross the worker
-// boundary as JS BigInts). Plotly can't plot BigInts directly, and naive
-// `Number(c) / Number(total)` overflows to Infinity / loses precision for
-// counts that don't fit in a float64 (any count with > ~16 decimal digits).
-// We compute percent via scaled BigInt division and only cast at the end.
+// Retained for consumers of raw worker output; Plotly views now receive their
+// percentages directly in dyce's portable specifications.
 const PERCENT_SCALE = 10n ** 15n;
 const PERCENT_DIVISOR = 1e13;
 
@@ -17,20 +14,18 @@ function asBigInt(x) {
   return typeof x === "bigint" ? x : BigInt(x);
 }
 
-// Convert a list of [outcome, count] pairs to percent values in [0, 100],
-// preserving precision for counts of arbitrary magnitude. Returns an array
-// of finite numbers; returns null if the total is zero (caller decides how
-// to handle an empty / zero-mass distribution).
 export function itemsToPercents(items) {
   if (!items || items.length === 0) return null;
   let total = 0n;
-  const counts = items.map(([, c]) => {
-    const b = asBigInt(c);
-    total += b;
-    return b;
+  const counts = items.map(([, count]) => {
+    const value = asBigInt(count);
+    total += value;
+    return value;
   });
   if (total === 0n) return null;
-  return counts.map((c) => Number((c * PERCENT_SCALE) / total) / PERCENT_DIVISOR);
+  return counts.map(
+    (count) => Number((count * PERCENT_SCALE) / total) / PERCENT_DIVISOR,
+  );
 }
 
 // Vertical sizing: every outcome row gets the same pixel allotment in every
@@ -46,14 +41,8 @@ export const MARGIN_BOTTOM_PX = 50;
 export const CHART_CHROME_PX = MARGIN_TOP_PX + MARGIN_BOTTOM_PX;
 export const EMPTY_CHART_PX = 120;
 
-// Decimal places for percent labels when the caller doesn't provide a
-// precision. Matches anydyce's display-precision default so the bars view
-// and the text view agree out of the box.
 export const DEFAULT_PLOT_PRECISION = 2;
 
-// Normalize a caller-provided precision to a safe non-negative integer,
-// falling back to the default for anything else (undefined from an older
-// worker message, null, NaN, negatives).
 function normalizePrecision(precision) {
   return Number.isInteger(precision) && precision >= 0
     ? precision
@@ -309,22 +298,35 @@ function renderConsolidated(
 // CURRENT light/dark palette; the caller is responsible for re-invoking on
 // a prefers-color-scheme change (see the matchMedia listener in
 // playground.js).
-export function renderPlots(container, outputs, Plotly, { precision } = {}) {
-  // Callers pass at least one output; the zero-output case is a whole-pane
-  // message handled upstream (playground.js showMessage), not here.
+export function renderPlots(container, portableSpecs, Plotly) {
   container.replaceChildren();
   const theme = readCssTheme();
-  // Shared x-axis range: every chart runs [0, global max + 5% headroom] so
-  // bar lengths are comparable across outputs. Null when no output has
-  // mass; each chart then auto-ranges (moot -- they're all empty).
-  const maxPct = globalMaxPercent(outputs);
-  const xMax = maxPct === null ? null : maxPct * 1.05;
-  for (const { label, items } of outputs) {
+  for (const portableSpec of portableSpecs || []) {
+    const spec = themePortableSpec(portableSpec, theme, { accentBars: true });
+    const outcomeCount = spec.data[0]?.y?.length || 0;
     const div = document.createElement("div");
     div.className = "plot";
     container.appendChild(div);
-    const spec = plotSpec(label, items, { xMax, precision, theme });
-    Plotly.newPlot(div, spec.data, spec.layout, PLOTLY_CONFIG);
+    spec.layout.height = outcomeCount
+      ? chartHeight(outcomeCount)
+      : EMPTY_CHART_PX;
+    spec.layout.title = {
+      text: outcomeCount
+        ? spec.data[0]?.name || ""
+        : `${spec.data[0]?.name || ""} (empty)`,
+    };
+    spec.layout.margin = {
+      l: 60,
+      r: 20,
+      t: MARGIN_TOP_PX,
+      b: MARGIN_BOTTOM_PX,
+    };
+    spec.layout.yaxis = {
+      ...spec.layout.yaxis,
+      type: "category",
+      autorange: "reversed",
+    };
+    Plotly.newPlot(div, spec.data, spec.layout, spec.config);
   }
 }
 
@@ -404,8 +406,66 @@ export function lineSpec(
 
 // Render the consolidated line overlay -- one chart overlaying every output as a
 // line (cf. renderPlots' one-chart-per-output bars). See renderConsolidated.
-export function renderLines(container, outputs, Plotly, opts = {}) {
-  renderConsolidated(container, outputs, Plotly, lineSpec, opts);
+export function renderLines(container, portableSpec, Plotly) {
+  container.replaceChildren();
+  const spec = themePortableSpec(portableSpec, readCssTheme());
+  if (!spec || spec.data.every((trace) => !trace.x?.length)) {
+    appendPlaceholder(container, "(empty distribution)");
+    return;
+  }
+  spec.layout.margin = {
+    l: 60,
+    r: 20,
+    t: MARGIN_TOP_PX,
+    b: MARGIN_BOTTOM_PX,
+  };
+  const div = document.createElement("div");
+  div.className = "plot";
+  container.appendChild(div);
+  Plotly.newPlot(div, spec.data, spec.layout, spec.config);
+}
+
+// Theme a portable dyce spec without changing its structural data. Metadata
+// identifies series consistently across bar, line, and ridge builders.
+export function themePortableSpec(spec, theme = null, { accentBars = false } = {}) {
+  if (!spec) return null;
+  const palette = themePalette(theme);
+  const data = (spec.data || []).map((trace) => {
+    const themed = {
+      ...trace,
+      ...(trace.x ? { x: trace.x.map((value) => Number(value)) } : {}),
+      ...(trace.y ? { y: trace.y.map((value) => Number(value)) } : {}),
+      ...(trace.line ? { line: { ...trace.line } } : {}),
+      ...(trace.marker ? { marker: { ...trace.marker } } : {}),
+    };
+    const series = trace.meta?.series || 0;
+    const color = accentBars && trace.meta?.role === "bar"
+      ? theme?.accent
+      : palette?.[series % palette.length];
+    if (color) {
+      themed.marker = { ...themed.marker, color };
+      if (trace.meta?.role === "line") {
+        themed.line = { ...themed.line, color };
+        themed.hoverlabel = {
+          ...(trace.hoverlabel || {}),
+          bgcolor: color,
+          bordercolor: color,
+          font: { ...(trace.hoverlabel?.font || {}), color: theme.bg },
+        };
+      }
+    }
+    return themed;
+  });
+  return {
+    data,
+    layout: {
+      ...(spec.layout || {}),
+      xaxis: { ...(spec.layout?.xaxis || {}), ...themeAxisBits(theme) },
+      yaxis: { ...(spec.layout?.yaxis || {}), ...themeAxisBits(theme) },
+      ...themeLayoutBits(theme),
+    },
+    config: { ...(spec.config || PLOTLY_CONFIG) },
+  };
 }
 
 // Return `color` with the alpha encoded by `template`. dyce owns structural
@@ -451,6 +511,8 @@ export function themeRidgeSpec(spec, theme = null) {
   const data = (spec.data || []).map((trace) => {
     const themed = {
       ...trace,
+      ...(trace.x ? { x: trace.x.map((value) => Number(value)) } : {}),
+      ...(trace.y ? { y: trace.y.map((value) => Number(value)) } : {}),
       ...(trace.line ? { line: { ...trace.line } } : {}),
       ...(trace.marker ? { marker: { ...trace.marker } } : {}),
     };

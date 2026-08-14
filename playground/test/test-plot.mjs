@@ -20,6 +20,7 @@ import {
   perOutputSeries,
   plotSpec,
   readCssTheme,
+  themePortableSpec,
   themeRidgeSpec,
 } from "../plot.js";
 
@@ -393,6 +394,41 @@ test("lineSpec: all-empty outputs -> isEmpty", () => {
 });
 
 // ---- themeRidgeSpec -----------------------------------------------------
+
+test("themePortableSpec themes dyce line series without changing geometry", () => {
+  const portable = {
+    data: [{
+      x: [1n, 2n],
+      y: [25, 75],
+      marker: { size: 5 },
+      meta: { series: 1, role: "line" },
+    }],
+    layout: { xaxis: {}, yaxis: {} },
+    config: { responsive: true },
+  };
+  const spec = themePortableSpec(portable, {
+    ...THEME,
+    series: ["#111111", "#222222"],
+  });
+  assert.deepEqual(spec.data[0].x, [1, 2]);
+  assert.equal(spec.data[0].line.color, "#222222");
+  assert.equal(spec.data[0].marker.color, "#222222");
+  assert.equal(spec.data[0].hoverlabel.bgcolor, "#222222");
+  assert.equal(spec.data[0].hoverlabel.bordercolor, "#222222");
+  assert.equal(spec.data[0].hoverlabel.font.color, THEME.bg);
+  assert.equal(portable.data[0].line, undefined);
+  assert.equal(portable.data[0].hoverlabel, undefined);
+});
+
+test("themePortableSpec uses the accent for dyce bars", () => {
+  const portable = {
+    data: [{ marker: { color: "#000" }, meta: { series: 0, role: "bar" } }],
+    layout: {},
+    config: {},
+  };
+  const spec = themePortableSpec(portable, THEME, { accentBars: true });
+  assert.equal(spec.data[0].marker.color, THEME.accent);
+});
 
 const portableRidge = {
   data: [

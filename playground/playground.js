@@ -308,6 +308,8 @@ function renderResults(text) {
 // time).
 let lastOutputs = null;
 let lastDisplayPrecision;
+let lastBarSpecs = [];
+let lastLineSpec = null;
 let lastRidgeSpec = null;
 // Base64 CSV + download filename of the last successful run, both computed
 // in the worker via anydyce.csv (csv_base64 / csv_filename) so the
@@ -345,19 +347,21 @@ function clearOutputCharts() {
 
 // All three chart views (bars, lines, ridge) are built from the same raw
 // [{label, items}] data, so toggling between them needs no re-render.
-function paintCharts(outputs, precision, ridgeSpec) {
-  renderPlots(outputBars, outputs, Plotly, { precision });
-  renderLines(outputLines, outputs, Plotly, { precision });
+function paintCharts(barSpecs, lineSpec, ridgeSpec) {
+  renderPlots(outputBars, barSpecs, Plotly);
+  renderLines(outputLines, lineSpec, Plotly);
   renderRidge(outputRidge, ridgeSpec, Plotly);
 }
 
-function renderOutputCharts(outputs, displayPrecision, ridgeSpec) {
+function renderOutputCharts(outputs, displayPrecision, barSpecs, lineSpec, ridgeSpec) {
   // displayPrecision is the run's final `set "anydyce: display precision"`
   // value, so the charts' percent labels match the text view's formatting.
   lastOutputs = outputs;
   lastDisplayPrecision = displayPrecision;
+  lastBarSpecs = barSpecs;
+  lastLineSpec = lineSpec;
   lastRidgeSpec = ridgeSpec;
-  paintCharts(outputs, displayPrecision, ridgeSpec);
+  paintCharts(barSpecs, lineSpec, ridgeSpec);
   showOutputViews();
 }
 
@@ -367,7 +371,7 @@ function renderOutputCharts(outputs, displayPrecision, ridgeSpec) {
 // explicit re-render. No-op before the first run.
 function rerenderCharts() {
   if (lastOutputs !== null) {
-    paintCharts(lastOutputs, lastDisplayPrecision, lastRidgeSpec);
+    paintCharts(lastBarSpecs, lastLineSpec, lastRidgeSpec);
   }
 }
 
@@ -701,6 +705,8 @@ async function handleRun() {
     const {
       text,
       outputs,
+      barSpecs,
+      lineSpec,
       ridgeSpec,
       displayPrecision,
       csv,
@@ -717,7 +723,7 @@ async function handleRun() {
       showMessage("(no output)");
     } else {
       renderResults(text);
-      renderOutputCharts(outputs, displayPrecision, ridgeSpec);
+      renderOutputCharts(outputs, displayPrecision, barSpecs, lineSpec, ridgeSpec);
     }
     lastCsv = csv;
     lastCsvFilename = csvFilename;
