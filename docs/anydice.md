@@ -14,7 +14,7 @@
 
 # `anydyce`’s *Mostly*-Compatible AnyDice Interpreter
 
-`anydyce` now includes an Open Source, pure Python, cleanroom implementation of Jasper Flick’s [AnyDice Dice Probability Calculator](https://anydice.com/).
+`anydyce` now includes an Open Source, pure-Python, cleanroom implementation of Jasper Flick’s [AnyDice Dice Probability Calculator](https://anydice.com/).
 
 An interactive version can be found here: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/)
 
@@ -37,7 +37,7 @@ Some foundation necessary to an analysis of AnyDice behaviors is present below, 
 
 The `anydyce` interpreter is primarily broken up into two major components:
 
-1. A portable, pure Python back end that relies on [`dyce`](https://github.com/posita/dyce/) for computation; and
+1. A portable, pure-Python back end that relies on [`dyce`](https://github.com/posita/dyce/) for computation; and
 2. A user interface implemented in HTML, CSS, and plain JavaScript that uses [Plotly](https://plotly.com/) for visualizations and [Pyodide](https://pyodide.org/en/stable/) to run everything (including the Python interpreter) directly in-browser.
 
 ### No server required
@@ -49,13 +49,11 @@ The only infrastructure needed to run a local instance is a simple web server (e
 
 Similar to other browser-based sandboxes and playgrounds, the included web interface allows programs to be preserved and shared solely by creating and copying a URL that encodes the entire program in the URL itself.
 As long as you have access to the URL (e.g., via a bookmark), you have the program.
-No reliance on accessing another’s database is needed.
+No reliance on a closed, proprietary data store is needed.
 
 ### Loading programs saved to anydice.com by program IDs
 
-The web interface allows loading of programs previously saved to AnyDice by way of a [publicly available partial program cache](https://github.com/posita/anydice-data) that was retrieved prior to [AnyDice being compromised](#background-purpose).
-Be advised, however, that as of June, 2026, about 100,000 programs are still absent from the cache.
-
+The web interface allows loading of programs previously saved to AnyDice by way of a [publicly available program cache](https://github.com/posita/anydice-data).
 For any AnyDice URL containing a program ID, you can create an alternate URL using that same ID to load that program and run it with the `anydyce` interpreter.
 For example, consider the URL [`https://anydice.com/program/18106`](https://anydice.com/program/18106).
 You can run the same program by visiting [`https://posita.github.io/anydyce/latest/playground/#id=18106`](https://posita.github.io/anydyce/latest/playground/#id=18106).
@@ -167,7 +165,7 @@ All interpretation and computation appears to be performed server-side.
 
 AnyDice remains closed source, and its author seldom makes updates.
 The author provides a [human readable version of the AnyDice grammar](http://anydice.com/ebnf.txt), but the actual implementation of its parser and interpreter are not publicly available.
-While AnyDice provides documentation, it does not constitute a complete specification from which to replicate or validate its interpreter.
+While AnyDice provides documentation, it does not constitute a complete specification from which to replicate or validate an implementation.
 Many meaningful details important to more sophisticated computations are left to the discovery of the user.
 
 In early 2026, AnyDice became completely unavailable for a week or two due to a system compromise.
@@ -187,7 +185,7 @@ Accesses required to create the cache were rate limited and consistent with AnyD
 anydice.com implicitly permits anyone anywhere in the world to: visit the site; create and execute programs; save programs and share links to those programs with others; and use links to retrieve saved programs for examination, execution, illustration, etc.
 As of this writing, no limitations are presented or appear to be enforced.
 
-[^3]: At a user’s request, AnyDice has ability to save a program in its own proprietary, server-side database, providing a link with a hexadecimal ID which can later be used to load the same program.
+[^3]: At a user’s request, AnyDice has ability to save a program in its own proprietary, server-side database, providing a link with a hexadecimal ID which can later be used to load the same program, assuming both the site and database are functional and available.
 
 ## Reverse-engineering methodology
 
@@ -200,11 +198,11 @@ The general workflow to iterate toward a working implementation was as follows:
 1. Form a hypothesis about a particular aspect of the AnyDice interpreter (e.g., structure or contextual behavior);
 2. Design a probe (program) whose results would surface details of that particular aspect;
 3. Execute the probe with AnyDice, interpret the results, refining this implementation as necessary; and, finally,
-4. Validate this implementation produces similar results of the most recent probe as well as all prior probes.[^4]
+4. Validate the reverse-engineered implementation produces similar results of the most recent probe as well as all prior probes.[^4]
 
-Additionally, periodic comparison of the `anydyce` interpreter’s results with AnyDice’s across the entire corpus of unique[^5] saved programs surfaced additional details and nuances not identified by the above loop.
-While 100% completeness is not guaranteed, based on experimentation and the behavior observed by processing that corpus, the `anydyce` interpreter should be appropriate for most uses.
-In some cases, the `anydyce` interpreter supersedes AnyDice’s where AnyDice’s behavioral inconsistencies or bugs produce incorrect results.
+Additionally, periodic comparison of this implementation’s results with AnyDice’s across a large corpus of unique[^5] saved programs surfaced additional nuances not identified by the above loop.
+While 100% completeness is not guaranteed, extensive experimentation and validation suggest the `anydyce` interpreter should be appropriate for most uses.
+Where AnyDice’s behavioral inconsistencies or bugs produce incorrect results, the `anydyce` interpreter can be a superior alternative.
 
 [^4]: Validation probes were captured as unit tests, important for avoiding regressions as the `anydyce` interpreter evolved.
 
@@ -218,10 +216,13 @@ In some cases, the `anydyce` interpreter supersedes AnyDice’s where AnyDice’
 
 ### Prior art
 
-- [PyDice](https://pdice.arkareem.com/) is a pure Python implementation of an AnyDice interpreter that both interprets AnyDice programs as well as transpiles them into [PythonDice](https://github.com/Ar-Kareem/PythonDice/) Python code (which is pretty darn cool)
+- [PyDice](https://pdice.arkareem.com/) is a pure-Python implementation of an AnyDice interpreter that both interprets AnyDice programs as well as transpiles them into [PythonDice](https://github.com/Ar-Kareem/PythonDice/) Python code (which is pretty darn cool)
+- [Dicey](https://github.com/basicer/dicey) is an AnyDice-inspired, browser-based JavaScript application
 - [anydice.js](https://github.com/dlom/anydice) claims to provide a low level interface for retrieving results from AnyDice’s interpreter for use in JavaScript programs (untested)
 - [anydieparser](https://www.npmjs.com/package/anydieparser) claims to provide an AnyDice interpreter in JavaScript (untested)
 - [anydice](https://git.paco.to/nick/anydice) claims to provide an AnyDice interpreter implemented in C and Rust (untested)
+- [Icecup](https://highdiceroller.github.io/icepool/apps/icecup.html) is a Python based interface to [Icepool](https://github.com/HighDiceRoller/icepool)
+- [SnakeEyes](https://github.com/Castux/SnakeEyes) is a dice explorer written in Lua
 
 ## Notes on the anydice.com implementation
 
@@ -287,7 +288,7 @@ For lowest first, they would be: `{1, 1}`, `{1, 2}`, `{1, 3}`, `{2, 2}`, `{2, 3}
 
 Order in sequences is preserved, meaning `output 2@{3, 5, 1}` yields `5`.
 Order of the outcomes of a single die are always lowest-to-highest.
-Where expansion occurs over multiple parameters, ordering is even more subtle, as [discussed below](#modifications-to-some-expanded-parameters-are-durable-across-expansion-calls), as illustrated by the following program:
+As [discussed below](#modifications-to-some-expanded-parameters-are-durable-across-expansion-calls), where expansion occurs over multiple parameters, ordering is even more subtle, as illustrated by the following program:
 
 ```c
 set "position order" to "highest first"
@@ -299,7 +300,7 @@ function: N_FROM_D:n S_FROM_P:s {
 output [2d3 2d3]
 ```
 
-Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=c2V0ICJwb3NpdGlvbiBvcmRlciIgdG8gImhpZ2hlc3QgZmlyc3QiCk46IDAKZnVuY3Rpb246IE5fRlJPTV9EOm4gU19GUk9NX1A6cyB7CiAgTjogTiArIDEKICByZXN1bHQ6IE5fRlJPTV9EICogMTAgXiAoTiAtIDEpICsgMUBTX0ZST01fUCAqIDEwIF4gTiArIDJAU19GUk9NX1AgKiAxMCBeIChOICsgMSkKfQpvdXRwdXQgWzJkMyAyZDJd)
+Open in playground (best viewed in “Text” mode): [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=c2V0ICJwb3NpdGlvbiBvcmRlciIgdG8gImhpZ2hlc3QgZmlyc3QiCk46IDAKZnVuY3Rpb246IE5fRlJPTV9EOm4gU19GUk9NX1A6cyB7CiAgTjogTiArIDEKICByZXN1bHQ6IE5fRlJPTV9EICogMTAgXiAoTiAtIDEpICsgMUBTX0ZST01fUCAqIDEwIF4gTiArIDJAU19GUk9NX1AgKiAxMCBeIChOICsgMSkKfQpvdXRwdXQgWzJkMyAyZDJd)
 
 The `anydyce` interpreter faithfully reproduces these various ordering behaviors.
 
@@ -793,9 +794,9 @@ Open in playground: [![Try the AnyDice-compatible playground](anydice-playground
 As expected, the `anydyce` interpreter produces the same output as the prior two programs.
 On anydice.com, however, the first six outputs are `10101`, `20202`, ..., `60606`.
 The second six outputs are `70102`, `80203`, ..., `120607`.
-As one can see, `B`’s modifications last through `A`’s inner cycle until `B` is reset in its own outer cycle.
+As one can see, `B`’s modifications are durable through `A`’s inner cycle until `B` is reset in its own outer cycle.
 
-What is even more bizarre is where expansion happens over a sequence, and that sequence parameter is overwritten in the function body.
+What is even more bizarre is where expansion happens over a sequence parameter that is overwritten in the function body.
 Consider:
 
 ```c
@@ -814,7 +815,7 @@ anydice.com, however, perplexingly, only produces three outcomes: `{118, 218, 31
 #### Diagnosing/avoiding parameter leaks on anydice.com
 
 To reiterate, it is entirely safe to write to parameter variable names in the `anydyce` interpreter.
-However, when using anydice.com, one can avoid the parameter leak problem with a refactor work-around.
+However, when using anydice.com, one can avoid the parameter leak problem with work-around.
 For any function potentially affected, rename all parameters to have new, unique names.
 Then assign the new parameter names to the old ones in the body of the function.
 For example, consider the following function:
