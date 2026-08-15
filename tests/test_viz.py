@@ -18,6 +18,7 @@ from fractions import Fraction
 
 import pytest
 from dyce.d import d0, d6, d8, d10, d12, p3d6, pd12
+from dyce.viz import GraphType
 
 try:
     import matplotlib as mpl
@@ -58,7 +59,7 @@ class TestPlotWidgets:
         plot_widgets = PlotWidgets(
             initial_alpha=0.125,
             initial_enable_cutoff=True,
-            initial_graph_type="at_least",
+            initial_graph_type=GraphType.AT_LEAST,
             initial_markers="xo",
             initial_plot_style="default",
         )
@@ -67,7 +68,7 @@ class TestPlotWidgets:
             == 0.125  # 1/(2**3)
         )
         assert plot_widgets.enable_cutoff.value is True
-        assert plot_widgets.graph_type.value == "at_least"
+        assert plot_widgets.graph_type.value == GraphType.AT_LEAST
         assert plot_widgets.markers.value == "xo"
         assert plot_widgets.plot_style.value == "default"
 
@@ -218,8 +219,10 @@ def test_values_xy_for_graph_type() -> None:
     lo = p3d6.h(0)
     hi = p3d6.h(-1)
 
-    lo_outcomes_normal, lo_values_normal = values_xy_for_graph_type(lo, "normal")
-    _, hi_values_normal = values_xy_for_graph_type(hi, "normal")
+    lo_outcomes_normal, lo_values_normal = values_xy_for_graph_type(
+        lo, GraphType.NORMAL
+    )
+    _, hi_values_normal = values_xy_for_graph_type(hi, GraphType.NORMAL)
     assert lo_outcomes_normal == d6_outcomes
     assert lo_values_normal == (
         Fraction(91, 216),
@@ -231,8 +234,10 @@ def test_values_xy_for_graph_type() -> None:
     )
     assert hi_values_normal == lo_values_normal[::-1]
 
-    lo_outcomes_at_least, lo_values_at_least = values_xy_for_graph_type(lo, "at_least")
-    _, hi_values_at_least = values_xy_for_graph_type(hi, "at_least")
+    lo_outcomes_at_least, lo_values_at_least = values_xy_for_graph_type(
+        lo, GraphType.AT_LEAST
+    )
+    _, hi_values_at_least = values_xy_for_graph_type(hi, GraphType.AT_LEAST)
     assert lo_outcomes_at_least == d6_outcomes
     assert lo_values_at_least == (
         Fraction(1),
@@ -251,8 +256,10 @@ def test_values_xy_for_graph_type() -> None:
         Fraction(91, 216),
     )
 
-    lo_outcomes_at_most, lo_values_at_most = values_xy_for_graph_type(lo, "at_most")
-    _, hi_values_at_most = values_xy_for_graph_type(hi, "at_most")
+    lo_outcomes_at_most, lo_values_at_most = values_xy_for_graph_type(
+        lo, GraphType.AT_MOST
+    )
+    _, hi_values_at_most = values_xy_for_graph_type(hi, GraphType.AT_MOST)
     assert lo_outcomes_at_most == d6_outcomes
     assert lo_values_at_most == hi_values_at_least[::-1]
     assert hi_values_at_most == lo_values_at_least[::-1]

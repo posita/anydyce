@@ -51,7 +51,7 @@ const PYTHON_BOOTSTRAP = `
 import traceback as _traceback
 import warnings
 from dyce.lifecycle import ExperimentalWarning
-from dyce.viz_plotly import bar_spec, line_spec, ridge_spec
+from dyce.viz.plotly import bar_spec, line_spec, ridge_spec
 # Default action is "default" (print first occurrence per location). The
 # playground UI shows every warning explicitly in the logs pane, so we
 # switch to "always" -- a recurring TruncationWarning at the same site

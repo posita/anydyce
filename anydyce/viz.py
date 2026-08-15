@@ -36,13 +36,13 @@ from typing import (
 import matplotlib as mpl
 from dyce import H, HableT
 from dyce.lifecycle import experimental
-from dyce.viz import (
-    _DEFAULT_ALPHA,
+from dyce.viz import GraphType
+from dyce.viz.matplotlib import (
     _DEFAULT_MARKERS,
-    GraphTypeT,
     plot_burst,
     plot_line,
 )
+from dyce.viz.matplotlib import _DEFAULT_PLOT_ALPHA as _DEFAULT_ALPHA
 from IPython.display import HTML, display
 from ipywidgets import widgets  # type: ignore[import-untyped]
 from matplotlib import colors as mcolors
@@ -77,7 +77,7 @@ def _first_of(i: Iterable[_T]) -> _T:
     return next(iter(i))
 
 
-_DEFAULT_GRAPH_TYPE = _first_of(GraphTypeT.__args__)  # type: ignore[attr-defined]
+_DEFAULT_GRAPH_TYPE = GraphType.NORMAL
 _CMAP_NAMES = tuple(sorted(mpl.colormaps.keys()))
 
 
@@ -100,7 +100,7 @@ class SettingsDict(TypedDict):
     burst_swap: bool
     burst_zero_fill_normalize: bool
     enable_cutoff: bool
-    graph_type: GraphTypeT
+    graph_type: GraphType
     markers: str
     plot_style: str
     resolution: int
@@ -391,9 +391,9 @@ class _PlotWidgetsDataclass:
         default_factory=partial(
             widgets.Select,
             value=_DEFAULT_GRAPH_TYPE,
-            options=[(graph_type, graph_type) for graph_type in GraphTypeT.__args__],  # type: ignore[attr-defined]
+            options=[(graph_type, graph_type) for graph_type in GraphType],
             description="Plot Type",
-            rows=min(len(GraphTypeT.__args__), 5),  # type: ignore[attr-defined]
+            rows=min(len(GraphType), 5),
         ),
     )
 
@@ -495,7 +495,7 @@ class PlotWidgets(_PlotWidgetsDataclass):
         initial_burst_color_bg_trnsp: bool = False,
         initial_burst_color_text: str = _DEFAULT_BURST_COLOR_TEXT,
         initial_enable_cutoff: bool = True,
-        initial_graph_type: GraphTypeT = _DEFAULT_GRAPH_TYPE,
+        initial_graph_type: GraphType = _DEFAULT_GRAPH_TYPE,
         initial_markers: str = _DEFAULT_MARKERS,
         initial_plot_style: str = _DEFAULT_PLOT_STYLE,
         initial_resolution: int = _DEFAULT_RESOLUTION,
@@ -1257,7 +1257,7 @@ def limit_for_display(h: H[_T], cutoff: Fraction) -> H:
 @experimental
 def values_xy_for_graph_type(
     h: H[_T],
-    graph_type: GraphTypeT,
+    graph_type: GraphType,
 ) -> tuple[tuple[_T, ...], tuple[Fraction, ...]]:
     outcomes, probabilities = (
         zip(*h.probability_items(), strict=True) if h else ((), ())
@@ -1306,7 +1306,7 @@ def jupyter_visualize(
     initial_burst_swap: bool = False,
     initial_burst_zero_fill_normalize: bool = False,
     initial_enable_cutoff: bool = True,
-    initial_graph_type: GraphTypeT = _DEFAULT_GRAPH_TYPE,
+    initial_graph_type: GraphType = _DEFAULT_GRAPH_TYPE,
     initial_markers: str = _DEFAULT_MARKERS,
     initial_plot_style: str = _DEFAULT_PLOT_STYLE,
     initial_resolution: int = _DEFAULT_RESOLUTION,

@@ -22,8 +22,9 @@
     Some of the following changes are not backward compatible.
     Please review before upgrading.
 
+- Adds the [AnyDice-compatible playground](../playground/)!
+  - See the [implementation notes](anydice.md) for details
 - Drops support for 3.9 and 3.10 and extends support to 3.14
-<!-- TODO(posita): Fill this out -->
 - Removes the following (analogies now live in [`dyce==0.7.0`](https://github.com/posita/dyce/releases/tag/v0.7.0).
   - `anydyce.viz.alphasize`
   - `anydyce.viz.cumulative_probability_formatter`
@@ -36,10 +37,6 @@
   - `anydyce.viz.plot_line`
   - `anydyce.viz.plot_scatter`
   - `anydyce.viz.probability_formatter`
-
-  <!-- - `anydyce.viz.limit_for_display` -->
-  <!-- - `anydyce.viz.values_xy_for_graph_type` -->
-  <!-- - `anydyce.viz.` -->
 
 ## [0.4.6](https://github.com/posita/anydyce/releases/tag/v0.4.6)
 
