@@ -23,7 +23,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field, fields
 from fractions import Fraction
 from functools import partial
-from itertools import accumulate, chain, cycle, islice
+from itertools import accumulate, cycle, islice
 from operator import __add__, __sub__, itemgetter
 from typing import (
     Any,
@@ -839,9 +839,7 @@ class HorizontalBarHPlotter(HPlotter):
         hs: Sequence[tuple[str, H, H | None]],
         settings: SettingsDict,
     ) -> None:
-        total_outcomes = sum(
-            1 for _ in chain.from_iterable(h.outcomes() for _, h, _ in hs)
-        )
+        total_outcomes = sum(len(h) for _, h, _ in hs)
         total_height = total_outcomes + 1  # one extra to accommodate the axis
         figsize = (
             settings["resolution"],
