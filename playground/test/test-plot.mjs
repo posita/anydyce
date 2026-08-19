@@ -25,6 +25,7 @@ test("chartHeight: each additional outcome adds exactly PX_PER_OUTCOME", () => {
 
 const THEME = {
   bg: "#14171c",
+  surface: "#181b1f",
   text: "#e6edf3",
   muted: "#8b949e",
   border: "#2d333b",
@@ -61,6 +62,9 @@ test("themePortableSpec themes dyce line series without changing geometry", () =
   assert.equal(spec.data[0].hoverlabel.bgcolor, "#222222");
   assert.equal(spec.data[0].hoverlabel.bordercolor, "#222222");
   assert.equal(spec.data[0].hoverlabel.font.color, THEME.bg);
+  assert.equal(spec.layout.hoverlabel.bgcolor, THEME.surface);
+  assert.equal(spec.layout.hoverlabel.bordercolor, THEME.text);
+  assert.equal(spec.layout.hoverlabel.font.color, THEME.text);
   assert.equal(portable.data[0].line, undefined);
   assert.equal(portable.data[0].hoverlabel, undefined);
 });
@@ -121,6 +125,7 @@ const portableRidge = {
 const ridgeTheme = {
   series: ["#112233"],
   bg: "#ffffff",
+  surface: "#f5f5f5",
   text: "#222222",
   muted: "#666666",
   border: "#cccccc",
@@ -146,7 +151,7 @@ test("themeRidgeSpec themes matching ridge fills, lines, and tooltips", () => {
 
 test("themeRidgeSpec themes label pill while preserving dyce opacity", () => {
   const spec = themeRidgeSpec(portableRidge, ridgeTheme);
-  assert.equal(spec.layout.annotations[0].bgcolor, "rgba(255, 255, 255, 0.72)");
+  assert.equal(spec.layout.annotations[0].bgcolor, "rgba(245, 245, 245, 0.72)");
   assert.equal(spec.layout.annotations[0].font.color, "#666666");
   assert.equal(spec.layout.annotations[0].borderpad, 2);
 });
@@ -155,7 +160,7 @@ test("themeRidgeSpec themes the peak callout", () => {
   const spec = themeRidgeSpec(portableRidge, ridgeTheme);
   assert.equal(
     spec.layout.annotations[1].bgcolor,
-    "rgba(255, 255, 255, 0.72)",
+    "rgba(245, 245, 245, 0.72)",
   );
   assert.equal(spec.layout.annotations[1].arrowcolor, "rgba(17, 34, 51, 0.4)");
   assert.equal(spec.layout.annotations[1].arrowwidth, 0.75);
