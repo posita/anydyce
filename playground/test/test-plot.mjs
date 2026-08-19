@@ -79,6 +79,44 @@ test("themePortableSpec uses the accent for dyce bars", () => {
   assert.equal(spec.data[0].marker.color, THEME.accent);
 });
 
+test("themePortableSpec preserves exact horizontal-bar outcomes", () => {
+  const outcomes = [-(2n ** 80n), 2n ** 80n];
+  const portable = {
+    data: [{
+      x: [25, 75],
+      y: outcomes,
+      orientation: "h",
+      hovertemplate: "%{y}: %{customdata}%",
+      meta: { series: 0, role: "bar" },
+    }],
+    layout: { xaxis: {}, yaxis: { title: { text: "Outcome" } } },
+  };
+  const spec = themePortableSpec(portable, THEME, { accentBars: true });
+  assert.deepEqual(spec.data[0].y, outcomes.map(String));
+  assert.equal(spec.data[0].hovertemplate, "%{y}: %{customdata}%");
+  assert.equal(spec.layout.yaxis.automargin, true);
+  assert.equal(spec.layout.yaxis.type, "category");
+});
+
+test("themePortableSpec uses elided ordinal ticks for unsafe line outcomes", () => {
+  const outcomes = [-(2n ** 80n), 0n, 2n ** 80n];
+  const portable = {
+    data: [{
+      x: outcomes,
+      y: [25, 50, 25],
+      hovertemplate: "%{x}: %{y}%",
+      meta: { series: 0, role: "line" },
+    }],
+    layout: { xaxis: {}, yaxis: {} },
+  };
+  const spec = themePortableSpec(portable, THEME);
+  assert.deepEqual(spec.data[0].x, [0, 1, 2]);
+  assert.deepEqual(spec.data[0].text, outcomes.map(String));
+  assert.equal(spec.data[0].hovertemplate, "%{text}: %{y}%");
+  assert.deepEqual(spec.layout.xaxis.tickvals, [0, 1, 2]);
+  assert.deepEqual(spec.layout.xaxis.ticktext, ["-1208…6176", "0", "12089…6176"]);
+});
+
 const portableRidge = {
   data: [
     {
@@ -182,6 +220,27 @@ test("themeRidgeSpec keeps peak colors aligned across empty ridges", () => {
     series: ["#112233", "#445566"],
   });
   assert.equal(spec.layout.annotations[2].arrowcolor, "rgba(68, 85, 102, 0.4)");
+});
+
+test("themeRidgeSpec uses elided ordinal ticks for unsafe outcomes", () => {
+  const outcomes = [-(2n ** 80n), 2n ** 80n];
+  const portable = structuredClone(portableRidge);
+  portable.data[0].x = [0, 0, 0, 0];
+  portable.data[0].y = [0, 2.4, 2.4, 0];
+  portable.data[1].x = outcomes;
+  portable.data[1].y = [2.4, 2.4];
+  portable.data[1].customdata = [50, 50];
+  portable.data[1].hovertemplate = "%{x}: %{customdata}%";
+  portable.layout.annotations[1].x = outcomes[1];
+  portable.layout.annotations[1].xref = "x";
+  const spec = themeRidgeSpec(portable, ridgeTheme);
+  assert.deepEqual(spec.data[0].x, [-0.1, 0, 1, 1.1]);
+  assert.deepEqual(spec.data[1].x, [0, 1]);
+  assert.deepEqual(spec.data[1].text, outcomes.map(String));
+  assert.equal(spec.data[1].hovertemplate, "%{text}: %{customdata}%");
+  assert.equal(spec.layout.annotations[1].x, 1);
+  assert.deepEqual(spec.layout.xaxis.tickvals, [0, 1]);
+  assert.deepEqual(spec.layout.xaxis.ticktext, ["-1208…6176", "12089…6176"]);
 });
 
 test("themeRidgeSpec does not mutate the portable input", () => {
