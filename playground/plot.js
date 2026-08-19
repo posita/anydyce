@@ -280,18 +280,40 @@ export function themeRidgeSpec(spec, theme = null) {
     }
     return themed;
   });
-  const annotations = (spec.layout?.annotations || []).map((annotation) => ({
-    ...annotation,
-    ...(theme
-      ? {
-          font: {
-            ...(annotation.font || {}),
-            color: theme.muted,
-            family: theme.fontFamily,
-          },
-          bgcolor: withTemplateAlpha(theme.bg, annotation.bgcolor),
-        }
-      : {}),
+  let annotationRidge = -1;
+  const annotations = (spec.layout?.annotations || []).map((annotation) => {
+    if (annotation.name === "ridge-label") annotationRidge += 1;
+    const ridge =
+      annotation.name === "ridge-peak-label" ? annotationRidge : null;
+    const ridgeColor =
+      ridge !== null && palette?.length
+        ? palette[ridge % palette.length]
+        : theme?.muted;
+    return {
+      ...annotation,
+      ...(theme
+        ? {
+            font: {
+              ...(annotation.font || {}),
+              color: theme.muted,
+              family: theme.fontFamily,
+            },
+            bgcolor: withTemplateAlpha(theme.bg, annotation.bgcolor),
+            ...(ridge !== null
+              ? {
+                  arrowcolor: withTemplateAlpha(
+                    ridgeColor,
+                    annotation.arrowcolor || "rgba(0, 0, 0, 0.4)",
+                  ),
+                }
+              : {}),
+          }
+        : {}),
+    };
+  });
+  const shapes = (spec.layout?.shapes || []).map((shape) => ({
+    ...shape,
+    ...(shape.line ? { line: { ...shape.line } } : {}),
   }));
   return {
     data,
@@ -300,6 +322,7 @@ export function themeRidgeSpec(spec, theme = null) {
       xaxis: { ...(spec.layout?.xaxis || {}), ...themeAxisBits(theme) },
       yaxis: { ...(spec.layout?.yaxis || {}), ...themeAxisBits(theme) },
       annotations,
+      shapes,
       margin: { l: 40, r: 20, t: MARGIN_TOP_PX, b: MARGIN_BOTTOM_PX },
       ...themeLayoutBits(theme),
     },

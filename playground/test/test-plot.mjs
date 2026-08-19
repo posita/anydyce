@@ -98,8 +98,22 @@ const portableRidge = {
     xaxis: { title: { text: "Outcome" } },
     yaxis: { showticklabels: false },
     annotations: [
-      { text: "a", bgcolor: "rgba(0, 0, 0, 0.72)", borderpad: 2 },
+      {
+        name: "ridge-label",
+        text: "a",
+        bgcolor: "rgba(0, 0, 0, 0.72)",
+        borderpad: 2,
+      },
+      {
+        name: "ridge-peak-label",
+        text: "100%",
+        bgcolor: "rgba(0, 0, 0, 0.72)",
+        arrowcolor: "rgba(0, 0, 0, 0.4)",
+        arrowwidth: 0.75,
+        borderpad: 2,
+      },
     ],
+    shapes: [],
   },
   config: { responsive: true, displaylogo: false },
 };
@@ -135,6 +149,34 @@ test("themeRidgeSpec themes label pill while preserving dyce opacity", () => {
   assert.equal(spec.layout.annotations[0].bgcolor, "rgba(255, 255, 255, 0.72)");
   assert.equal(spec.layout.annotations[0].font.color, "#666666");
   assert.equal(spec.layout.annotations[0].borderpad, 2);
+});
+
+test("themeRidgeSpec themes the peak callout", () => {
+  const spec = themeRidgeSpec(portableRidge, ridgeTheme);
+  assert.equal(
+    spec.layout.annotations[1].bgcolor,
+    "rgba(255, 255, 255, 0.72)",
+  );
+  assert.equal(spec.layout.annotations[1].arrowcolor, "rgba(17, 34, 51, 0.4)");
+  assert.equal(spec.layout.annotations[1].arrowwidth, 0.75);
+});
+
+test("themeRidgeSpec keeps peak colors aligned across empty ridges", () => {
+  const portable = structuredClone(portableRidge);
+  portable.layout.annotations = [
+    { name: "ridge-label", text: "empty" },
+    { name: "ridge-label", text: "b" },
+    {
+      name: "ridge-peak-label",
+      text: "100%",
+      arrowcolor: "rgba(0, 0, 0, 0.4)",
+    },
+  ];
+  const spec = themeRidgeSpec(portable, {
+    ...ridgeTheme,
+    series: ["#112233", "#445566"],
+  });
+  assert.equal(spec.layout.annotations[2].arrowcolor, "rgba(68, 85, 102, 0.4)");
 });
 
 test("themeRidgeSpec does not mutate the portable input", () => {
