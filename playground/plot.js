@@ -158,7 +158,7 @@ export function renderPlots(container, portableSpecs, Plotly) {
         : `${spec.data[0]?.name || ""} (empty)`,
     };
     spec.layout.margin = {
-      l: 60,
+      l: 20,
       r: 20,
       t: MARGIN_TOP_PX,
       b: MARGIN_BOTTOM_PX,
@@ -167,6 +167,7 @@ export function renderPlots(container, portableSpecs, Plotly) {
       ...spec.layout.yaxis,
       type: "category",
       autorange: "reversed",
+      automargin: true,
     };
     Plotly.newPlot(div, spec.data, spec.layout, spec.config);
   }
@@ -192,19 +193,85 @@ export function renderLines(container, portableSpec, Plotly) {
   Plotly.newPlot(div, spec.data, spec.layout, spec.config);
 }
 
-// Theme a portable dyce spec without changing its structural data. Metadata
-// identifies series consistently across bar, line, and ridge builders.
+const MIN_SAFE_BIGINT = BigInt(Number.MIN_SAFE_INTEGER);
+const MAX_SAFE_BIGINT = BigInt(Number.MAX_SAFE_INTEGER);
+const MAX_OUTCOME_TICK_CHARS = 10;
+
+function isUnsafeInteger(value) {
+  return typeof value === "bigint" &&
+    (value < MIN_SAFE_BIGINT || value > MAX_SAFE_BIGINT);
+}
+
+function outcomeTickText(outcome) {
+  const text = String(outcome);
+  if (text.length <= MAX_OUTCOME_TICK_CHARS) return text;
+  const prefixLength = Math.ceil((MAX_OUTCOME_TICK_CHARS - 1) / 2);
+  const suffixLength = MAX_OUTCOME_TICK_CHARS - prefixLength - 1;
+  return `${text.slice(0, prefixLength)}…${text.slice(-suffixLength)}`;
+}
+
+// Plotly numeric axes cannot consume bigint values. If any outcome exceeds
+// JavaScript's exact integer range, use ordered numeric positions with exact
+// strings for hover text and visibly elided tick labels. This preserves values
+// at the deliberate cost of proportional spacing in that exceptional case.
+function ordinalOutcomeAxis(traces) {
+  const outcomes = traces
+    .filter((trace) => trace.meta?.role === "line")
+    .flatMap((trace) => trace.x || []);
+  if (!outcomes.some(isUnsafeInteger)) return null;
+  const uniqueOutcomes = [...new Map(
+    outcomes.map((outcome) => [String(outcome), outcome]),
+  ).values()].sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
+  return {
+    indexByOutcome: new Map(
+      uniqueOutcomes.map((outcome, index) => [String(outcome), index]),
+    ),
+    ticktext: uniqueOutcomes.map(outcomeTickText),
+    tickvals: uniqueOutcomes.map((_, index) => index),
+  };
+}
+
+function exactOutcomeHover(trace, outcomes) {
+  return {
+    ...trace,
+    text: outcomes.map(String),
+    hovertemplate: trace.hovertemplate?.replace("%{x}", "%{text}"),
+  };
+}
+
+// Adapt and theme a portable dyce spec without mutating it. Metadata identifies
+// series consistently across bar, line, and ridge builders.
 export function themePortableSpec(spec, theme = null, { accentBars = false } = {}) {
   if (!spec) return null;
   const palette = themePalette(theme);
+  const ordinalAxis = ordinalOutcomeAxis(spec.data || []);
   const data = (spec.data || []).map((trace) => {
-    const themed = {
+    const isHorizontalBar = trace.meta?.role === "bar" && trace.orientation === "h";
+    const outcomes = trace.meta?.role === "line" ? trace.x || [] : null;
+    let themed = {
       ...trace,
-      ...(trace.x ? { x: trace.x.map((value) => Number(value)) } : {}),
-      ...(trace.y ? { y: trace.y.map((value) => Number(value)) } : {}),
+      ...(trace.x
+        ? {
+            x: trace.x.map((value) =>
+              isHorizontalBar
+                ? Number(value)
+                : ordinalAxis && outcomes
+                  ? ordinalAxis.indexByOutcome.get(String(value))
+                  : Number(value)
+            ),
+          }
+        : {}),
+      ...(trace.y
+        ? {
+            y: trace.y.map((value) =>
+              isHorizontalBar ? String(value) : Number(value)
+            ),
+          }
+        : {}),
       ...(trace.line ? { line: { ...trace.line } } : {}),
       ...(trace.marker ? { marker: { ...trace.marker } } : {}),
     };
+    if (ordinalAxis && outcomes) themed = exactOutcomeHover(themed, outcomes);
     const series = trace.meta?.series || 0;
     const color = accentBars && trace.meta?.role === "bar"
       ? theme?.accent
@@ -227,8 +294,26 @@ export function themePortableSpec(spec, theme = null, { accentBars = false } = {
     data,
     layout: {
       ...(spec.layout || {}),
-      xaxis: { ...(spec.layout?.xaxis || {}), ...themeAxisBits(theme) },
-      yaxis: { ...(spec.layout?.yaxis || {}), ...themeAxisBits(theme) },
+      xaxis: {
+        ...(spec.layout?.xaxis || {}),
+        ...themeAxisBits(theme),
+        ...(ordinalAxis
+          ? {
+              tickmode: "array",
+              ticktext: ordinalAxis.ticktext,
+              tickvals: ordinalAxis.tickvals,
+            }
+          : {}),
+      },
+      yaxis: {
+        ...(spec.layout?.yaxis || {}),
+        ...themeAxisBits(theme),
+        ...(data.some(
+          (trace) => trace.meta?.role === "bar" && trace.orientation === "h",
+        )
+          ? { automargin: true, type: "category" }
+          : {}),
+      },
       ...themeLayoutBits(theme),
     },
     config: { ...(spec.config || PLOTLY_CONFIG) },
@@ -268,21 +353,45 @@ function withAlpha(color, alpha) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-// Apply the page's current CSS theme to dyce's portable ridge PlotSpec without
-// changing its geometry, ordering, hover text, or configuration. Trace metadata
-// identifies each ridge and its fill/line role, so presentation does not depend
-// on trace position. The input remains unchanged for later light/dark re-renders.
+// Apply the page's current CSS theme to dyce's portable ridge PlotSpec. Numeric
+// geometry is retained when outcomes are safely representable; otherwise the
+// exact ordinal fallback above is used. Trace metadata identifies each ridge
+// and its fill/line role, so presentation does not depend on trace position.
+// The input remains unchanged for later light/dark re-renders.
 export function themeRidgeSpec(spec, theme = null) {
   if (!spec) return null;
   const palette = themePalette(theme);
+  const ordinalAxis = ordinalOutcomeAxis(spec.data || []);
+  const ridgeOutcomes = new Map(
+    (spec.data || [])
+      .filter((trace) => trace.meta?.role === "line")
+      .map((trace) => [trace.meta?.ridge, trace.x || []]),
+  );
   const data = (spec.data || []).map((trace) => {
-    const themed = {
+    const outcomes = ridgeOutcomes.get(trace.meta?.ridge) || [];
+    const ordinalX = ordinalAxis
+      ? outcomes.map((outcome) =>
+          ordinalAxis.indexByOutcome.get(String(outcome))
+        )
+      : null;
+    let themed = {
       ...trace,
-      ...(trace.x ? { x: trace.x.map((value) => Number(value)) } : {}),
+      ...(trace.x
+        ? {
+            x: ordinalX && trace.meta?.role === "line"
+              ? ordinalX
+              : ordinalX && trace.meta?.role === "fill" && ordinalX.length
+                ? [ordinalX[0] - 0.1, ...ordinalX, ordinalX.at(-1) + 0.1]
+                : trace.x.map((value) => Number(value)),
+          }
+        : {}),
       ...(trace.y ? { y: trace.y.map((value) => Number(value)) } : {}),
       ...(trace.line ? { line: { ...trace.line } } : {}),
       ...(trace.marker ? { marker: { ...trace.marker } } : {}),
     };
+    if (ordinalAxis && trace.meta?.role === "line") {
+      themed = exactOutcomeHover(themed, outcomes);
+    }
     const ridge = trace.meta?.ridge;
     const color = palette?.length ? palette[ridge % palette.length] : null;
     if (color && trace.meta?.role === "fill") {
@@ -310,6 +419,13 @@ export function themeRidgeSpec(spec, theme = null) {
         : theme?.muted;
     return {
       ...annotation,
+      ...(annotation.xref === "x"
+        ? {
+            x: ordinalAxis
+              ? ordinalAxis.indexByOutcome.get(String(annotation.x))
+              : Number(annotation.x),
+          }
+        : {}),
       ...(theme
         ? {
             font: {
@@ -338,7 +454,17 @@ export function themeRidgeSpec(spec, theme = null) {
     data,
     layout: {
       ...(spec.layout || {}),
-      xaxis: { ...(spec.layout?.xaxis || {}), ...themeAxisBits(theme) },
+      xaxis: {
+        ...(spec.layout?.xaxis || {}),
+        ...themeAxisBits(theme),
+        ...(ordinalAxis
+          ? {
+              tickmode: "array",
+              ticktext: ordinalAxis.ticktext,
+              tickvals: ordinalAxis.tickvals,
+            }
+          : {}),
+      },
       yaxis: { ...(spec.layout?.yaxis || {}), ...themeAxisBits(theme) },
       annotations,
       shapes,
