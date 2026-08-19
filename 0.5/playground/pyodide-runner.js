@@ -5,17 +5,15 @@
 //
 // Public API:
 //   await initPyodide(onStatus)  -> resolves when runtime is ready
-//   await runAnydice(source)     -> resolves to {text, outputs,
-//                                   displayPrecision, csv, csvFilename,
+//   await runAnydice(source)     -> resolves to {text, outputs, barSpecs,
+//                                   lineSpec, ridgeSpec, csv, csvFilename,
 //                                   warnings};
 //                                   rejects with RunError (Python exception:
 //                                   carries .traceback and .warnings) or
 //                                   CancelledError (deliberate cancel).
 //                                   `text` is the fully-rendered display
 //                                   string (anydyce's format_results).
-//                                   `outputs` is raw per-output data for
-//                                   the bars view. `displayPrecision` is
-//                                   the run's final display precision.
+//                                   `outputs` is raw per-output data.
 //   cancelCurrentRun()           -> terminates the worker, rejecting any
 //                                   in-flight run with CancelledError; caller
 //                                   re-calls initPyodide() to bring runtime
@@ -44,6 +42,11 @@ export class RunError extends Error {
 
 let worker = null;
 let initPromise = null;
+// The reject of the in-flight init promise, held so a worker-level "error"
+// event can settle the promise the caller is awaiting. A crash posts no
+// message, so the message listener in initPyodide never fires. Null once init
+// has settled.
+let initReject = null;
 let onStatusCallback = null;
 let nextRunId = 0;
 const pendingRuns = new Map(); // runId -> { resolve, reject }
@@ -76,7 +79,9 @@ function ensureWorker() {
           handler.resolve({
             text: msg.text || "",
             outputs: msg.outputs || [],
-            displayPrecision: msg.displayPrecision,
+            barSpecs: msg.barSpecs || [],
+            lineSpec: msg.lineSpec || null,
+            ridgeSpec: msg.ridgeSpec || null,
             csv: msg.csv || "",
             csvFilename: msg.csvFilename || "",
             warnings: msg.warnings || [],
@@ -111,8 +116,9 @@ function ensureWorker() {
         `(${ev.filename || "?"}:${ev.lineno || "?"}). ` +
         "Please reload the page.",
     );
-    if (initPromise && initPromise.then) {
-      initPromise = Promise.reject(workerCrashError);
+    if (initReject) {
+      initReject(workerCrashError);
+      initReject = null;
     }
     for (const { reject } of pendingRuns.values()) reject(workerCrashError);
     pendingRuns.clear();
@@ -126,13 +132,16 @@ export function initPyodide(onStatus = () => {}) {
   onStatusCallback = onStatus;
 
   initPromise = new Promise((resolve, reject) => {
+    initReject = reject;
     const onMessage = (ev) => {
       const msg = ev.data;
       if (msg.type === "ready") {
         worker.removeEventListener("message", onMessage);
+        initReject = null;
         resolve();
       } else if (msg.type === "error" && msg.stage === "init") {
         worker.removeEventListener("message", onMessage);
+        initReject = null;
         reject(new Error(msg.error));
       }
     };
@@ -151,12 +160,6 @@ export function runAnydice(source) {
     pendingRuns.set(runId, { resolve, reject });
     worker.postMessage({ type: "run", source, runId });
   });
-}
-
-// Returns true if there's at least one run currently waiting for a result.
-// Useful for the UI to decide whether the Cancel button should be enabled.
-export function hasInFlightRun() {
-  return pendingRuns.size > 0;
 }
 
 // Terminate the worker, killing any in-flight run. The pending Promise(s)

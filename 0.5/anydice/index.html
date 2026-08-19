@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1427,7 +1427,7 @@
 -->
 
 <h1 id="anydyces-mostly-compatible-anydice-interpreter"><code>anydyce</code>’s <em>Mostly</em>-Compatible AnyDice Interpreter</h1>
-<p><code>anydyce</code> now includes an Open Source, pure Python, cleanroom implementation of Jasper Flick’s <a href="https://anydice.com/">AnyDice Dice Probability Calculator</a>.</p>
+<p><code>anydyce</code> now includes an Open Source, pure-Python, cleanroom implementation of Jasper Flick’s <a href="https://anydice.com/">AnyDice Dice Probability Calculator</a>.</p>
 <p>An interactive version can be found here: <a href="../playground/"><img alt="Try the AnyDice-compatible playground" src="../anydice-playground.svg" /></a></p>
 <p>You can also <a href="../#running-locally">host your own or run it locally</a>.</p>
 <p>The <code>anydyce</code> interpreter strives to be a working replacement in all meaningful aspects, but it is <strong><em>not</em></strong> 100% compatible, favoring fundamental correctness over producing identical results.
@@ -1443,7 +1443,7 @@ Some foundation necessary to an analysis of AnyDice behaviors is present below, 
 <h2 id="features">Features</h2>
 <p>The <code>anydyce</code> interpreter is primarily broken up into two major components:</p>
 <ol>
-<li>A portable, pure Python back end that relies on <a href="https://github.com/posita/dyce/"><code>dyce</code></a> for computation; and</li>
+<li>A portable, pure-Python back end that relies on <a href="https://github.com/posita/dyce/"><code>dyce</code></a> for computation; and</li>
 <li>A user interface implemented in HTML, CSS, and plain JavaScript that uses <a href="https://plotly.com/">Plotly</a> for visualizations and <a href="https://pyodide.org/en/stable/">Pyodide</a> to run everything (including the Python interpreter) directly in-browser.</li>
 </ol>
 <h3 id="no-server-required">No server required</h3>
@@ -1452,11 +1452,10 @@ The only infrastructure needed to run a local instance is a simple web server (e
 <h3 id="the-url-is-the-program">The URL <strong><em>is</em></strong> the program</h3>
 <p>Similar to other browser-based sandboxes and playgrounds, the included web interface allows programs to be preserved and shared solely by creating and copying a URL that encodes the entire program in the URL itself.
 As long as you have access to the URL (e.g., via a bookmark), you have the program.
-No reliance on accessing another’s database is needed.</p>
+No reliance on a closed, proprietary data store is needed.</p>
 <h3 id="loading-programs-saved-to-anydicecom-by-program-ids">Loading programs saved to anydice.com by program IDs</h3>
-<p>The web interface allows loading of programs previously saved to AnyDice by way of a <a href="https://github.com/posita/anydice-data">publicly available partial program cache</a> that was retrieved prior to <a href="#background-purpose">AnyDice being compromised</a>.
-Be advised, however, that as of June, 2026, about 100,000 programs are still absent from the cache.</p>
-<p>For any AnyDice URL containing a program ID, you can create an alternate URL using that same ID to load that program and run it with the <code>anydyce</code> interpreter.
+<p>The web interface allows loading of programs previously saved to AnyDice by way of a <a href="https://github.com/posita/anydice-data">publicly available program cache</a>.
+For any AnyDice URL containing a program ID, you can create an alternate URL using that same ID to load that program and run it with the <code>anydyce</code> interpreter.
 For example, consider the URL <a href="https://anydice.com/program/18106"><code>https://anydice.com/program/18106</code></a>.
 You can run the same program by visiting <a href="https://posita.github.io/anydyce/latest/playground/#id=18106"><code>https://posita.github.io/anydyce/latest/playground/#id=18106</code></a>.
 Alternatively, you can <a href="../#running-locally">run your own copy locally</a> and adapt the same pattern to the URL of your local web server (e.g.,<code>https://127.0.0.1:8000/playground/#id=18106</code>).</p>
@@ -1569,7 +1568,7 @@ By way of illustration, trying to run programs <a href="../playground/#id=183b0"
 <h2 id="background-purpose">Background &amp; purpose</h2>
 <p>AnyDice appears to have been around in some form or another since 2009, receiving a handful of updates between then and 2026.
 It is free to use by anyone, likely funded entirely by the author who invites others to offset costs through donations.
-It has amassed over a quarter million “saved” programs<sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup> during its tenure.
+As of early August, 2026, it has amassed over a quarter million “saved” programs<sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup> during its tenure.
 It enjoys substantial popularity among loyal users, many of whom post on <a href="https://rpg.stackexchange.com/questions/tagged/anydice">rpg.stackexchange.com</a> providing volunteer education and support.</p>
 <p>Its most typical use involves typing or pasting a program conforming to a <a href="https://anydice.com/docs/">proprietary syntax</a> into a text field on a <a href="https://anydice.com/">hosted website</a>.
 The user submits the program by activating a “Calculate” button in the interface, which transmits the program text via HTTP POST to a <a href="https://anydice.com/calculator_limited.php">PHP handler</a>.
@@ -1577,10 +1576,12 @@ The returned JSON results are then interpreted and displayed for the user.
 All interpretation and computation appears to be performed server-side.</p>
 <p>AnyDice remains closed source, and its author seldom makes updates.
 The author provides a <a href="http://anydice.com/ebnf.txt">human readable version of the AnyDice grammar</a>, but the actual implementation of its parser and interpreter are not publicly available.
-While AnyDice provides documentation, it does not constitute a complete specification from which to replicate or validate its interpreter.
+While AnyDice provides documentation, it does not constitute a complete specification from which to replicate or validate an implementation.
 Many meaningful details important to more sophisticated computations are left to the discovery of the user.</p>
 <p>In early 2026, AnyDice became completely unavailable for a week or two due to a system compromise.
-The site was eventually restored, but programs saved to its proprietary database by users over the preceding several weeks were permanently lost.</p>
+The site was eventually restored, but programs saved to its proprietary database by users over the preceding several weeks were permanently lost.
+Between May and late July/early August of 2026, AnyDice’s ability to save new programs or retrieve existing ones again went offline, but the rest of the site remained functional.
+The cause for this partial outage is unknown.</p>
 <p>The purpose of this effort is to provide a publicly-accessible reference implementation to avoid future loss of user investment.
 For convenience, a usable instance resides at <a href="https://posita.github.io/anydyce/latest/playground/"><code>https://posita.github.io/anydyce/latest/playground/</code></a>.
 However, merely relying on a single alternate site is insufficient, as no site guarantees access in perpetuity.
@@ -1599,17 +1600,20 @@ While the documentation was a helpful starting point, it was fairly high level, 
 <li>Form a hypothesis about a particular aspect of the AnyDice interpreter (e.g., structure or contextual behavior);</li>
 <li>Design a probe (program) whose results would surface details of that particular aspect;</li>
 <li>Execute the probe with AnyDice, interpret the results, refining this implementation as necessary; and, finally,</li>
-<li>Validate this implementation produces similar results of the most recent probe as well as all prior probes.<sup id="fnref:4"><a class="footnote-ref" href="#fn:4">4</a></sup></li>
+<li>Validate the reverse-engineered implementation produces similar results of the most recent probe as well as all prior probes.<sup id="fnref:4"><a class="footnote-ref" href="#fn:4">4</a></sup></li>
 </ol>
-<p>Additionally, periodic comparison of the <code>anydyce</code> interpreter’s results with AnyDice’s across the entire corpus of unique<sup id="fnref:5"><a class="footnote-ref" href="#fn:5">5</a></sup> saved programs surfaced additional details and nuances not identified by the above loop.
-While 100% completeness is not guaranteed, based on experimentation and the behavior observed by processing that corpus, the <code>anydyce</code> interpreter should be appropriate for most uses.
-In some cases, the <code>anydyce</code> interpreter supersedes AnyDice’s where AnyDice’s behavioral inconsistencies or bugs produce incorrect results.</p>
+<p>Additionally, periodic comparison of this implementation’s results with AnyDice’s across a large corpus of unique<sup id="fnref:5"><a class="footnote-ref" href="#fn:5">5</a></sup> saved programs surfaced additional nuances not identified by the above loop.
+While 100% completeness is not guaranteed, extensive experimentation and validation suggest the <code>anydyce</code> interpreter should be appropriate for most uses.
+Where AnyDice’s behavioral inconsistencies or bugs produce incorrect results, the <code>anydyce</code> interpreter can be a superior alternative.</p>
 <h3 id="prior-art">Prior art</h3>
 <ul>
-<li><a href="https://pdice.arkareem.com/">PyDice</a> is a pure Python implementation of an AnyDice interpreter that both interprets AnyDice programs as well as transpiles them into <a href="https://github.com/Ar-Kareem/PythonDice/">PythonDice</a> Python code (which is pretty darn cool)</li>
+<li><a href="https://pdice.arkareem.com/">PyDice</a> is a pure-Python implementation of an AnyDice interpreter that both interprets AnyDice programs as well as transpiles them into <a href="https://github.com/Ar-Kareem/PythonDice/">PythonDice</a> Python code (which is pretty darn cool)</li>
+<li><a href="https://github.com/basicer/dicey">Dicey</a> is an AnyDice-inspired, browser-based JavaScript application</li>
 <li><a href="https://github.com/dlom/anydice">anydice.js</a> claims to provide a low level interface for retrieving results from AnyDice’s interpreter for use in JavaScript programs (untested)</li>
 <li><a href="https://www.npmjs.com/package/anydieparser">anydieparser</a> claims to provide an AnyDice interpreter in JavaScript (untested)</li>
 <li><a href="https://git.paco.to/nick/anydice">anydice</a> claims to provide an AnyDice interpreter implemented in C and Rust (untested)</li>
+<li><a href="https://highdiceroller.github.io/icepool/apps/icecup.html">Icecup</a> is a Python based interface to <a href="https://github.com/HighDiceRoller/icepool">Icepool</a></li>
+<li><a href="https://github.com/Castux/SnakeEyes">SnakeEyes</a> is a dice explorer written in Lua</li>
 </ul>
 <h2 id="notes-on-the-anydicecom-implementation">Notes on the anydice.com implementation</h2>
 <p>Some basics foundationally necessary to a discussion of AnyDice are presented below, but familiarity with AnyDice’s documentation<sup id="fnref2:1"><a class="footnote-ref" href="#fn:1">1</a></sup> is helpful for gleaning a complete picture.</p>
@@ -1662,7 +1666,7 @@ Rolls are not repeated during expansion.</p>
 For lowest first, they would be: <code>{1, 1}</code>, <code>{1, 2}</code>, <code>{1, 3}</code>, <code>{2, 2}</code>, <code>{2, 3}</code>, <code>{3, 3}</code>.</p>
 <p>Order in sequences is preserved, meaning <code>output 2@{3, 5, 1}</code> yields <code>5</code>.
 Order of the outcomes of a single die are always lowest-to-highest.
-Where expansion occurs over multiple parameters, ordering is even more subtle, as <a href="#modifications-to-some-expanded-parameters-are-durable-across-expansion-calls">discussed below</a>, as illustrated by the following program:</p>
+As <a href="#modifications-to-some-expanded-parameters-are-durable-across-expansion-calls">discussed below</a>, where expansion occurs over multiple parameters, ordering is even more subtle, as illustrated by the following program:</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
 <span class="normal">3</span>
@@ -1677,7 +1681,7 @@ Where expansion occurs over multiple parameters, ordering is even more subtle, a
 <span class="p">}</span>
 <span class="n">output</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="n">d3</span><span class="w"> </span><span class="mi">2</span><span class="n">d3</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
-<p>Open in playground: <a href="../playground/#p=c2V0ICJwb3NpdGlvbiBvcmRlciIgdG8gImhpZ2hlc3QgZmlyc3QiCk46IDAKZnVuY3Rpb246IE5fRlJPTV9EOm4gU19GUk9NX1A6cyB7CiAgTjogTiArIDEKICByZXN1bHQ6IE5fRlJPTV9EICogMTAgXiAoTiAtIDEpICsgMUBTX0ZST01fUCAqIDEwIF4gTiArIDJAU19GUk9NX1AgKiAxMCBeIChOICsgMSkKfQpvdXRwdXQgWzJkMyAyZDJd"><img alt="Try the AnyDice-compatible playground" src="../anydice-playground.svg" /></a></p>
+<p>Open in playground (best viewed in “Text” mode): <a href="../playground/#p=c2V0ICJwb3NpdGlvbiBvcmRlciIgdG8gImhpZ2hlc3QgZmlyc3QiCk46IDAKZnVuY3Rpb246IE5fRlJPTV9EOm4gU19GUk9NX1A6cyB7CiAgTjogTiArIDEKICByZXN1bHQ6IE5fRlJPTV9EICogMTAgXiAoTiAtIDEpICsgMUBTX0ZST01fUCAqIDEwIF4gTiArIDJAU19GUk9NX1AgKiAxMCBeIChOICsgMSkKfQpvdXRwdXQgWzJkMyAyZDJd"><img alt="Try the AnyDice-compatible playground" src="../anydice-playground.svg" /></a></p>
 <p>The <code>anydyce</code> interpreter faithfully reproduces these various ordering behaviors.</p>
 <h3 id="variables">Variables</h3>
 <p>Variables have uppercase letter names, optionally with underscores.
@@ -2183,8 +2187,8 @@ Consider another small modification to the probe:</p>
 <p>As expected, the <code>anydyce</code> interpreter produces the same output as the prior two programs.
 On anydice.com, however, the first six outputs are <code>10101</code>, <code>20202</code>, ..., <code>60606</code>.
 The second six outputs are <code>70102</code>, <code>80203</code>, ..., <code>120607</code>.
-As one can see, <code>B</code>’s modifications last through <code>A</code>’s inner cycle until <code>B</code> is reset in its own outer cycle.</p>
-<p>What is even more bizarre is where expansion happens over a sequence, and that sequence parameter is overwritten in the function body.
+As one can see, <code>B</code>’s modifications are durable through <code>A</code>’s inner cycle until <code>B</code> is reset in its own outer cycle.</p>
+<p>What is even more bizarre is where expansion happens over a sequence parameter that is overwritten in the function body.
 Consider:</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -2201,7 +2205,7 @@ Consider:</p>
 anydice.com, however, perplexingly, only produces three outcomes: <code>{118, 218, 318}</code>.</p>
 <h4 id="diagnosingavoiding-parameter-leaks-on-anydicecom">Diagnosing/avoiding parameter leaks on anydice.com</h4>
 <p>To reiterate, it is entirely safe to write to parameter variable names in the <code>anydyce</code> interpreter.
-However, when using anydice.com, one can avoid the parameter leak problem with a refactor work-around.
+However, when using anydice.com, one can avoid the parameter leak problem with work-around.
 For any function potentially affected, rename all parameters to have new, unique names.
 Then assign the new parameter names to the old ones in the body of the function.
 For example, consider the following function:</p>
@@ -2324,9 +2328,7 @@ If you have any feedback on how this project can better meet these goals, please
 <p>Deliberately omitted is AnyDice’s <a href="#legacy-programs">“legacy” syntax</a>.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
 </li>
 <li id="fn:3">
-<p>At a user’s request, AnyDice has ability to save a program in its own proprietary, server-side database, providing a link with a hexadecimal ID which can later be used to load the same program.
-  As of this writing, AnyDice’s ability to save new programs or retrieve existing ones seems to be offline.
-  The highest program ID known to this author prior to this reduction in functionality was <a href="../playground/#id=4327d"><code>4327d</code></a>.&#160;<a class="footnote-backref" href="#fnref:3" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+<p>At a user’s request, AnyDice has ability to save a program in its own proprietary, server-side database, providing a link with a hexadecimal ID which can later be used to load the same program, assuming both the site and database are functional and available.&#160;<a class="footnote-backref" href="#fnref:3" title="Jump back to footnote 3 in the text">&#8617;</a></p>
 </li>
 <li id="fn:4">
 <p>Validation probes were captured as unit tests, important for avoiding regressions as the <code>anydyce</code> interpreter evolved.&#160;<a class="footnote-backref" href="#fnref:4" title="Jump back to footnote 4 in the text">&#8617;</a></p>
@@ -2447,7 +2449,7 @@ If you have any feedback on how this project can better meet these goals, please
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.annotate", "content.tabs.link", "navigation.footer", "navigation.expand", "navigation.sections"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

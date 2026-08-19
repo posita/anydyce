@@ -6,8 +6,8 @@
  *   --c-<hue>            full-strength color (higher contrast against bg)
  *   --c-<hue>-muted      subtler variant, one step toward bg
  *   --c-fg / --c-bg      foreground / background
- *   --c-fg-ward[-muted]  neutral grey near fg (text-like)
- *   --c-bg-ward[-muted]  neutral grey near bg (border/fill-like)
+ *   --c-fg-ward[-muted]  neutral gray near fg (text-like)
+ *   --c-bg-ward[-muted]  neutral gray near bg (border/fill-like)
  *
  * "-muted" ALWAYS means "toward bg / lower contrast," in both light and
  * dark. The four neutrals form a contrast ramp authored to hold in both
@@ -18,7 +18,7 @@
  * Consequence: this is no longer a literal terminal palette. Chromatic
  * hues can be pasted in from a source theme directly, but the neutrals
  * must be fitted to the ramp by hand -- in dark mode their light/dark
- * assignment is the reverse of a terminal's, so the grey steps get
+ * assignment is the reverse of a terminal's, so the gray steps get
  * swapped. That juggling is the price of mode-independent semantics. */
 
 :root {

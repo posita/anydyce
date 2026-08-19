@@ -8,7 +8,7 @@
    * --muted is the subtle fg-ward neutral (secondary text); --border and
    * --bg-elev are small opaque nudges of bg toward fg (a hairline and a
    * faintly-distinct surface). In light that reads as a white field with
-   * light-grey chrome; in dark, chrome lifts slightly off the background. */
+   * light-gray chrome; in dark, chrome lifts slightly off the background. */
   --bg:           var(--c-bg);
   --bg-elev:      color-mix(in srgb, var(--c-bg), var(--c-fg) 3%);
   --border:       color-mix(in srgb, var(--c-bg), var(--c-fg) 18%);
@@ -24,15 +24,15 @@
    * value (the one accent value that's genuinely mode-specific). */
   --accent:       var(--c-cyan);
   --accent-muted: var(--c-cyan-muted);
-  --accent-fg:    var(--c-bg);  /* #ffffff; */
-  --code-bg:      var(--c-bg);  /* #f4f6f8; */
+  --accent-fg:    var(--c-bg);
+  --code-bg:      var(--c-bg);
   --caret:        rgb(from var(--accent) r g b / 40%);
-  --selection-bg: rgb(from var(--accent-muted) r g b / 20%);  /* #add6ff; */
+  --selection-bg: rgb(from var(--accent-muted) r g b / 20%);
   /* Active-line tint MUST be semi-transparent. CM6's drawSelection layer is
    * z-index: -1, so any opaque background painted on .cm-line covers it from
    * above. rgba with low alpha lets the selection show through. */
   --active-line-bg: rgb(from var(--accent-muted) r g b / 7%);
-  --match-bg:     color-mix(in hsl shorter hue, var(--accent) 5%, rgba(204, 153, 51, 0.4));  /* #f6e0a0; */
+  --match-bg:     color-mix(in hsl shorter hue, var(--accent) 5%, rgba(204, 153, 51, 0.4));
   --search-bg:    color-mix(in hsl shorter hue, var(--accent-muted) 5%, rgba(255, 204, 51, 0.4));
 
   /* Syntax highlighting maps token types onto theme color slots (themes.css).
@@ -58,7 +58,6 @@
    * in playground.js; centralized here so per-knob tuning doesn't require
    * touching JS. */
   --editor-font-size:        13px;
-  /* --cursor-opacity:          0.50; */
   --cursor-width:            0.55em;
   --search-font-size:        0.95em;
   --search-close-font-size:  1.1em;
@@ -305,6 +304,27 @@ main {
   align-items: center;
 }
 
+/* CSV export is a plain text link, not a button, so it reads distinctly from
+ * the view-toggle buttons beside it and is far less prone to accidental
+ * clicks while flipping through visualizations. .disabled hides it entirely
+ * between runs (when there is nothing to download). */
+.pane-actions .csv-link {
+  font-size: 0.9em;
+  white-space: nowrap;
+  cursor: pointer;
+  color: var(--accent-muted);
+  text-decoration: underline;
+  /* A little extra separation from the view-toggle group beside it (on top
+   * of the .pane-actions gap). */
+  margin-inline-end: 0.4em;
+}
+.pane-actions .csv-link:hover {
+  color: var(--accent);
+}
+.pane-actions .csv-link.disabled {
+  display: none;
+}
+
 /* Shared metrics for ALL pane-header controls (action buttons + view
  * toggle): one rule owns the vertical sizing so the control families can't
  * drift apart in height. Variant rules below add only what differs --
@@ -317,33 +337,50 @@ main {
   cursor: pointer;
 }
 
-.pane-actions button {
-  padding-inline: 0.9em;
+/* One shared width for the two action buttons: wide enough for the Run
+ * button's longest label ("Running...") so its label swaps don't jitter, and
+ * applied to Share URL too so the pair reads as a matched set. */
+.pane-actions #share-btn,
+.pane-actions #run-btn {
+  min-width: 6.5em;
+}
+
+/* Reusable, context-free button look -- used by the pane-header action buttons
+ * AND the output message surface's Cancel. .btn is the primary/accent style;
+ * add .btn-secondary for the neutral variant. Header buttons also pick up
+ * shared vertical metrics from .pane-header button; .btn carries its own so it
+ * works outside a header too (e.g. the Cancel button). */
+.btn {
+  font-family: inherit;
+  font-size: 0.9em;
+  font-style: normal;
+  padding: 0.3em 0.9em;
   border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  cursor: pointer;
   background: var(--accent-muted);
   color: var(--accent-fg);
-  border-radius: var(--control-radius);
 }
-.pane-actions button:hover {
+.btn:hover {
   background: var(--accent);
 }
-.pane-actions button.btn-secondary {
-  background: var(--bg);
-  color: var(--text);
-}
-.pane-actions button.btn-secondary:hover {
-  background: var(--code-bg);
-}
-.pane-actions button:disabled {
+.btn:disabled {
   background: var(--border);
   color: var(--muted);
   cursor: not-allowed;
 }
+.btn-secondary {
+  background: var(--bg);
+  color: var(--text);
+}
+.btn-secondary:hover {
+  background: var(--code-bg);
+}
 
-/* Icon-only action button (maximize/restore): center the glyph and tighten
- * the horizontal padding since it's roughly square rather than text-width.
- * The glyph inherits the button's text color via currentColor. */
-.pane-actions button.icon-btn {
+/* Icon-only button (maximize/restore): center the glyph and tighten the
+ * horizontal padding since it's roughly square rather than text-width. Pairs
+ * with .btn; the glyph inherits the button's text color via currentColor. */
+.icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -416,6 +453,44 @@ main {
   font-size: var(--editor-font-size);
 }
 
+/* The single output-pane message surface (startup prompt, "Running...",
+ * "(cancelled)", error summaries). Fills the pane like a view; content pinned
+ * top-left so every message starts in the same 1em top-left spot -- the whole
+ * point of consolidating the former per-state renderers here. The label + the
+ * running-state Cancel share a row, top-aligned so the label sits at the same
+ * top edge whether or not the (taller) Cancel button is present. */
+.output-message {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8em;
+  padding: 1em;
+  overflow: auto;
+  color: var(--muted);
+  font-style: italic;
+  font-size: var(--editor-font-size);
+}
+.output-message-text {
+  /* Wrap long errors and honor any embedded newlines. min-width:0 lets the
+   * flex item shrink below its content width so it actually wraps. */
+  white-space: pre-wrap;
+  min-width: 0;
+}
+
+/* The Cancel button gets its look from .btn .btn-secondary; these rules add
+ * only its message-surface behavior. It reserves its box from the start of the
+ * run via visibility (not display), so the delayed reveal paints into space
+ * already held -- no reflow that would shift "Running..." down or sideways.
+ * .revealed paints it in; a non-running message adds .hidden (display:none) to
+ * drop it entirely. flex:none keeps it from stretching in the row. */
+.output-message button {
+  flex: none;
+  visibility: hidden;
+}
+.output-message button.revealed {
+  visibility: visible;
+}
+
 #output-text {
   padding: 1em;
   font-family: var(--font-mono);
@@ -476,6 +551,9 @@ body.output-maximized .logs-pane {
 .plot:last-child {
   margin-bottom: 0;
 }
+/* Per-chart "(empty distribution)" status line, rendered inside a chart view
+ * by plot.js's appendPlaceholder (distinct from the pane-level message surface
+ * -- this one sits within a successful run's output). */
 .plot-empty {
   color: var(--muted);
   font-style: italic;
@@ -491,13 +569,17 @@ body.output-maximized .logs-pane {
   overflow: hidden;
 }
 .view-toggle button {
-  /* Vertical metrics come from the shared .pane-header button rule.
-   * Horizontal padding is narrower than the action buttons -- the toggle
-   * reads as one segmented control, not two standalone buttons. The
-   * wrapper owns the border and radius; squared inner corners keep the
-   * segment backgrounds flush against it (the toggle now sits inside
-   * .pane-actions, whose button rule would otherwise round them). */
+  /* The toggle segments are their own family (not .btn): the wrapper owns the
+   * border and radius, so each segment strips the native button border
+   * (border:none below) and reads as part of one segmented control. Vertical
+   * metrics come from the shared .pane-header button rule; horizontal padding
+   * is narrower than the .btn action buttons. */
   padding-inline: 0.7em;
+  /* Uniform segment width so the four labels (Bars/Lines/Ridge/Text) render
+   * as equal-width cells rather than sizing to each word. Wide enough for the
+   * longest label; shorter ones center within it. */
+  min-width: 4.5em;
+  text-align: center;
   border: none;
   border-radius: 0;
   background: var(--bg);
@@ -527,10 +609,9 @@ body.output-maximized .logs-pane {
   white-space: pre-wrap;
   margin: 0.1em 0;
 }
-/* Severity suffixes pair by convention with the strings passed to
- * logEntry() in playground.js (info / warning / error / cancel). An
- * unrecognized severity renders unstyled -- cosmetic-only failure. */
-.log-entry-info     { color: var(--muted); }
+/* Severity suffixes pair by convention with the strings passed to logEntry()
+ * in playground.js. An unrecognized severity renders unstyled (cosmetic-only
+ * failure). */
 .log-entry-warning  { color: var(--syn-prop); }
 .log-entry-error    { color: var(--syn-str); }
 .log-entry-cancel   { color: var(--syn-op-kw); }

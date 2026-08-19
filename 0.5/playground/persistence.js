@@ -113,76 +113,42 @@ export function saveEditorSplit(percent, storage = globalThis.localStorage) {
   saveNumber(EDITOR_SPLIT_KEY, percent, storage);
 }
 
-// Read the persisted output-pane view mode ("bars" or "text"), or null if
-// absent or set to an unrecognized value. The consumer applies its own
-// default for null.
-export function loadViewMode(storage = globalThis.localStorage) {
-  try {
-    if (!storage) return null;
-    const raw = storage.getItem(VIEW_MODE_KEY);
-    if (raw === null) return null;
-    return _ALL_VIEW_MODES.has(raw) ? raw : null;
-  } catch {
-    return null;
-  }
+// Build the load/save pair for a key whose value must belong to `valid`. Both
+// silently return null / no-op on a storage error or an unrecognized value; the
+// consumer applies its own default (DEFAULT_ACCENT, etc.) for null.
+function makeEnumStorage(key, valid) {
+  return {
+    load(storage = globalThis.localStorage) {
+      try {
+        const raw = storage?.getItem(key);
+        return valid.has(raw) ? raw : null;
+      } catch {
+        return null;
+      }
+    },
+    save(value, storage = globalThis.localStorage) {
+      if (!valid.has(value)) return;
+      try {
+        storage?.setItem(key, value);
+      } catch {
+        // ignore
+      }
+    },
+  };
 }
 
-// Persist the view mode. Silent no-op on storage error / unknown mode.
-export function saveViewMode(mode, storage = globalThis.localStorage) {
-  if (!_ALL_VIEW_MODES.has(mode)) return;
-  try {
-    if (!storage) return;
-    storage.setItem(VIEW_MODE_KEY, mode);
-  } catch {
-    // ignore
-  }
-}
-
-// Read the persisted accent hue, or null if absent / unrecognized. The
-// consumer applies DEFAULT_ACCENT for null.
-export function loadAccent(storage = globalThis.localStorage) {
-  try {
-    if (!storage) return null;
-    const raw = storage.getItem(ACCENT_KEY);
-    return _ACCENT_SET.has(raw) ? raw : null;
-  } catch {
-    return null;
-  }
-}
-
-// Persist the accent hue. Silent no-op on storage error / unknown hue.
-export function saveAccent(accent, storage = globalThis.localStorage) {
-  if (!_ACCENT_SET.has(accent)) return;
-  try {
-    if (!storage) return;
-    storage.setItem(ACCENT_KEY, accent);
-  } catch {
-    // ignore
-  }
-}
-
-// Read the persisted theme family, or null if absent / unrecognized. The
-// consumer applies DEFAULT_THEME for null.
-export function loadTheme(storage = globalThis.localStorage) {
-  try {
-    if (!storage) return null;
-    const raw = storage.getItem(THEME_KEY);
-    return _THEME_SET.has(raw) ? raw : null;
-  } catch {
-    return null;
-  }
-}
-
-// Persist the theme family. Silent no-op on storage error / unknown theme.
-export function saveTheme(theme, storage = globalThis.localStorage) {
-  if (!_THEME_SET.has(theme)) return;
-  try {
-    if (!storage) return;
-    storage.setItem(THEME_KEY, theme);
-  } catch {
-    // ignore
-  }
-}
+export const { load: loadViewMode, save: saveViewMode } = makeEnumStorage(
+  VIEW_MODE_KEY,
+  _ALL_VIEW_MODES,
+);
+export const { load: loadAccent, save: saveAccent } = makeEnumStorage(
+  ACCENT_KEY,
+  _ACCENT_SET,
+);
+export const { load: loadTheme, save: saveTheme } = makeEnumStorage(
+  THEME_KEY,
+  _THEME_SET,
+);
 
 // Strip the URL fragment without reloading or triggering a hashchange event.
 // `history.replaceState` doesn't fire hashchange, which is what we want --

@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1033,10 +1033,9 @@
 Please review before upgrading.</p>
 </div>
 <ul>
+<li>Adds the <a href="../playground/">AnyDice-compatible playground</a>!</li>
+<li>See the <a href="../anydice/">implementation notes</a> for details</li>
 <li>Drops support for 3.9 and 3.10 and extends support to 3.14</li>
-</ul>
-<!-- TODO(posita): Fill this out -->
-<ul>
 <li>Removes the following (analogies now live in <a href="https://github.com/posita/dyce/releases/tag/v0.7.0"><code>dyce==0.7.0</code></a>.</li>
 <li><code>anydyce.viz.alphasize</code></li>
 <li><code>anydyce.viz.cumulative_probability_formatter</code></li>
@@ -1050,10 +1049,6 @@ Please review before upgrading.</p>
 <li><code>anydyce.viz.plot_scatter</code></li>
 <li><code>anydyce.viz.probability_formatter</code></li>
 </ul>
-<!-- - `anydyce.viz.limit_for_display` -->
-<!-- - `anydyce.viz.values_xy_for_graph_type` -->
-<!-- - `anydyce.viz.` -->
-
 <h2 id="046"><a href="https://github.com/posita/anydyce/releases/tag/v0.4.6">0.4.6</a></h2>
 <ul>
 <li>Relaxed <code>ipywidgets</code> dependency to <code>&gt;=7.5,&lt;9</code> to better accommodate JupyterLite after prior version crashed and burned</li>
@@ -1068,7 +1063,7 @@ Please review before upgrading.</p>
 <h2 id="044"><a href="https://github.com/posita/anydyce/releases/tag/v0.4.4">0.4.4</a></h2>
 <ul>
 <li>Added <code>SettingsDict["burst_columns"]</code> and related widget.</li>
-<li>Added <code>None</code> as an acceptable item value for <code>histogram_specs</code> parameter to <a class="autorefs autorefs-internal" href="../anydyce/#anydyce.viz.HPlotterChooser"><code>HPlotterChooser</code> initializer</a>, <a class="autorefs autorefs-internal" title="update_hs(histogram_specs: Iterable[HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None]) -> None" href="../anydyce/#anydyce.viz.HPlotterChooser.update_hs"><code>HPlotterChooser.update_hs</code></a>, and <a class="autorefs autorefs-internal" title="jupyter_visualize(histogram_specs: Iterable[HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None], *, controls_expanded: bool = False, initial_alpha: float = _DEFAULT_ALPHA, initial_burst_cmap_inner: str = _DEFAULT_CMAP, initial_burst_cmap_link: bool = True, initial_burst_cmap_outer: str = _DEFAULT_COMPARE_CMAP, initial_burst_cmap_use_midpoints: bool = True, initial_burst_color_bg: str = _DEFAULT_BURST_COLOR_BG, initial_burst_color_bg_trnsp: bool = False, initial_burst_color_text: str = _DEFAULT_BURST_COLOR_TEXT, initial_burst_columns: int = _DEFAULT_COLS_BURST, initial_burst_swap: bool = False, initial_burst_zero_fill_normalize: bool = False, initial_enable_cutoff: bool = True, initial_graph_type: GraphTypeT = _DEFAULT_GRAPH_TYPE, initial_markers: str = _DEFAULT_MARKERS, initial_plot_style: str = _DEFAULT_PLOT_STYLE, initial_resolution: int = _DEFAULT_RESOLUTION, selected_name: str | None = None) -> None" href="../anydyce/#anydyce.viz.jupyter_visualize"><code>jupyter_visualize</code></a>.</li>
+<li>Added <code>None</code> as an acceptable item value for <code>histogram_specs</code> parameter to <a class="autorefs autorefs-internal" href="../anydyce/#anydyce.viz.HPlotterChooser"><code>HPlotterChooser</code> initializer</a>, <a class="autorefs autorefs-internal" title="update_hs(histogram_specs: Iterable[HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None]) -> None" href="../anydyce/#anydyce.viz.HPlotterChooser.update_hs"><code>HPlotterChooser.update_hs</code></a>, and <a class="autorefs autorefs-internal" title="jupyter_visualize(histogram_specs: Iterable[HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None], *, controls_expanded: bool = False, initial_alpha: float = _DEFAULT_ALPHA, initial_burst_cmap_inner: str = _DEFAULT_CMAP, initial_burst_cmap_link: bool = True, initial_burst_cmap_outer: str = _DEFAULT_COMPARE_CMAP, initial_burst_cmap_use_midpoints: bool = True, initial_burst_color_bg: str = _DEFAULT_BURST_COLOR_BG, initial_burst_color_bg_trnsp: bool = False, initial_burst_color_text: str = _DEFAULT_BURST_COLOR_TEXT, initial_burst_columns: int = _DEFAULT_COLS_BURST, initial_burst_swap: bool = False, initial_burst_zero_fill_normalize: bool = False, initial_enable_cutoff: bool = True, initial_graph_type: GraphType = _DEFAULT_GRAPH_TYPE, initial_markers: str = _DEFAULT_MARKERS, initial_plot_style: str = _DEFAULT_PLOT_STYLE, initial_resolution: int = _DEFAULT_RESOLUTION, selected_name: str | None = None) -> None" href="../anydyce/#anydyce.viz.jupyter_visualize"><code>jupyter_visualize</code></a>.</li>
 </ul>
 <h2 id="043"><a href="https://github.com/posita/anydyce/releases/tag/v0.4.3">0.4.3</a></h2>
 <ul>
@@ -1092,7 +1087,7 @@ That broke the ability to display interactive plots.
 </ul>
 <h2 id="040"><a href="https://github.com/posita/anydyce/releases/tag/v0.4.0">0.4.0</a></h2>
 <ul>
-<li>Adds <a class="autorefs autorefs-internal" href="../anydyce/#anydyce.viz.HPlotterChooser"><code>HPlotterChooser</code></a> implementation and substantially refactors <a class="autorefs autorefs-internal" title="jupyter_visualize(histogram_specs: Iterable[HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None], *, controls_expanded: bool = False, initial_alpha: float = _DEFAULT_ALPHA, initial_burst_cmap_inner: str = _DEFAULT_CMAP, initial_burst_cmap_link: bool = True, initial_burst_cmap_outer: str = _DEFAULT_COMPARE_CMAP, initial_burst_cmap_use_midpoints: bool = True, initial_burst_color_bg: str = _DEFAULT_BURST_COLOR_BG, initial_burst_color_bg_trnsp: bool = False, initial_burst_color_text: str = _DEFAULT_BURST_COLOR_TEXT, initial_burst_columns: int = _DEFAULT_COLS_BURST, initial_burst_swap: bool = False, initial_burst_zero_fill_normalize: bool = False, initial_enable_cutoff: bool = True, initial_graph_type: GraphTypeT = _DEFAULT_GRAPH_TYPE, initial_markers: str = _DEFAULT_MARKERS, initial_plot_style: str = _DEFAULT_PLOT_STYLE, initial_resolution: int = _DEFAULT_RESOLUTION, selected_name: str | None = None) -> None" href="../anydyce/#anydyce.viz.jupyter_visualize"><code>jupyter_visualize</code></a> in terms thereof.</li>
+<li>Adds <a class="autorefs autorefs-internal" href="../anydyce/#anydyce.viz.HPlotterChooser"><code>HPlotterChooser</code></a> implementation and substantially refactors <a class="autorefs autorefs-internal" title="jupyter_visualize(histogram_specs: Iterable[HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None], *, controls_expanded: bool = False, initial_alpha: float = _DEFAULT_ALPHA, initial_burst_cmap_inner: str = _DEFAULT_CMAP, initial_burst_cmap_link: bool = True, initial_burst_cmap_outer: str = _DEFAULT_COMPARE_CMAP, initial_burst_cmap_use_midpoints: bool = True, initial_burst_color_bg: str = _DEFAULT_BURST_COLOR_BG, initial_burst_color_bg_trnsp: bool = False, initial_burst_color_text: str = _DEFAULT_BURST_COLOR_TEXT, initial_burst_columns: int = _DEFAULT_COLS_BURST, initial_burst_swap: bool = False, initial_burst_zero_fill_normalize: bool = False, initial_enable_cutoff: bool = True, initial_graph_type: GraphType = _DEFAULT_GRAPH_TYPE, initial_markers: str = _DEFAULT_MARKERS, initial_plot_style: str = _DEFAULT_PLOT_STYLE, initial_resolution: int = _DEFAULT_RESOLUTION, selected_name: str | None = None) -> None" href="../anydyce/#anydyce.viz.jupyter_visualize"><code>jupyter_visualize</code></a> in terms thereof.</li>
 </ul>
 <h2 id="032"><a href="https://github.com/posita/anydyce/releases/tag/v0.3.2">0.3.2</a></h2>
 <ul>
@@ -1122,15 +1117,15 @@ That broke the ability to display interactive plots.
 <h2 id="014"><a href="https://github.com/posita/anydyce/releases/tag/v0.1.4">0.1.4</a></h2>
 <ul>
 <li>Prepares for breaking changes in future release of <code>dyce~=0.6</code>.</li>
-<li>Adds experimental <a class="autorefs autorefs-internal" title="values_xy_for_graph_type(h: H[_T], graph_type: GraphTypeT) -> tuple[tuple[_T, ...], tuple[Fraction, ...]]" href="../anydyce/#anydyce.viz.values_xy_for_graph_type"><code>values_xy_for_graph_type</code></a> function and exposes new “at least” and “at most” graph types via <a class="autorefs autorefs-internal" title="jupyter_visualize(histogram_specs: Iterable[HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None], *, controls_expanded: bool = False, initial_alpha: float = _DEFAULT_ALPHA, initial_burst_cmap_inner: str = _DEFAULT_CMAP, initial_burst_cmap_link: bool = True, initial_burst_cmap_outer: str = _DEFAULT_COMPARE_CMAP, initial_burst_cmap_use_midpoints: bool = True, initial_burst_color_bg: str = _DEFAULT_BURST_COLOR_BG, initial_burst_color_bg_trnsp: bool = False, initial_burst_color_text: str = _DEFAULT_BURST_COLOR_TEXT, initial_burst_columns: int = _DEFAULT_COLS_BURST, initial_burst_swap: bool = False, initial_burst_zero_fill_normalize: bool = False, initial_enable_cutoff: bool = True, initial_graph_type: GraphTypeT = _DEFAULT_GRAPH_TYPE, initial_markers: str = _DEFAULT_MARKERS, initial_plot_style: str = _DEFAULT_PLOT_STYLE, initial_resolution: int = _DEFAULT_RESOLUTION, selected_name: str | None = None) -> None" href="../anydyce/#anydyce.viz.jupyter_visualize"><code>jupyter_visualize</code></a> interface.</li>
+<li>Adds experimental <a class="autorefs autorefs-internal" title="values_xy_for_graph_type(h: H[_T], graph_type: GraphType) -> tuple[tuple[_T, ...], tuple[Fraction, ...]]" href="../anydyce/#anydyce.viz.values_xy_for_graph_type"><code>values_xy_for_graph_type</code></a> function and exposes new “at least” and “at most” graph types via <a class="autorefs autorefs-internal" title="jupyter_visualize(histogram_specs: Iterable[HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None], *, controls_expanded: bool = False, initial_alpha: float = _DEFAULT_ALPHA, initial_burst_cmap_inner: str = _DEFAULT_CMAP, initial_burst_cmap_link: bool = True, initial_burst_cmap_outer: str = _DEFAULT_COMPARE_CMAP, initial_burst_cmap_use_midpoints: bool = True, initial_burst_color_bg: str = _DEFAULT_BURST_COLOR_BG, initial_burst_color_bg_trnsp: bool = False, initial_burst_color_text: str = _DEFAULT_BURST_COLOR_TEXT, initial_burst_columns: int = _DEFAULT_COLS_BURST, initial_burst_swap: bool = False, initial_burst_zero_fill_normalize: bool = False, initial_enable_cutoff: bool = True, initial_graph_type: GraphType = _DEFAULT_GRAPH_TYPE, initial_markers: str = _DEFAULT_MARKERS, initial_plot_style: str = _DEFAULT_PLOT_STYLE, initial_resolution: int = _DEFAULT_RESOLUTION, selected_name: str | None = None) -> None" href="../anydyce/#anydyce.viz.jupyter_visualize"><code>jupyter_visualize</code></a> interface.</li>
 </ul>
 <h2 id="013"><a href="https://github.com/posita/anydyce/releases/tag/v0.1.3">0.1.3</a></h2>
 <ul>
-<li>Turns data limiting off by default in <a class="autorefs autorefs-internal" title="jupyter_visualize(histogram_specs: Iterable[HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None], *, controls_expanded: bool = False, initial_alpha: float = _DEFAULT_ALPHA, initial_burst_cmap_inner: str = _DEFAULT_CMAP, initial_burst_cmap_link: bool = True, initial_burst_cmap_outer: str = _DEFAULT_COMPARE_CMAP, initial_burst_cmap_use_midpoints: bool = True, initial_burst_color_bg: str = _DEFAULT_BURST_COLOR_BG, initial_burst_color_bg_trnsp: bool = False, initial_burst_color_text: str = _DEFAULT_BURST_COLOR_TEXT, initial_burst_columns: int = _DEFAULT_COLS_BURST, initial_burst_swap: bool = False, initial_burst_zero_fill_normalize: bool = False, initial_enable_cutoff: bool = True, initial_graph_type: GraphTypeT = _DEFAULT_GRAPH_TYPE, initial_markers: str = _DEFAULT_MARKERS, initial_plot_style: str = _DEFAULT_PLOT_STYLE, initial_resolution: int = _DEFAULT_RESOLUTION, selected_name: str | None = None) -> None" href="../anydyce/#anydyce.viz.jupyter_visualize"><code>jupyter_visualize</code></a>.</li>
+<li>Turns data limiting off by default in <a class="autorefs autorefs-internal" title="jupyter_visualize(histogram_specs: Iterable[HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None], *, controls_expanded: bool = False, initial_alpha: float = _DEFAULT_ALPHA, initial_burst_cmap_inner: str = _DEFAULT_CMAP, initial_burst_cmap_link: bool = True, initial_burst_cmap_outer: str = _DEFAULT_COMPARE_CMAP, initial_burst_cmap_use_midpoints: bool = True, initial_burst_color_bg: str = _DEFAULT_BURST_COLOR_BG, initial_burst_color_bg_trnsp: bool = False, initial_burst_color_text: str = _DEFAULT_BURST_COLOR_TEXT, initial_burst_columns: int = _DEFAULT_COLS_BURST, initial_burst_swap: bool = False, initial_burst_zero_fill_normalize: bool = False, initial_enable_cutoff: bool = True, initial_graph_type: GraphType = _DEFAULT_GRAPH_TYPE, initial_markers: str = _DEFAULT_MARKERS, initial_plot_style: str = _DEFAULT_PLOT_STYLE, initial_resolution: int = _DEFAULT_RESOLUTION, selected_name: str | None = None) -> None" href="../anydyce/#anydyce.viz.jupyter_visualize"><code>jupyter_visualize</code></a>.</li>
 </ul>
 <h2 id="012"><a href="https://github.com/posita/anydyce/releases/tag/v0.1.2">0.1.2</a></h2>
 <ul>
-<li>Adds <a class="autorefs autorefs-internal" title="limit_for_display(h: H[_T], cutoff: Fraction) -> H" href="../anydyce/#anydyce.viz.limit_for_display"><code>limit_for_display</code></a> and updates <a class="autorefs autorefs-internal" title="jupyter_visualize(histogram_specs: Iterable[HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None], *, controls_expanded: bool = False, initial_alpha: float = _DEFAULT_ALPHA, initial_burst_cmap_inner: str = _DEFAULT_CMAP, initial_burst_cmap_link: bool = True, initial_burst_cmap_outer: str = _DEFAULT_COMPARE_CMAP, initial_burst_cmap_use_midpoints: bool = True, initial_burst_color_bg: str = _DEFAULT_BURST_COLOR_BG, initial_burst_color_bg_trnsp: bool = False, initial_burst_color_text: str = _DEFAULT_BURST_COLOR_TEXT, initial_burst_columns: int = _DEFAULT_COLS_BURST, initial_burst_swap: bool = False, initial_burst_zero_fill_normalize: bool = False, initial_enable_cutoff: bool = True, initial_graph_type: GraphTypeT = _DEFAULT_GRAPH_TYPE, initial_markers: str = _DEFAULT_MARKERS, initial_plot_style: str = _DEFAULT_PLOT_STYLE, initial_resolution: int = _DEFAULT_RESOLUTION, selected_name: str | None = None) -> None" href="../anydyce/#anydyce.viz.jupyter_visualize"><code>jupyter_visualize</code></a>.</li>
+<li>Adds <a class="autorefs autorefs-internal" title="limit_for_display(h: H[_T], cutoff: Fraction) -> H" href="../anydyce/#anydyce.viz.limit_for_display"><code>limit_for_display</code></a> and updates <a class="autorefs autorefs-internal" title="jupyter_visualize(histogram_specs: Iterable[HLikeT | tuple[str, HLikeT] | tuple[str, HLikeT, HLikeT | None] | None], *, controls_expanded: bool = False, initial_alpha: float = _DEFAULT_ALPHA, initial_burst_cmap_inner: str = _DEFAULT_CMAP, initial_burst_cmap_link: bool = True, initial_burst_cmap_outer: str = _DEFAULT_COMPARE_CMAP, initial_burst_cmap_use_midpoints: bool = True, initial_burst_color_bg: str = _DEFAULT_BURST_COLOR_BG, initial_burst_color_bg_trnsp: bool = False, initial_burst_color_text: str = _DEFAULT_BURST_COLOR_TEXT, initial_burst_columns: int = _DEFAULT_COLS_BURST, initial_burst_swap: bool = False, initial_burst_zero_fill_normalize: bool = False, initial_enable_cutoff: bool = True, initial_graph_type: GraphType = _DEFAULT_GRAPH_TYPE, initial_markers: str = _DEFAULT_MARKERS, initial_plot_style: str = _DEFAULT_PLOT_STYLE, initial_resolution: int = _DEFAULT_RESOLUTION, selected_name: str | None = None) -> None" href="../anydyce/#anydyce.viz.jupyter_visualize"><code>jupyter_visualize</code></a>.</li>
 </ul>
 <h2 id="011"><a href="https://github.com/posita/anydyce/releases/tag/v0.1.1">0.1.1</a></h2>
 <ul>
@@ -1239,7 +1234,7 @@ Non-experimental features should be considered stable.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.annotate", "content.tabs.link", "navigation.footer", "navigation.expand", "navigation.sections"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

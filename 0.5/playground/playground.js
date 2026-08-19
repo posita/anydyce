@@ -72,13 +72,11 @@ const anydiceEditorTheme = EditorView.theme({
     height:          "100%",
   },
   ".cm-content":         { caretColor: "var(--caret)" },
-  // Block cursor: translucent background block (vs default border-left
-  // line) so the character behind shows through. See playground.css for
-  // the opacity/width knobs.
+  // Block cursor: translucent background block (vs default border-left line) so
+  // the character behind shows through. See --cursor-width in playground.css.
   ".cm-cursor, .cm-cursor-primary": {
     border:          "none",
     backgroundColor: "var(--caret)",
-    // opacity:         "var(--cursor-opacity)",
     width:           "var(--cursor-width)",
     marginLeft:      "0",
   },
@@ -265,10 +263,11 @@ async function fetchProgramFromUrl() {
 const statusEl          = document.getElementById("status");
 const runBtn            = document.getElementById("run-btn");
 const shareBtn          = document.getElementById("share-btn");
-const cancelBtn         = document.getElementById("cancel-btn");
-const csvBtn            = document.getElementById("csv-btn");
+const csvLink           = document.getElementById("csv-link");
 const maximizeBtn       = document.getElementById("maximize-btn");
-const outputPlaceholder = document.getElementById("output-placeholder");
+const outputMessage     = document.getElementById("output-message");
+const outputMessageText = document.getElementById("output-message-text");
+const outputCancel      = document.getElementById("output-cancel");
 const outputText        = document.getElementById("output-text");
 const outputBars        = document.getElementById("output-bars");
 const outputLines       = document.getElementById("output-lines");
@@ -280,25 +279,37 @@ const viewTextBtn       = document.getElementById("view-text-btn");
 const logsPlaceholder   = document.getElementById("logs-placeholder");
 const logsEl            = document.getElementById("logs");
 
+// The four output views paired with their toggle buttons: the single source
+// for view visibility, the toggle listeners, and mode validation below.
+const VIEWS = [
+  { mode: VIEW_MODE_RIDGE, el: outputRidge, btn: viewRidgeBtn },
+  { mode: VIEW_MODE_BARS, el: outputBars, btn: viewBarsBtn },
+  { mode: VIEW_MODE_LINES, el: outputLines, btn: viewLinesBtn },
+  { mode: VIEW_MODE_TEXT, el: outputText, btn: viewTextBtn },
+];
+const CHART_VIEWS = VIEWS.filter((v) => v.mode !== VIEW_MODE_TEXT).map(
+  (v) => v.el,
+);
+
 function setStatus(msg) {
   if (statusEl) statusEl.textContent = msg;
 }
 
+// text is anydyce.format_results' multi-block string, built in the worker. The
+// caller follows with renderOutputCharts, which reveals the views.
 function renderResults(text) {
-  // Text view: anydyce.format_results produces the multi-block string in
-  // the worker; just display it. The bars view is rendered separately
-  // from the structured `outputs` array (see handleRun).
   outputText.textContent = text;
-  showOutputViews();
 }
 
-// Last successful run's raw outputs + precision, kept so the charts can be
+// Last successful run's raw outputs and specs, kept so the charts can be
 // re-rendered without re-running the program (currently: when the OS
 // light/dark setting flips mid-session, since Plotly has no native
 // prefers-color-scheme reactivity and the charts bake colors in at render
 // time).
 let lastOutputs = null;
-let lastDisplayPrecision;
+let lastBarSpecs = [];
+let lastLineSpec = null;
+let lastRidgeSpec = null;
 // Base64 CSV + download filename of the last successful run, both computed
 // in the worker via anydyce.csv (csv_base64 / csv_filename) so the
 // playground and the Jupyter widget produce byte-identical files with
@@ -307,70 +318,55 @@ let lastDisplayPrecision;
 let lastCsv = "";
 let lastCsvFilename = "";
 
+// The CSV export is a native download link: point its href at the data URL
+// when a run makes one available, and neutralize it (no href, aria-disabled,
+// pointer-events off via .disabled) otherwise. A plain link -- rather than a
+// button in the pane-actions row -- is much harder to hit by accident while
+// flipping through the visualization toggles.
 function setCsvAvailable(available) {
-  csvBtn.disabled = !available;
-  csvBtn.title = available
-    ? "Download results as CSV"
-    : "Run a program to enable CSV export";
-}
-
-function handleCsvDownload() {
-  if (!lastCsv) return;
-  const a = document.createElement("a");
-  a.href = `data:text/csv;base64,${lastCsv}`;
-  a.download = lastCsvFilename || "anydice-results.csv";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-csvBtn.addEventListener("click", handleCsvDownload);
-
-// Clear both chart views. With `msg`, drop a placeholder note into each so
-// the chart panes mirror whatever short text the text view shows (error
-// summary, "(cancelled)", etc.) when there's nothing to plot.
-function clearOutputCharts(msg) {
-  for (const container of [outputBars, outputLines, outputRidge]) {
-    container.replaceChildren();
-    if (msg) {
-      const div = document.createElement("div");
-      div.className = "plot-empty";
-      div.textContent = msg;
-      container.appendChild(div);
-    }
+  if (available) {
+    csvLink.href = `data:text/csv;base64,${lastCsv}`;
+    csvLink.download = lastCsvFilename || "anydice-results.csv";
+    csvLink.classList.remove("disabled");
+    csvLink.removeAttribute("aria-disabled");
+    csvLink.title = "Download results as CSV";
+  } else {
+    csvLink.removeAttribute("href");
+    csvLink.classList.add("disabled");
+    csvLink.setAttribute("aria-disabled", "true");
+    csvLink.title = "Run a program to enable CSV export";
   }
 }
 
-function renderOutputCharts(outputs, displayPrecision) {
-  // All three chart views (bars + lines + ridge) are built from the raw
-  // [{label, items}] data on every run, so toggling between them is instant
-  // (no re-render). displayPrecision is the run's final `set "anydyce: display
-  // precision"` value, so percent labels match the text view's formatting.
+function clearOutputCharts() {
+  for (const container of CHART_VIEWS) {
+    container.replaceChildren();
+  }
+}
+
+// All three chart views are rendered from dyce's portable specifications.
+function paintCharts(barSpecs, lineSpec, ridgeSpec) {
+  renderPlots(outputBars, barSpecs, Plotly);
+  renderLines(outputLines, lineSpec, Plotly);
+  renderRidge(outputRidge, ridgeSpec, Plotly);
+}
+
+function renderOutputCharts(outputs, barSpecs, lineSpec, ridgeSpec) {
   lastOutputs = outputs;
-  lastDisplayPrecision = displayPrecision;
-  renderPlots(outputBars, outputs, Plotly, { precision: displayPrecision });
-  renderLines(outputLines, outputs, Plotly, { precision: displayPrecision });
-  renderRidge(outputRidge, outputs, Plotly, { precision: displayPrecision });
+  lastBarSpecs = barSpecs;
+  lastLineSpec = lineSpec;
+  lastRidgeSpec = ridgeSpec;
+  paintCharts(barSpecs, lineSpec, ridgeSpec);
   showOutputViews();
 }
 
-// Re-render the charts from the last run's saved data so they pick up the
-// current CSS palette. Plotly bakes colors into its SVG at render time and
-// has no CSS reactivity, so any palette change -- OS light/dark flip or an
-// accent-hue selection -- needs an explicit re-render. The rest of the UI
-// follows var(--accent) / the media query automatically. No-op before the
-// first run.
+// Re-paint from the last run's saved data to pick up the current CSS palette.
+// Plotly bakes colors into its SVG at render time and has no CSS reactivity, so
+// a palette change (OS light/dark flip or accent-hue selection) needs an
+// explicit re-render. No-op before the first run.
 function rerenderCharts() {
   if (lastOutputs !== null) {
-    renderPlots(outputBars, lastOutputs, Plotly, {
-      precision: lastDisplayPrecision,
-    });
-    renderLines(outputLines, lastOutputs, Plotly, {
-      precision: lastDisplayPrecision,
-    });
-    renderRidge(outputRidge, lastOutputs, Plotly, {
-      precision: lastDisplayPrecision,
-    });
+    paintCharts(lastBarSpecs, lastLineSpec, lastRidgeSpec);
   }
 }
 
@@ -429,16 +425,12 @@ themeSelect.addEventListener("change", () => setTheme(themeSelect.value));
 setTheme(loadTheme() || DEFAULT_THEME);
 
 function renderError(err) {
-  // Output shows a short error summary only; the full traceback lives in
-  // the logs pane (see logTraceback). Keeping output terse means the eye
-  // can quickly tell "did it work?" without scrolling past 30 lines of
-  // traceback. Surface the same summary in both views so toggling doesn't
-  // change what you see when something went wrong.
+  // Output shows a short error summary only (in the message surface); the full
+  // traceback lives in the logs pane (see logTraceback). Keeping output terse
+  // means the eye can quickly tell "did it work?" without scrolling past 30
+  // lines of traceback.
   const detail = (err && err.message) || String(err);
-  const msg = `Error: ${detail}`;
-  outputText.textContent = msg;
-  clearOutputCharts(msg);
-  showOutputViews();
+  showMessage(`Error: ${detail}`);
 }
 
 // ---- View-mode toggle ------------------------------------------------------
@@ -453,20 +445,19 @@ function renderError(err) {
 // the chart fills the now-visible space. (Switching to text view doesn't
 // need anything; <pre>-style text reflows naturally.)
 
-let viewMode = loadViewMode() || VIEW_MODE_BARS;
-// False until the first run (or error) renders something. While false, the
-// placeholder element is visible and BOTH views stay hidden regardless of
-// viewMode -- toggling before the first run only moves the active-button
-// highlight.
-let outputHasContent = false;
+let viewMode = loadViewMode() || VIEW_MODE_RIDGE;
+// The output pane shows EITHER a message (startup prompt, Running..., the
+// (cancelled) note, an error) OR the result views, never both. This gates the
+// views hidden (see applyViewVisibility) so a mid-run view-toggle can't reveal
+// stale content. Starts true: the startup prompt is up on load.
+let showingMessage = true;
+let outputCancelTimer = null;
 
-// Re-layout any currently-visible Plotly charts to their container's size.
-// Needed after anything that changes chart geometry outside Plotly's
-// awareness: un-hiding the bars view (Plotly skips layout for
-// display: none containers) and dragging the editor divider (Plotly's
-// `responsive: true` listens to WINDOW resize only, not container resize).
+// Plotly skips layout for display:none containers and its `responsive:true`
+// tracks only WINDOW resize, so charts must be resized by hand after anything
+// that changes their container geometry (un-hiding a view, dragging a divider).
 function resizeVisibleCharts() {
-  for (const container of [outputBars, outputLines, outputRidge]) {
+  for (const container of CHART_VIEWS) {
     if (container.classList.contains("hidden")) continue;
     for (const plot of container.querySelectorAll(".plot")) {
       Plotly.Plots.resize(plot);
@@ -475,53 +466,67 @@ function resizeVisibleCharts() {
 }
 
 function applyViewVisibility() {
-  const visible = (mode) => viewMode === mode && outputHasContent;
-  outputBars.classList.toggle("hidden", !visible(VIEW_MODE_BARS));
-  outputLines.classList.toggle("hidden", !visible(VIEW_MODE_LINES));
-  outputRidge.classList.toggle("hidden", !visible(VIEW_MODE_RIDGE));
-  outputText.classList.toggle("hidden", !visible(VIEW_MODE_TEXT));
-  viewBarsBtn.classList.toggle("active", viewMode === VIEW_MODE_BARS);
-  viewLinesBtn.classList.toggle("active", viewMode === VIEW_MODE_LINES);
-  viewRidgeBtn.classList.toggle("active", viewMode === VIEW_MODE_RIDGE);
-  viewTextBtn.classList.toggle("active", viewMode === VIEW_MODE_TEXT);
-  // Charts skip layout while display:none; resize whichever chart view just
-  // became visible so it fills the pane (Plotly tracks window, not container).
-  if (outputHasContent && viewMode !== VIEW_MODE_TEXT) {
+  for (const { mode, el, btn } of VIEWS) {
+    el.classList.toggle("hidden", !(mode === viewMode && !showingMessage));
+    btn.classList.toggle("active", mode === viewMode);
+  }
+  if (!showingMessage && viewMode !== VIEW_MODE_TEXT) {
     resizeVisibleCharts();
   }
 }
 
-// First content retires the placeholder permanently and reveals the active
-// view. Idempotent -- render paths call it unconditionally.
+// Reveal the result views, hiding the message surface. Every render path
+// (results, error, cancel) funnels through here once its content is in place.
 function showOutputViews() {
-  if (!outputHasContent) {
-    outputHasContent = true;
-    outputPlaceholder.classList.add("hidden");
-  }
+  showingMessage = false;
+  clearOutputCancelTimer();
+  outputMessage.classList.add("hidden");
   applyViewVisibility();
 }
 
-function setViewMode(mode) {
-  if (
-    mode !== VIEW_MODE_BARS &&
-    mode !== VIEW_MODE_LINES &&
-    mode !== VIEW_MODE_RIDGE &&
-    mode !== VIEW_MODE_TEXT
-  ) {
-    return;
+function clearOutputCancelTimer() {
+  if (outputCancelTimer !== null) {
+    clearTimeout(outputCancelTimer);
+    outputCancelTimer = null;
   }
+}
+
+// The one place any non-result text is shown: fills the message surface and
+// hides the views. `cancelable` (the running state only) arms the Cancel
+// button's delayed reveal, so fast runs never flash it.
+function showMessage(text, { cancelable = false } = {}) {
+  showingMessage = true;
+  outputMessageText.textContent = text;
+  clearOutputCancelTimer();
+  outputCancel.classList.remove("revealed");
+  outputCancel.classList.toggle("hidden", !cancelable);
+  outputMessage.classList.remove("hidden");
+  applyViewVisibility();
+  if (cancelable) {
+    outputCancelTimer = setTimeout(revealOutputCancel, CANCEL_REVEAL_MS);
+  }
+}
+
+function revealOutputCancel() {
+  outputCancelTimer = null;
+  if (runInFlight) {
+    outputCancel.classList.add("revealed");
+  }
+}
+
+function setViewMode(mode) {
+  if (!VIEWS.some((v) => v.mode === mode)) return;
   viewMode = mode;
   applyViewVisibility();
   saveViewMode(mode);
 }
 
-viewBarsBtn.addEventListener("click", () => setViewMode(VIEW_MODE_BARS));
-viewLinesBtn.addEventListener("click", () => setViewMode(VIEW_MODE_LINES));
-viewRidgeBtn.addEventListener("click", () => setViewMode(VIEW_MODE_RIDGE));
-viewTextBtn.addEventListener("click", () => setViewMode(VIEW_MODE_TEXT));
+for (const { mode, btn } of VIEWS) {
+  btn.addEventListener("click", () => setViewMode(mode));
+}
 
-// Reflect the persisted (or default) view mode in the toggle buttons on
-// load. The views themselves stay hidden until first content.
+// Reflect the persisted (or default) view mode in the toggle buttons on load;
+// the views themselves stay hidden until first content.
 applyViewVisibility();
 
 // ---- Maximize (pseudo-fullscreen) output view ------------------------------
@@ -568,8 +573,8 @@ document.addEventListener("keydown", (e) => {
 // panes together represent one run: output for results, logs for
 // diagnostic messages. The Run button doubles as the clear action.
 //
-// Severity classes (.log-entry-info / -warning / -error / -cancel /
-// -traceback) drive CSS colors; see playground.css.
+// Severity classes (.log-entry-warning / -error / -cancel / -traceback) drive
+// CSS colors. See playground.css.
 
 let logsHasContent = false;
 
@@ -620,16 +625,49 @@ function logTraceback(traceback) {
 // call later in this file.
 let editor;
 let runtimeReady = false;
-// Set when the user hits Run / Shift-Enter before the runtime is ready.
-// The initPyodide .then() callback checks this flag and auto-fires
-// handleRun() the moment Pyodide finishes loading, so the user's click
-// isn't lost to timing.
+// Set when Run / Shift+Enter fires before the runtime is ready; initPyodide's
+// .then() auto-fires handleRun() once loaded, so the click isn't lost.
 let runPending = false;
-// Lock: at most one in-flight run per output pane. The Run button is
-// disabled during a run, but the Shift-Enter keymap binding bypasses the
-// disabled state, so a separate flag is needed to make the guard work for
-// both code paths.
+// Guard: one in-flight run at a time. The Shift+Enter keymap bypasses the
+// disabled Run button, so a flag -- not the button state -- is what enforces it.
 let runInFlight = false;
+
+// How long a run must run before the pane offers a Cancel control. Fast runs
+// finish inside this window and never show it, so we don't offer the heavyweight
+// cancel (worker teardown + re-init) for runs that don't need it.
+const CANCEL_REVEAL_MS = 1000;
+
+// The primary button is a pure state readout that morphs through three shapes
+// in one fixed slot (so nothing reflows and each carries an honest label). It
+// never becomes Cancel -- cancellation lives in the output pane's message
+// surface (see showMessage). Two shapes carry a title:
+//   loading -> "Loading..."  disabled  (tooltip: what the runtime is doing)
+//   run     -> "Run"         enabled   (tooltip: the Shift+Enter shortcut)
+//   running -> "Running..."  disabled
+function setRunButton(label, { enabled, title } = {}) {
+  runBtn.textContent = label;
+  runBtn.disabled = !enabled;
+  if (title) {
+    runBtn.title = title;
+  } else {
+    runBtn.removeAttribute("title");
+  }
+}
+
+function enterLoadingState(context) {
+  setRunButton("Loading...", { enabled: false, title: context });
+}
+
+function enterRestState() {
+  setRunButton("Run", {
+    enabled: true,
+    title: "Shortcut: Shift+Enter in the editor",
+  });
+}
+
+function enterRunningState() {
+  setRunButton("Running...", { enabled: false });
+}
 
 async function handleRun() {
   if (!runtimeReady) {
@@ -645,36 +683,42 @@ async function handleRun() {
   }
   runInFlight = true;
   const source = editor.state.doc.toString();
-  // Visual run-in-progress state: clear the output pane, disable the Run
-  // button, enable the Cancel button, and reflect running in the corner
-  // status. The Shift-Enter keymap binding calls into handleRun() the same
-  // way the button click does, so both paths get this behavior. Restoration
-  // happens in the `finally` block below, regardless of whether the run
-  // succeeded, threw, or was cancelled.
-  // (With Pyodide now in a worker, the main thread stays responsive during
-  // the run; the rAF yield from the prior single-threaded version is no
-  // longer needed.)
+  // Shift+Enter routes here too, so both entry points share this setup; the
+  // finally block restores the resting state whether the run succeeds, throws,
+  // or is cancelled.
   setStatus("Running...");
-  runBtn.disabled = true;
-  cancelBtn.disabled = false;
-  cancelBtn.title = "Cancel the current run (terminates and re-initializes the worker)";
+  enterRunningState();
   outputText.textContent = "";
   clearOutputCharts();
-  showOutputViews();
+  showMessage("Running...", { cancelable: true });
   resetLogs();
-  // Disable CSV export while a run is in flight; the visible panes no
-  // longer reflect what would be downloaded. Re-enabled on success only --
-  // a failed or cancelled run leaves it disabled rather than offering the
-  // prior run's data against the current panes' error text.
+  // Re-enabled on success only, so a failed or cancelled run doesn't offer the
+  // prior run's data for download against the current error text.
   setCsvAvailable(false);
   const t0 = performance.now();
   try {
-    const { text, outputs, displayPrecision, csv, csvFilename, warnings } =
+    const {
+      text,
+      outputs,
+      barSpecs,
+      lineSpec,
+      ridgeSpec,
+      csv,
+      csvFilename,
+      warnings,
+    } =
       await runAnydice(source);
     const dt = Math.round(performance.now() - t0);
     logWarnings(warnings);
-    renderResults(text);
-    renderOutputCharts(outputs, displayPrecision);
+    if (outputs.length === 0) {
+      // Zero outputs is a whole-pane state, so it goes to the message surface
+      // like every other pane message -- not a per-view placeholder.
+      lastOutputs = null;
+      showMessage("(no output)");
+    } else {
+      renderResults(text);
+      renderOutputCharts(outputs, barSpecs, lineSpec, ridgeSpec);
+    }
     lastCsv = csv;
     lastCsvFilename = csvFilename;
     setCsvAvailable(Boolean(csv) && outputs.length > 0);
@@ -684,8 +728,7 @@ async function handleRun() {
       // Cancel is a deliberate user action, not a failure. handleCancel()
       // updates the status and re-inits the runtime; don't overwrite that
       // here.
-      outputText.textContent = "(cancelled)";
-      clearOutputCharts("(cancelled)");
+      showMessage("(cancelled)");
       logEntry("cancel", "Cancelled by user.");
     } else if (err instanceof RunError) {
       // Python-level error from the program. Output gets the short summary;
@@ -704,39 +747,36 @@ async function handleRun() {
     }
   } finally {
     runInFlight = false;
-    runBtn.disabled = false;
-    cancelBtn.disabled = true;
-    cancelBtn.title = "No run in progress";
+    enterRestState();
   }
 }
 
 async function handleCancel() {
   if (!runInFlight) return;
-  // Disable Cancel immediately to avoid double-clicks during the (brief)
-  // teardown + re-init window.
-  cancelBtn.disabled = true;
-  cancelBtn.title = "Cancelling...";
   setStatus("Cancelling and re-initializing runtime...");
   // Mark runtime as not-ready so any Run / Shift-Enter triggered during
   // re-init gets queued (handleRun checks runtimeReady).
   runtimeReady = false;
+  // Show the loading shape immediately for feedback.
+  enterLoadingState("Restarting the runtime...");
   // Terminate the worker. The pending run's Promise rejects with
   // CancelledError; handleRun's catch handles the UI for that, and its
-  // finally re-enables runBtn. We disable it again below for the re-init
-  // window.
+  // finally runs enterRestState() -- we re-assert the loading shape after the
+  // yield below so the button doesn't flip to "Run" mid-re-init.
   cancelCurrentRun();
   // Yield once so handleRun's catch + finally run before we proceed.
   await Promise.resolve();
-  runBtn.disabled = true;
+  enterLoadingState("Restarting the runtime...");
   try {
     await initPyodide(setStatus);
     runtimeReady = true;
-    runBtn.disabled = false;
     if (runPending) {
       // Same queued-run logic as the initial-load path: if the user clicked
       // Run while re-init was in progress, honor it now.
       runPending = false;
       handleRun();
+    } else {
+      enterRestState();
     }
   } catch (err) {
     setStatus("Runtime failed to re-initialize. Reload to recover.");
@@ -835,8 +875,7 @@ if (programFromUrl() === null) {
 initPyodide(setStatus)
   .then(() => {
     runtimeReady = true;
-    runBtn.disabled = false;
-    runBtn.title = "Run the program (Shift+Enter)";
+    enterRestState();
     if (runPending) {
       // User clicked Run / hit Shift-Enter while loading; honor the
       // queued click now that the runtime is up. handleRun() reads from
@@ -844,11 +883,10 @@ initPyodide(setStatus)
       // the wait are reflected in the run.
       runPending = false;
       handleRun();
-    } else if (!outputHasContent) {
-      // Nothing rendered yet -- advance the placeholder prose from
-      // "Starting up..." to the ready prompt.
-      outputPlaceholder.textContent =
-        "Click Run (or Shift+Enter in the editor). Output will appear here.";
+    } else if (showingMessage) {
+      // Nothing rendered yet -- advance the message from "Starting up..." to
+      // the ready prompt.
+      showMessage("Click Run (or Shift+Enter in the editor). Output will appear here.");
     }
   })
   .catch((err) => {
@@ -857,7 +895,9 @@ initPyodide(setStatus)
   });
 
 runBtn.addEventListener("click", handleRun);
-cancelBtn.addEventListener("click", handleCancel);
+// Cancel lives in the output pane's message surface (running state only),
+// revealed only after a run outlasts CANCEL_REVEAL_MS.
+outputCancel.addEventListener("click", handleCancel);
 
 // ---- Output / logs resizer --------------------------------------------------
 

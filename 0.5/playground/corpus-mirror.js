@@ -30,7 +30,7 @@ const _HEX_RE = /^-?[0-9A-Fa-f]+$/;
 // can't be parsed.
 export function programIdAsInt(programId) {
   if (typeof programId === "number") {
-    if (!Number.isInteger(programId)) {
+    if (!Number.isSafeInteger(programId)) {
       throw new Error(`unable to parse program ID (${programId})`);
     }
     return programId;
@@ -42,10 +42,11 @@ export function programIdAsInt(programId) {
   if (!_HEX_RE.test(s)) {
     throw new Error(`unable to parse program ID (${programId})`);
   }
-  // parseInt("-abc", 16) === -2748; supported directly.
+  // parseInt("-abc", 16) === -2748; supported directly. Reject magnitudes past
+  // 2^53, where parseInt silently rounds and would yield a wrong shard path.
   const n = parseInt(s, 16);
-  if (!Number.isFinite(n)) {
-    throw new Error(`unable to parse program ID (${programId})`);
+  if (!Number.isSafeInteger(n)) {
+    throw new Error(`program ID out of safe integer range (${programId})`);
   }
   return n;
 }
@@ -75,8 +76,7 @@ export function shardedSubpathFromProgramId(programId) {
   const padded = sign + paddedBody;
   const sub1 = padded.slice(-4, -2);
   const sub2 = padded.slice(-2);
-  const filename = `${programIdAsHex(programId)}.txt`;
-  return `${sub1}/${sub2}/${filename}`;
+  return `${sub1}/${sub2}/${n.toString(16)}.txt`;
 }
 
 // Return the absolute raw-GitHub URL for a program's mirrored source file.

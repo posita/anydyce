@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -849,8 +849,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>anydyce/anydice/interpreter.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 235</span>
-<span class="normal"> 236</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 236</span>
 <span class="normal"> 237</span>
 <span class="normal"> 238</span>
 <span class="normal"> 239</span>
@@ -1958,7 +1957,7 @@
 
     <span class="c1"># ---- Statement execution -------------------------------------------------------------</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_exec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stmt</span><span class="p">:</span> <span class="n">Stmt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: C901</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_exec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stmt</span><span class="p">:</span> <span class="n">Stmt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># ruff: ignore[complex-structure]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stmt</span><span class="p">,</span> <span class="n">OutputStmt</span><span class="p">):</span>
             <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eval</span><span class="p">(</span><span class="n">stmt</span><span class="o">.</span><span class="n">expr</span><span class="p">)</span>
             <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce_to_h</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -2031,7 +2030,7 @@
 
     <span class="c1"># ---- Expression evaluation -----------------------------------------------------------</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Expr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Val</span><span class="p">:</span>  <span class="c1"># noqa: C901</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Expr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Val</span><span class="p">:</span>  <span class="c1"># ruff: ignore[complex-structure]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">EmptySeq</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">()</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Number</span><span class="p">):</span>
@@ -2175,7 +2174,7 @@
 
         <span class="k">return</span> <span class="n">dempty</span> <span class="k">if</span> <span class="n">l_empty</span> <span class="ow">or</span> <span class="n">r_empty</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_h_binop</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_cmp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">_Val</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">_Val</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">H</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>  <span class="c1"># noqa: C901</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_cmp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">_Val</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">_Val</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">H</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>  <span class="c1"># ruff: ignore[complex-structure]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">P</span><span class="p">):</span>
             <span class="n">left</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">h</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">P</span><span class="p">):</span>
@@ -2530,7 +2529,7 @@
             <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;undefined function for call: </span><span class="si">{</span><span class="n">call</span><span class="o">.</span><span class="n">parts</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invoke</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_bind_and_expand</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_bind_and_expand</span><span class="p">(</span>  <span class="c1"># ruff: ignore[complex-structure]</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">param_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">],</span>
         <span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">_Val</span><span class="p">],</span>
@@ -2575,7 +2574,7 @@
                 <span class="n">bound</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg</span>
             <span class="k">elif</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">P</span><span class="p">):</span>
-                    <span class="n">arg</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">h</span><span class="p">()</span>  <span class="c1"># noqa: PLW2901</span>
+                    <span class="n">arg</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">h</span><span class="p">()</span>  <span class="c1"># ruff: ignore[redefined-loop-name]</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
                     <span class="c1"># AnyDice sum-coerces a seq arg to `:n`, then wraps it as</span>
                     <span class="c1"># a 1-outcome die at that sum so the call still routes</span>
@@ -2587,7 +2586,7 @@
                     <span class="c1"># once with N=0 rather than eliminating the call.</span>
                     <span class="c1"># Verified via tmp-probes -0x40 (weighted-seq body), -0x41</span>
                     <span class="c1"># (scalar body), and -0x42 (empty-seq edge case).</span>
-                    <span class="n">arg</span> <span class="o">=</span> <span class="n">H</span><span class="p">({</span><span class="nb">sum</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span> <span class="mi">1</span><span class="p">})</span>  <span class="c1"># noqa: PLW2901</span>
+                    <span class="n">arg</span> <span class="o">=</span> <span class="n">H</span><span class="p">({</span><span class="nb">sum</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span> <span class="mi">1</span><span class="p">})</span>  <span class="c1"># ruff: ignore[redefined-loop-name]</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                     <span class="n">bound</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">H</span><span class="p">):</span>
@@ -2611,11 +2610,11 @@
                 <span class="c1"># with REROLL bound to d{} only eliminates the X-matching</span>
                 <span class="c1"># branches, not the whole call).</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-                    <span class="n">arg</span> <span class="o">=</span> <span class="n">H</span><span class="p">({</span><span class="n">arg</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>  <span class="c1"># noqa: PLW2901</span>
+                    <span class="n">arg</span> <span class="o">=</span> <span class="n">H</span><span class="p">({</span><span class="n">arg</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>  <span class="c1"># ruff: ignore[redefined-loop-name]</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
                     <span class="c1"># AnyDice sum-coerces a seq to an int, then wraps as a 1-outcome die</span>
                     <span class="c1"># (NOT distinct outcomes)</span>
-                    <span class="n">arg</span> <span class="o">=</span> <span class="n">H</span><span class="p">({</span><span class="nb">sum</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span> <span class="mi">1</span><span class="p">})</span>  <span class="c1"># noqa: PLW2901</span>
+                    <span class="n">arg</span> <span class="o">=</span> <span class="n">H</span><span class="p">({</span><span class="nb">sum</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span> <span class="mi">1</span><span class="p">})</span>  <span class="c1"># ruff: ignore[redefined-loop-name]</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">P</span><span class="p">)):</span>
                     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">err_label</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="si">}</span><span class="s2">: expected die, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -2669,7 +2668,7 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">FunctionDef</span><span class="p">):</span>
             <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">pattern</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">Param</span><span class="p">)]</span>
             <span class="n">param_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">type</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">]</span>
-            <span class="n">err_label</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;function param </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>  <span class="c1"># noqa: E731</span>
+            <span class="n">err_label</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;function param </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>  <span class="c1"># ruff: ignore[lambda-assignment]</span>
             <span class="n">bind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bind_and_expand</span><span class="p">(</span><span class="n">param_types</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">err_label</span><span class="o">=</span><span class="n">err_label</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">bind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">H</span><span class="p">({})</span>
@@ -2677,7 +2676,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invoke_user</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">bound</span><span class="p">,</span> <span class="n">expansion</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">param_types</span><span class="p">,</span> <span class="n">impl</span> <span class="o">=</span> <span class="n">entry</span>
-            <span class="n">err_label</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;builtin param </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>  <span class="c1"># noqa: E731</span>
+            <span class="n">err_label</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;builtin param </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>  <span class="c1"># ruff: ignore[lambda-assignment]</span>
             <span class="n">bind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bind_and_expand</span><span class="p">(</span><span class="n">param_types</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">err_label</span><span class="o">=</span><span class="n">err_label</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">bind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">H</span><span class="p">({})</span>
@@ -2691,12 +2690,13 @@
         <span class="n">bound</span><span class="p">:</span> <span class="n">_BoundT</span><span class="p">,</span>
         <span class="n">expansion</span><span class="p">:</span> <span class="n">_ExpansionT</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Val</span><span class="p">:</span>
-        <span class="c1"># No-expansion fast path: invoke the body once with `bound` installed</span>
-        <span class="c1"># in the env. Truncate the return when it&#39;s an H -- important for deep-</span>
-        <span class="c1"># recursion programs whose recursive calls are all-passthrough (e.g.</span>
-        <span class="c1"># `function: f N:n D:d { ... [f N/2 D] ... }` -- both args bypass</span>
-        <span class="c1"># expansion, so the body&#39;s bigint-growing operations would otherwise</span>
-        <span class="c1"># propagate untruncated).</span>
+        <span class="c1"># No-expansion fast path: invoke the body once with `bound` installed in</span>
+        <span class="c1"># the env. Any returned H is kept bounded by the ambient `quantize_hs`</span>
+        <span class="c1"># context (see _apply_calc_precision), not truncated here. That matters</span>
+        <span class="c1"># for deep-recursion programs whose recursive calls are all-passthrough</span>
+        <span class="c1"># (e.g. `function: f N:n D:d { ... [f N/2 D] ... }`, where both args</span>
+        <span class="c1"># bypass expansion), whose bigint-growing operations would otherwise</span>
+        <span class="c1"># propagate untruncated.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">expansion</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invoke_with_bound</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">bound</span><span class="p">)</span>
 
@@ -2824,8 +2824,6 @@
 <span class="sd">              distinct for user-defined bodies that read mutated non-param</span>
 <span class="sd">              env vars.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">product</span>
-
         <span class="k">if</span> <span class="n">reverse_combos</span><span class="p">:</span>
             <span class="n">items_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">items</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">items</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">expansion</span><span class="p">)]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -2834,7 +2832,7 @@
         <span class="k">def</span><span class="w"> </span><span class="nf">_gen</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">H</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">]]:</span>
             <span class="k">for</span> <span class="n">combo</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">items_list</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">reverse_combos</span><span class="p">:</span>
-                    <span class="n">combo</span> <span class="o">=</span> <span class="n">combo</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># noqa: PLW2901</span>
+                    <span class="n">combo</span> <span class="o">=</span> <span class="n">combo</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># ruff: ignore[redefined-loop-name]</span>
                 <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span>
                 <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">combo</span><span class="p">:</span>
                     <span class="n">weight</span> <span class="o">*=</span> <span class="n">w</span>
@@ -2918,8 +2916,7 @@ caller cannot observe <code>set</code>-directive effects.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>anydyce/anydice/interpreter.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">266</span>
-<span class="normal">267</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">267</span>
 <span class="normal">268</span>
 <span class="normal">269</span>
 <span class="normal">270</span>
@@ -2962,7 +2959,8 @@ caller cannot observe <code>set</code>-directive effects.</p>
 <span class="normal">307</span>
 <span class="normal">308</span>
 <span class="normal">309</span>
-<span class="normal">310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
+<span class="normal">310</span>
+<span class="normal">311</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">program</span><span class="p">:</span> <span class="n">Program</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -3039,7 +3037,7 @@ caller cannot observe <code>set</code>-directive effects.</p>
 </div>
 <p>Formats output results from <a class="autorefs autorefs-internal" title="run(source: str, *, settings: Settings | None = None) -> AnyDiceResultsT" href="#anydyce.anydice.run"><code>run</code></a>.</p>
 <p>Reads <code>display_precision</code> from <em>settings</em>, if provided.
-Pass the same [<code>Settings</code>][anydyce.anydice.Settings] object passed to <code>run</code> will ensure settings modifications in the program are honored during formatting.</p>
+Passing the same [<code>Settings</code>][anydyce.anydice.Settings] object given to <code>run</code> ensures settings modifications made by the program are honored during formatting.</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -3180,7 +3178,7 @@ Pass the same [<code>Settings</code>][anydyce.anydice.Settings] object passed to
 <span class="sd">    Formats output results from [`run`][anydyce.anydice.run].</span>
 
 <span class="sd">    Reads `display_precision` from *settings*, if provided.</span>
-<span class="sd">    Pass the same [`Settings`][anydyce.anydice.Settings] object passed to `run` will ensure settings modifications in the program are honored during formatting.</span>
+<span class="sd">    Passing the same [`Settings`][anydyce.anydice.Settings] object given to `run` ensures settings modifications made by the program are honored during formatting.</span>
 
 <span class="sd">        &gt;&gt;&gt; from anydyce.anydice import Settings, format_results, run</span>
 <span class="sd">        &gt;&gt;&gt; settings = Settings()</span>
@@ -3255,7 +3253,7 @@ Pass the same [<code>Settings</code>][anydyce.anydice.Settings] object passed to
 <p><code>anydyce.anydice.parse</code> is experimental; its interface may change or it may be removed in a future release.</p>
 </div>
 <p>Parses AnyDice source text into an AST [<code>Program</code>][anydyce.anydice.Program].</p>
-<p>Useful for (e.g.) passing to [<code>AnyDiceInterpreter.run</code>][anydice.anydice.AnyDiceInterpreter.run].</p>
+<p>Useful for (e.g.) passing to <a class="autorefs autorefs-internal" title="run(program: Program, *, settings: Settings | None = None) -> AnyDiceResultsT" href="#anydyce.anydice.AnyDiceInterpreter.run"><code>AnyDiceInterpreter.run</code></a>.</p>
 
 
             <details class="mkdocstrings-source">
@@ -3278,11 +3276,11 @@ Pass the same [<code>Settings</code>][anydyce.anydice.Settings] object passed to
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parses AnyDice source text into an AST [`Program`][anydyce.anydice.Program].</span>
 
-<span class="sd">    Useful for (e.g.) passing to [`AnyDiceInterpreter.run`][anydice.anydice.AnyDiceInterpreter.run].</span>
+<span class="sd">    Useful for (e.g.) passing to [`AnyDiceInterpreter.run`][anydyce.anydice.AnyDiceInterpreter.run].</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">program</span> <span class="o">=</span> <span class="n">_PARSER</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">program</span><span class="p">,</span> <span class="n">Program</span><span class="p">):</span>  <span class="c1"># expected return value of our transformer</span>
-        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;Program&quot;</span><span class="p">,</span> <span class="n">program</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">program</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;expected type of program (</span><span class="si">{</span><span class="n">program</span><span class="si">!r}</span><span class="s2">) to be </span><span class="si">{</span><span class="n">Program</span><span class="si">!r}</span><span class="s2">, not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">program</span><span class="p">)</span><span class="si">!r}</span><span class="s2">&quot;</span>  <span class="c1"># pragma: no cover</span>
@@ -3309,8 +3307,8 @@ Pass the same [<code>Settings</code>][anydyce.anydice.Settings] object passed to
 <p><code>anydyce.anydice.run</code> is experimental; its interface may change or it may be removed in a future release.</p>
 </div>
 <p>Shorthand for <code>AnyDiceInterpreter().run(parse(source), settings=settings)</code>, returning one <code>(name, distribution)</code> pair per <code>output</code> statement.</p>
-<p>If <em>settings</em> is provided, the interpreter mutates it during execution (e.g. when the program contains <code>set "anydyce: display precision" to ...</code>), so the caller or others can observe its final state (e.g., [<code>format_results</code>][anydyce.anydice.format_result]’ examination of <code>settings.display_precision</code>).</p>
-<p>See <a class="autorefs autorefs-internal" title="format_results(results: AnyDiceResultsT, *, settings: Settings | None = None, short: bool = False) -> str" href="#anydyce.anydice.format_results"><code>format_results</code></a>, <a class="autorefs autorefs-internal" title="parse(source: str) -> Program" href="#anydyce.anydice.parse"><code>parse</code></a>, and [<code>AnyDiceInterpreter.run</code>][anydice.anydice.AnyDiceInterpreter.run] for additional detail.</p>
+<p>If <em>settings</em> is provided, the interpreter mutates it during execution (e.g. when the program contains <code>set "anydyce: display precision" to ...</code>), so the caller can observe its final state (e.g. via <a class="autorefs autorefs-internal" title="format_results(results: AnyDiceResultsT, *, settings: Settings | None = None, short: bool = False) -> str" href="#anydyce.anydice.format_results"><code>format_results</code></a> reading <code>settings.display_precision</code>).</p>
+<p>See <a class="autorefs autorefs-internal" title="format_results(results: AnyDiceResultsT, *, settings: Settings | None = None, short: bool = False) -> str" href="#anydyce.anydice.format_results"><code>format_results</code></a>, <a class="autorefs autorefs-internal" title="parse(source: str) -> Program" href="#anydyce.anydice.parse"><code>parse</code></a>, and <a class="autorefs autorefs-internal" title="run(program: Program, *, settings: Settings | None = None) -> AnyDiceResultsT" href="#anydyce.anydice.AnyDiceInterpreter.run"><code>AnyDiceInterpreter.run</code></a> for additional detail.</p>
 
 
             <details class="mkdocstrings-source">
@@ -3329,9 +3327,9 @@ Pass the same [<code>Settings</code>][anydyce.anydice.Settings] object passed to
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Shorthand for `AnyDiceInterpreter().run(parse(source), settings=settings)`, returning one `(name, distribution)` pair per `output` statement.</span>
 
-<span class="sd">    If *settings* is provided, the interpreter mutates it during execution (e.g. when the program contains `set &quot;anydyce: display precision&quot; to ...`), so the caller or others can observe its final state (e.g., [`format_results`][anydyce.anydice.format_result]’ examination of `settings.display_precision`).</span>
+<span class="sd">    If *settings* is provided, the interpreter mutates it during execution (e.g. when the program contains `set &quot;anydyce: display precision&quot; to ...`), so the caller can observe its final state (e.g. via [`format_results`][anydyce.anydice.format_results] reading `settings.display_precision`).</span>
 
-<span class="sd">    See [`format_results`][anydyce.anydice.format_results], [`parse`][anydyce.anydice.parse], and [`AnyDiceInterpreter.run`][anydice.anydice.AnyDiceInterpreter.run] for additional detail.</span>
+<span class="sd">    See [`format_results`][anydyce.anydice.format_results], [`parse`][anydyce.anydice.parse], and [`AnyDiceInterpreter.run`][anydyce.anydice.AnyDiceInterpreter.run] for additional detail.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">AnyDiceInterpreter</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">),</span> <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -3476,7 +3474,7 @@ Pass the same [<code>Settings</code>][anydyce.anydice.Settings] object passed to
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.annotate", "content.tabs.link", "navigation.footer", "navigation.expand", "navigation.sections"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       
