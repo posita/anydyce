@@ -23,8 +23,27 @@ export function readCssTheme(root = globalThis.document?.documentElement) {
   if (!root) return null;
   const styles = getComputedStyle(root);
   const v = (name) => styles.getPropertyValue(name).trim();
+  const resolved = (name) => {
+    const probe = root.ownerDocument.createElement("span");
+    probe.hidden = true;
+    probe.style.color = `var(${name})`;
+    root.ownerDocument.body.appendChild(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    const srgb = color.match(
+      /^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\)$/i,
+    );
+    if (srgb) {
+      const channels = srgb.slice(1).map((channel) =>
+        Math.round(Number(channel) * 255)
+      );
+      return `rgb(${channels.join(", ")})`;
+    }
+    return color;
+  };
   return {
     bg: v("--bg"),
+    surface: resolved("--bg-elev"),
     text: v("--text"),
     muted: v("--muted"),
     border: v("--border"),
@@ -57,8 +76,8 @@ function themeLayoutBits(theme) {
     plot_bgcolor: theme.bg,
     font: { color: theme.text, family: theme.fontFamily },
     hoverlabel: {
-      bgcolor: theme.bg,
-      bordercolor: theme.border,
+      bgcolor: theme.surface,
+      bordercolor: theme.text,
       font: { color: theme.text, family: theme.fontFamily },
     },
     modebar: {
@@ -298,7 +317,7 @@ export function themeRidgeSpec(spec, theme = null) {
               color: theme.muted,
               family: theme.fontFamily,
             },
-            bgcolor: withTemplateAlpha(theme.bg, annotation.bgcolor),
+            bgcolor: withTemplateAlpha(theme.surface, annotation.bgcolor),
             ...(ridge !== null
               ? {
                   arrowcolor: withTemplateAlpha(
