@@ -14,7 +14,7 @@
 
 # `anydyce`’s *Mostly*-Compatible AnyDice Interpreter
 
-`anydyce` now includes an Open Source, pure-Python, cleanroom implementation of Jasper Flick’s [AnyDice Dice Probability Calculator](https://anydice.com/).
+`anydyce` now includes an Open Source, pure-Python, cleanroom implementation of [Jasper Flick](https://catlikecoding.com/jasper-flick/)’s [AnyDice Dice Probability Calculator](https://anydice.com/).
 
 An interactive version can be found here: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/)
 
@@ -221,9 +221,10 @@ Where AnyDice’s behavioral inconsistencies or bugs produce incorrect results, 
 - [Dicey](https://dicey.js.org/) is an AnyDice-inspired, browser-based JavaScript application
 - [Icecup](https://highdiceroller.github.io/icepool/apps/icecup.html) is a Python based interface to [Icepool](https://github.com/HighDiceRoller/icepool)
 - [SnakeEyes](https://snake-eyes.io/) is a dice explorer written in Lua
+- [anydice](https://git.paco.to/nick/anydice) claims to provide an AnyDice interpreter implemented in C and Rust (untested)
+- [ManyDice](https://github.com/Zemyla/ManyDice) claims to be an AnyDice grammar parser written in Haskell (untested)
 - [anydice.js](https://github.com/dlom/anydice) claims to provide a low level interface for retrieving results from AnyDice’s interpreter for use in JavaScript programs (untested)
 - [anydieparser](https://www.npmjs.com/package/anydieparser) claims to provide an AnyDice interpreter in JavaScript (untested)
-- [anydice](https://git.paco.to/nick/anydice) claims to provide an AnyDice interpreter implemented in C and Rust (untested)
 
 ## Notes on the anydice.com implementation
 
@@ -926,7 +927,7 @@ The `anydyce` interpreter does not recognize the `legacy` keyword and is incapab
 
 The goals of this project are as follows:
 
-1. Present a truly transparent reference implementation for Jasper Flick’s [AnyDice Dice Probability Calculator](https://anydice.com/) subject to independent inspection, validation, and improvement.
+1. Present a truly transparent reference implementation for [Jasper Flick](https://catlikecoding.com/jasper-flick/)’s [AnyDice Dice Probability Calculator](https://anydice.com/) subject to independent inspection, validation, and improvement.
    This includes addressing long-standing bugs persistent in the original platform.
 1. Preserve existing cognitive investment in the AnyDice platform independently of the author’s ability or willingness to support it, including enabling users to:
     1. share AnyDice programs without relying on a proprietary centralized database; and
