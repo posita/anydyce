@@ -1,4 +1,4 @@
-site_name: anydyce
+site_name: dyceum
 site_description: Interactivity tools for dyce
 site_author: Matt Bogosian
 copyright: <i>Copyright and other protections apply.
@@ -103,7 +103,7 @@ watch:
   - README.md
   - _griffe_ext.py
   - _mkdocs_hooks.py
-  - anydyce
+  - dyceum
   - docs
   - jupyter-lite.json
   - jupyter_lite_config.json
@@ -117,5 +117,5 @@ nav:
   - Contributing: contrib.md
   - License: license.md
   - API:
-    - AnyDice: anydyce.anydice.md
-    - Jupyter: anydyce.md
+    - AnyDice: dyceum.anydice.md
+    - Jupyter: dyceum.md

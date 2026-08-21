@@ -16,7 +16,7 @@
 from dyce import H
 from dyce.d import d6, d8, d12, h2d10
 
-from anydyce.csv import csv_base64
+from dyceum.csv import csv_base64
 
 __all__ = ()
 

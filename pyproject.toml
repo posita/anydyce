@@ -7,7 +7,7 @@
 # ======================================================================================
 
 [project]
-name = "anydyce"
+name = "dyceum"
 dynamic = ["version"]
 description = "Interactivity tools for dyce"
 readme = {file = "README.md", content-type = "text/markdown; charset=UTF-8"}
@@ -38,7 +38,7 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://posita.github.io/anydyce/"
+Homepage = "https://dyceum.org/"
 "Source Repository" = "https://github.com/posita/anydyce/"
 
 [project.optional-dependencies]
@@ -49,8 +49,8 @@ requires = ["setuptools>=64", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["anydyce", "anydyce.anydice"]
-package-data = {"anydyce" = ["py.typed"]}
+packages = ["dyceum", "dyceum.anydice"]
+package-data = {"dyceum" = ["anydice/grammar.lark", "py.typed"]}
 
 [tool.setuptools_scm]
 fallback_version = "0.0.0+unknown"
@@ -136,14 +136,14 @@ ignore-words-list = "Nd,countin,damange"
 skip = ["*.ipynb"]
 
 [tool.coverage.run]
-source = ["anydyce"]
+source = ["dyceum"]
 branch = true
 
 [tool.coverage.report]
 show_missing = true
 
 [tool.mypy]
-files = ["anydyce", "docs", "helpers", "tests", "*.py"]
+files = ["dyceum", "docs", "helpers", "tests", "*.py"]
 # exclude = """(?x)(
 #     ^docs/assets/nb_.*\\.py$
 # )"""
@@ -155,7 +155,7 @@ warn_unused_configs = true
 warn_unused_ignores = true
 
 [tool.pyrefly]
-project-includes = ["anydyce", "docs", "helpers", "tests", "*.py"]
+project-includes = ["dyceum", "docs", "helpers", "tests", "*.py"]
 python-version = "3.11.0"
 infer-with-first-use = false
 
@@ -163,7 +163,7 @@ infer-with-first-use = false
 unused-ignore = true
 
 [tool.pyright]
-include = ["anydyce", "docs", "helpers", "tests", "*.py"]
+include = ["dyceum", "docs", "helpers", "tests", "*.py"]
 pythonVersion = "3.11"
 reportUnnecessaryTypeIgnoreComment = "warning"
 typeCheckingMode = "basic"
@@ -183,14 +183,14 @@ doctest_optionflags = [
   # See also <https://docs.pytest.org/en/stable/how-to/doctest.html#using-doctest-options>
   "NUMBER",
 ]
-testpaths = ["README.md", "anydyce", "docs", "helpers", "tests", "*.py"]
+testpaths = ["README.md", "dyceum", "docs", "helpers", "tests", "*.py"]
 
 [tool.ruff.format]
 docstring-code-format = true
 docstring-code-line-length = "dynamic"
 
 [tool.ruff.lint.per-file-ignores]
-"anydyce/magic.py" = [
+"dyceum/magic.py" = [
   "T201",  # `print` is the Jupyter cell-output mechanism
 ]
 "docs/assets/nb_*.py" = [
@@ -253,7 +253,7 @@ select = [
 ]
 
 [tool.ty.src]
-include = ["anydyce", "docs", "helpers", "tests", "*.py"]
+include = ["dyceum", "docs", "helpers", "tests", "*.py"]
 exclude = ["docs/assets/nb_*.py"]
 
 [tool.check_doctests]

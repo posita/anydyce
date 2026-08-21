@@ -1,6 +1,6 @@
 all : \
     anydice-playground.svg \
-	notebooks/anydyce_intro.ipynb
+	notebooks/dyceum_intro.ipynb
 
 notebooks/%.ipynb : assets/nb_%.py
 	jupytext --to notebook --update $< --output $@

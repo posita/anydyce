@@ -124,11 +124,11 @@ def anyd(line: str, cell: str) -> None:
         # cell output
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         warnings.filterwarnings("ignore", category=ExperimentalWarning)
-        # Seed the display precision from the CLI flag; `set "anydyce: display
+        # Seed the display precision from the CLI flag; `set "dyceum: display
         # precision"` inside the cell can override (the run() call mutates
         # settings in place). format_results then reads the final value.
         settings = Settings()
-        settings.set("anydyce: display precision", args.precision)
+        settings.set("dyceum: display precision", args.precision)
         results = run(cell, settings=settings)
         if args.output_format in _PLOTTER_NAMES_BY_FORMAT:
             jupyter_visualize(
@@ -226,7 +226,7 @@ def load_ipython_extension(ipy: InteractiveShell) -> None:
     r"""
     IPython extension entry point. Registers Magics.
 
-    Invoked by `%load_ext anydyce.magic` from inside an IPython/Jupyter session.
+    Invoked by `%load_ext dyceum.magic` from inside an IPython/Jupyter session.
     """
     # The expected ipython.register_magic_function works at runtime (as verified by our
     # load-extension tests), but type checkers get confused if we use it that way.

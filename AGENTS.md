@@ -1,6 +1,6 @@
-# `anydyce` development guidance
+# `dyceum` development guidance
 
-`anydyce` contains higher-level visualization and application experiments around `dyce`.
+`dyceum` contains higher-level visualization and application experiments around `dyce`.
 It includes a cleanroom AnyDice-compatible interpreter, Jupyter integration, and a static Pyodide browser playground.
 It supports CPython 3.11–3.14 and PyPy 3.11.
 Versions come from Git tags through `setuptools-scm`; do not edit a version file.
@@ -20,11 +20,11 @@ When work depends on unreleased `dyce` changes, use the neighboring development 
 
 ## Layout
 
-- `anydyce/anydice/` is the AnyDice-compatible interpreter.
+- `dyceum/anydice/` is the AnyDice-compatible interpreter.
   Its parser, AST, interpreter, settings, built-ins, formatter, and unparser are separate components.
-- `anydyce/viz.py` provides the Matplotlib and ipywidgets visualization layer.
-  The package root imports it lazily so `import anydyce` remains light.
-- `anydyce/csv.py` provides result-export helpers.
+- `dyceum/viz.py` provides the Matplotlib and ipywidgets visualization layer.
+  The package root imports it lazily so `import dyceum` remains light.
+- `dyceum/csv.py` provides result-export helpers.
 - `playground/` is a static, zero-build application using JavaScript modules, Pyodide, CodeMirror, and Plotly.
 - `tests/` contains package and interpreter tests.
 - `docs/` contains MkDocs sources, notebooks, compatibility findings, and release notes.
@@ -35,11 +35,11 @@ Use the package tree, `README.md`, and `docs/` for current detail.
 
 ## AnyDice compatibility
 
-The existing interpreter aims to reproduce observed AnyDice behavior, including awkward behavior, unless a documented `anydyce:` extension says otherwise.
+The existing interpreter aims to reproduce observed AnyDice behavior, including awkward behavior, unless a documented `dyceum:` extension says otherwise.
 Do not “fix” a surprising semantic without checking the compatibility documentation, tests, probes, and corpus evidence.
 
 `docs/anydice.md` is the public behavior report.
-`docs/notes/anydice-semantics.md` and `docs/notes/anydyce-interpreter.md` hold deeper evidence and exploratory design notes.
+`docs/notes/anydice-semantics.md` and `docs/notes/dyceum-interpreter.md` hold deeper evidence and exploratory design notes.
 The large oracle corpus may exist in the sibling `anydice-data/` directory when working in the shared development workspace.
 
 Any stricter AnyDice-inspired language is a separate design and must not silently change the compatibility interpreter.

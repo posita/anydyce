@@ -12,7 +12,7 @@
   Thank you!
 -->
 
-# Contributing to `anydyce`
+# Contributing to `dyceum`
 
 There are many ways you can contribute.
 You have only but to try.
@@ -22,7 +22,7 @@ You have only but to try.
 You can [file new issues](https://github.com/posita/anydyce/issues) as you find them.
 Please try to avoid duplicating issues.
 
-For more free-flow discussions (beefs, rants, ideas, recipes, etc.), consider starting or joining a [discussion](https://github.com/beartype/anydyce/discussions).
+For more free-flow discussions (beefs, rants, ideas, recipes, etc.), consider starting or joining a [discussion](https://github.com/beartype/dyceum/discussions).
 
 <!--
 ## Posting on StackExchange
@@ -38,7 +38,7 @@ An easy way to bootstrap an isolated development environment is:
 ```sh
 % git clone --recurse-submodules https://github.com/posita/anydyce.git
 …
-% cd anydyce
+% cd dyceum
 % uv venv --clear --prompt "$( basename "${PWD}" )" --relocatable
 …
 % uv sync
@@ -53,7 +53,7 @@ Unit tests are run via [pytest](https://docs.pytest.org/) via [Tox](https://tox.
 Linting and type checking are run via [pre-commit](https://pre-commit.com/).
 
 ```sh
-% cd …/path/to/anydyce
+% cd …/path/to/dyceum
 % uv run pytest --cov  # or uv run tox [-e ...]
 …
 % uv run pre-commit run --all-files --hook-stage pre-push
@@ -65,14 +65,14 @@ Linting and type checking are run via [pre-commit](https://pre-commit.com/).
 
 If you are willing and able, consider [submitting a pull request](https://github.com/posita/anydyce/pulls) with a fix.
 See [the docs](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) if you’re not already familiar with pull requests.
-`anydyce` releases from [`master`](https://github.com/posita/dyce/tree/master) (although not always immediately), so [this workflow](https://githubflow.github.io/#how-we-do-it) might be helpful to understand.
+`dyceum` releases from [`master`](https://github.com/posita/dyce/tree/master) (although not always immediately), so [this workflow](https://githubflow.github.io/#how-we-do-it) might be helpful to understand.
 There are only a few additional guidelines:
 
 - If it is not already present, please add your name (and optionally your email, GitHub username, website address, or other contact information) to the [`LICENSE`](license.md) file.
 
 ```md
 ...
-- [Matt Bogosian](mailto:matt@bogosian.net?Subject=anydyce); GitHub – [**@posita**](https://github.com/posita)
+- [Matt Bogosian](mailto:matt@bogosian.net?Subject=dyceum); GitHub – [**@posita**](https://github.com/posita)
 ...
 ```
 
@@ -85,7 +85,7 @@ There are only a few additional guidelines:
 - Provide tests where feasible and appropriate.
   At the very least, existing tests should not fail.
   (There are exceptions, but if there is any doubt, they probably do not apply.)
-  Unit tests live in [`tests`](https://github.com/posita/dyce/tree/v{anydyce_git_ref}/tests).
+  Unit tests live in [`tests`](https://github.com/posita/dyce/tree/v{dyceum_git_ref}/tests).
 
 - If you want feedback on a work-in-progress, consider [“mentioning” me](https://github.blog/2011-03-23-mention-somebody-they-re-notified/) ([**@posita**](https://github.com/posita)), and describe specifically how I can help.
   Consider prefixing your pull request’s title with something like, “`NEED FEEDBACK – `”.

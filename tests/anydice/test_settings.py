@@ -15,18 +15,18 @@
 
 import pytest
 
-from anydyce.anydice.settings import Settings
+from dyceum.anydice.settings import Settings
 
 __all__ = ()
 
 
 class TestDefaults:
     def test_calc_bit_width_default(self) -> None:
-        # See anydyce.anydice.interpreter._DEFAULT_CALC_BIT_WIDTH
+        # See dyceum.anydice.interpreter._DEFAULT_CALC_BIT_WIDTH
         assert Settings().calc_bit_width == 256
 
     def test_display_precision_default(self) -> None:
-        # See anydyce.anydice.interpreter._DEFAULT_DISPLAY_PRECISION
+        # See dyceum.anydice.interpreter._DEFAULT_DISPLAY_PRECISION
         assert Settings().display_precision == 2
 
 
@@ -34,36 +34,36 @@ class TestIntValues:
     def test_calc_bit_width_set_to_int(self) -> None:
         s = Settings()
         assert s.calc_bit_width != 512
-        s.set("anydyce: calculation precision", 512)
+        s.set("dyceum: calculation precision", 512)
         assert s.calc_bit_width == 512
 
     def test_calc_bit_width_set_to_zero(self) -> None:
         s = Settings()
         assert s.calc_bit_width != 0
-        s.set("anydyce: calculation precision", 0)
+        s.set("dyceum: calculation precision", 0)
         assert s.calc_bit_width == 0
 
     def test_calc_bit_width_rejects_negative(self) -> None:
         s = Settings()
         with pytest.raises(ValueError, match="non-negative"):
-            s.set("anydyce: calculation precision", -1)
+            s.set("dyceum: calculation precision", -1)
 
     def test_display_precision_set_to_int(self) -> None:
         s = Settings()
         assert s.display_precision != 6
-        s.set("anydyce: display precision", 6)
+        s.set("dyceum: display precision", 6)
         assert s.display_precision == 6
 
     def test_display_precision_set_to_zero(self) -> None:
         s = Settings()
         assert s.display_precision != 0
-        s.set("anydyce: display precision", 0)
+        s.set("dyceum: display precision", 0)
         assert s.display_precision == 0
 
     def test_display_precision_rejects_negative(self) -> None:
         s = Settings()
         with pytest.raises(ValueError, match="non-negative"):
-            s.set("anydyce: display precision", -1)
+            s.set("dyceum: display precision", -1)
 
 
 class TestSymbolicValues:
@@ -79,7 +79,7 @@ class TestSymbolicValues:
     )
     def test_calc_bit_width_symbolic(self, symbol: str, expected: int) -> None:
         s = Settings()
-        s.set("anydyce: calculation precision", symbol)
+        s.set("dyceum: calculation precision", symbol)
         assert s.calc_bit_width == expected
 
     @pytest.mark.parametrize(
@@ -94,15 +94,15 @@ class TestSymbolicValues:
     )
     def test_display_precision_symbolic(self, symbol: str, expected: int) -> None:
         s = Settings()
-        s.set("anydyce: display precision", symbol)
+        s.set("dyceum: display precision", symbol)
         assert s.display_precision == expected
 
     def test_calc_bit_width_rejects_unknown_symbol(self) -> None:
         s = Settings()
         with pytest.raises(ValueError, match=r"(?i)\binvalid\b"):
-            s.set("anydyce: calculation precision", "nonsense")
+            s.set("dyceum: calculation precision", "nonsense")
 
     def test_display_precision_rejects_unknown_symbol(self) -> None:
         s = Settings()
         with pytest.raises(ValueError, match=r"(?i)\binvalid\b"):
-            s.set("anydyce: display precision", "nonsense")
+            s.set("dyceum: display precision", "nonsense")

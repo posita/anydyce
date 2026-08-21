@@ -13,9 +13,11 @@
   Thank you!
 -->
 
-# `anydyce` release notes
+# `dyceum` release notes
 
 ## [0.5.0](https://github.com/posita/anydyce/releases/tag/v0.5.0)
+
+- Renamed the project and Python package from `anydyce` to `dyceum`.
 
 !!! warning "Breaking changes"
 
@@ -26,17 +28,17 @@
   - See the [implementation notes](anydice.md) for details
 - Drops support for 3.9 and 3.10 and extends support to 3.14
 - Removes the following (analogies now live in [`dyce==0.7.0`](https://github.com/posita/dyce/releases/tag/v0.7.0).
-  - `anydyce.viz.alphasize`
-  - `anydyce.viz.cumulative_probability_formatter`
-  - `anydyce.viz.graph_colors`
-  - `anydyce.viz.outcome_name_formatter`
-  - `anydyce.viz.outcome_name_probability_formatter`
-  - `anydyce.viz.plot_bar`
-  - `anydyce.viz.plot_burst_subplot`
-  - `anydyce.viz.plot_burst`
-  - `anydyce.viz.plot_line`
-  - `anydyce.viz.plot_scatter`
-  - `anydyce.viz.probability_formatter`
+  - `dyceum.viz.alphasize`
+  - `dyceum.viz.cumulative_probability_formatter`
+  - `dyceum.viz.graph_colors`
+  - `dyceum.viz.outcome_name_formatter`
+  - `dyceum.viz.outcome_name_probability_formatter`
+  - `dyceum.viz.plot_bar`
+  - `dyceum.viz.plot_burst_subplot`
+  - `dyceum.viz.plot_burst`
+  - `dyceum.viz.plot_line`
+  - `dyceum.viz.plot_scatter`
+  - `dyceum.viz.probability_formatter`
 
 ## [0.4.6](https://github.com/posita/anydyce/releases/tag/v0.4.6)
 
@@ -52,18 +54,18 @@
 ## [0.4.4](https://github.com/posita/anydyce/releases/tag/v0.4.4)
 
 - Added `SettingsDict["burst_columns"]` and related widget.
-- Added `None` as an acceptable item value for `histogram_specs` parameter to [`HPlotterChooser` initializer][anydyce.viz.HPlotterChooser], [`HPlotterChooser.update_hs`][anydyce.viz.HPlotterChooser.update_hs], and [`jupyter_visualize`][anydyce.viz.jupyter_visualize].
+- Added `None` as an acceptable item value for `histogram_specs` parameter to [`HPlotterChooser` initializer][dyceum.viz.HPlotterChooser], [`HPlotterChooser.update_hs`][dyceum.viz.HPlotterChooser.update_hs], and [`jupyter_visualize`][dyceum.viz.jupyter_visualize].
 
 ## [0.4.3](https://github.com/posita/anydyce/releases/tag/v0.4.3)
 
-- Restored [rich display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display) hook methods accidentally removed from `anydyce.viz.Image` in [v0.4.2](#042).
+- Restored [rich display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display) hook methods accidentally removed from `dyceum.viz.Image` in [v0.4.2](#042).
 
 ## [0.4.2](https://github.com/posita/anydyce/releases/tag/v0.4.2)
 
 !!! bug
 
     ***Do not use!***
-    This release inadvertently removed [rich display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display) hook methods from `anydyce.viz.Image`.
+    This release inadvertently removed [rich display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display) hook methods from `dyceum.viz.Image`.
     That broke the ability to display interactive plots.
     (Fixed in [v0.4.3](#043).)
 
@@ -76,7 +78,7 @@
 
 ## [0.4.0](https://github.com/posita/anydyce/releases/tag/v0.4.0)
 
-- Adds [`HPlotterChooser`][anydyce.viz.HPlotterChooser] implementation and substantially refactors [`jupyter_visualize`][anydyce.viz.jupyter_visualize] in terms thereof.
+- Adds [`HPlotterChooser`][dyceum.viz.HPlotterChooser] implementation and substantially refactors [`jupyter_visualize`][dyceum.viz.jupyter_visualize] in terms thereof.
 
 ## [0.3.2](https://github.com/posita/anydyce/releases/tag/v0.3.2)
 
@@ -106,15 +108,15 @@
 ## [0.1.4](https://github.com/posita/anydyce/releases/tag/v0.1.4)
 
 - Prepares for breaking changes in future release of `dyce~=0.6`.
-- Adds experimental [`values_xy_for_graph_type`][anydyce.viz.values_xy_for_graph_type] function and exposes new “at least” and “at most” graph types via [`jupyter_visualize`][anydyce.viz.jupyter_visualize] interface.
+- Adds experimental [`values_xy_for_graph_type`][dyceum.viz.values_xy_for_graph_type] function and exposes new “at least” and “at most” graph types via [`jupyter_visualize`][dyceum.viz.jupyter_visualize] interface.
 
 ## [0.1.3](https://github.com/posita/anydyce/releases/tag/v0.1.3)
 
-- Turns data limiting off by default in [`jupyter_visualize`][anydyce.viz.jupyter_visualize].
+- Turns data limiting off by default in [`jupyter_visualize`][dyceum.viz.jupyter_visualize].
 
 ## [0.1.2](https://github.com/posita/anydyce/releases/tag/v0.1.2)
 
-- Adds [`limit_for_display`][anydyce.viz.limit_for_display] and updates [`jupyter_visualize`][anydyce.viz.jupyter_visualize].
+- Adds [`limit_for_display`][dyceum.viz.limit_for_display] and updates [`jupyter_visualize`][dyceum.viz.jupyter_visualize].
 
 ## [0.1.1](https://github.com/posita/anydyce/releases/tag/v0.1.1)
 

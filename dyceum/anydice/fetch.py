@@ -50,7 +50,7 @@ DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
 }
 
-_ANYDYCE_FETCH_URL_BASE = f"https://{ANYDICE_HOST}/program/"
+_DYCEUM_FETCH_URL_BASE = f"https://{ANYDICE_HOST}/program/"
 _GH_MIRROR_URL_BASE = (
     "https://raw.githubusercontent.com/posita/anydice-data/"
     "refs/heads/main/anydice.com/program/"
@@ -128,7 +128,7 @@ def check_http_response(resp: urllib.response.addinfourl, expected_host: str) ->
     r"""
     Verify *resp* is a 200 from *expected_host* after any redirects and returns the response URL.
 
-    Raises a [`NetworkError`][anydyce.anydice.fetch.NetworkError] on anything else.
+    Raises a [`NetworkError`][dyceum.anydice.fetch.NetworkError] on anything else.
     The status check guards against compromised hosts that return 4xx/5xx (caught by urlopen anyway) and against unexpected redirects to a different host (which urllib follows silently for GET).
     """
     status = getattr(resp, "status", None)
@@ -149,8 +149,8 @@ def extract_program_from_json(
     Extracts a JSON object from *json_str*, which should be a literal JSON string, including enclosing quotes.
 
     *program_id_hex* and *program_url* are used in error processing.
-    Raises an [`EmptyProgramError`][anydyce.anydice.fetch.EmptyProgramError] if the program is missing from the retrieved content or literally the empty string.
-    Raises a [`NoSuchProgramError`][anydyce.anydice.fetch.NoSuchProgramError] if a program was returned, but matches the missing placeholder used if *program_id_hex* does not reference a saved program.
+    Raises an [`EmptyProgramError`][dyceum.anydice.fetch.EmptyProgramError] if the program is missing from the retrieved content or literally the empty string.
+    Raises a [`NoSuchProgramError`][dyceum.anydice.fetch.NoSuchProgramError] if a program was returned, but matches the missing placeholder used if *program_id_hex* does not reference a saved program.
     Can also raise a `json.JSONDecodeError` (or possibly other errors) if *json_str* isn't valid JSON.
     """
     # When json.loads is passed a literal JSON string, it will decode a subset of
@@ -181,7 +181,7 @@ def extract_program_from_json(
 def extract_program_id_hex_and_url(program_loc_or_id: str | int) -> tuple[str, str]:
     r"""
     Returns `(program_id_hex, program_url)`, if discoverable from *program_loc_or_id*.
-    Raises a [`BadOrMissingProgramIdError`][anydyce.anydice.fetch.BadOrMissingProgramIdError] otherwise.
+    Raises a [`BadOrMissingProgramIdError`][dyceum.anydice.fetch.BadOrMissingProgramIdError] otherwise.
     """
     if isinstance(program_loc_or_id, int):
         program_id_hex = program_id_as_hex(program_loc_or_id)
@@ -216,10 +216,10 @@ def fetch_anydice_program(program_loc_or_id: str | int) -> tuple[str, str, str, 
     If fetching was successful, subsequent calls on the same *program_loc_or_id* should avoid additional network round trips so long as they remain in-cache.
     Programs from retrieved from local filesystems are not cached.
 
-    Raises a [`BadOrMissingProgramIdError`][anydyce.anydice.fetch.BadOrMissingProgramIdError] if the program ID cannot be determined from *program_loc_or_id*.
-    Raises an [`EmptyProgramError`][anydyce.anydice.fetch.EmptyProgramError] if the program is missing from the retrieved content or literally the empty string.
-    Raises a [`NetworkError`][anydyce.anydice.fetch.NetworkError] if there was a problem retrieving the content.
-    Raises a [`NoSuchProgramError`][anydyce.anydice.fetch.NoSuchProgramError] if a program was returned, but matches the missing placeholder used if *program_id_hex* does not reference a saved program.
+    Raises a [`BadOrMissingProgramIdError`][dyceum.anydice.fetch.BadOrMissingProgramIdError] if the program ID cannot be determined from *program_loc_or_id*.
+    Raises an [`EmptyProgramError`][dyceum.anydice.fetch.EmptyProgramError] if the program is missing from the retrieved content or literally the empty string.
+    Raises a [`NetworkError`][dyceum.anydice.fetch.NetworkError] if there was a problem retrieving the content.
+    Raises a [`NoSuchProgramError`][dyceum.anydice.fetch.NoSuchProgramError] if a program was returned, but matches the missing placeholder used if *program_id_hex* does not reference a saved program.
     """
     program_id_hex, initial_url = extract_program_id_hex_and_url(program_loc_or_id)
     try:
@@ -267,7 +267,7 @@ def gh_mirror_url_for_program_id_hex(program_id_hex: str) -> str:
     This is pure formatting.
     It does not guarantee that anything exists at the URL.
 
-        >>> from anydyce.anydice.fetch import gh_mirror_url_for_program_id_hex
+        >>> from dyceum.anydice.fetch import gh_mirror_url_for_program_id_hex
         >>> gh_mirror_url_for_program_id_hex("123")
         'https://raw.githubusercontent.com/posita/anydice-data/refs/heads/main/anydice.com/program/01/23/123.txt'
         >>> gh_mirror_url_for_program_id_hex("fedcba98")
@@ -285,7 +285,7 @@ def program_id_as_hex(program_id: str | int) -> str:
     r"""
     Returns *program_id* in hexadecimal string form.
 
-        >>> from anydyce.anydice.fetch import program_id_as_hex
+        >>> from dyceum.anydice.fetch import program_id_as_hex
         >>> program_id_as_hex(22)
         '16'
         >>> program_id_as_hex(-255)
@@ -313,7 +313,7 @@ def program_id_as_int(program_id: str | int) -> int:
     r"""
     Returns *program_id* in integer form.
 
-        >>> from anydyce.anydice.fetch import program_id_as_int
+        >>> from dyceum.anydice.fetch import program_id_as_int
         >>> program_id_as_int(22)
         22
         >>> program_id_as_int(-255)
@@ -337,7 +337,7 @@ def sharded_subpath_from_program_id(program_id: str | int) -> Path:
     r"""
     Returns the canonical sharded subpath of the program file associated with *program_id*.
 
-        >>> from anydyce.anydice.fetch import sharded_subpath_from_program_id
+        >>> from dyceum.anydice.fetch import sharded_subpath_from_program_id
         >>> sharded_subpath_from_program_id("f").as_posix()
         '00/0f/f.txt'
         >>> sharded_subpath_from_program_id("1a2b3c").as_posix()
@@ -358,18 +358,18 @@ def sharded_subpath_from_program_id(program_id: str | int) -> Path:
 
 
 def _anydice_url_for_program_id_hex(program_id_hex: str) -> str:
-    return urljoin(_ANYDYCE_FETCH_URL_BASE, program_id_hex)
+    return urljoin(_DYCEUM_FETCH_URL_BASE, program_id_hex)
 
 
 def _extract_program_from_var_loaded_program(
     html: str, *, program_id_hex: str, program_url: str | None = None
 ) -> str:
     r"""
-    Attempts to find the AnyDice program in *html* and calls [`extract_program_from_json`][anydyce.anydice.fetch.extract_program_from_json] it, if found.
+    Attempts to find the AnyDice program in *html* and calls [`extract_program_from_json`][dyceum.anydice.fetch.extract_program_from_json] it, if found.
 
     *program_id_hex* and *program_url* are used in error processing.
-    Raises an [`EmptyProgramError`][anydyce.anydice.fetch.EmptyProgramError] if the program is missing from *html* or literally the empty string.
-    Raises a [`NoSuchProgramError`][anydyce.anydice.fetch.NoSuchProgramError] if a program was returned, but matches the missing placeholder used if *program_id_hex* does not reference a saved program.
+    Raises an [`EmptyProgramError`][dyceum.anydice.fetch.EmptyProgramError] if the program is missing from *html* or literally the empty string.
+    Raises a [`NoSuchProgramError`][dyceum.anydice.fetch.NoSuchProgramError] if a program was returned, but matches the missing placeholder used if *program_id_hex* does not reference a saved program.
     """
     m = _VAR_LOADED_PROGRAM_SRC_RE.search(html)
     if m is None:
