@@ -38,7 +38,7 @@ jobs:
   verify-testpypi:
     # Deliberately uses setup-python + pip (not setup-uv + uv pip) so
     # the verification path mirrors what downstream users actually run
-    # when they `pip install anydyce`. uv pip install is highly
+    # when they `pip install dyceum`. uv pip install is highly
     # compatible but not identical. Resolver behavior, pre-release
     # semantics, and sdist build paths can diverge. This is the one
     # place where matching the canonical end-user install path matters
@@ -59,14 +59,14 @@ jobs:
             if pip install \
                 --index-url 'https://test.pypi.org/simple/' \
                 --extra-index-url 'https://pypi.org/simple/' \
-                "anydyce==${VERSION}" ; then
+                "dyceum==${VERSION}" ; then
               break
             fi
             sleep 2
           done
       - name: verify installed version matches tag
         run: |
-          INSTALLED=$(python -c "import importlib.metadata; print(importlib.metadata.version('anydyce'))")
+          INSTALLED=$(python -c "import importlib.metadata; print(importlib.metadata.version('dyceum'))")
           EXPECTED="${GITHUB_REF_NAME#v}"
           test "$INSTALLED" = "$EXPECTED" || {
             echo "installed=$INSTALLED expected=$EXPECTED"

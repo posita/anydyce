@@ -29,7 +29,7 @@ except ImportError:
         allow_module_level=True,
     )
 
-from anydyce.viz import (
+from dyceum.viz import (
     BurstHPlotter,
     HorizontalBarHPlotter,
     HPlotterChooser,

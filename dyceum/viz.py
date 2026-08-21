@@ -178,7 +178,7 @@ class _SvgImg:
     r"""
     Abstraction to support downloading the SVG plot image.
 
-    The [initializer][anydyce.viz.Image.__init__] requires several parameters.
+    The [initializer][dyceum.viz.Image.__init__] requires several parameters.
     *file_name* is the name of the file to be downloaded.
     *data* is the raw SVG data.
 
@@ -428,7 +428,7 @@ class PlotWidgets(_PlotWidgetsDataclass):
         future versions.
 
     Class to encapsulate interactive plot control widgets. All parameters for the
-    [initializer][anydyce.viz.PlotWidgets.__init__] are optional.
+    [initializer][dyceum.viz.PlotWidgets.__init__] are optional.
 
     - *initial_alpha* is the starting alpha value for graphs (defaults to `#!python
        0.75`).
@@ -590,7 +590,7 @@ class PlotWidgets(_PlotWidgetsDataclass):
     def plot_updates_suspended(self) -> bool:
         r"""
         Whether plot redraws are currently being suppressed by an active
-        [`suspend_plot_updates`][anydyce.viz.PlotWidgets.suspend_plot_updates] block.
+        [`suspend_plot_updates`][dyceum.viz.PlotWidgets.suspend_plot_updates] block.
         """
         return self._suspend_plot_updates_depth > 0
 
@@ -601,7 +601,7 @@ class PlotWidgets(_PlotWidgetsDataclass):
         duration of the block.
 
         This ***only*** manages a flag readable via
-        [`plot_updates_suspended`][anydyce.viz.PlotWidgets.plot_updates_suspended]. No
+        [`plot_updates_suspended`][dyceum.viz.PlotWidgets.plot_updates_suspended]. No
         suppression or redraw logic is contained here.
         """
         self._suspend_plot_updates_depth += 1
@@ -620,7 +620,7 @@ class HPlotter:
 
     A plotter responsible for laying out control widgets and visualizing data provided
     by primary and optional secondary histograms. (See the
-    [*plot* method][anydyce.viz.HPlotter.plot].)
+    [*plot* method][dyceum.viz.HPlotter.plot].)
     """
 
     @property
@@ -967,7 +967,7 @@ class HPlotterChooser:
 
     A controller for coordinating the display of a histogram data set and selection of
     one or more plotters as well as triggering updates in response to either control or
-    data changes. All parameters for the [initializer][anydyce.HPlotterChooser.__init__]
+    data changes. All parameters for the [initializer][dyceum.HPlotterChooser.__init__]
     are optional.
 
     *histogram_specs* is the histogram data set which defaults to an empty tuple. If
@@ -983,7 +983,7 @@ class HPlotterChooser:
     graphs that don't neatly fit into a particular row size).
 
     The histogram data set can also be replaced via
-    [`update_hs`][anydyce.viz.HPlotterChooser.update_hs].
+    [`update_hs`][dyceum.viz.HPlotterChooser.update_hs].
 
     Plotter controls (including the selection tabs) are contained within an accordion
     interface. If *controls_expanded* is `True`, the accordion is initially
@@ -991,11 +991,11 @@ class HPlotterChooser:
 
     *plot_widgets* allows object creators to customize the available control widgets,
     including their initial values. It defaults to `None` which results in a
-    fresh [`PlotWidgets`][anydyce.viz.PlotWidgets] object being created during
+    fresh [`PlotWidgets`][dyceum.viz.PlotWidgets] object being created during
     construction.
 
     *plotters_or_factories* allows overriding which plotters are available. The default
-    is to provide factories for all plotters currently available in `anydyce`.
+    is to provide factories for all plotters currently available in `dyceum`.
 
     *selected_name* is the name of the plotter to be displayed initially. It must match
     the `NAME` property of an available plotter provided by the
@@ -1123,7 +1123,7 @@ class HPlotterChooser:
         r"""
         Callback for updating the visualization in response to configuration or data
         changes. *settings* are the current values from all control widgets. (See
-        [`PlotWidgets`][anydyce.viz.PlotWidgets].)
+        [`PlotWidgets`][dyceum.viz.PlotWidgets].)
         """
         if self._plot_widgets.plot_updates_suspended:
             return
@@ -1185,7 +1185,7 @@ class HPlotterChooser:
     ) -> None:
         r"""
         Triggers an update to the histogram data. See
-        [`HPlotterChooser`][anydyce.viz.HPlotterChooser] for a more detailed
+        [`HPlotterChooser`][dyceum.viz.HPlotterChooser] for a more detailed
         explanation of *histogram_specs*.
         """
         self.hs = _histogram_specs_to_h_tuples(histogram_specs, cutoff=None)
@@ -1221,7 +1221,7 @@ def limit_for_display(h: H[_T], cutoff: Fraction) -> H:
     be useful in speeding up plots where there are large number of negligible
     probabilities.
 
-        >>> from anydyce.viz import limit_for_display
+        >>> from dyceum.viz import limit_for_display
         >>> from dyce import H
         >>> from fractions import Fraction
         >>> h = H({1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6})
@@ -1325,8 +1325,8 @@ def jupyter_visualize(
     start](index.md#interactive-quick-start).)
 
     Parameters have the same meanings as with
-    [`HPlotterChooser`][anydyce.viz.HPlotterChooser] and
-    [`PlotWidgets`][anydyce.viz.PlotWidgets].
+    [`HPlotterChooser`][dyceum.viz.HPlotterChooser] and
+    [`PlotWidgets`][dyceum.viz.PlotWidgets].
     """
     plotter_chooser = HPlotterChooser(
         histogram_specs,

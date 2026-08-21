@@ -93,7 +93,7 @@ _BINOP_PREC: dict[str, int] = {
 
 def unparse(program: Program) -> str:
     r"""
-    Convert a parsed [`Program`][anydyce.anydice.ast_.Program] to canonical source text.
+    Convert a parsed [`Program`][dyceum.anydice.ast_.Program] to canonical source text.
     """
     return "\n".join(_stmt(s, 0) for s in program.stmts)
 

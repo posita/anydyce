@@ -29,10 +29,10 @@ except ImportError:
     pytest.skip("matplotlib not available", allow_module_level=True)
 
 
-from anydyce import magic as anydyce_magic
-from anydyce.anydice import AnyDiceResultsT, Settings
-from anydyce.anydice.fetch import NetworkError, NoSuchProgramError
-from anydyce.magic import anyd, anyd_load, load_ipython_extension
+from dyceum import magic as dyceum_magic
+from dyceum.anydice import AnyDiceResultsT, Settings
+from dyceum.anydice.fetch import NetworkError, NoSuchProgramError
+from dyceum.magic import anyd, anyd_load, load_ipython_extension
 
 __all__ = ()
 
@@ -62,7 +62,7 @@ def no_real_fetch(monkeypatch: pytest.MonkeyPatch) -> None:
             "fetch_anydice_program called in test without configuring fake_fetch"
         )
 
-    monkeypatch.setattr(anydyce_magic, "fetch_anydice_program", _blocked)
+    monkeypatch.setattr(dyceum_magic, "fetch_anydice_program", _blocked)
 
 
 @pytest.fixture
@@ -74,7 +74,7 @@ def fake_fetch(
     """
 
     def install(impl: _FetchImpl) -> None:
-        monkeypatch.setattr(anydyce_magic, "fetch_anydice_program", impl)
+        monkeypatch.setattr(dyceum_magic, "fetch_anydice_program", impl)
 
     return install
 
@@ -91,7 +91,7 @@ def ipython_shell() -> InteractiveShell:
 def recording_shell(monkeypatch: pytest.MonkeyPatch) -> _RecordingShell:
     r"""Replace the active IPython shell with a `RecordingShell` stub for this test."""
     shell = _RecordingShell()
-    monkeypatch.setattr(anydyce_magic, "get_ipython", lambda: shell)
+    monkeypatch.setattr(dyceum_magic, "get_ipython", lambda: shell)
     return shell
 
 
@@ -190,7 +190,7 @@ class TestAnydMagicWarnings:
         recwarn: pytest.WarningsRecorder,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        original_run = anydyce_magic.run
+        original_run = dyceum_magic.run
 
         def _emit_deprecation(
             source: str, *, settings: Settings | None = None
@@ -204,10 +204,10 @@ class TestAnydMagicWarnings:
             warnings.warn("test experimental", ExperimentalWarning, stacklevel=2)
             return original_run(source, settings=settings)
 
-        monkeypatch.setattr(anydyce_magic, "run", _emit_deprecation)
+        monkeypatch.setattr(dyceum_magic, "run", _emit_deprecation)
         anyd("--text", "output 1d6")
 
-        monkeypatch.setattr(anydyce_magic, "run", _emit_experimental)
+        monkeypatch.setattr(dyceum_magic, "run", _emit_experimental)
         anyd("--text", "output 1d6")
 
         # DeprecationWarnings and ExperimentalWarnings *are* suppressed
@@ -221,7 +221,7 @@ class TestAnydMagicWarnings:
         recwarn: pytest.WarningsRecorder,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        original_run = anydyce_magic.run
+        original_run = dyceum_magic.run
 
         def _emit_truncation(
             source: str, *, settings: Settings | None = None
@@ -229,7 +229,7 @@ class TestAnydMagicWarnings:
             warnings.warn("test truncation", TruncationWarning, stacklevel=2)
             return original_run(source, settings=settings)
 
-        monkeypatch.setattr(anydyce_magic, "run", _emit_truncation)
+        monkeypatch.setattr(dyceum_magic, "run", _emit_truncation)
         anyd("--text", "output 1d6")
 
         # TruncationWarnings are *not* suppressed
@@ -313,7 +313,7 @@ class TestAnydLoadMagicBasic:
     def test_program_id_passed_to_fetch(
         self,
         fake_fetch: Callable[[_FetchImpl], None],
-        # Present for the side-effect of patching anydyce.magic.get_python
+        # Present for the side-effect of patching dyceum.magic.get_python
         recording_shell: _RecordingShell,  # ruff: ignore[unused-method-argument]
     ) -> None:
         captured: list[str] = []

@@ -14,12 +14,12 @@
 
 <!-- TODO(posita): This doesn't format well. Each package should have
 its own doc once things settle down. -->
-# `anydyce` package reference
+# `dyceum` package reference
 
-## `anydyce.magic`
+## `dyceum.magic`
 
-::: anydyce.magic
+::: dyceum.magic
 
-## `anydyce.viz`
+## `dyceum.viz`
 
-::: anydyce.viz
+::: dyceum.viz

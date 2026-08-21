@@ -242,7 +242,7 @@ async function fetchProgramFromUrl() {
     const text = await resp.text();
     setStatus(`Loaded program 0x${hexId}.`);
     // Prepend a provenance comment header (same format as %anyd_load in
-    // anydyce/magic.py). It lands in the editor, so the debounced save
+    // dyceum/magic.py). It lands in the editor, so the debounced save
     // persists it with the program -- provenance survives reloads.
     const fetchedAt = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
     // Reconstruct the full URL with the NORMALIZED id (rather than echoing
@@ -295,7 +295,7 @@ function setStatus(msg) {
   if (statusEl) statusEl.textContent = msg;
 }
 
-// text is anydyce.format_results' multi-block string, built in the worker. The
+// text is dyceum.format_results' multi-block string, built in the worker. The
 // caller follows with renderOutputCharts, which reveals the views.
 function renderResults(text) {
   outputText.textContent = text;
@@ -311,7 +311,7 @@ let lastBarSpecs = [];
 let lastLineSpec = null;
 let lastRidgeSpec = null;
 // Base64 CSV + download filename of the last successful run, both computed
-// in the worker via anydyce.csv (csv_base64 / csv_filename) so the
+// in the worker via dyceum.csv (csv_base64 / csv_filename) so the
 // playground and the Jupyter widget produce byte-identical files with
 // identical names. Held JS-side so the download keeps working even after a
 // Cancel terminates the worker.

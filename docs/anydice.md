@@ -12,19 +12,19 @@
   Thank you!
 -->
 
-# `anydyce`’s *Mostly*-Compatible AnyDice Interpreter
+# `dyceum`’s *Mostly*-Compatible AnyDice Interpreter
 
-`anydyce` now includes an Open Source, pure-Python, cleanroom implementation of Jasper Flick’s [AnyDice Dice Probability Calculator](https://anydice.com/).
+`dyceum` now includes an Open Source, pure-Python, cleanroom implementation of [Jasper Flick](https://catlikecoding.com/jasper-flick/)’s [AnyDice Dice Probability Calculator](https://anydice.com/).
 
 An interactive version can be found here: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/)
 
 You can also [host your own or run it locally](index.md#running-locally).
 
-The `anydyce` interpreter strives to be a working replacement in all meaningful aspects, but it is ***not*** 100% compatible, favoring fundamental correctness over producing identical results.
+The `dyceum` interpreter strives to be a working replacement in all meaningful aspects, but it is ***not*** 100% compatible, favoring fundamental correctness over producing identical results.
 Besides [detailing features](#features) and [enumerating goals](#conclusion), this document primarily focuses on two categories of behaviors:
 
-1. **AnyDice idiosyncrasies**, meaning surprising or inconsistent behaviors that appear intended that the `anydyce` interpreter faithfully replicates; and
-2. **Excluded AnyDice bugs**, meaning behaviors that are likely unintended defects, that the `anydyce` interpreter deliberately avoids.
+1. **AnyDice idiosyncrasies**, meaning surprising or inconsistent behaviors that appear intended that the `dyceum` interpreter faithfully replicates; and
+2. **Excluded AnyDice bugs**, meaning behaviors that are likely unintended defects, that the `dyceum` interpreter deliberately avoids.
 
 It should be noted that until now, many of these behaviors weren’t well documented or widely understood, but were implicated in many of the real world programs examined during this effort.
 Inconsistencies, both individually and collectively were unintuitive and difficult to remember, making non-trivial programs hard to author, reason about, and debug.
@@ -35,7 +35,7 @@ Some foundation necessary to an analysis of AnyDice behaviors is present below, 
 
 ## Features
 
-The `anydyce` interpreter is primarily broken up into two major components:
+The `dyceum` interpreter is primarily broken up into two major components:
 
 1. A portable, pure-Python back end that relies on [`dyce`](https://github.com/posita/dyce/) for computation; and
 2. A user interface implemented in HTML, CSS, and plain JavaScript that uses [Plotly](https://plotly.com/) for visualizations and [Pyodide](https://pyodide.org/en/stable/) to run everything (including the Python interpreter) directly in-browser.
@@ -54,9 +54,9 @@ No reliance on a closed, proprietary data store is needed.
 ### Loading programs saved to anydice.com by program IDs
 
 The web interface allows loading of programs previously saved to AnyDice by way of a [publicly available program cache](https://github.com/posita/anydice-data).
-For any AnyDice URL containing a program ID, you can create an alternate URL using that same ID to load that program and run it with the `anydyce` interpreter.
+For any AnyDice URL containing a program ID, you can create an alternate URL using that same ID to load that program and run it with the `dyceum` interpreter.
 For example, consider the URL [`https://anydice.com/program/18106`](https://anydice.com/program/18106).
-You can run the same program by visiting [`https://posita.github.io/anydyce/latest/playground/#id=18106`](https://posita.github.io/anydyce/latest/playground/#id=18106).
+You can run the same program by visiting [`https://dyceum.org/latest/playground/#id=18106`](https://dyceum.org/latest/playground/#id=18106).
 Alternatively, you can [run your own copy locally](index.md#running-locally) and adapt the same pattern to the URL of your local web server (e.g.,`https://127.0.0.1:8000/playground/#id=18106`).
 
 ### No `float`s
@@ -75,14 +75,14 @@ This does not eliminate errors, but it does allow authors to arbitrarily tune pr
 
 ### Proprietary extensions
 
-In addition to supporting (almost[^2]) all AnyDice features, settings, library functions, etc., the `anydyce` interpreter provides two additional settings configurable via the `set ... to ...` syntax:
+In addition to supporting (almost[^2]) all AnyDice features, settings, library functions, etc., the `dyceum` interpreter provides two additional settings configurable via the `set ... to ...` syntax:
 
-1. `"anydyce: calculation precision"` -
+1. `"dyceum: calculation precision"` -
    This is either a non-negative integer indicating the maximum number of bits to allow for outcome counts within a die before quantization occurs, or one of: `"default"` (equivalent to `256`), `"low"` (`64`), `"medium"` (`256`), `"high"` (`1024`), and `"exact"` (`0`, meaning do not quantize).
    This setting affects computations that follow it and can be changed multiple times.
    Note that `"exact"` or `0` ***never*** quantizes, ***even where numbers and computations would exhaust all available resources***, so use those values with caution.
    (See [the note on performance below](#note-on-performance).)
-2. `"anydyce: display precision"` -
+2. `"dyceum: display precision"` -
    This is either a non-negative integer indicating how many decimal places to show when displaying results, or one of: `"default"` (equivalent to `2`), `"low"` (`0`), `"medium"` (`2`), `"high"` (`6`), and `"exact"` (`13`, which isn’t ***really*** exact, but it’s probably far more detailed than you’ll ever need).
    Only the most recent value is applied to all display outputs once a program completes.
 
@@ -90,23 +90,23 @@ In addition to supporting (almost[^2]) all AnyDice features, settings, library f
 \ This illustrates quantization in action. Note especially the tails
   of the distribution. More detail can be seen in the text output. \
 loop P over {4, 8} {
-  set "anydyce: calculation precision" to P
+  set "dyceum: calculation precision" to P
   output 20d6 named "20d6 with computations quantized at [P] bits"
 }
-set "anydyce: calculation precision" to "exact"
+set "dyceum: calculation precision" to "exact"
 output 20d6 named "20d6 without any quantization"
-set "anydyce: display precision" to "exact"
+set "dyceum: display precision" to "exact"
 ```
 
-Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=XCBUaGlzIGlsbHVzdHJhdGVzIHF1YW5pdHphdGlvbiBpbiBhY3Rpb24uIE5vdGUgZXNwZWNpYWxseSB0aGUgdGFpbHMKICBvZiB0aGUgZGlzdHJpYnV0aW9uLiBNb3JlIGRldGFpbCBjYW4gYmUgc2VlIGluIHRoZSB0ZXh0IG91dHB1dC4gXApsb29wIFAgb3ZlciB7NCwgOH0gewogIHNldCAiYW55ZHljZTogY2FsY3VsYXRpb24gcHJlY2lzaW9uIiB0byBQCiAgb3V0cHV0IDIwZDYgbmFtZWQgIjIwZDYgd2l0aCBjb21wdXRhdGlvbnMgcXVhbnRpemVkIGF0IFtQXSBiaXRzIgp9CnNldCAiYW55ZHljZTogY2FsY3VsYXRpb24gcHJlY2lzaW9uIiB0byAiZXhhY3QiCm91dHB1dCAyMGQ2IG5hbWVkICIyMGQ2IHdpdGhvdXQgYW55IHF1YW50aXphdGlvbiIKc2V0ICJhbnlkeWNlOiBkaXNwbGF5IHByZWNpc2lvbiIgdG8gImV4YWN0Igo)
+Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=XCBUaGlzIGlsbHVzdHJhdGVzIHF1YW5pdHphdGlvbiBpbiBhY3Rpb24uIE5vdGUgZXNwZWNpYWxseSB0aGUgdGFpbHMKICBvZiB0aGUgZGlzdHJpYnV0aW9uLiBNb3JlIGRldGFpbCBjYW4gYmUgc2VlIGluIHRoZSB0ZXh0IG91dHB1dC4gXApsb29wIFAgb3ZlciB7NCwgOH0gewogIHNldCAiZHljZXVtOiBjYWxjdWxhdGlvbiBwcmVjaXNpb24iIHRvIFAKICBvdXRwdXQgMjBkNiBuYW1lZCAiMjBkNiB3aXRoIGNvbXB1dGF0aW9ucyBxdWFudGl6ZWQgYXQgW1BdIGJpdHMiCn0Kc2V0ICJkeWNldW06IGNhbGN1bGF0aW9uIHByZWNpc2lvbiIgdG8gImV4YWN0IgpvdXRwdXQgMjBkNiBuYW1lZCAiMjBkNiB3aXRob3V0IGFueSBxdWFudGl6YXRpb24iCnNldCAiZHljZXVtOiBkaXNwbGF5IHByZWNpc2lvbiIgdG8gImV4YWN0Igo)
 
 [^2]: Deliberately omitted is AnyDice’s [“legacy” syntax](#legacy-programs).
 
 ### Portable Python implementation
 
-The back-end can be incorporated into other projects via the [`anydyce.anydice`][anydyce.anydice] subpackage.
+The back-end can be incorporated into other projects via the [`dyceum.anydice`][dyceum.anydice] subpackage.
 
-    >>> from anydyce.anydice import format_results, run
+    >>> from dyceum.anydice import format_results, run
     >>> program = r"""
     ...     output 3d6
     ... """
@@ -134,9 +134,9 @@ The back-end can be incorporated into other projects via the [`anydyce.anydice`]
 
 ### A note on performance
 
-In some cases, the `anydyce` interpreter outperforms anydice.com.
-This can be hard to gauge, since the `anydyce` interpreter runs in the user’s browser, and is subject to the limitations of that execution environment.
-For example, on modest hardware, the following program completes in under 2s in the `anydyce` interpreter, but times out before producing results on anydice.com.
+In some cases, the `dyceum` interpreter outperforms anydice.com.
+This can be hard to gauge, since the `dyceum` interpreter runs in the user’s browser, and is subject to the limitations of that execution environment.
+For example, on modest hardware, the following program completes in under 2s in the `dyceum` interpreter, but times out before producing results on anydice.com.
 
 ```c
 output 300@(1000d100)
@@ -144,12 +144,12 @@ output 300@(1000d100)
 
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=b3V0cHV0IDMwMEAoMTAwMGQxMDApCg)
 
-In other cases, the `anydyce` interpreter under-performs anydice.com, sometimes by an order of magnitude or more (e.g., programs [`26da9`](../playground/#id=26da9) and [`286e0`](../playground/#id=286e0)).
-This is usually because the `anydyce` interpreter attempts to be unhelpfully precise with math, which becomes ***very*** laborious as integers become huge.
+In other cases, the `dyceum` interpreter under-performs anydice.com, sometimes by an order of magnitude or more (e.g., programs [`26da9`](../playground/#id=26da9) and [`286e0`](../playground/#id=286e0)).
+This is usually because the `dyceum` interpreter attempts to be unhelpfully precise with math, which becomes ***very*** laborious as integers become huge.
 That can often be mitigated by selecting a [lower quantization threshold](#proprietary-extensions).
-By way of illustration, trying to run programs [`183b0`](../playground/#id=183b0) or [`282d6`](../playground/#id=282d6) with [`"anydyce: calculation precision"` set to `"exact"`](#proprietary-extensions) will likely fail to complete within several minutes (if ever).
+By way of illustration, trying to run programs [`183b0`](../playground/#id=183b0) or [`282d6`](../playground/#id=282d6) with [`"dyceum: calculation precision"` set to `"exact"`](#proprietary-extensions) will likely fail to complete within several minutes (if ever).
 
-The `anydyce` interpreter and the underlying [`dyce` library](https://github.com/posita/dyce/) on which it is built are very much works in progress, and performance improvements are a high priority item on their road maps, so this is likely to improve as time goes on.
+The `dyceum` interpreter and the underlying [`dyce` library](https://github.com/posita/dyce/) on which it is built are very much works in progress, and performance improvements are a high priority item on their road maps, so this is likely to improve as time goes on.
 
 ## Background &amp; purpose
 
@@ -174,7 +174,7 @@ Between May and late July/early August of 2026, AnyDice’s ability to save new 
 The cause for this partial outage is unknown.
 
 The purpose of this effort is to provide a publicly-accessible reference implementation to avoid future loss of user investment.
-For convenience, a usable instance resides at [`https://posita.github.io/anydyce/latest/playground/`](https://posita.github.io/anydyce/latest/playground/).
+For convenience, a usable instance resides at [`https://dyceum.org/latest/playground/`](https://dyceum.org/latest/playground/).
 However, merely relying on a single alternate site is insufficient, as no site guarantees access in perpetuity.
 Therefore, users are encouraged to clone [this implementation’s source code](https://github.com/posita/anydyce) and run or host instances of their own.
 
@@ -201,10 +201,10 @@ The general workflow to iterate toward a working implementation was as follows:
 4. Validate the reverse-engineered implementation produces similar results of the most recent probe as well as all prior probes.[^4]
 
 Additionally, periodic comparison of this implementation’s results with AnyDice’s across a large corpus of unique[^5] saved programs surfaced additional nuances not identified by the above loop.
-While 100% completeness is not guaranteed, extensive experimentation and validation suggest the `anydyce` interpreter should be appropriate for most uses.
-Where AnyDice’s behavioral inconsistencies or bugs produce incorrect results, the `anydyce` interpreter can be a superior alternative.
+While 100% completeness is not guaranteed, extensive experimentation and validation suggest the `dyceum` interpreter should be appropriate for most uses.
+Where AnyDice’s behavioral inconsistencies or bugs produce incorrect results, the `dyceum` interpreter can be a superior alternative.
 
-[^4]: Validation probes were captured as unit tests, important for avoiding regressions as the `anydyce` interpreter evolved.
+[^4]: Validation probes were captured as unit tests, important for avoiding regressions as the `dyceum` interpreter evolved.
 
 [^5]: AnyDice’s save functionality implements a rudimentary de-duplication filter.
       Where a user requests a program be saved that is byte-for-byte identical to a prior saved program, AnyDice often provides a link with the ID of the previously saved program.
@@ -221,9 +221,10 @@ Where AnyDice’s behavioral inconsistencies or bugs produce incorrect results, 
 - [Dicey](https://dicey.js.org/) is an AnyDice-inspired, browser-based JavaScript application
 - [Icecup](https://highdiceroller.github.io/icepool/apps/icecup.html) is a Python based interface to [Icepool](https://github.com/HighDiceRoller/icepool)
 - [SnakeEyes](https://snake-eyes.io/) is a dice explorer written in Lua
+- [anydice](https://git.paco.to/nick/anydice) claims to provide an AnyDice interpreter implemented in C and Rust (untested)
+- [ManyDice](https://github.com/Zemyla/ManyDice) claims to be an AnyDice grammar parser written in Haskell (untested)
 - [anydice.js](https://github.com/dlom/anydice) claims to provide a low level interface for retrieving results from AnyDice’s interpreter for use in JavaScript programs (untested)
 - [anydieparser](https://www.npmjs.com/package/anydieparser) claims to provide an AnyDice interpreter in JavaScript (untested)
-- [anydice](https://git.paco.to/nick/anydice) claims to provide an AnyDice interpreter implemented in C and Rust (untested)
 
 ## Notes on the anydice.com implementation
 
@@ -303,7 +304,7 @@ output [2d3 2d3]
 
 Open in playground (best viewed in “Text” mode): [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=c2V0ICJwb3NpdGlvbiBvcmRlciIgdG8gImhpZ2hlc3QgZmlyc3QiCk46IDAKZnVuY3Rpb246IE5fRlJPTV9EOm4gU19GUk9NX1A6cyB7CiAgTjogTiArIDEKICByZXN1bHQ6IE5fRlJPTV9EICogMTAgXiAoTiAtIDEpICsgMUBTX0ZST01fUCAqIDEwIF4gTiArIDJAU19GUk9NX1AgKiAxMCBeIChOICsgMSkKfQpvdXRwdXQgWzJkMyAyZDJd)
 
-The `anydyce` interpreter faithfully reproduces these various ordering behaviors.
+The `dyceum` interpreter faithfully reproduces these various ordering behaviors.
 
 ### Variables
 
@@ -313,7 +314,7 @@ In AnyDice, variables are dynamically typed, which means that a variable’s typ
 After an assignment `A: 1`, `A` points to the number `1`.
 If one later reassigns `A: {}`, `A` then points to the empty sequence.
 
-With the exception of two very strange behaviors described below that are deliberately not reproduced by the `anydyce` interpreter, AnyDice objects are ***immutable***, and variables behave as pointers to those immutable objects.
+With the exception of two very strange behaviors described below that are deliberately not reproduced by the `dyceum` interpreter, AnyDice objects are ***immutable***, and variables behave as pointers to those immutable objects.
 This is illustrated by the following program:
 
 ```c
@@ -394,12 +395,12 @@ The expression `{1, 2, 3}d{2, 4, 6}` becomes `6d{2, 4, 6}`, or a pool of 6 dice,
     But when the base ***collapses*** to the number `0` and the exponent is a negative number, AnyDice resolves the expression as `-9223372036854776000` (or `-0x80000000000000c0`).
     The expression `d{-2, -1, 0, 1, 2} ^ -2` resolves to `d{0, 1, -9223372036854776000, 1, 0}`.
     The large negative number was perhaps intended a sentinel value of some kind, but it remains inconsistent with AnyDice’s divide-by-zero behavior.
-    The `anydyce` interpreter preserves the sentinel behavior with a zero base and negative exponent, so the expression `0^-1` resolves to `-9223372036854776000`.
+    The `dyceum` interpreter preserves the sentinel behavior with a zero base and negative exponent, so the expression `0^-1` resolves to `-9223372036854776000`.
 
 !!! bug "`<num>^-1` is an error, even though `<seq>^-1` is not"
 
     Confusingly, a negative exponent in AnyDice results in an error where the base is a number.
-    The `anydyce` interpreter resolves negative exponents with number bases consistently with other values as well as integer division that truncates toward zero.
+    The `dyceum` interpreter resolves negative exponents with number bases consistently with other values as well as integer division that truncates toward zero.
     The expression `(-1)^-1` resolves to `-1`, `(-1)^-2` resolves to `1`, etc.
 
 Unary `-` collapses sequences into numbers.
@@ -410,7 +411,7 @@ This presents an asymmetry where `-{1..4}` resolves to `-10`, while `+{1..4}` re
 
     On anydice.com, `output d8 <= {1,2}` is treated as equivalent to `output d8 > {1,2}` rather than `output {1,2} >= d8`.
     Further, a comparison with `<=` always resolves to `1` where the left-hand operand is a non-empty die and the right-hand operand is the empty sequence (e.g., `d{-1000} <= {}`).
-    The `anydyce` interpreter deliberately avoids these behaviors, instead treating `<=` comparisons consistently with others.
+    The `dyceum` interpreter deliberately avoids these behaviors, instead treating `<=` comparisons consistently with others.
 
 Where `d`’s left-hand operand resolves to a negative number, the expression is treated as if the negative applies to the right-hand operand.
 In other words, `-<num>d<expr>` is treated as `<num>d(-(<expr>))`.
@@ -492,7 +493,7 @@ AnyDice follows this convention, but only ***some*** of the time, and inconsiste
 
    Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=ZnVuY3Rpb246IGRlbHZlIE46biB7CiAgaWYgTiA8PSAwIHsgcmVzdWx0OiAxMjMgfSBcIEFsd2F5cyByZXR1cm4gMTIzIGF0IHRoZSBib3R0b20gXAogIHJlc3VsdDogW2RlbHZlIE4gLSAxXQp9CmZ1bmN0aW9uOiBkZWx2ZSBib3RoIE06biBOOm4gewogIHJlc3VsdDogW2RlbHZlIE1dICsgW2RlbHZlIE5dICBcIERvZXMgdGhpcyByZXR1cm4gZHt9LCAxMjMsIG9yIDI0Nj8gSXQgZGVwZW5kcyEgXAp9CmZ1bmN0aW9uOiBkZWx2ZSBhbW9uZyBNOm4gTjpuIHsKICByZXN1bHQ6IFtkZWx2ZSBib3RoIE0gTV0gKyBbZGVsdmUgYm90aCBNIE5dICsgW2RlbHZlIGJvdGggTiBNXSArIFtkZWx2ZSBib3RoIE4gTl0KfQpNOiAzIE46IDMKb3V0cHV0IFtkZWx2ZSBhbW9uZyBNIE5dIG5hbWVkICJkZWx2ZSBhbW9uZyBbTV0gW05dIgpNOiAzIE46IDEwCm91dHB1dCBbZGVsdmUgYW1vbmcgTSBOXSBuYW1lZCAiZGVsdmUgYW1vbmcgW01dIFtOXSIKTTogMTAgTjogMTAKb3V0cHV0IFtkZWx2ZSBhbW9uZyBNIE5dIG5hbWVkICJkZWx2ZSBhbW9uZyBbTV0gW05dIgo)
 
-   A much more subtle version of this issue can be found when comparing the second output of [`https://anydice.com/program/1065f`](https://anydice.com/program/1065f) to that [computed by the `anydyce` interpreter](../playground/#id=1065f).
+   A much more subtle version of this issue can be found when comparing the second output of [`https://anydice.com/program/1065f`](https://anydice.com/program/1065f) to that [computed by the `dyceum` interpreter](../playground/#id=1065f).
    (See also the section on [“phantom” mass](#phantom-mass).)
    At first glance, the distributions look similar, but a careful inspection will reveal that AnyDice’s results do not sum to 100%, and the values are slightly off.
 
@@ -501,7 +502,7 @@ AnyDice follows this convention, but only ***some*** of the time, and inconsiste
 !!! bug "`d{} + {}` does not equal `{} + d{}`, even though `d{} - {}` equals `{} - d{}`"
 
     The ***specific*** exception to this exception is that AnyDice resolves `d{} + {}` and `d{} | {}` specifically to `d{}`, even though `{} + d{}`, `{} | d{}`, `d{} - {}`, and `{} - d{}` all resolve to `0`.
-    The `anydyce` interpreter does not reproduce this inconsistency.
+    The `dyceum` interpreter does not reproduce this inconsistency.
 
 Operations involving ***multiplicative*** and ***comparative*** operators, `*`, `/`, `^`, `&`, `=`, `!=`, `<`, `<=`, `>=`, and `>` follow set convolution conventions.
 The expressions `d{} * 1`, `1 / d{}`, `8 ^ d{}`, `d{} & 8`, etc. all resolve to `d{}`.
@@ -526,9 +527,9 @@ So `#(d100d{})`, `#(d{}d100)`, and `#(d{}d{})` are all `1`.
 This is where our implementation of [`<die>d<die>` as a function above](#operand-interpretation-and-collapse) breaks down.
 While it produces equivalent ***outputs***, `#([roll d{} of the die d{}])` yields `0`, not `1`.
 
-In its current implementation, the `anydyce` interpreter bends over backwards to reproduce these size inconsistencies for compatibility.
-However, it’s quite possible aspects of these behaviors are bugs with anydyce.com, perhaps contributing to things like [“phantom” mass](#phantom-mass).
-In the future, the `anydyce` interpreter may diverge from anydice.com by implementing something more coherent.
+In its current implementation, the `dyceum` interpreter bends over backwards to reproduce these size inconsistencies for compatibility.
+However, it’s quite possible aspects of these behaviors are bugs with dyceum.com, perhaps contributing to things like [“phantom” mass](#phantom-mass).
+In the future, the `dyceum` interpreter may diverge from anydice.com by implementing something more coherent.
 
 ### Functions, variable scope, type coercion, and type expansion
 
@@ -701,7 +702,7 @@ That behavior might have useful applications beyond the [expansion probe above](
     No explanation of motivation or consequences is provided, but it teaches away from a common idiom among many programming languages, such as recursive counters or default overrides.
     The behavior it fails to properly identify is that modifications to a non-expanded parameter value remain modified across all remaining function calls during expansion.
     In effect, it means that parameters are passed by-reference from its internal expansion machinery.
-    The `anydyce` interpreter does not reproduce this behavior.
+    The `dyceum` interpreter does not reproduce this behavior.
 
 
 Many users are reasonably and completely unaware of this trap and often fall into it with more complicated programs. Consider the following (simplified from AnyDice program [`9010`](../playground/#id=9010)) as an illustration:
@@ -774,7 +775,7 @@ output [(d6 * 100) then d6]
 
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=STogMApmdW5jdGlvbjogQTpuIHRoZW4gQjpuIHsKICBJOiBJICsgMTAwMDAKICBWOiBBICsgQiArIEkKICBBOiBBICsgMQogIHJlc3VsdDogVgp9Cm91dHB1dCBbKGQ2ICogMTAwKSB0aGVuIGQ2XQo)
 
-Both the `anydyce` interpreter and anydice.com produce the same output for both of the above programs.
+Both the `dyceum` interpreter and anydice.com produce the same output for both of the above programs.
 `A`’s value is reset to the next value in its inner loop for every iteration.
 But what happens if one writes back to `B` during expansion?
 Consider another small modification to the probe:
@@ -792,7 +793,7 @@ output [(d6 * 100) then d6]
 
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=STogMApmdW5jdGlvbjogQTpuIHRoZW4gQjpuIHsKICBJOiBJICsgMTAwMDAKICBWOiBBICsgQiArIEkKICBCOiBCICsgMSAgXCA8LSBUaGlzIGlzIGRpZmZlcmVudCBcCiAgcmVzdWx0OiBWCn0Kb3V0cHV0IFsoZDYgKiAxMDApIHRoZW4gZDZdCg)
 
-As expected, the `anydyce` interpreter produces the same output as the prior two programs.
+As expected, the `dyceum` interpreter produces the same output as the prior two programs.
 On anydice.com, however, the first six outputs are `10101`, `20202`, ..., `60606`.
 The second six outputs are `70102`, `80203`, ..., `120607`.
 As one can see, `B`’s modifications are durable through `A`’s inner cycle until `B` is reset in its own outer cycle.
@@ -810,12 +811,12 @@ output [add one hundred times d3 to sum of 3d6]
 
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=ZnVuY3Rpb246IGFkZCBvbmUgaHVuZHJlZCB0aW1lcyBOOm4gdG8gc3VtIG9mIFM6cyB7CiAgUzogUyArIDAKICByZXN1bHQ6IE4gKiAxMDAgKyBTCn0Kb3V0cHV0IFthZGQgb25lIGh1bmRyZWQgdGltZXMgZDMgdG8gc3VtIG9mIDNkNl0K)
 
-The `anydyce` interpreter produces the expected 54 outcomes: `{103-118, 203-218, 303-318}`.
+The `dyceum` interpreter produces the expected 54 outcomes: `{103-118, 203-218, 303-318}`.
 anydice.com, however, perplexingly, only produces three outcomes: `{118, 218, 318}`.
 
 #### Diagnosing/avoiding parameter leaks on anydice.com
 
-To reiterate, it is entirely safe to write to parameter variable names in the `anydyce` interpreter.
+To reiterate, it is entirely safe to write to parameter variable names in the `dyceum` interpreter.
 However, when using anydice.com, one can avoid the parameter leak problem with work-around.
 For any function potentially affected, rename all parameters to have new, unique names.
 Then assign the new parameter names to the old ones in the body of the function.
@@ -871,7 +872,7 @@ output D
 
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=ZnVuY3Rpb246IGYgSzpuIHsgcmVzdWx0OiBLIH0KZnVuY3Rpb246IGcgRzpuIEQ6ZCB7IGlmIEcgPSAxIHsgcmVzdWx0OiA1IH0gZWxzZSB7IHJlc3VsdDogW2YgRF0gfSB9Cm91dHB1dCBbZyAoZDIpIChkMCldCkQ6IFtnIChkMikgKGR7fSldCm91dHB1dCBECkQ6IDRkRCArIDAKb3V0cHV0IEQ)
 
-The `anydyce` interpreter produces expected outputs that all sum to 100%.
+The `dyceum` interpreter produces expected outputs that all sum to 100%.
 anydice.com’s results, however, only sum to 100% for the first output.
 The second output has a phantom that occupies 50% of the total weight.
 That is compounded to 93.75% for the third output, so the phantom is durable over at least some operations.
@@ -893,7 +894,7 @@ output 1d{9}^(1d10*10)
 
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=b3V0cHV0IDFkezl9XigxZDEwKjEwKQ)
 
-The `anydyce` interpreter correctly handles large integer outcomes.
+The `dyceum` interpreter correctly handles large integer outcomes.
 anydice.com produces four outcomes, two of which are negative, despite being mathematically impossible.
 
 The following stresses weight accumulation (floating point) errors.
@@ -914,19 +915,19 @@ loop N over {1..60} {
 
 Open in playground: [![Try the AnyDice-compatible playground](anydice-playground.svg)](../playground/#p=RDogZHsxOjk5LCAwfQpsb29wIE4gb3ZlciB7MS4uNjB9IHsKICBEOiBEICogRAogIG91dHB1dCBEIG5hbWVkICJkezE6OTksIDB9IGFmdGVyIGxvb3AgW05dIgp9Cm91dHB1dCBke30gbmFtZWQgIj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09IgpEOiBkezE6OSwgMH0KbG9vcCBOIG92ZXIgezEuLjYwfSB7CiAgRDogRCAqIEQKICBvdXRwdXQgRCBuYW1lZCAiZHsxOjksIDB9IGFmdGVyIGxvb3AgW05dIgp9Cg)
 
-As [described above](#features), the `anydyce` interpreter handles these calculations reasonably, even with truncation.
+As [described above](#features), the `dyceum` interpreter handles these calculations reasonably, even with truncation.
 However, on anydice.com, later loops’ cumulative weights fail to sum to 100% (sometimes approaching zero, sometimes approaching infinity).
 
 ### “Legacy” programs
 
 anydice.com allows interpretation and execution of an undocumented “legacy” syntax (e.g., `output legacy "8d6h4-4"` from program [`1f`](../playground/#id=1f)).
-The `anydyce` interpreter does not recognize the `legacy` keyword and is incapable of interpreting the corresponding notation.
+The `dyceum` interpreter does not recognize the `legacy` keyword and is incapable of interpreting the corresponding notation.
 
 ## Conclusion
 
 The goals of this project are as follows:
 
-1. Present a truly transparent reference implementation for Jasper Flick’s [AnyDice Dice Probability Calculator](https://anydice.com/) subject to independent inspection, validation, and improvement.
+1. Present a truly transparent reference implementation for [Jasper Flick](https://catlikecoding.com/jasper-flick/)’s [AnyDice Dice Probability Calculator](https://anydice.com/) subject to independent inspection, validation, and improvement.
    This includes addressing long-standing bugs persistent in the original platform.
 1. Preserve existing cognitive investment in the AnyDice platform independently of the author’s ability or willingness to support it, including enabling users to:
     1. share AnyDice programs without relying on a proprietary centralized database; and

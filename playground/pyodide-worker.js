@@ -22,12 +22,12 @@
 //                      traceback?, warnings?, runId? }
 //
 // `text` is the fully-formatted, multi-block result string produced by
-// anydyce's `format_results` -- the single source of truth for textual
+// dyceum's `format_results` -- the single source of truth for textual
 // rendering, so the playground stays in lock-step with the magic and any
-// other anydyce consumer. `outputs` is a list of {label, items} per
+// other dyceum consumer. `outputs` is a list of {label, items} per
 // `output` statement (items = list of [outcome, count] pairs). `csv` and
 // `csvFilename` are the base64-encoded CSV export and its download name
-// (anydyce.csv.csv_base64 / csv_filename, same as the Jupyter widget's
+// (dyceum.csv.csv_base64 / csv_filename, same as the Jupyter widget's
 // download link) backing the CSV button.
 //
 // `warnings` is an array of {category, message, filename, lineno} captured
@@ -63,8 +63,8 @@ warnings.simplefilter("always")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=ExperimentalWarning)
 
-from anydyce.anydice import Settings, format_results, run as _anydyce_run
-from anydyce.csv import csv_base64, csv_filename
+from dyceum.anydice import Settings, format_results, run as _dyceum_run
+from dyceum.csv import csv_base64, csv_filename
 
 _captured_warnings = []
 
@@ -81,12 +81,12 @@ warnings.showwarning = _capture_warning
 def _do_run(source):
     _captured_warnings.clear()
     # Fresh Settings per run so a prior cell's set directives don't leak.
-    # _anydyce_run mutates this in place when the program uses
-    # \`set "anydyce: display precision" to ...\` / calculation precision;
+    # _dyceum_run mutates this in place when the program uses
+    # \`set "dyceum: display precision" to ...\` / calculation precision;
     # format_results then reads the final display_precision back.
     settings = Settings()
     try:
-        results = _anydyce_run(source, settings=settings)
+        results = _dyceum_run(source, settings=settings)
     except BaseException as exc:
         return {
             "ok": False,
@@ -96,9 +96,9 @@ def _do_run(source):
         }
     return {
         "ok": True,
-        # Single source of truth for text rendering: anydyce's format_results.
+        # Single source of truth for text rendering: dyceum's format_results.
         # Header style, empty-distribution wording, precision handling, etc.
-        # all live in one place; the playground tracks anydyce automatically.
+        # all live in one place; the playground tracks dyceum automatically.
         "text": format_results(results, settings=settings),
         # Raw per-output data remains useful outside Plotly (and for exports).
         "outputs": [
@@ -139,7 +139,7 @@ def _do_run(source):
             label_bgcolor="rgba(0, 0, 0, 0.72)",
             precision=settings.display_precision,
         ).as_dict(),
-        # Base64 CSV + filename via the same anydyce.csv helpers the Jupyter
+        # Base64 CSV + filename via the same dyceum.csv helpers the Jupyter
         # widget uses, so both surfaces export identical files with identical
         # names. Computed eagerly (not on demand) so the download keeps
         # working after a Cancel terminates the worker and wipes Python-side
@@ -185,17 +185,17 @@ async function init() {
   const wheelNames = await discoverLocalWheels();
   if (wheelNames.length === 0) {
     throw new Error(
-      "No wheels found in ./wheels/. Build the anydyce wheel " +
+      "No wheels found in ./wheels/. Build the dyceum wheel " +
       "(`uv build --wheel` in the repo root) and list its filename in " +
       "playground/wheels/index.json (e.g. " +
-      '`["anydyce-0.5.0rc1-py3-none-any.whl"]`).',
+      '`["dyceum-0.5.0rc1-py3-none-any.whl"]`).',
     );
   }
 
   postStatus(`Installing ${wheelNames.length} local wheel(s)...`);
   // Install all bundled wheels in a SINGLE micropip call so micropip resolves
   // the set as one transaction: inter-dependencies (dyce needs optype;
-  // anydyce needs dyce/lark) are satisfied from the provided wheels rather
+  // dyceum needs dyce/lark) are satisfied from the provided wheels rather
   // than fetched from PyPI, so init makes no cross-origin round-trips.
   // (Installing one wheel at a time would let a dependency resolve from PyPI
   // before its bundled wheel had been installed -- notably optype, which dyce

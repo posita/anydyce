@@ -19,9 +19,9 @@ from dyce.d import d1, d2, dempty, dzero
 from dyce.h import aggregate_weighted
 from lark.exceptions import UnexpectedInput
 
-from anydyce.anydice import parse, run
-from anydyce.anydice.interpreter import AnyDiceInterpreter
-from anydyce.anydice.settings import Settings
+from dyceum.anydice import parse, run
+from dyceum.anydice.interpreter import AnyDiceInterpreter
+from dyceum.anydice.settings import Settings
 
 __all__ = ()
 
@@ -3568,62 +3568,62 @@ class TestSetSettingValidation:
             run('set "maximum function depth" to "10"')
 
 
-# ---- anydyce-specific precision settings -----------------------------------------------
+# ---- dyceum-specific precision settings -----------------------------------------------
 
 
 class TestAnydyceSettings:
-    # `set "anydyce: calculation precision"` controls the bit_width passed to
+    # `set "dyceum: calculation precision"` controls the bit_width passed to
     # dyce.quantize_hs for the duration of the run; mid-program changes take
-    # effect for subsequent statements via re-entry. `set "anydyce: display
+    # effect for subsequent statements via re-entry. `set "dyceum: display
     # precision"` updates the Settings object; the final value is what the
     # caller observes after run() returns (formatting is the caller's job).
 
     def test_interpreter_run_accepts_settings_kwarg(self) -> None:
-        from anydyce.anydice import parse
-        from anydyce.anydice.interpreter import AnyDiceInterpreter
-        from anydyce.anydice.settings import Settings
+        from dyceum.anydice import parse
+        from dyceum.anydice.interpreter import AnyDiceInterpreter
+        from dyceum.anydice.settings import Settings
 
         s = Settings()
         AnyDiceInterpreter().run(parse("output 1"), settings=s)
 
     def test_module_run_accepts_settings_kwarg(self) -> None:
-        from anydyce.anydice import run as module_run
-        from anydyce.anydice.settings import Settings
+        from dyceum.anydice import run as module_run
+        from dyceum.anydice.settings import Settings
 
         s = Settings()
         module_run("output 1", settings=s)
 
     def test_display_precision_observable_after_run(self) -> None:
-        from anydyce.anydice import run as module_run
-        from anydyce.anydice.settings import Settings
+        from dyceum.anydice import run as module_run
+        from dyceum.anydice.settings import Settings
 
         s = Settings()
         assert s.display_precision == 2
-        module_run('set "anydyce: display precision" to 6\noutput 1', settings=s)
+        module_run('set "dyceum: display precision" to 6\noutput 1', settings=s)
         assert s.display_precision == 6
 
     def test_display_precision_final_value_wins(self) -> None:
         # Two `set` directives: the second one is what the caller observes.
         # Format consumers use this single final value for ALL outputs.
-        from anydyce.anydice import run as module_run
-        from anydyce.anydice.settings import Settings
+        from dyceum.anydice import run as module_run
+        from dyceum.anydice.settings import Settings
 
         s = Settings()
         module_run(
-            'set "anydyce: display precision" to 4\n'
+            'set "dyceum: display precision" to 4\n'
             'output 1d6 named "first"\n'
-            'set "anydyce: display precision" to 6\n'
+            'set "dyceum: display precision" to 6\n'
             'output 1d6 named "second"\n',
             settings=s,
         )
         assert s.display_precision == 6
 
     def test_calc_precision_symbolic_value(self) -> None:
-        from anydyce.anydice import run as module_run
-        from anydyce.anydice.settings import Settings
+        from dyceum.anydice import run as module_run
+        from dyceum.anydice.settings import Settings
 
         s = Settings()
-        module_run('set "anydyce: calculation precision" to "low"', settings=s)
+        module_run('set "dyceum: calculation precision" to "low"', settings=s)
         assert s.calc_bit_width == 64
 
     def test_calc_precision_quantizes_h_counts(self) -> None:
@@ -3631,15 +3631,15 @@ class TestAnydyceSettings:
         # bit_width=8 crushes them to small ints. We don't pin exact values
         # (dyce's quantization math owns those); we just assert the order of
         # magnitude collapses by many decades.
-        from anydyce.anydice import run as module_run
-        from anydyce.anydice.settings import Settings
+        from dyceum.anydice import run as module_run
+        from dyceum.anydice.settings import Settings
 
         s_quant = Settings()
-        s_quant.set("anydyce: calculation precision", 8)
+        s_quant.set("dyceum: calculation precision", 8)
         [(_, h_quant)] = module_run("output 20d20", settings=s_quant)
 
         s_exact = Settings()
-        s_exact.set("anydyce: calculation precision", 0)
+        s_exact.set("dyceum: calculation precision", 0)
         [(_, h_exact)] = module_run("output 20d20", settings=s_exact)
 
         # Unquantized total is 20**20 ≈ 1.05e26; bit_width=8 capped totals are
@@ -3651,14 +3651,14 @@ class TestAnydyceSettings:
         # First output is computed under "exact"; the set directive then
         # switches to bit_width=8; second output is computed under that.
         # Distinguishable in the resulting H totals.
-        from anydyce.anydice import run as module_run
-        from anydyce.anydice.settings import Settings
+        from dyceum.anydice import run as module_run
+        from dyceum.anydice.settings import Settings
 
         s = Settings()
         results = module_run(
-            'set "anydyce: calculation precision" to "exact"\n'
+            'set "dyceum: calculation precision" to "exact"\n'
             'output 20d20 named "exact"\n'
-            'set "anydyce: calculation precision" to 8\n'
+            'set "dyceum: calculation precision" to 8\n'
             'output 20d20 named "quantized"\n',
             settings=s,
         )
@@ -3671,7 +3671,7 @@ class TestAnydyceSettings:
     def test_interpreter_settings_dont_span_runs(self) -> None:
         interp = AnyDiceInterpreter()
         settings = Settings()
-        settings.set("anydyce: calculation precision", "exact")
+        settings.set("dyceum: calculation precision", "exact")
         program = "D: d{1, 0:7} loop _ over {1..7} { D: D * D } output D"
         results_exact = interp.run(parse(program), settings=settings)
         results_default = interp.run(parse(program))
@@ -3684,12 +3684,12 @@ class TestAnydyceSettings:
         # If the program does not contain a `set` directive for a key, that
         # key on the caller-provided Settings stays exactly as the caller
         # configured it. Confirms run() does not blindly reset.
-        from anydyce.anydice import run as module_run
-        from anydyce.anydice.settings import Settings
+        from dyceum.anydice import run as module_run
+        from dyceum.anydice.settings import Settings
 
         s = Settings()
-        s.set("anydyce: display precision", 8)
-        s.set("anydyce: calculation precision", 1024)
+        s.set("dyceum: display precision", 8)
+        s.set("dyceum: calculation precision", 1024)
         module_run("output 1", settings=s)
         assert s.display_precision == 8
         assert s.calc_bit_width == 1024

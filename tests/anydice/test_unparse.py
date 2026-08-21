@@ -16,7 +16,7 @@
 
 import pytest
 
-from anydyce.anydice import parse, unparse
+from dyceum.anydice import parse, unparse
 
 __all__ = ()
 

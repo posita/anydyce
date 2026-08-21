@@ -16,8 +16,8 @@
 import pytest
 from lark import UnexpectedInput
 
-from anydyce.anydice import parse
-from anydyce.anydice.ast_ import (
+from dyceum.anydice import parse
+from dyceum.anydice.ast_ import (
     BinOp,
     Call,
     DiceBinOp,

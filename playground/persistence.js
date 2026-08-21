@@ -7,17 +7,17 @@
 //
 // Contract:
 //   - On editor idle (~500ms after last keystroke), save the current doc
-//     under localStorage["anydyce-playground:doc"] and strip any URL
+//     under localStorage["dyceum-playground:doc"] and strip any URL
 //     fragment so the bare URL on reload picks up the saved doc.
 //   - On initial load, fall back to the saved doc IFF no URL fragment is
 //     present (the fragment wins, so shared links work first visit).
 //   - localStorage access can throw in private-browsing modes -- always
 //     wrap in try/catch and treat errors as "no-op + carry on".
 
-export const STORAGE_KEY = "anydyce-playground:doc";
-export const LOGS_SPLIT_KEY = "anydyce-playground:logs-split";
-export const EDITOR_SPLIT_KEY = "anydyce-playground:editor-split";
-export const VIEW_MODE_KEY = "anydyce-playground:view-mode";
+export const STORAGE_KEY = "dyceum-playground:doc";
+export const LOGS_SPLIT_KEY = "dyceum-playground:logs-split";
+export const EDITOR_SPLIT_KEY = "dyceum-playground:editor-split";
+export const VIEW_MODE_KEY = "dyceum-playground:view-mode";
 
 export const VIEW_MODE_BARS = "bars";
 export const VIEW_MODE_LINES = "lines";
@@ -30,7 +30,7 @@ const _ALL_VIEW_MODES = new Set([
   VIEW_MODE_TEXT,
 ]);
 
-export const ACCENT_KEY = "anydyce-playground:accent";
+export const ACCENT_KEY = "dyceum-playground:accent";
 // Accent hue keys = the color slots usable as an accent (the neutrals are
 // excluded). Order is the swatch row's display order (roughly spectral).
 // Each maps to var(--c-<key>) via an html[data-accent] rule in
@@ -39,7 +39,7 @@ export const ACCENTS = ["red", "yellow", "green", "cyan", "blue", "magenta"];
 export const DEFAULT_ACCENT = "cyan";
 const _ACCENT_SET = new Set(ACCENTS);
 
-export const THEME_KEY = "anydyce-playground:theme";
+export const THEME_KEY = "dyceum-playground:theme";
 // Theme family keys. "default" lives in themes.css's bare :root (no
 // attribute); the rest are html[data-theme="<key>"] blocks. The picker's
 // <option> values must match these.
@@ -47,11 +47,30 @@ export const THEMES = ["default", "no-color", "colorblind", "high-contrast"];
 export const DEFAULT_THEME = "default";
 const _THEME_SET = new Set(THEMES);
 
+const _LEGACY_KEYS = new Map([
+  [STORAGE_KEY, "anydyce-playground:doc"],
+  [LOGS_SPLIT_KEY, "anydyce-playground:logs-split"],
+  [EDITOR_SPLIT_KEY, "anydyce-playground:editor-split"],
+  [VIEW_MODE_KEY, "anydyce-playground:view-mode"],
+  [ACCENT_KEY, "anydyce-playground:accent"],
+  [THEME_KEY, "anydyce-playground:theme"],
+]);
+
+function loadRaw(key, storage) {
+  const current = storage.getItem(key);
+  if (current !== null) return current;
+
+  const legacyKey = _LEGACY_KEYS.get(key);
+  const legacy = legacyKey === undefined ? null : storage.getItem(legacyKey);
+  if (legacy !== null) storage.setItem(key, legacy);
+  return legacy;
+}
+
 // Read the saved editor doc, or null if absent / unreadable.
 export function loadSavedDoc(storage = globalThis.localStorage) {
   try {
     if (!storage) return null;
-    const text = storage.getItem(STORAGE_KEY);
+    const text = loadRaw(STORAGE_KEY, storage);
     return text === null ? null : text;
   } catch {
     return null;
@@ -76,7 +95,7 @@ export function saveDoc(text, storage = globalThis.localStorage) {
 function loadNumber(key, storage) {
   try {
     if (!storage) return null;
-    const raw = storage.getItem(key);
+    const raw = loadRaw(key, storage);
     if (raw === null) return null;
     const n = Number(raw);
     if (!Number.isFinite(n)) return null;
@@ -120,7 +139,8 @@ function makeEnumStorage(key, valid) {
   return {
     load(storage = globalThis.localStorage) {
       try {
-        const raw = storage?.getItem(key);
+        if (!storage) return null;
+        const raw = loadRaw(key, storage);
         return valid.has(raw) ? raw : null;
       } catch {
         return null;

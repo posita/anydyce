@@ -20,7 +20,7 @@ jobs:
       - run: git config user.name "github-actions[bot]"
       - run: git config user.email "github-actions[bot]@users.noreply.github.com"
       - run: |
-          FULL_VERSION=$(python -c "import importlib.metadata; print(importlib.metadata.version('anydyce'))")
+          FULL_VERSION=$(python -c "import importlib.metadata; print(importlib.metadata.version('dyceum'))")
           MINOR_VERSION=$(python -c "
           v = '$FULL_VERSION'.split('.')
           print(f'{v[0]}.{v[1]}')
