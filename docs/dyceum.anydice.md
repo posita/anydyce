@@ -12,6 +12,6 @@
   Thank you!
 -->
 
-# `anydyce.anydice` package reference
+# `dyceum.anydice` package reference
 
-::: anydyce.anydice
+::: dyceum.anydice

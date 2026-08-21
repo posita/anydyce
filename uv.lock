@@ -17,7 +17,7 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "anydyce"
+name = "dyceum"
 source = { editable = "." }
 dependencies = [
     { name = "dyce" },

@@ -111,15 +111,38 @@ test("saveDoc no-ops when storage is unavailable", () => {
 });
 
 test("STORAGE_KEY is stable and namespaced", () => {
-  // Other tabs / apps on the same origin must not collide. The "anydyce-
+  // Other tabs / apps on the same origin must not collide. The "dyceum-
   // playground:" prefix is the namespace.
-  assert.match(STORAGE_KEY, /^anydyce-playground:/);
+  assert.match(STORAGE_KEY, /^dyceum-playground:/);
+});
+
+test("loaders migrate values from the former playground namespace", () => {
+  const storage = makeStorage();
+  storage.setItem("anydyce-playground:doc", "output 2d6");
+  storage.setItem("anydyce-playground:logs-split", "40");
+  storage.setItem("anydyce-playground:editor-split", "60");
+  storage.setItem("anydyce-playground:view-mode", "text");
+  storage.setItem("anydyce-playground:accent", "red");
+  storage.setItem("anydyce-playground:theme", "no-color");
+
+  assert.equal(loadSavedDoc(storage), "output 2d6");
+  assert.equal(loadLogsSplit(storage), 40);
+  assert.equal(loadEditorSplit(storage), 60);
+  assert.equal(loadViewMode(storage), "text");
+  assert.equal(loadAccent(storage), "red");
+  assert.equal(loadTheme(storage), "no-color");
+  assert.equal(storage.getItem(STORAGE_KEY), "output 2d6");
+  assert.equal(storage.getItem(LOGS_SPLIT_KEY), "40");
+  assert.equal(storage.getItem(EDITOR_SPLIT_KEY), "60");
+  assert.equal(storage.getItem(VIEW_MODE_KEY), "text");
+  assert.equal(storage.getItem(ACCENT_KEY), "red");
+  assert.equal(storage.getItem(THEME_KEY), "no-color");
 });
 
 // ---- loadLogsSplit / saveLogsSplit ---------------------------------------
 
 test("LOGS_SPLIT_KEY shares the playground namespace", () => {
-  assert.match(LOGS_SPLIT_KEY, /^anydyce-playground:/);
+  assert.match(LOGS_SPLIT_KEY, /^dyceum-playground:/);
   assert.notEqual(LOGS_SPLIT_KEY, STORAGE_KEY);
 });
 
@@ -162,7 +185,7 @@ test("loadLogsSplit / saveLogsSplit no-op when storage is unavailable", () => {
 // Same numeric load/save behavior as the logs split, distinct key.
 
 test("EDITOR_SPLIT_KEY shares the playground namespace, distinct from others", () => {
-  assert.match(EDITOR_SPLIT_KEY, /^anydyce-playground:/);
+  assert.match(EDITOR_SPLIT_KEY, /^dyceum-playground:/);
   assert.notEqual(EDITOR_SPLIT_KEY, LOGS_SPLIT_KEY);
   assert.notEqual(EDITOR_SPLIT_KEY, STORAGE_KEY);
 });
@@ -197,7 +220,7 @@ test("saveEditorSplit swallows storage errors / no-ops without storage", () => {
 // ---- loadViewMode / saveViewMode -----------------------------------------
 
 test("VIEW_MODE_KEY shares the playground namespace", () => {
-  assert.match(VIEW_MODE_KEY, /^anydyce-playground:/);
+  assert.match(VIEW_MODE_KEY, /^dyceum-playground:/);
   assert.notEqual(VIEW_MODE_KEY, STORAGE_KEY);
   assert.notEqual(VIEW_MODE_KEY, LOGS_SPLIT_KEY);
 });
@@ -247,7 +270,7 @@ test("loadViewMode / saveViewMode no-op when storage is unavailable", () => {
 // ---- loadAccent / saveAccent -----------------------------------------------
 
 test("ACCENT_KEY shares the playground namespace", () => {
-  assert.match(ACCENT_KEY, /^anydyce-playground:/);
+  assert.match(ACCENT_KEY, /^dyceum-playground:/);
 });
 
 test("DEFAULT_ACCENT is one of the valid accents", () => {
@@ -295,7 +318,7 @@ test("loadAccent / saveAccent swallow storage errors / no-op without storage", (
 // ---- loadTheme / saveTheme -------------------------------------------------
 
 test("THEME_KEY shares the playground namespace; DEFAULT_THEME is valid", () => {
-  assert.match(THEME_KEY, /^anydyce-playground:/);
+  assert.match(THEME_KEY, /^dyceum-playground:/);
   assert.ok(THEMES.includes(DEFAULT_THEME));
 });
 

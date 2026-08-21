@@ -19,7 +19,7 @@ from dyce.h import DEFAULT_PRECISION, DEFAULT_QUANTIZATION_BIT_WIDTH
 
 __all__ = ("Settings",)
 
-# Defaults for the two anydyce-introduced settings.
+# Defaults for the two dyceum-introduced settings.
 #
 # Calculation precision is the bit_width passed to `dyce.quantize_hs`.
 # 256 matches the interpreter's prior `_DEFAULT_QUANTIZATION_BIT_WIDTH`
@@ -34,7 +34,7 @@ _DEFAULT_CALC_BIT_WIDTH: int = DEFAULT_QUANTIZATION_BIT_WIDTH
 _DEFAULT_DISPLAY_PRECISION: int = DEFAULT_PRECISION
 
 # Symbolic resolution tables. The user may write either an integer literal
-# or one of these strings as the value of `set "anydyce: ... precision" to
+# or one of these strings as the value of `set "dyceum: ... precision" to
 # X`. "exact" for calculation precision means "no quantization" (signalled
 # by bit_width=0; see interpreter.py for the actual skip). "exact" for
 # display precision means "as many decimals as float64 can meaningfully
@@ -58,8 +58,8 @@ _DEFAULTS: dict[str, int | str] = {
     "position order": "highest first",
     "maximum function depth": 10,
     "explode depth": 2,
-    "anydyce: calculation precision": _DEFAULT_CALC_BIT_WIDTH,
-    "anydyce: display precision": _DEFAULT_DISPLAY_PRECISION,
+    "dyceum: calculation precision": _DEFAULT_CALC_BIT_WIDTH,
+    "dyceum: display precision": _DEFAULT_DISPLAY_PRECISION,
 }
 
 _VALID_STRINGS: dict[str, set[str]] = {
@@ -77,8 +77,8 @@ _POSITIVE_INT_KEYS: frozenset[str] = frozenset(
 # strings in the corresponding table above. 0 has a key role for
 # calculation precision (= no quantization).
 _NON_NEGATIVE_INT_OR_SYMBOLIC: dict[str, dict[str, int]] = {
-    "anydyce: calculation precision": _CALC_SYMBOLIC,
-    "anydyce: display precision": _DISPLAY_SYMBOLIC,
+    "dyceum: calculation precision": _CALC_SYMBOLIC,
+    "dyceum: display precision": _DISPLAY_SYMBOLIC,
 }
 
 
@@ -145,11 +145,11 @@ class Settings:
 
     @property
     def calc_bit_width(self) -> int:
-        return cast("int", self._data["anydyce: calculation precision"])
+        return cast("int", self._data["dyceum: calculation precision"])
 
     @property
     def display_precision(self) -> int:
-        return cast("int", self._data["anydyce: display precision"])
+        return cast("int", self._data["dyceum: display precision"])
 
     def highest_first(self) -> bool:
         return self._data["position order"] == "highest first"

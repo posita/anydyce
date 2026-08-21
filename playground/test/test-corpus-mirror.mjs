@@ -2,7 +2,7 @@
 //
 // Run with: node --test playground/test/test-corpus-mirror.mjs
 //
-// The Python source these mirror lives in `anydyce/anydice/fetch.py`. Test
+// The Python source these mirror lives in `dyceum/anydice/fetch.py`. Test
 // cases derive from the Python module's docstring examples so the JS port
 // stays in sync with the reference implementation.
 
@@ -100,7 +100,7 @@ test("programIdAsHex: throws on invalid input", () => {
 // Verify the sharded subpath matches the Python docstring examples exactly.
 
 test("shardedSubpathFromProgramId: docstring examples", () => {
-  // From `anydyce.anydice.fetch.sharded_subpath_from_program_id` docstring.
+  // From `dyceum.anydice.fetch.sharded_subpath_from_program_id` docstring.
   assert.equal(shardedSubpathFromProgramId("f"), "00/0f/f.txt");
   assert.equal(shardedSubpathFromProgramId("1a2b3c"), "2b/3c/1a2b3c.txt");
   assert.equal(shardedSubpathFromProgramId("-abc"), "0a/bc/-abc.txt");
@@ -165,7 +165,7 @@ test("shardedSubpathFromProgramId: case-insensitive input, lowercase output", ()
 // ---- ghMirrorUrlForProgramId ----------------------------------------------
 
 test("ghMirrorUrlForProgramId: docstring examples", () => {
-  // From `anydyce.anydice.fetch.gh_mirror_url_for_program_id_hex` docstring.
+  // From `dyceum.anydice.fetch.gh_mirror_url_for_program_id_hex` docstring.
   assert.equal(
     ghMirrorUrlForProgramId("123"),
     "https://raw.githubusercontent.com/posita/anydice-data/" +
@@ -267,7 +267,7 @@ test("provenanceHeader: is a well-formed AnyDice block comment", () => {
 });
 
 test("provenanceHeader: matches the %anyd_load header shape", () => {
-  // Line-by-line shape parity with anydyce/magic.py's anyd_load header
+  // Line-by-line shape parity with dyceum/magic.py's anyd_load header
   // (sans the %%anyd line, which is Jupyter-specific).
   const lines = provenanceHeader("183b0", "2026-06-12T00:00:00Z").split("\n");
   assert.equal(lines.length, 6); // 5 content lines + trailing ""

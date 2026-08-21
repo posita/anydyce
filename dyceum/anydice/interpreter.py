@@ -115,7 +115,7 @@ class _EmptyPoolOfOne(PoolT):
     The latter is one.
     You do the math.
 
-        >>> from anydyce.anydice.interpreter import _EmptyPoolOfOne
+        >>> from dyceum.anydice.interpreter import _EmptyPoolOfOne
         >>> epoo = _EmptyPoolOfOne()
         >>> len(epoo)
         1
@@ -241,7 +241,7 @@ class AnyDiceInterpreter:
         # bug. Same lifecycle pattern as `_quantize_stack` below.
         self._settings: Settings | None = None
         # ExitStack that owns the nested `quantize_hs` contexts produced by
-        # `set "anydyce: calculation precision"` directives. Owned by `run()`;
+        # `set "dyceum: calculation precision"` directives. Owned by `run()`;
         # `_apply_calc_precision` unwinds and re-enters as needed when a `set`
         # changes the calc bit_width.
         self._quantize_stack: ExitStack | None = None
@@ -314,7 +314,7 @@ class AnyDiceInterpreter:
         r"""Unwind any active `quantize_hs` context and enter a new one for
         `bit_width`. `bit_width == 0` means "exact" -- no quantization, no
         active context. Called from `run()` at entry and from the SetStmt
-        handler when `"anydyce: calculation precision"` changes."""
+        handler when `"dyceum: calculation precision"` changes."""
         assert self._quantize_stack is not None, "called outside run()"
         # close() unwinds all registered exits. ExitStack stays reusable, so
         # subsequent enter_context() registers the replacement (or no
@@ -341,7 +341,7 @@ class AnyDiceInterpreter:
             if isinstance(v, (str, int)):
                 self._settings.set(stmt.key, v)
                 # Adjusts the active `quantize_hs` context for the rest of the run
-                if stmt.key == "anydyce: calculation precision":
+                if stmt.key == "dyceum: calculation precision":
                     self._apply_calc_precision(self._settings.calc_bit_width)
             else:  # pragma: no cover
                 raise TypeError(

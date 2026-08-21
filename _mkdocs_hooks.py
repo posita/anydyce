@@ -29,7 +29,7 @@ from urllib.parse import urlsplit
 
 _LOGGER = logging.getLogger("mkdocs.hooks")
 
-_RAW_VERSION = importlib.metadata.version("anydyce")
+_RAW_VERSION = importlib.metadata.version("dyceum")
 # Dev/dirty builds (e.g. "0.1.0.dev5+gabcdef") fall back to "main"
 _IS_RELEASE = "+" not in _RAW_VERSION and ".dev" not in _RAW_VERSION
 _GIT_REF = f"v{_RAW_VERSION}" if _IS_RELEASE else "main"
@@ -49,7 +49,7 @@ def on_page_markdown(markdown: str, **_kwargs: object) -> str:
         markdown,
         flags=re.DOTALL,
     )
-    return markdown.replace("{anydyce_git_ref}", _GIT_REF)
+    return markdown.replace("{dyceum_git_ref}", _GIT_REF)
 
 
 def on_pre_build(**_kwargs: object) -> None:
@@ -63,18 +63,18 @@ def on_pre_build(**_kwargs: object) -> None:
     )
     # Replace 'latest' with the docs version in docs site URLs
     index = index.replace(
-        "https://posita.github.io/anydyce/latest/",
-        f"https://posita.github.io/anydyce/{_DOCS_VERSION}/",
+        "https://dyceum.org/latest/",
+        f"https://dyceum.org/{_DOCS_VERSION}/",
     )
     # For release builds, restore version-specific shields.io badge URLs and PyPI link
     if _IS_RELEASE:
         index = re.sub(
-            r"(https://img\.shields\.io/pypi/[^/]+/anydyce)(\.svg)",
+            r"(https://img\.shields\.io/pypi/[^/]+/dyceum)(\.svg)",
             rf"\g<1>/{_RAW_VERSION}\g<2>",
             index,
         )
         index = re.sub(
-            r"(https://pypi\.org/project/anydyce/)(?=\))",
+            r"(https://pypi\.org/project/dyceum/)(?=\))",
             rf"\g<1>{_RAW_VERSION}/",
             index,
         )
@@ -174,7 +174,7 @@ def _bundled_wheel_urls(pkg_names: Iterable[str]) -> Iterator[str]:
 
 
 def _get_latest_pkg_wheel_from_dist() -> Path:
-    return max(Path("dist").glob("anydyce*-none-any.whl"), key=os.path.getmtime)
+    return max(Path("dist").glob("dyceum*-none-any.whl"), key=os.path.getmtime)
 
 
 def _uv_run(cmd: Sequence[str]) -> None:

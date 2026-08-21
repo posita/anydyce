@@ -51,16 +51,16 @@ def format_results(
     results: AnyDiceResultsT, *, settings: Settings | None = None, short: bool = False
 ) -> str:
     r"""
-    Formats output results from [`run`][anydyce.anydice.run].
+    Formats output results from [`run`][dyceum.anydice.run].
 
     Reads `display_precision` from *settings*, if provided.
-    Passing the same [`Settings`][anydyce.anydice.Settings] object given to `run` ensures settings modifications made by the program are honored during formatting.
+    Passing the same [`Settings`][dyceum.anydice.Settings] object given to `run` ensures settings modifications made by the program are honored during formatting.
 
-        >>> from anydyce.anydice import Settings, format_results, run
+        >>> from dyceum.anydice import Settings, format_results, run
         >>> settings = Settings()
         >>> results = run(
         ...     'output 2d3 named "2d3" output d{} named "the empty die"'
-        ...     'set "anydyce: display precision" to "high"',
+        ...     'set "dyceum: display precision" to "high"',
         ...     settings=settings,
         ... )
         >>> print(format_results(results, settings=settings))
@@ -77,7 +77,7 @@ def format_results(
         (empty distribution)
 
         >>> settings = Settings()
-        >>> settings.set("anydyce: display precision", 4)
+        >>> settings.set("dyceum: display precision", 4)
         >>> print(
         ...     format_results(
         ...         run(
@@ -112,9 +112,9 @@ def format_results(
 @experimental
 def parse(source: str) -> Program:
     r"""
-    Parses AnyDice source text into an AST [`Program`][anydyce.anydice.Program].
+    Parses AnyDice source text into an AST [`Program`][dyceum.anydice.Program].
 
-    Useful for (e.g.) passing to [`AnyDiceInterpreter.run`][anydyce.anydice.AnyDiceInterpreter.run].
+    Useful for (e.g.) passing to [`AnyDiceInterpreter.run`][dyceum.anydice.AnyDiceInterpreter.run].
     """
     program = _PARSER.parse(source)
     if isinstance(program, Program):  # expected return value of our transformer
@@ -130,8 +130,8 @@ def run(source: str, *, settings: Settings | None = None) -> AnyDiceResultsT:
     r"""
     Shorthand for `AnyDiceInterpreter().run(parse(source), settings=settings)`, returning one `(name, distribution)` pair per `output` statement.
 
-    If *settings* is provided, the interpreter mutates it during execution (e.g. when the program contains `set "anydyce: display precision" to ...`), so the caller can observe its final state (e.g. via [`format_results`][anydyce.anydice.format_results] reading `settings.display_precision`).
+    If *settings* is provided, the interpreter mutates it during execution (e.g. when the program contains `set "dyceum: display precision" to ...`), so the caller can observe its final state (e.g. via [`format_results`][dyceum.anydice.format_results] reading `settings.display_precision`).
 
-    See [`format_results`][anydyce.anydice.format_results], [`parse`][anydyce.anydice.parse], and [`AnyDiceInterpreter.run`][anydyce.anydice.AnyDiceInterpreter.run] for additional detail.
+    See [`format_results`][dyceum.anydice.format_results], [`parse`][dyceum.anydice.parse], and [`AnyDiceInterpreter.run`][dyceum.anydice.AnyDiceInterpreter.run] for additional detail.
     """
     return AnyDiceInterpreter().run(parse(source), settings=settings)

@@ -18,7 +18,7 @@ from json import JSONDecodeError
 
 import pytest
 
-from anydyce.anydice.fetch import (
+from dyceum.anydice.fetch import (
     EmptyProgramError,
     NoSuchProgramError,
     _extract_program_from_var_loaded_program,

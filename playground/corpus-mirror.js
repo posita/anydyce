@@ -1,6 +1,6 @@
 // Corpus-mirror URL formation.
 //
-// Pure-JS port of `anydyce.anydice.fetch.gh_mirror_url_for_program_id_hex` (and
+// Pure-JS port of `dyceum.anydice.fetch.gh_mirror_url_for_program_id_hex` (and
 // its supporting helpers). Computes the raw-content GitHub URL where a given
 // program ID's source text lives in the `posita/anydice-data` mirror repo.
 //
@@ -10,7 +10,7 @@
 // block on the runtime. Routing through Python would gate the fetch on
 // Pyodide being ready, defeating the parallelism.
 //
-// Algorithm (see Python docstrings in `anydyce/anydice/fetch.py`):
+// Algorithm (see Python docstrings in `dyceum/anydice/fetch.py`):
 //   1. Parse the input as a signed hex integer.
 //   2. Format it as 5-wide zero-padded hex; the minus sign (if any) counts
 //      toward the width.
@@ -90,7 +90,7 @@ const _ANYDICE_PROGRAM_URL_BASE = "https://anydice.com/program/";
 
 // Build an AnyDice block-comment provenance header for a corpus program
 // loaded via `#id=...`. Mirrors the header `%anyd_load` prepends in
-// anydyce/magic.py so provenance reads the same across surfaces. The
+// dyceum/magic.py so provenance reads the same across surfaces. The
 // header ends with a newline; callers prepend it directly to the fetched
 // program text.
 //

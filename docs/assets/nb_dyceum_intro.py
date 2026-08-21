@@ -30,7 +30,7 @@
 # stale.
 # -->
 #
-# ## Introduction to [`anydyce`](https://posita.github.io/anydyce/)&rsquo;s interactive visualization capabilities
+# ## Introduction to [`dyceum`](https://dyceum.org/)&rsquo;s interactive visualization capabilities
 
 # Selected examples highlighting [`dyce`](https://posita.github.io/dyce/)&rsquo;s use and capabilities. Select `Run All Cells` from the `Run` menu above.
 
@@ -42,7 +42,7 @@ from prerequisites import (  # pyright: ignore[reportMissingImports] # pyrefly: 
 
 await install_if_missing(  # type: ignore[top-level-await]
     # The optional piplite_spec (third item) omits version to use the local wheel
-    ("anydyce[jupyter]", "anydyce~=0.5.0.dev1[jupyter]", "anydyce[jupyter]"),
+    ("dyceum[jupyter]", "dyceum~=0.5.0.dev1[jupyter]", "dyceum[jupyter]"),
 )
 
 import warnings
@@ -52,7 +52,7 @@ import matplotlib as mpl  # ruff: ignore[unused-import]
 import matplotlib_inline
 from dyce.lifecycle import ExperimentalWarning
 
-import anydyce.magic  # ruff: ignore[unused-import]
+import dyceum.magic  # ruff: ignore[unused-import]
 
 matplotlib_inline.backend_inline.set_matplotlib_formats("svg")
 warnings.filterwarnings("ignore", category=ExperimentalWarning)
@@ -66,7 +66,7 @@ from enum import IntEnum, auto
 from dyce import HResult, expand
 from dyce.d import h2d6
 
-from anydyce.viz import jupyter_visualize
+from dyceum.viz import jupyter_visualize
 
 
 class PBTA(IntEnum):
