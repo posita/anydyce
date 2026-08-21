@@ -217,12 +217,13 @@ Where AnyDice’s behavioral inconsistencies or bugs produce incorrect results, 
 ### Prior art
 
 - [PyDice](https://pdice.arkareem.com/) is a pure-Python implementation of an AnyDice interpreter that both interprets AnyDice programs as well as transpiles them into [PythonDice](https://github.com/Ar-Kareem/PythonDice/) Python code (which is pretty darn cool)
-- [Dicey](https://github.com/basicer/dicey) is an AnyDice-inspired, browser-based JavaScript application
+- [Dice Playground](https://diceplayground.com/) is an open source AnyDice alternative using a Python dialect intended to provide additional power and more conventional language behavior
+- [Dicey](https://dicey.js.org/) is an AnyDice-inspired, browser-based JavaScript application
+- [Icecup](https://highdiceroller.github.io/icepool/apps/icecup.html) is a Python based interface to [Icepool](https://github.com/HighDiceRoller/icepool)
+- [SnakeEyes](https://snake-eyes.io/) is a dice explorer written in Lua
 - [anydice.js](https://github.com/dlom/anydice) claims to provide a low level interface for retrieving results from AnyDice’s interpreter for use in JavaScript programs (untested)
 - [anydieparser](https://www.npmjs.com/package/anydieparser) claims to provide an AnyDice interpreter in JavaScript (untested)
 - [anydice](https://git.paco.to/nick/anydice) claims to provide an AnyDice interpreter implemented in C and Rust (untested)
-- [Icecup](https://highdiceroller.github.io/icepool/apps/icecup.html) is a Python based interface to [Icepool](https://github.com/HighDiceRoller/icepool)
-- [SnakeEyes](https://github.com/Castux/SnakeEyes) is a dice explorer written in Lua
 
 ## Notes on the anydice.com implementation
 
