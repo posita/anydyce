@@ -17,13 +17,12 @@
 
 ## [0.5.0](https://github.com/posita/anydyce/releases/tag/v0.5.0)
 
-- Renamed the project and Python package from `anydyce` to `dyceum`.
-
 !!! warning "Breaking changes"
 
     Some of the following changes are not backward compatible.
     Please review before upgrading.
 
+- Renamed the project and Python package from `anydyce` to `dyceum`.
 - Adds the [AnyDice-compatible playground](../playground/)!
   - See the [implementation notes](anydice.md) for details
 - Drops support for 3.9 and 3.10 and extends support to 3.14
