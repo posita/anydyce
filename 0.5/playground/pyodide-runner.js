@@ -12,7 +12,7 @@
 //                                   carries .traceback and .warnings) or
 //                                   CancelledError (deliberate cancel).
 //                                   `text` is the fully-rendered display
-//                                   string (anydyce's format_results).
+//                                   string (dyceum's format_results).
 //                                   `outputs` is raw per-output data.
 //   cancelCurrentRun()           -> terminates the worker, rejecting any
 //                                   in-flight run with CancelledError; caller

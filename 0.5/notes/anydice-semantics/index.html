@@ -23,7 +23,7 @@
     
     
       
-        <title>AnyDice semantics: what we preserve, what we don't, and what we fixed - anydyce</title>
+        <title>AnyDice semantics: what we preserve, what we don't, and what we fixed - dyceum</title>
       
     
     
@@ -96,7 +96,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="anydyce" class="md-header__button md-logo" aria-label="anydyce" data-md-component="logo">
+    <a href="../.." title="dyceum" class="md-header__button md-logo" aria-label="dyceum" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -110,7 +110,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            anydyce
+            dyceum
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -242,13 +242,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="anydyce" class="md-nav__button md-logo" aria-label="anydyce" data-md-component="logo">
+    <a href="../.." title="dyceum" class="md-nav__button md-logo" aria-label="dyceum" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    anydyce
+    dyceum
   </label>
   
     <div class="md-nav__source">
@@ -461,7 +461,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../anydyce.anydice/" class="md-nav__link">
+      <a href="../../dyceum.anydice/" class="md-nav__link">
         
   
   
@@ -489,7 +489,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../anydyce/" class="md-nav__link">
+      <a href="../../dyceum/" class="md-nav__link">
         
   
   
@@ -909,8 +909,8 @@
 <h1 id="anydice-semantics-what-we-preserve-what-we-dont-and-what-we-fixed">AnyDice semantics: what we preserve, what we don't, and what we fixed</h1>
 <p>A living catalog of:</p>
 <ol>
-<li><strong>Preserved AnyDice idiosyncrasies</strong> -- behaviors that are surprising or inconsistent but appear to be intended, that anydyce faithfully replicates.</li>
-<li><strong>Excluded AnyDice bugs</strong> -- behaviors we have evidence are unintended defects, that anydyce deliberately does <em>not</em> replicate (and that we annotate corpus mismatches with so AnyDice is not used as an oracle for them).</li>
+<li><strong>Preserved AnyDice idiosyncrasies</strong> -- behaviors that are surprising or inconsistent but appear to be intended, that Dyceum faithfully replicates.</li>
+<li><strong>Excluded AnyDice bugs</strong> -- behaviors we have evidence are unintended defects, that Dyceum deliberately does <em>not</em> replicate (and that we annotate corpus mismatches with so AnyDice is not used as an oracle for them).</li>
 <li><strong>Fixed our-side bugs</strong> -- correctness defects we discovered in our own interpreter during corpus triage and have since fixed.</li>
 </ol>
 <p>Each entry should carry a concrete reference (a test name, a probe id, a commit, or a corpus program id) so the claim is verifiable. AnyDice is closed-source; everything here is the result of empirical reverse-engineering against the live <code>anydice.com</code> and the cached corpus output.</p>
@@ -922,7 +922,7 @@
 <ul>
 <li>
 <p><strong>Sequence in numeric / die context is <em>uniform over elements</em>, not the sum.</strong>
-  <code>output {1,2,3}</code> yields <code>{1:33.3%, 2:33.3%, 3:33.3%}</code> (uniform over the three values), <em>not</em> <code>{6:100%}</code> (the sum). Verified by probes -21 / -22 against AnyDice. Both anydyce and AnyDice produce the uniform distribution.</p>
+  <code>output {1,2,3}</code> yields <code>{1:33.3%, 2:33.3%, 3:33.3%}</code> (uniform over the three values), <em>not</em> <code>{6:100%}</code> (the sum). Verified by probes -21 / -22 against AnyDice. Both Dyceum and AnyDice produce the uniform distribution.</p>
 </li>
 <li>
 <p><strong><code>output</code> collapses any pool / H to its sum.</strong>
@@ -1134,7 +1134,7 @@
 <h3 id="h-h-h-not-0"><code>H({}) + H({}) = H({})</code>, not <code>0</code></h3>
 <p>Our <code>_apply_arith</code>'s "treat empty die as scalar <code>0</code> for <code>+</code>/<code>-</code>" rule was applied independently per operand, so <code>H({}) + H({})</code> collapsed via <code>0 + 0 = 0</code> instead of propagating <code>H({})</code>. The split surfaced on recursion-cap paths in exploding-dice corpus programs (<code>result: 1d[explode dN] + 1d[explode dN]</code> where both inner calls hit the depth cap and returned <code>H({})</code>); our spurious <code>0</code> leaked into the parent distribution and reshaped it broadly across interior outcomes, not just the tail. The truncation warnings on these programs were red herrings -- the dominant divergence wasn't the precision-floor tail, it was this empty+empty coercion. Fix: check both-operand emptiness <em>before</em> the per-operand single-empty rule fires (interpreter.py:467-485). Canonical corpus impact: cleared 16 of 18 truncation-warning residual programs (e.g. <code>0x42f0</code>, <code>0x5d53</code>, <code>0x10517</code>, <code>0x141db</code>) plus 5 additional exact matches (<code>0x142c7</code>, <code>0x28367</code>-<code>9</code>, <code>0x286d1</code>). Verified against the recursion-cap probes <code>-0x2e</code> (smaller-die variant of <code>0x42f0</code>) and <code>-0x30</code> (multi-fallback discriminator). Codified by <code>test_empty_die_&lt;op&gt;_empty_die</code> across the binary-op test classes.</p>
 <h3 id="preserve_zero_counts-in-dyce-core-070rc3"><code>preserve_zero_counts</code> in dyce-core (0.7.0rc3)</h3>
-<p>A dyce-core change re-ported into the dyce-cleanroom branch to support our interpreter's <code>H.lowest_terms(preserve_zero_counts=...)</code> use. Not strictly an anydyce bug but called out because the integration unblocked the corpus triage.</p>
+<p>A dyce-core change re-ported into the dyce-cleanroom branch to support our interpreter's <code>H.lowest_terms(preserve_zero_counts=...)</code> use. Not strictly a Dyceum bug but called out because the integration unblocked the corpus triage.</p>
 <hr />
 <h2 id="4-methodology-the-rename-counterfactual-technique">4. Methodology: the rename-counterfactual technique</h2>
 <p>Most of the bugs in Section 2 — especially the parameter-leakage cluster — were diagnosed using a counterfactual rewrite that exploits AnyDice's <em>correct</em> handling of local-variable mutation as a baseline. The technique is the standard tool for confirming whether a corpus divergence belongs to a known bug class (or surfaces a new one).</p>
