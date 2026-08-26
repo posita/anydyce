@@ -32,6 +32,11 @@ If that file is missing or appears to be modified from its original, then please
 
 # `dyceum` (née `anydyce`) – Application experiments for [`dyce`](https://posita.github.io/dyce/)
 
+<div align="center">
+  <a href="https://dyceum.org/latest/playground/"><img src="https://dyceum.org/latest/assets/anydice-clone.png" alt="Dyceum’s AnyDice interpreter in action"></a><br>
+  <i>Dyceum’s AnyDice language interpreter and interactive playground in action</i>
+</div>
+
 `dyceum` is a testing ground for various interactive interfaces to [`dyce`](https://posita.github.io/dyce/) (the dice mechanic modeling library).
 ***`dyceum` was deliberately renamed from `anydyce` based on [community feedback](https://www.reddit.com/r/RPGdesign/comments/1vt60ti/anydyce_an_open_source_inbrowser_mostlycompatible/).*** Currently, it includes:
 
