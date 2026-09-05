@@ -56,12 +56,11 @@ from dyce.viz.plotly import bar_spec, line_spec, ridge_spec
 # playground UI shows every warning explicitly in the logs pane, so we
 # switch to "always" -- a recurring TruncationWarning at the same site
 # should be visible each run, not silently de-duplicated. simplefilter()
-# RESETS the filter list, so the category-specific ignores below MUST be
-# added AFTER it; filterwarnings() prepends, so the last-added rule is
-# checked first.
+# prepends each rule, so the category-specific ignores below MUST be added
+# AFTER the general rule to take precedence.
 warnings.simplefilter("always")
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-warnings.filterwarnings("ignore", category=ExperimentalWarning)
+warnings.simplefilter("ignore", DeprecationWarning)
+warnings.simplefilter("ignore", ExperimentalWarning)
 
 from dyceum.anydice import Settings, format_results, run as _dyceum_run
 from dyceum.csv import csv_base64, csv_filename

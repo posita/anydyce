@@ -47,7 +47,7 @@ __all__ = ()
 
 @pytest.fixture(autouse=True)
 def _suppress_experimental() -> None:
-    warnings.filterwarnings("ignore", category=RuntimeWarning)
+    warnings.simplefilter("ignore", RuntimeWarning)
 
 
 # ---- Tests ---------------------------------------------------------------------------
