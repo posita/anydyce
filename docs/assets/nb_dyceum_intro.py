@@ -55,7 +55,7 @@ from dyce.lifecycle import ExperimentalWarning
 import dyceum.magic  # ruff: ignore[unused-import]
 
 matplotlib_inline.backend_inline.set_matplotlib_formats("svg")
-warnings.filterwarnings("ignore", category=ExperimentalWarning)
+warnings.simplefilter("ignore", ExperimentalWarning)
 
 # %% [markdown]
 # ### Using `dyce` to visualize *[Apocalypse World](http://apocalypse-world.com/)&rsquo;s* core mechanic with various modifiers

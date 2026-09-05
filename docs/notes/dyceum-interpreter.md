@@ -839,11 +839,8 @@ user's `return expand(...)` line:
 
 Each renders as `header\n  source-line\n`. Adjacent emissions look like
 the source line is printed twice, but it's two different warnings whose
-tails happen to be the same source. `explode_n` at `evaluation.py:587`
-already wraps internal `expand` calls in
-`warnings.catch_warnings()` with `filterwarnings("ignore",
-category=ExperimentalWarning)` to suppress the noise from a public API
-that itself uses `expand`.
+tails happen to be the same source.
+`explode_n` is itself experimental, and the `@experimental` decorator suppresses the nested `ExperimentalWarning` from its internal `expand` call.
 
 ### Two-stage `_pct_to_counts` recovery
 
