@@ -122,8 +122,8 @@ def anyd(line: str, cell: str) -> None:
         # Everything other than a DeprecationWarning or ExperimentalWarning (e.g.,
         # TruncationWarning, etc.) should bubble up so Jupyter renders it next to the
         # cell output
-        warnings.filterwarnings("ignore", category=DeprecationWarning)
-        warnings.filterwarnings("ignore", category=ExperimentalWarning)
+        warnings.simplefilter("ignore", DeprecationWarning)
+        warnings.simplefilter("ignore", ExperimentalWarning)
         # Seed the display precision from the CLI flag; `set "dyceum: display
         # precision"` inside the cell can override (the run() call mutates
         # settings in place). format_results then reads the final value.
