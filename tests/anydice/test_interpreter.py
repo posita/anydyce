@@ -3305,10 +3305,10 @@ class TestBuiltinHighestNOf:
 # arguments are valid; they coerce to single-face dice via `:d` semantics.
 #
 # Equivalent dyce expressions (per the user's specification):
-#   [highest N of A and B]          == P(A, B).h(slice(-N, None))
-#   [lowest  N of A and B]          == P(A, B).h(slice(0, N))
-#   [highest N of A and B and C]    == P(A, B, C).h(slice(-N, None))
-#   [lowest  N of A and B and C]    == P(A, B, C).h(slice(0, N))
+#   [highest N of A and B]          == P(A, B).at(slice(-N, None))
+#   [lowest  N of A and B]          == P(A, B).at(slice(0, N))
+#   [highest N of A and B and C]    == P(A, B, C).at(slice(-N, None))
+#   [lowest  N of A and B and C]    == P(A, B, C).at(slice(0, N))
 
 
 class TestBuiltinHighestNOfAnd:
@@ -3359,13 +3359,13 @@ class TestBuiltinHighestNOfAnd:
 
     def test_highest_2_of_two_multi_die_pools(self) -> None:
         # `[highest 2 of 2d6 and 1d4]` -- combined pool of 3 dice, take top 2.
-        expected = P(H(6), H(6), H(4)).h(slice(-2, None))
+        expected = P(H(6), H(6), H(4)).at(slice(-2, None))
         assert run("output [highest 2 of 2d6 and 1d4]") == [("output 1", expected)]
 
     def test_highest_4_of_three_multi_die_pools(self) -> None:
         # `[highest 4 of 3d4 and 3d6 and 3d8]` -- combined pool of 9 dice,
         # take top 4. Matches program -a in the small corpus.
-        expected = P(H(4), H(4), H(4), H(6), H(6), H(6), H(8), H(8), H(8)).h(
+        expected = P(H(4), H(4), H(4), H(6), H(6), H(6), H(8), H(8), H(8)).at(
             slice(-4, None)
         )
         assert run("output [highest 4 of 3d4 and 3d6 and 3d8]") == [

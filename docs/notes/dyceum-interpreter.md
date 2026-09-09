@@ -111,7 +111,7 @@ any non-string value.
 Right operand governs dispatch:
 
 - `P` or `H` → `_pool_h_select(pool, positions)` → H distribution.
-  Uses `pool.h(*selectors)` with `slice` objects built from 1-based positions.
+  Uses `pool.at(*selectors)` with `slice` objects built from 1-based positions.
   In highest-first mode position 1 is the highest die (`slice(-1, None)`),
   position 2 is second-highest (`slice(-2, -1)`), etc.
 - `tuple` (sequence) → deterministic index: position 1 → last element in a
@@ -268,7 +268,7 @@ semantic uniformly across right operands:
 - `{1, 3} @ 4567` = digit-extract at positions 1 and 3, summed.
 
 Implementation: `_at_seq` and `_at_pool` recognize a tuple-left and dispatch
-to multi-position selection (using `pool.h(*selectors)` for pools so
+to multi-position selection (using `pool.at(*selectors)` for pools so
 correlated positions are summed jointly, not as independent draws). Verified
 against AnyDice (program 42ad5).
 
@@ -751,10 +751,10 @@ New families should still land under the same TDD pattern when they're added.
 AnyDice exposes four undocumented patterns that are NOT user-definable via the function-definition syntax (you can't write `function: highest N:n of A:d and B:d`; the parser would treat that as a same-shape user function only callable with a specific dispatch shape, but AnyDice's builtin preempts).
 They construct a heterogeneous pool from the listed dice and select the N highest / N lowest:
 
-- `[highest N of FIRST and SECOND]` ≡ `P(FIRST, SECOND).h(slice(-N, None))`
-- `[lowest N of FIRST and SECOND]` ≡ `P(FIRST, SECOND).h(slice(0, N))`
-- `[highest N of FIRST and SECOND and THIRD]` ≡ `P(FIRST, SECOND, THIRD).h(slice(-N, None))`
-- `[lowest N of FIRST and SECOND and THIRD]` ≡ `P(FIRST, SECOND, THIRD).h(slice(0, N))`
+- `[highest N of FIRST and SECOND]` ≡ `P(FIRST, SECOND).at(slice(-N, None))`
+- `[lowest N of FIRST and SECOND]` ≡ `P(FIRST, SECOND).at(slice(0, N))`
+- `[highest N of FIRST and SECOND and THIRD]` ≡ `P(FIRST, SECOND, THIRD).at(slice(-N, None))`
+- `[lowest N of FIRST and SECOND and THIRD]` ≡ `P(FIRST, SECOND, THIRD).at(slice(0, N))`
 
 There is NO four-or-more-die variant; the family is exactly 2-die and 3-die.
 Scalar arguments are valid (coerce to single-face dice via `:d` semantics) and pool arguments are valid too (dyce's `P()` flattens nested pools so `P(2d6, 1d4)` correctly yields a 3-die pool).

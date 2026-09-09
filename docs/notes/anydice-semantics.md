@@ -179,7 +179,7 @@ Examples: `0x19a58`, `0x25d0d` (substantially similar programs by the same autho
 
 ### `_SelectionPrefix` / `_SelectionSuffix` multiplicity (dyce-side, *fixed upstream*)
 
-Listed here for completeness even though the fix is upstream. dyce's `P.h(*selectors)` previously dropped per-position multiplicity when the duplicate-selection covered only a *subset* of pool positions (e.g. `.h(-2,-2)` on a 2-die pool). The Prefix/Suffix selection types were multiplicity-blind; selections with `count>1` over a partial subset fell through to them, silently de-duplicating. AnyDice preserves multiplicity here; we did not. Fixed in dyce `0.7.0rc4`; anydyce pinned to that release.
+Listed here for completeness even though the fix is upstream. dyce's `P.at(*selectors)` previously dropped per-position multiplicity when the duplicate-selection covered only a *subset* of pool positions (e.g. `.at(-2,-2)` on a 2-die pool). The Prefix/Suffix selection types were multiplicity-blind; selections with `count>1` over a partial subset fell through to them, silently de-duplicating. AnyDice preserves multiplicity here; we did not. Fixed in dyce `0.7.0rc4`; anydyce pinned to that release.
 
 Evidence: dyce's `tests/test_p.py::test_analyze_selection_single_pos`; corpus `0x11caf` cleared by the upstream fix.
 
