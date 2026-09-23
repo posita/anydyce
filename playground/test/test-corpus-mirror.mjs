@@ -224,11 +224,10 @@ test("provenanceHeader: negative ID cites the mirror (no fabricated anydice.com 
   // Negative IDs are locally-minted fakes; they never existed on
   // anydice.com.
   const header = provenanceHeader("-c", "2026-06-12T00:00:00Z");
-  // The mirror URL's PATH contains "anydice.com/program/" (the repo mirrors
-  // the site's directory layout), so exclude the canonical ORIGIN
-  // specifically.
-  assert.ok(!header.includes("https://anydice.com/"), header);
-  assert.match(header, /fetched from https:\/\/raw\.githubusercontent\.com\/posita\/anydice-data\//);
+  assert.match(
+    header,
+    /^  AnyDice program -c fetched from https:\/\/raw\.githubusercontent\.com\/posita\/anydice-data\/refs\/heads\/main\/anydice\.com\/program\/00\/0c\/-c\.txt$/m,
+  );
 });
 
 test("provenanceHeader: includes the #id= fragment for reproducibility", () => {
