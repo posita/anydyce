@@ -39,7 +39,7 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://dyceum.org/"
-"Source Repository" = "https://github.com/posita/anydyce/"
+"Source Repository" = "https://github.com/posita/dyceum/"
 
 [project.optional-dependencies]
 jupyter = ["dyce[viz-mpl]", "ipywidgets"]

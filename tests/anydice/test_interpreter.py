@@ -3571,7 +3571,7 @@ class TestSetSettingValidation:
 # ---- dyceum-specific precision settings -----------------------------------------------
 
 
-class TestAnydyceSettings:
+class TestProprietaryDyceumSettings:
     # `set "dyceum: calculation precision"` controls the bit_width passed to
     # dyce.quantize_hs for the duration of the run; mid-program changes take
     # effect for subsequent statements via re-entry. `set "dyceum: display

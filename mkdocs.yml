@@ -6,7 +6,7 @@ copyright: <i>Copyright and other protections apply.
   All rights not expressly waived or licensed are reserved.
   If that file is missing or appears to be modified from its original, then please contact the author before viewing or using this software in any capacity.</i>
 docs_dir: docs
-repo_url: https://github.com/posita/anydyce/
+repo_url: https://github.com/posita/dyceum/
 
 theme:
   name: material

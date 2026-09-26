@@ -176,7 +176,7 @@ The cause for this partial outage is unknown.
 The purpose of this effort is to provide a publicly-accessible reference implementation to avoid future loss of user investment.
 For convenience, a usable instance resides at [`https://dyceum.org/latest/playground/`](https://dyceum.org/latest/playground/).
 However, merely relying on a single alternate site is insufficient, as no site guarantees access in perpetuity.
-Therefore, users are encouraged to clone [this implementation’s source code](https://github.com/posita/anydyce) and run or host instances of their own.
+Therefore, users are encouraged to clone [this implementation’s source code](https://github.com/posita/dyceum) and run or host instances of their own.
 
 The [AnyDice program cache](https://github.com/posita/anydice-data) is intended to preserve intellectual property of program authors who assigned no royalties or rights to their programs, and who reasonably relied on the ongoing availability of an interpreter and storage mechanism to preserve each program’s accessibility and value.
 If you are the author of a particular program in the cache that you want removed, please [file an issue](https://github.com/posita/anydice-data/issues).

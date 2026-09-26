@@ -57,7 +57,7 @@ def on_pre_build(**_kwargs: object) -> None:
     index = readme
     # Replace 'main' with the version-specific git ref in GitHub source URLs
     index = re.sub(
-        r"(https?://(?:raw\.githubusercontent\.com|github\.com)/posita/anydyce/(?:blob/|tree/)?)main\b",
+        r"(https?://(?:raw\.githubusercontent\.com|github\.com)/posita/dyceum/(?:blob/|tree/)?)main\b",
         rf"\g<1>{_GIT_REF}",
         index,
     )

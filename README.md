@@ -19,8 +19,8 @@ All rights not expressly waived or licensed are reserved.
 If that file is missing or appears to be modified from its original, then please contact the author before viewing or using this software in any capacity.*
 <!-- mkdocs:hide:end -->
 
-[![Tests](https://github.com/posita/anydyce/actions/workflows/tests.yaml/badge.svg)](https://github.com/posita/anydyce/actions/workflows/tests.yaml)
-[![Coverage](https://codecov.io/gh/posita/anydyce/branch/main/graph/badge.svg)](https://app.codecov.io/gh/posita/anydyce)
+[![Tests](https://github.com/posita/dyceum/actions/workflows/tests.yml/badge.svg)](https://github.com/posita/dyceum/actions/workflows/tests.yml)
+[![Coverage](https://codecov.io/gh/posita/dyceum/branch/main/graph/badge.svg)](https://app.codecov.io/gh/posita/dyceum)
 [![Version](https://img.shields.io/pypi/v/dyceum.svg)](https://pypi.org/project/dyceum/)
 ![Development Stage](https://img.shields.io/pypi/status/dyceum.svg)
 [![License](https://img.shields.io/pypi/l/dyceum.svg)](http://opensource.org/licenses/MIT)
@@ -56,11 +56,11 @@ If you find anything lacking in any way, please don’t hesitate to [bring it to
 
 ## Running locally
 
-`dyceum` is also available [as a PyPI package](https://pypi.python.org/pypi/dyceum/) and [as source](https://github.com/posita/anydyce).
-To try it on your own hardware, use the [`quickstart-local.sh` script](https://github.com/posita/anydyce/blob/main/quickstart-local.sh) to create a local [virtual environment](https://docs.python.org/3/library/venv.html) and bootstrap a local copy.
+`dyceum` is also available [as a PyPI package](https://pypi.python.org/pypi/dyceum/) and [as source](https://github.com/posita/dyceum).
+To try it on your own hardware, use the [`quickstart-local.sh` script](https://github.com/posita/dyceum/blob/main/quickstart-local.sh) to create a local [virtual environment](https://docs.python.org/3/library/venv.html) and bootstrap a local copy.
 
 ```sh
-% git clone https://github.com/posita/anydyce.git dyceum && ./dyceum/quickstart-local.sh
+% git clone https://github.com/posita/dyceum.git dyceum && ./dyceum/quickstart-local.sh
 ...
 INFO    -  Documentation built in 4.84 seconds
 INFO    -  [20:39:05] Serving on http://127.0.0.1:8000/
@@ -91,4 +91,4 @@ It has the following runtime dependencies:
 
 `dyceum` is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 See the included [`LICENSE`](https://dyceum.org/latest/license/) file for details.
-Source code is [available on GitHub](https://github.com/posita/anydyce).
+Source code is [available on GitHub](https://github.com/posita/dyceum).
