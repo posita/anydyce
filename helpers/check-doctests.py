@@ -14,7 +14,8 @@
 # (This does not apply to code comments.) Thank you!
 # ======================================================================================
 
-r"""Synthesize type-checkable files from doctests and run type checkers, or reformat doctest examples in place.
+r"""
+Synthesizes type-checkable files from doctests and run type checkers, or reformat doctest examples in place.
 
 Run "check --help" or "format --help" for subcommand-specific usage.
 """
@@ -43,11 +44,17 @@ from typing import Any
 _LOGGER = logging.getLogger(__name__)
 _DEFAULT_SUFFIXES: frozenset[str] = frozenset({".md", ".py", ".pyi"})
 
+
+def _log_text(value: object) -> str:
+    r"""Escapes line breaks in values included in one-line log entries."""
+    return str(value).replace("\n", r"\n").replace("\r", r"\r")
+
+
 # ---- Synthesis -----------------------------------------------------------------------
 
 
 def _leading_blank_lines(s: str) -> int:
-    r"""Return the number of leading blank lines in *s*."""
+    r"""Returns the number of leading blank lines in *s*."""
     count = 0
     for line in s.split("\n"):
         if line.strip():
@@ -58,7 +65,7 @@ def _leading_blank_lines(s: str) -> int:
 
 def _iter_doctests(text: str, filepath: Path) -> Iterator[tuple[int, doctest.DocTest]]:
     r"""
-    Yield `(doc_offset, dt)` for every doctest block in *text*.
+    Yields `(doc_offset, dt)` for every doctest block in *text*.
 
     First tries to locate docstrings via `ast` (text-only, no import).
     Each docstring's `doc_offset` maps `dt.examples[i].lineno` to an absolute 0-based line number in the original file.
@@ -74,10 +81,12 @@ def _iter_doctests(text: str, filepath: Path) -> Iterator[tuple[int, doctest.Doc
     try:
         tree = ast.parse(text, filename=str(filepath))
     except SyntaxError:
-        _LOGGER.debug("%s: ast parse failed, falling back to text mode", filepath)
+        _LOGGER.debug(
+            "%s: ast parse failed, falling back to text mode", _log_text(filepath)
+        )
         yield 0, parser.get_doctest(string=text, **kwargs)
     else:
-        _LOGGER.debug("%s: parsed via ast", filepath)
+        _LOGGER.debug("%s: parsed via ast", _log_text(filepath))
         for node in ast.walk(tree):
             if not isinstance(
                 node,
@@ -106,14 +115,14 @@ def _iter_doctests(text: str, filepath: Path) -> Iterator[tuple[int, doctest.Doc
 
 def _synthesize_filepath(filepath: Path) -> str:
     r"""
-    Return a buffer whose doctest code lines occupy their original positions.
+    Returns a buffer whose doctest code lines occupy their original positions.
 
     All other lines are blank. The result ends with exactly one `os.linesep`.
     """
     try:
         text = filepath.read_text(encoding="utf-8")
     except UnicodeDecodeError as exc:
-        _LOGGER.warning("skipping %s: %s", filepath, exc)
+        _LOGGER.warning("skipping %s: %s", _log_text(filepath), _log_text(exc))
         return ""
     out = [""] * len(text.splitlines())
     if out:
@@ -137,10 +146,10 @@ def _synthesize_filepaths(tmp_dir: Path, filepaths: Iterable[Path]) -> dict[Path
         if flat in seen_flat:
             _LOGGER.warning(
                 "name collision: %s and %s both map to %s; skipping %s",
-                seen_flat[flat],
-                filepath,
-                flat,
-                filepath,
+                _log_text(seen_flat[flat]),
+                _log_text(filepath),
+                _log_text(flat),
+                _log_text(filepath),
             )
             continue
         seen_flat[flat] = filepath
@@ -148,11 +157,11 @@ def _synthesize_filepaths(tmp_dir: Path, filepaths: Iterable[Path]) -> dict[Path
         try:
             content = _synthesize_filepath(filepath)
         except OSError as exc:
-            _LOGGER.warning("skipping %s: %s", filepath, exc)
+            _LOGGER.warning("skipping %s: %s", _log_text(filepath), _log_text(exc))
             continue
         tmp_path.write_text(content)
         path_map[tmp_path] = filepath
-        _LOGGER.debug("wrote %s", tmp_path)
+        _LOGGER.debug("wrote %s", _log_text(tmp_path))
 
     return path_map
 
@@ -169,11 +178,11 @@ def _run_checkers(
 
     for checker_cmd in checker_commands:
         cmd = checker_cmd + [str(p) for p in tmp_files]
-        _LOGGER.info("%s", " ".join(cmd))
+        _LOGGER.info("%s", _log_text(" ".join(cmd)))
         try:
             result = subprocess.run(cmd, capture_output=True, text=True)  # ruff: ignore[subprocess-run-without-check, subprocess-without-shell-equals-true]
         except FileNotFoundError:
-            _LOGGER.error("checker not found: %s", checker_cmd[0])  # ruff: ignore[error-instead-of-exception]
+            _LOGGER.error("checker not found: %s", _log_text(checker_cmd[0]))  # ruff: ignore[error-instead-of-exception]
             if fail_fast:
                 return 1
             exit_code |= 1
@@ -204,7 +213,7 @@ def _run_checkers(
 
 def _ruff_format(source: str) -> str | None:
     r"""
-    Format *source* through `ruff format`.
+    Formats *source* through `ruff format`.
 
     Returns the formatted source, or `None` if ruff failed or the source is unchanged.
     """
@@ -223,7 +232,7 @@ def _ruff_format(source: str) -> str | None:
 
 def _make_prefixed_lines(source: str, indent: int) -> list[str] | None:
     r"""
-    Convert formatted Python *source* to doctest-prefixed lines.
+    Converts formatted Python *source* to doctest-prefixed lines.
 
     Applies *indent* spaces before each `>>>` or `...` prompt.
     Returns `None` if the formatted source contains blank lines between top-level statements, which would silently split the example into multiple interactions.
@@ -256,7 +265,7 @@ def _make_prefixed_lines(source: str, indent: int) -> list[str] | None:
 
 def _format_filepath(filepath: Path) -> bool:
     r"""
-    Format doctest examples in *filepath* in place.
+    Formats doctest examples in *filepath* in place.
 
     Skips `.py` and `.pyi` files.
     Relies on `ruff format` for those, which handles docstring line-length adjustments natively via `docstring-code-line-length`.
@@ -264,13 +273,14 @@ def _format_filepath(filepath: Path) -> bool:
     """
     if filepath.suffix in {".py", ".pyi"}:
         _LOGGER.debug(
-            "skipping %s: use ruff format for Python doctest formatting", filepath
+            "skipping %s: use ruff format for Python doctest formatting",
+            _log_text(filepath),
         )
         return False
     try:
         text = filepath.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as exc:
-        _LOGGER.warning("skipping %s: %s", filepath, exc)
+        _LOGGER.warning("skipping %s: %s", _log_text(filepath), _log_text(exc))
         return False
 
     examples: list[tuple[int, doctest.Example]] = [
@@ -301,7 +311,7 @@ def _format_filepath(filepath: Path) -> bool:
         if new_lines is None:
             _LOGGER.warning(
                 "%s:%d: skipping example: reformatted source would split the doctest block",
-                filepath,
+                _log_text(filepath),
                 abs_lineno + 1,
             )
             continue
@@ -323,14 +333,14 @@ def _format_filepath(filepath: Path) -> bool:
 
 
 def _format_filepaths(filepaths: Iterable[Path]) -> bool:
-    r"""Format doctest examples across all *filepaths*, logging a summary."""
+    r"""Formats doctest examples across all *filepaths*, logging a summary."""
     changed: list[Path] = [
         filepath for filepath in filepaths if _format_filepath(filepath)
     ]
 
     if changed:
         for p in changed:
-            _LOGGER.info("reformatted %s", p)
+            _LOGGER.info("reformatted %s", _log_text(p))
         _LOGGER.warning("%d file(s) reformatted", len(changed))
         return True
     else:
@@ -345,7 +355,7 @@ _tmp_dir: Path | None = None
 
 def _flat_name(filepath: Path) -> str:
     r"""
-    Derive a flat filename for *filepath* suitable for a shared temp directory.
+    Derives a flat filename for *filepath* suitable for a shared temp directory.
 
     Leading dots and path separators are stripped, remaining separators are replaced with `__`, and the extension is forced to `.py` so that type checkers will analyse the file.
     """
@@ -356,7 +366,7 @@ def _flat_name(filepath: Path) -> str:
 
 def _cleanup_tmp_dir(*, tmp_dir: Path) -> None:
     if tmp_dir is not None and tmp_dir.exists():
-        _LOGGER.debug("removing temp directory %s", tmp_dir)
+        _LOGGER.debug("removing temp directory %s", _log_text(tmp_dir))
         shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
@@ -379,7 +389,7 @@ def _load_toml_config(  # ruff: ignore[complex-structure]
     subcommand: str | None,
 ) -> tuple[dict[str, object], dict[str, object]]:
     r"""
-    Find and return `[tool.check_doctests]` from the nearest `pyproject.toml`.
+    Finds and return `[tool.check_doctests]` from the nearest `pyproject.toml`.
 
     Walks up from the current directory.
     Returns `({}, {})` if no file is found or the section is absent.
@@ -394,13 +404,17 @@ def _load_toml_config(  # ruff: ignore[complex-structure]
             with candidate.open("rb") as f:
                 data = tomllib.load(f)
         except (OSError, tomllib.TOMLDecodeError) as exc:
-            _LOGGER.warning("could not read %s: %s", candidate, exc)
+            _LOGGER.warning(
+                "could not read %s: %s", _log_text(candidate), _log_text(exc)
+            )
             return {}, {}
         raw: object = data.get("tool", {}).get("check_doctests", {})
         if not isinstance(raw, dict):
-            _LOGGER.warning("%s: [tool.check_doctests] is not a table", candidate)
+            _LOGGER.warning(
+                "%s: [tool.check_doctests] is not a table", _log_text(candidate)
+            )
             return {}, {}
-        _LOGGER.debug("loaded config from %s", candidate)
+        _LOGGER.debug("loaded config from %s", _log_text(candidate))
 
         # Parse shared keys (skip subcommand sub-tables).
         shared: dict[str, object] = {}
@@ -411,16 +425,24 @@ def _load_toml_config(  # ruff: ignore[complex-structure]
                 if isinstance(val, str):
                     shared[key] = val
                 else:
-                    _LOGGER.warning("%s: %s must be a string; ignoring", candidate, key)
+                    _LOGGER.warning(
+                        "%s: %s must be a string; ignoring",
+                        _log_text(candidate),
+                        _log_text(key),
+                    )
             elif key in _TOML_SHARED_STR_LIST_KEYS:
                 if isinstance(val, list) and all(isinstance(s, str) for s in val):
                     shared[key] = val
                 else:
                     _LOGGER.warning(
-                        "%s: %s must be a list of strings; ignoring", candidate, key
+                        "%s: %s must be a list of strings; ignoring",
+                        _log_text(candidate),
+                        _log_text(key),
                     )
             else:
-                _LOGGER.warning("%s: unknown key %r; ignoring", candidate, key)
+                _LOGGER.warning(
+                    "%s: unknown key %r; ignoring", _log_text(candidate), _log_text(key)
+                )
 
         # Parse subcommand-specific keys.
         sub: dict[str, object] = {}
@@ -429,8 +451,8 @@ def _load_toml_config(  # ruff: ignore[complex-structure]
             if not isinstance(raw_sub, dict):
                 _LOGGER.warning(
                     "%s: [tool.check_doctests.%s] is not a table",
-                    candidate,
-                    subcommand,
+                    _log_text(candidate),
+                    _log_text(subcommand),
                 )
             else:
                 for key, val in raw_sub.items():
@@ -445,7 +467,7 @@ def _load_toml_config(  # ruff: ignore[complex-structure]
                             else:
                                 _LOGGER.warning(
                                     "%s: checkers must be a list of string lists; ignoring",
-                                    candidate,
+                                    _log_text(candidate),
                                 )
                         elif key in _TOML_CHECK_BOOL_KEYS:
                             if isinstance(val, bool):
@@ -453,20 +475,20 @@ def _load_toml_config(  # ruff: ignore[complex-structure]
                             else:
                                 _LOGGER.warning(
                                     "%s: %s must be a boolean; ignoring",
-                                    candidate,
-                                    key,
+                                    _log_text(candidate),
+                                    _log_text(key),
                                 )
                         else:
                             _LOGGER.warning(
                                 "%s: unknown key %r in [tool.check_doctests.check]; ignoring",
-                                candidate,
-                                key,
+                                _log_text(candidate),
+                                _log_text(key),
                             )
                     else:
                         _LOGGER.warning(
                             "%s: unknown key %r in [tool.check_doctests.format]; ignoring",
-                            candidate,
-                            key,
+                            _log_text(candidate),
+                            _log_text(key),
                         )
 
         return shared, sub
@@ -480,7 +502,7 @@ def _split_argv(
     argv: list[str],
 ) -> tuple[list[str], list[list[str]]]:
     r"""
-    Split *argv* on `--` boundaries.
+    Splits *argv* on `--` boundaries.
 
     Returns `(pre_args, checker_commands)` where *pre_args* is everything before the first `--` (passed to argparse) and *checker_commands* is a list of token lists, one per checker, split on subsequent `--` tokens.
 
@@ -646,7 +668,7 @@ def _enum_src_files(paths: Sequence[Path], suffixes: frozenset[str]) -> list[Pat
             text=True,
         )
         if result.returncode != 0:
-            _LOGGER.error("git rev-parse failed: %s", result.stderr.strip())
+            _LOGGER.error("git rev-parse failed: %s", _log_text(result.stderr.strip()))
             dirs.append(Path.cwd())
         else:
             dirs.append(Path(result.stdout.strip()))
@@ -666,7 +688,7 @@ def _enum_src_files(paths: Sequence[Path], suffixes: frozenset[str]) -> list[Pat
             text=True,
         )
         if result.returncode != 0:
-            _LOGGER.error("git ls-files failed: %s", result.stderr.strip())
+            _LOGGER.error("git ls-files failed: %s", _log_text(result.stderr.strip()))
         else:
             discovered = [
                 Path(p)
@@ -676,7 +698,7 @@ def _enum_src_files(paths: Sequence[Path], suffixes: frozenset[str]) -> list[Pat
             _LOGGER.debug(
                 "found %d file(s) via git ls-files (filtered to %s)",
                 len(discovered),
-                ", ".join(sorted(suffixes)),
+                _log_text(", ".join(sorted(suffixes))),
             )
             files.extend(discovered)
 
@@ -757,10 +779,10 @@ def main() -> int:  # ruff: ignore[complex-structure]
 
     # Set up temp directory and cleanup handlers.
     tmp_dir = Path(tempfile.mkdtemp(prefix="check_doctests_"))
-    _LOGGER.debug("temp directory: %s", tmp_dir)
+    _LOGGER.debug("temp directory: %s", _log_text(tmp_dir))
 
     if args.keep:
-        _LOGGER.warning("keeping temp directory: %s", tmp_dir)
+        _LOGGER.warning("keeping temp directory: %s", _log_text(tmp_dir))
     else:
         cleanup_tmp_dir = partial(_cleanup_tmp_dir, tmp_dir=tmp_dir)
         atexit.register(cleanup_tmp_dir)
