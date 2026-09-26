@@ -2,8 +2,8 @@
 
 A living catalog of:
 
-1. **Preserved AnyDice idiosyncrasies** -- behaviors that are surprising or inconsistent but appear to be intended, that Dyceum faithfully replicates.
-2. **Excluded AnyDice bugs** -- behaviors we have evidence are unintended defects, that Dyceum deliberately does *not* replicate (and that we annotate corpus mismatches with so AnyDice is not used as an oracle for them).
+1. **Preserved AnyDice idiosyncrasies** -- behaviors that are surprising or inconsistent but appear to be intended, that `dyceum` faithfully replicates.
+2. **Excluded AnyDice bugs** -- behaviors we have evidence are unintended defects, that `dyceum` deliberately does *not* replicate (and that we annotate corpus mismatches with so AnyDice is not used as an oracle for them).
 3. **Fixed our-side bugs** -- correctness defects we discovered in our own interpreter during corpus triage and have since fixed.
 
 Each entry should carry a concrete reference (a test name, a probe id, a commit, or a corpus program id) so the claim is verifiable. AnyDice is closed-source; everything here is the result of empirical reverse-engineering against the live `anydice.com` and the cached corpus output.
@@ -19,7 +19,7 @@ Future-investigation lead: the `match:approximate` corpus cohort (~26k programs 
 ### Type coercion and value semantics
 
 - **Sequence in numeric / die context is *uniform over elements*, not the sum.**
-  `output {1,2,3}` yields `{1:33.3%, 2:33.3%, 3:33.3%}` (uniform over the three values), *not* `{6:100%}` (the sum). Verified by probes -21 / -22 against AnyDice. Both Dyceum and AnyDice produce the uniform distribution.
+  `output {1,2,3}` yields `{1:33.3%, 2:33.3%, 3:33.3%}` (uniform over the three values), *not* `{6:100%}` (the sum). Verified by probes -21 / -22 against AnyDice. Both `dyceum` and AnyDice produce the uniform distribution.
 
 - **`output` collapses any pool / H to its sum.**
   This is `output`'s behavior, not a property of the dice or the operators that produced the value. So `output 2d10` produces the triangular sum 2..20; `output -(2d10)` collapses the negated pool to -20..-2. The pool / H structure survives every operator that doesn't itself collapse; `output` is the universal collapse site.
@@ -179,7 +179,7 @@ Examples: `0x19a58`, `0x25d0d` (substantially similar programs by the same autho
 
 ### `_SelectionPrefix` / `_SelectionSuffix` multiplicity (dyce-side, *fixed upstream*)
 
-Listed here for completeness even though the fix is upstream. dyce's `P.h(*selectors)` previously dropped per-position multiplicity when the duplicate-selection covered only a *subset* of pool positions (e.g. `.h(-2,-2)` on a 2-die pool). The Prefix/Suffix selection types were multiplicity-blind; selections with `count>1` over a partial subset fell through to them, silently de-duplicating. AnyDice preserves multiplicity here; we did not. Fixed in dyce `0.7.0rc4`; anydyce pinned to that release.
+Listed here for completeness even though the fix is upstream. dyce's `P.at(*selectors)` previously dropped per-position multiplicity when the duplicate-selection covered only a *subset* of pool positions (e.g. `.at(-2,-2)` on a 2-die pool). The Prefix/Suffix selection types were multiplicity-blind; selections with `count>1` over a partial subset fell through to them, silently de-duplicating. AnyDice preserves multiplicity here; we did not. Fixed in dyce `0.7.0rc4`; anydyce pinned to that release.
 
 Evidence: dyce's `tests/test_p.py::test_analyze_selection_single_pos`; corpus `0x11caf` cleared by the upstream fix.
 
@@ -247,7 +247,7 @@ Our `_apply_arith`'s "treat empty die as scalar `0` for `+`/`-`" rule was applie
 
 ### `preserve_zero_counts` in dyce-core (0.7.0rc3)
 
-A dyce-core change re-ported into the dyce-cleanroom branch to support our interpreter's `H.lowest_terms(preserve_zero_counts=...)` use. Not strictly a Dyceum bug but called out because the integration unblocked the corpus triage.
+A dyce-core change re-ported into the dyce-cleanroom branch to support our interpreter's `H.lowest_terms(preserve_zero_counts=...)` use. Not strictly a `dyceum` bug but called out because the integration unblocked the corpus triage.
 
 ---
 

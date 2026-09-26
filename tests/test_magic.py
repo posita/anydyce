@@ -16,6 +16,7 @@
 import re
 import warnings
 from collections.abc import Callable
+from unittest.mock import ANY, Mock, call, create_autospec
 
 import pytest
 from dyce import TruncationWarning
@@ -37,16 +38,6 @@ from dyceum.magic import anyd, anyd_load, load_ipython_extension
 __all__ = ()
 
 _FetchImpl = Callable[[str], tuple[str, str, str, str]]
-
-
-class _RecordingShell:
-    r"""Minimal shell stub that records `set_next_input` calls."""
-
-    def __init__(self) -> None:
-        self.set_next_input_calls: list[tuple[str, bool]] = []
-
-    def set_next_input(self, text: str, *, replace: bool = False) -> None:
-        self.set_next_input_calls.append((text, replace))
 
 
 @pytest.fixture(autouse=True)  # ruff: ignore[pytest-fixture-autouse]
@@ -88,9 +79,9 @@ def ipython_shell() -> InteractiveShell:
 
 
 @pytest.fixture
-def recording_shell(monkeypatch: pytest.MonkeyPatch) -> _RecordingShell:
-    r"""Replace the active IPython shell with a `RecordingShell` stub for this test."""
-    shell = _RecordingShell()
+def recording_shell(monkeypatch: pytest.MonkeyPatch) -> Mock:
+    r"""Replace the active IPython shell with an autospecced mock for this test."""
+    shell = create_autospec(InteractiveShell, instance=True)
     monkeypatch.setattr(dyceum_magic, "get_ipython", lambda: shell)
     return shell
 
@@ -245,7 +236,7 @@ class TestAnydLoadMagicBasic:
     def test_replaces_cell_on_success(
         self,
         fake_fetch: Callable[[_FetchImpl], None],
-        recording_shell: _RecordingShell,
+        recording_shell: Mock,
     ) -> None:
         fake_fetch(
             lambda _arg: (
@@ -258,16 +249,15 @@ class TestAnydLoadMagicBasic:
 
         anyd_load("4d2")
 
-        assert len(recording_shell.set_next_input_calls) == 1
-        text, replace = recording_shell.set_next_input_calls[0]
-        assert replace is True
+        recording_shell.set_next_input.assert_called_once_with(ANY, replace=True)
+        text = recording_shell.set_next_input.call_args.args[0]
         assert text.startswith("%%anyd\n")
         assert text.rstrip().endswith("output 3d6")
 
     def test_program_url_and_input_in_comment(
         self,
         fake_fetch: Callable[[_FetchImpl], None],
-        recording_shell: _RecordingShell,
+        recording_shell: Mock,
     ) -> None:
         # The fetched-from URL returned by fetch_anydice_program appears in the header,
         # and the replayed `%anyd_load` line echoes what the user originally typed so
@@ -283,14 +273,14 @@ class TestAnydLoadMagicBasic:
 
         anyd_load("4d2")
 
-        text, _ = recording_shell.set_next_input_calls[0]
+        text = recording_shell.set_next_input.call_args.args[0]
         assert "fetched from https://anydice.com/program/4d2" in text
         assert "%anyd_load 4d2\n" in text
 
     def test_fetched_at_in_comment(
         self,
         fake_fetch: Callable[[_FetchImpl], None],
-        recording_shell: _RecordingShell,
+        recording_shell: Mock,
     ) -> None:
         fake_fetch(
             lambda _arg: (
@@ -303,7 +293,7 @@ class TestAnydLoadMagicBasic:
 
         anyd_load("4d2")
 
-        text, _ = recording_shell.set_next_input_calls[0]
+        text = recording_shell.set_next_input.call_args.args[0]
         # ISO 8601 timestamp with tz offset somewhere in the comment header.
         assert re.search(
             r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}",
@@ -314,27 +304,25 @@ class TestAnydLoadMagicBasic:
         self,
         fake_fetch: Callable[[_FetchImpl], None],
         # Present for the side-effect of patching dyceum.magic.get_python
-        recording_shell: _RecordingShell,  # ruff: ignore[unused-method-argument]
+        recording_shell: Mock,  # ruff: ignore[unused-method-argument]
     ) -> None:
-        captured: list[str] = []
-
-        def _capture(arg: str) -> tuple[str, str, str, str]:
-            captured.append(arg)
-            return (
+        fetch = Mock(
+            return_value=(
                 "4d2",
                 "https://anydice.com/program/4d2",
                 "https://anydice.com/",
                 "output 3d6\n",
             )
+        )
 
-        fake_fetch(_capture)
+        fake_fetch(fetch)
 
         anyd_load("4d2")
         anyd_load("https://anydice.com/program/4d2")
 
-        assert captured == [
-            "4d2",
-            "https://anydice.com/program/4d2",
+        assert fetch.call_args_list == [
+            call("4d2"),
+            call("https://anydice.com/program/4d2"),
         ]
 
 
@@ -342,7 +330,7 @@ class TestAnydLoadMagicErrors:
     def test_no_such_program_propagates(
         self,
         fake_fetch: Callable[[_FetchImpl], None],
-        recording_shell: _RecordingShell,
+        recording_shell: Mock,
     ) -> None:
         def _raise(_arg: str) -> tuple[str, str, str, str]:
             raise NoSuchProgramError("no such program", program_id_hex="deadbeef")
@@ -353,12 +341,12 @@ class TestAnydLoadMagicErrors:
             anyd_load("deadbeef")
 
         # Cell must NOT be replaced on failure
-        assert recording_shell.set_next_input_calls == []
+        recording_shell.set_next_input.assert_not_called()
 
     def test_network_error_propagates(
         self,
         fake_fetch: Callable[[_FetchImpl], None],
-        recording_shell: _RecordingShell,
+        recording_shell: Mock,
     ) -> None:
         def _raise(_arg: str) -> tuple[str, str, str, str]:
             raise NetworkError("connection refused")
@@ -368,7 +356,7 @@ class TestAnydLoadMagicErrors:
         with pytest.raises(NetworkError):
             anyd_load("4d2")
 
-        assert recording_shell.set_next_input_calls == []
+        recording_shell.set_next_input.assert_not_called()
 
     def test_missing_arg_raises(self) -> None:
         from IPython.core.error import UsageError

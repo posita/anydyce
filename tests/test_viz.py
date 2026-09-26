@@ -210,8 +210,8 @@ def test_limit_for_display_out_of_bounds() -> None:
 
 def test_values_xy_for_graph_type() -> None:
     d6_outcomes = tuple(d6.outcomes())
-    lo = p3d6.h(0)
-    hi = p3d6.h(-1)
+    lo = p3d6.at(0)
+    hi = p3d6.at(-1)
 
     lo_outcomes_normal, lo_values_normal = values_xy_for_graph_type(
         lo, GraphType.NORMAL

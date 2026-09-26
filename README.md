@@ -30,16 +30,21 @@ If that file is missing or appears to be modified from its original, then please
 [![`dyce`-powered!](https://posita.github.io/dyce/latest/dyce-powered.svg)](https://posita.github.io/dyce/)
 [![Bear-ified™](https://raw.githubusercontent.com/beartype/beartype-assets/main/badge/bear-ified.svg)](https://beartype.rtfd.io/)
 
-# `dyceum` – Application experiments for [`dyce`](https://posita.github.io/dyce/)
+# `dyceum` (née `anydyce`) – Application experiments for [`dyce`](https://posita.github.io/dyce/)
+
+<div align="center">
+  <a href="https://dyceum.org/latest/playground/"><img src="https://dyceum.org/latest/assets/anydice-clone.png" alt="Dyceum’s AnyDice interpreter in action"></a><br>
+  <i>Dyceum’s AnyDice language interpreter and interactive playground in action</i>
+</div>
 
 `dyceum` is a testing ground for various interactive interfaces to [`dyce`](https://posita.github.io/dyce/) (the dice mechanic modeling library).
-Currently, it includes:
+***`dyceum` was deliberately renamed from `anydyce` based on [community feedback](https://www.reddit.com/r/RPGdesign/comments/1vt60ti/anydyce_an_open_source_inbrowser_mostlycompatible/).*** Currently, it includes:
 
-1. A [JupyterLite](https://jupyterlite.readthedocs.io/) graphing widget using [Matplotlib](https://matplotlib.org/) and [`Jupyter Widgets`](https://ipywidgets.readthedocs.io/) for visualizing [histograms and pools](https://posita.github.io/dyce/latest/countin/):
-    * Try it! 👉 [![Try dyce](https://jupyterlite.readthedocs.io/en/latest/_static/badge.svg)](https://dyceum.org/latest/jupyter/lab/?path=dyceum_intro.ipynb)  👈
 1. 💥 ***New!*** 💥 A fully functioning, (mostly[^1]) compatible, pure-Python [AnyDice](https://anydice.com/) language interpreter and interactive playground.
    [Quite a bit of detail is provided](anydice.md) on how it was built, how it differs from the original, and all the pitfalls and nuances discovered along the way.
     * Try it! 👉 [![Try the AnyDice-compatible playground](https://dyceum.org/latest/anydice-playground.svg)](https://dyceum.org/latest/playground/) 👈
+1. A [JupyterLite](https://jupyterlite.readthedocs.io/) graphing widget using [Matplotlib](https://matplotlib.org/) and [`Jupyter Widgets`](https://ipywidgets.readthedocs.io/) for visualizing [histograms and pools](https://posita.github.io/dyce/latest/countin/):
+    * Try it! 👉 [![Try dyce](https://jupyterlite.readthedocs.io/en/latest/_static/badge.svg)](https://dyceum.org/latest/jupyter/lab/?path=dyceum_intro.ipynb)  👈
 
 !!! danger "JupyterLite may not save your work!"
 

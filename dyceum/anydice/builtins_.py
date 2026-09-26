@@ -31,7 +31,7 @@ __all__ = ("BUILTINS",)
 
 def _h_from_pool(p: P) -> H:
     r"""Collapse a pool to a die representing the sum distribution."""
-    return H({0: 1}) if len(p) == 0 else p.h(slice(0, None))
+    return H({0: 1}) if len(p) == 0 else p.at(slice(0, None))
 
 
 # ---- Built-ins -------------------------------------------------------------------------
@@ -80,13 +80,13 @@ def _lowest_of_and(a: int, b: int) -> int:
 def _highest_n_of(n: int, pool: P) -> H:
     # sum of n highest dice from pool
     selectors = tuple(slice(-(i), -(i - 1) if i > 1 else None) for i in range(1, n + 1))
-    return pool.h(*selectors) if selectors else H({0: 1})
+    return pool.at(*selectors) if selectors else H({0: 1})
 
 
 def _lowest_n_of(n: int, pool: P) -> H:
     # sum of n lowest dice from pool
     selectors = tuple(slice(i, i + 1) for i in range(n))
-    return pool.h(*selectors) if selectors else H({0: 1})
+    return pool.at(*selectors) if selectors else H({0: 1})
 
 
 def _middle_n_of(n: int, pool: P) -> H:
@@ -103,7 +103,7 @@ def _middle_n_of(n: int, pool: P) -> H:
         return pool.h() if total > 0 else H({0: 1})
     drop = (total - n + 1) // 2
     selectors = tuple(slice(drop + i, drop + i + 1) for i in range(n))
-    return pool.h(*selectors)
+    return pool.at(*selectors)
 
 
 def _explode(die: H | P, depth: int) -> H:

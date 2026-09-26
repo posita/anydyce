@@ -624,16 +624,16 @@ class AnyDiceInterpreter:
             # Left is out of range
             if not 1 <= left <= size:
                 return dzero
-            # 1-based position. highest-first: pos 1 = highest = pool.h(-1).
-            # lowest-first:  pos 1 = lowest  = pool.h(0).
+            # 1-based position. highest-first: pos 1 = highest = pool.at(-1).
+            # lowest-first:  pos 1 = lowest  = pool.at(0).
             elif self._settings.highest_first():
-                return pool.h(-left)
+                return pool.at(-left)
             else:
-                return pool.h(left - 1)
+                return pool.at(left - 1)
         elif isinstance(left, tuple):
             # Multi-position semantic: each element of the seq is a separate
             # position. The positions come from the SAME pool roll, so they're
-            # correlated; dyce's `P.h(*selectors)` sums them jointly. Out-of-
+            # correlated; dyce's `P.at(*selectors)` sums them jointly. Out-of-
             # range positions are silently dropped (they contribute 0 to the
             # sum). Verified against AnyDice via 42ad5.
             size = len(pool)
@@ -645,7 +645,7 @@ class AnyDiceInterpreter:
                     selectors.append(-p_int if highest_first else p_int - 1)
             if not selectors:
                 return dzero
-            return pool.h(*selectors)
+            return pool.at(*selectors)
         else:
             raise TypeError(
                 f"@ left operand must be a number or sequence, got {type(left).__name__}"
