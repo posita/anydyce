@@ -575,6 +575,7 @@ interpreter) using `expand(callback, 4 @ P(die), 1 @ P(card))`:
 ```python
 from dyce import H, P, PResult, expand
 
+
 def alchemist(dice: PResult, cards: PResult, *, return_which="trump_ctrls"):
     dice_ = 1000 + sum(dice.roll)
     cards_ = 1000 + sum(cards.roll)
@@ -583,8 +584,9 @@ def alchemist(dice: PResult, cards: PResult, *, return_which="trump_ctrls"):
     trump_losses = int(str(cards_)[3])
     return locals()[return_which]
 
-die = H({1:5, 10:2, 100:3})
-card = H({1:5, 10:2, 100:7})
+
+die = H({1: 5, 10: 2, 100: 3})
+card = H({1: 5, 10: 2, 100: 7})
 expand(alchemist, 4 @ P(die), 1 @ P(card), return_which="trump_ctrls").format_short()
 # {avg: 0.14, 0: 85.71%, 1: 14.29%}    -- matches our anydyce interpreter
 ```
@@ -972,13 +974,14 @@ Let's try calculating the total damage of the following attack on a boss in an R
 ```python
 from dice_calc import roll, anydice_casting, T_N, T_S, T_D
 
+
 # In anydice we have (:N, :S, and :D) which are (T_N, T_S, and T_D) in here
 # read: https://anydice.com/docs/functions for more information
 @anydice_casting()
 def calculate(to_hit_roll: T_N, save_roll: T_N):  # type hinting as T_N REQUIRED!!!
     if to_hit_roll + 7 < 22:  # miss
         return 0
-    is_crit = (to_hit_roll == 20)
+    is_crit = to_hit_roll == 20
     dmg_die_mult = 2 if is_crit else 1
     blung_dmg = roll(2 * dmg_die_mult, 8) + 4
     thund_dmg = roll(1 * dmg_die_mult, 4)
@@ -987,12 +990,16 @@ def calculate(to_hit_roll: T_N, save_roll: T_N):  # type hinting as T_N REQUIRED
         radiant_dmg = radiant_dmg // 2
     return blung_dmg + thund_dmg + radiant_dmg
 
+
 X = calculate(roll(20), roll(20))
 
 # plotting code
 from matplotlib import pyplot as plt
+
 vals, probs = zip(*X.get_vals_probs())
-plt.bar(vals, probs); plt.xlabel('Damage'); plt.ylabel('Probability');
+plt.bar(vals, probs)
+plt.xlabel("Damage")
+plt.ylabel("Probability")
 ```
 
 ![png](https://github.com/Ar-Kareem/PythonDice/blob/master/README_files/./README_18_0.png)

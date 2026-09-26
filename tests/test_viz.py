@@ -13,7 +13,6 @@
 # (This does not apply to code comments.) Thank you!
 # ======================================================================================
 
-import warnings
 from fractions import Fraction
 
 import pytest
@@ -43,11 +42,6 @@ from dyceum.viz import (
 )
 
 __all__ = ()
-
-
-@pytest.fixture(autouse=True)
-def _suppress_experimental() -> None:
-    warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
 # ---- Tests ---------------------------------------------------------------------------

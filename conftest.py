@@ -5,11 +5,11 @@ from pathlib import Path
 import pytest
 
 # Pin because without width argument, H.format bars scale to COLUMNS, and tox overrides
-# COLUMNS for some reason
+# COLUMNS for some reason.
 environ["COLUMNS"] = ""
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True)  # ruff: ignore[pytest-fixture-autouse]
 def suppress_dyce_warnings() -> None:
     import warnings
 
@@ -19,8 +19,8 @@ def suppress_dyce_warnings() -> None:
     # before plugins (e.g,. coverage) can work their magic
     from dyce.lifecycle import ExperimentalWarning
 
-    warnings.filterwarnings("ignore", category=ExperimentalWarning)
-    warnings.filterwarnings("ignore", category=TruncationWarning)
+    warnings.simplefilter("ignore", ExperimentalWarning)
+    warnings.simplefilter("ignore", TruncationWarning)
 
 
 def pytest_ignore_collect(
@@ -35,7 +35,7 @@ def pytest_ignore_collect(
     ):
         return True
     if platform.python_implementation() == "PyPy":
-        # Skip these because Matplotlib is not compatible with PyPy. See
+        # These modules require Matplotlib, which is absent on PyPy. See
         # <http://packages.pypy.org/>.
         return collection_path.match("docs/assets/") or collection_path.name in (
             "magic.py",
