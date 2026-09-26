@@ -1396,7 +1396,7 @@ def _histogram_specs_to_h_tuples(
             second_h_like = None
         else:
             label, first_h_like = thing[:2]
-            second_h_like = thing[2] if len(thing) >= 3 else None  # ty: ignore[index-out-of-bounds]
+            second_h_like = thing[2] if len(thing) >= 3 else None
 
         assert isinstance(label, str)
         first_h = limit_for_display(
