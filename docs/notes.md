@@ -15,7 +15,7 @@
 
 # `dyceum` release notes
 
-## [0.5.0](https://github.com/posita/anydyce/releases/tag/v0.5.0)
+## [0.5.0](https://github.com/posita/dyceum/releases/tag/v0.5.0)
 
 - Renamed the project and Python package from `anydyce` to `dyceum`.
 
@@ -40,27 +40,27 @@
   - `dyceum.viz.plot_scatter`
   - `dyceum.viz.probability_formatter`
 
-## [0.4.6](https://github.com/posita/anydyce/releases/tag/v0.4.6)
+## [0.4.6](https://github.com/posita/dyceum/releases/tag/v0.4.6)
 
 - Relaxed `ipywidgets` dependency to `>=7.5,<9` to better accommodate JupyterLite after prior version crashed and burned
 
-## [0.4.5](https://github.com/posita/anydyce/releases/tag/v0.4.5)
+## [0.4.5](https://github.com/posita/dyceum/releases/tag/v0.4.5)
 
 - Stabilized Jupyter Lite installation
 - Adjusted typing slightly
 - Defaulted to collapsed installation cells
 - Acknowledged removal of PyPy support ([beartype/beartype#324](https://github.com/beartype/beartype/issues/324))
 
-## [0.4.4](https://github.com/posita/anydyce/releases/tag/v0.4.4)
+## [0.4.4](https://github.com/posita/dyceum/releases/tag/v0.4.4)
 
 - Added `SettingsDict["burst_columns"]` and related widget.
 - Added `None` as an acceptable item value for `histogram_specs` parameter to [`HPlotterChooser` initializer][dyceum.viz.HPlotterChooser], [`HPlotterChooser.update_hs`][dyceum.viz.HPlotterChooser.update_hs], and [`jupyter_visualize`][dyceum.viz.jupyter_visualize].
 
-## [0.4.3](https://github.com/posita/anydyce/releases/tag/v0.4.3)
+## [0.4.3](https://github.com/posita/dyceum/releases/tag/v0.4.3)
 
 - Restored [rich display](https://ipython.readthedocs.io/en/stable/config/integrating.html#integrating-rich-display) hook methods accidentally removed from `dyceum.viz.Image` in [v0.4.2](#042).
 
-## [0.4.2](https://github.com/posita/anydyce/releases/tag/v0.4.2)
+## [0.4.2](https://github.com/posita/dyceum/releases/tag/v0.4.2)
 
 !!! bug
 
@@ -71,60 +71,60 @@
 
 - Allows *true* cutoff disablement (not merely a small default).
 
-## [0.4.1](https://github.com/posita/anydyce/releases/tag/v0.4.1)
+## [0.4.1](https://github.com/posita/dyceum/releases/tag/v0.4.1)
 
 - Adds transparency as well as PNG and SVG output and download selections.
 - Fixes display inconsistencies between Jupyter Lab and Jupyter Lite.
 
-## [0.4.0](https://github.com/posita/anydyce/releases/tag/v0.4.0)
+## [0.4.0](https://github.com/posita/dyceum/releases/tag/v0.4.0)
 
 - Adds [`HPlotterChooser`][dyceum.viz.HPlotterChooser] implementation and substantially refactors [`jupyter_visualize`][dyceum.viz.jupyter_visualize] in terms thereof.
 
-## [0.3.2](https://github.com/posita/anydyce/releases/tag/v0.3.2)
+## [0.3.2](https://github.com/posita/dyceum/releases/tag/v0.3.2)
 
 - Works around [jupyterlite/jupyterlite#838](https://github.com/jupyterlite/jupyterlite/issues/838) to fix docs.
 
-## [0.3.1](https://github.com/posita/anydyce/releases/tag/v0.3.1)
+## [0.3.1](https://github.com/posita/dyceum/releases/tag/v0.3.1)
 
 - Fixes badges in docs.
 - Migrates to `jupyterlite==0.1.0b13`.
 - Un-breaks 0.3.0 in JupyterLite.
 
-## [0.3.0](https://github.com/posita/anydyce/releases/tag/v0.3.0)
+## [0.3.0](https://github.com/posita/dyceum/releases/tag/v0.3.0)
 
 - Migrates to `ipywidgets~=8.0`.
 
-## [0.2.0](https://github.com/posita/anydyce/releases/tag/v0.2.0)
+## [0.2.0](https://github.com/posita/dyceum/releases/tag/v0.2.0)
 
 - Completes update to `dyce~=0.6`.
 - Migrates from [`setuptools_scm`](https://pypi.org/project/setuptools-scm/) to [`versioningit`](https://pypi.org/project/versioningit/) for more flexible version number formatting.
 - Allows deployments to PyPI from CI based on tags.
 
-## [0.1.6](https://github.com/posita/anydyce/releases/tag/v0.1.6)
+## [0.1.6](https://github.com/posita/dyceum/releases/tag/v0.1.6)
 
 - `ipywidgets` and `matplotlib` are now required dependencies.
 - Minor corrections to required Python version.
 
-## [0.1.4](https://github.com/posita/anydyce/releases/tag/v0.1.4)
+## [0.1.4](https://github.com/posita/dyceum/releases/tag/v0.1.4)
 
 - Prepares for breaking changes in future release of `dyce~=0.6`.
 - Adds experimental [`values_xy_for_graph_type`][dyceum.viz.values_xy_for_graph_type] function and exposes new “at least” and “at most” graph types via [`jupyter_visualize`][dyceum.viz.jupyter_visualize] interface.
 
-## [0.1.3](https://github.com/posita/anydyce/releases/tag/v0.1.3)
+## [0.1.3](https://github.com/posita/dyceum/releases/tag/v0.1.3)
 
 - Turns data limiting off by default in [`jupyter_visualize`][dyceum.viz.jupyter_visualize].
 
-## [0.1.2](https://github.com/posita/anydyce/releases/tag/v0.1.2)
+## [0.1.2](https://github.com/posita/dyceum/releases/tag/v0.1.2)
 
 - Adds [`limit_for_display`][dyceum.viz.limit_for_display] and updates [`jupyter_visualize`][dyceum.viz.jupyter_visualize].
 
-## [0.1.1](https://github.com/posita/anydyce/releases/tag/v0.1.1)
+## [0.1.1](https://github.com/posita/dyceum/releases/tag/v0.1.1)
 
 - Removes use of `numerary.types.…SCU` types.
 - Links to an external (Gist) repository for example notebook.
 - Adds comparison table to AnyDice to `README.md`.
 
-## [0.1.0](https://github.com/posita/anydyce/releases/tag/v0.1.0)
+## [0.1.0](https://github.com/posita/dyceum/releases/tag/v0.1.0)
 
 `anydyce` goes live!
 Non-experimental features should be considered stable.

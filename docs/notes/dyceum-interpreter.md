@@ -1,21 +1,21 @@
 <!---
-Design and status notes for the dyce.anydyce AnyDice interpreter.
+Design and status notes for the dyceum.anydice AnyDice interpreter.
 Captured from conversations 2026-04-25/26. Ephemeral — not intended for publication.
 -->
 
-# dyce.anydyce Interpreter Notes
+# dyceum.anydice Interpreter Notes
 
 ## What it is
 
 A tree-walking interpreter for the [AnyDice](https://anydice.com) language.
 Takes AnyDice source text, returns a list of `(name, H)` pairs — one per
 `output` statement in the program.
-Public API: `dyce.anydyce.run(source: str) -> list[tuple[str | None, H]]`.
+Public API: `dyceum.anydice.run(source: str) -> list[tuple[str | None, H]]`.
 
 ## Files
 
 ```
-dyce/anydyce/
+dyceum/anydice/
   __init__.py        public run() entry point
   grammar.lark       Lark LALR(1) grammar
   ast_.py            pure dataclass AST nodes
@@ -525,7 +525,7 @@ against AnyDice's various non-standard response shapes:
 ### Verify subcommand
 
 `helpers/anydice-programs.py verify` runs every program through
-`dyce.anydyce.run`, compares the result to the stored AnyDice JSON, and
+`dyceum.anydice.run`, compares the result to the stored AnyDice JSON, and
 buckets each row as match / match:approximate / mismatch:* / interp-error:*
 / interp-timeout / anydice-* / unrun. `match:approximate` covers
 distributions whose proportions agree within `1e-8 %` absolute tolerance
@@ -569,7 +569,7 @@ AnyDice's aggregate doesn't match the clean Cartesian-product weighting:
 | TRUMP_CONTROLS | 0: 85.71%, 1: 14.29% | 0: 73.275%, 1: 26.725% |
 | TRUMP_LOSSES   | 0: 64.29%, 1: 35.71% | 0: 71.749%, 1: 28.251% |
 
-Independently confirmed via a pure-dyce reference implementation (no anydyce
+Independently confirmed via a pure-dyce reference implementation (no dyceum
 interpreter) using `expand(callback, 4 @ P(die), 1 @ P(card))`:
 
 ```python
@@ -588,7 +588,7 @@ def alchemist(dice: PResult, cards: PResult, *, return_which="trump_ctrls"):
 die = H({1: 5, 10: 2, 100: 3})
 card = H({1: 5, 10: 2, 100: 7})
 expand(alchemist, 4 @ P(die), 1 @ P(card), return_which="trump_ctrls").format_short()
-# {avg: 0.14, 0: 85.71%, 1: 14.29%}    -- matches our anydyce interpreter
+# {avg: 0.14, 0: 85.71%, 1: 14.29%}    -- matches our dyceum interpreter
 ```
 
 So our interpreter is consistent with the dyce-native reference (which has no
@@ -771,7 +771,7 @@ This is a real semantic divergence from most programming languages and silently 
 ### Verify subcommand
 
 `helpers/anydice-programs.py verify` runs every program through
-`dyce.anydyce.run`, compares the result to the stored AnyDice JSON, and
+`dyceum.anydice.run`, compares the result to the stored AnyDice JSON, and
 buckets each row as match / mismatch:values / mismatch:dist-count /
 parse-fail / interp-error:&lt;ExcType&gt; / interp-timeout / anydice-error /
 anydice-empty / anydice-resource / anydice-bad-json / anydice-bad-shape /
@@ -1051,7 +1051,7 @@ results into a new `H`.
 
 NOTE: most of the body of this file describes a prior interpreter that was
 subsequently removed and rebuilt; the current implementation lives in
-`dyce/anydyce/interpreter.py` (no underscore prefix; modules were renamed in a
+`dyceum/anydice/interpreter.py` (no underscore prefix; modules were renamed in a
 2026-04-27 cleanup pass). Stale sections above (file paths, line counts,
 corpus pass counts, `_compress_h`/`_dispatch_coercion` references) describe
 the previous implementation. Treat the notes below as authoritative when they
@@ -1059,12 +1059,12 @@ conflict.
 
 ## Current implementation summary
 
-Public API is unchanged: `dyce.anydyce.run(source) -> list[(name, H)]`.
+Public API is unchanged: `dyceum.anydice.run(source) -> list[(name, H)]`.
 
 Module layout after rename:
 
 ```
-dyce/anydyce/
+dyceum/anydice/
   __init__.py        public parse/run/unparse
   grammar.lark       Lark LALR(1) grammar
   ast_.py            AST dataclasses (suffix _ to avoid stdlib `ast`)
@@ -1075,7 +1075,7 @@ dyce/anydyce/
   settings.py        runtime settings (position order, max depth, explode depth)
 ```
 
-Test count: 305+ (`tests/anydyce/test_interpreter.py`); five type checkers
+Test count: 305+ (`tests/anydice/test_interpreter.py`); five type checkers
 (mypy, pyright, ty, pyrefly) and ruff all clean.
 
 `_Val` type alias unions `int | H[int] | P[int] | tuple[int,...] | str`.
@@ -1100,11 +1100,11 @@ because no real program path produces a bare H in that position.
 ## Naming
 
 - **AnyDice** -- the AnyDice-compatible variant we have today, in
-  `dyce/anydyce/`. Accepts AnyDice programs, reproduces AnyDice's outputs
+  `dyceum/anydice/`. Accepts AnyDice programs, reproduces AnyDice's outputs
   (warts and all). Default name with no qualifier; "AnyDice Legacy" only
   when disambiguation is needed.
 - **AnyDice NG** -- the new variant being designed, target package
-  `dyce/anydyce_ng/`. Forked language with strict types, no implicit
+  `dyceum/anydice_ng/`. Forked language with strict types, no implicit
   coercions, principled error handling. "NG" = Next Generation; it's a
   fork, not a deprecation of AnyDice.
 
@@ -1115,7 +1115,7 @@ AST, transformer, and unparser.
 
 Reference for "the (1)/(3) factoring" mentioned earlier:
 
-- **(1)** **AnyDice NG** -- a sibling interpreter in `dyce.anydyce_ng`.
+- **(1)** **AnyDice NG** -- a sibling interpreter in `dyceum.anydice_ng`.
   Same parser, same AST, same transformer, same unparser. Replacement
   `_apply_*` dispatch that drops AnyDice's surprising coercions.
 
@@ -1124,7 +1124,7 @@ Reference for "the (1)/(3) factoring" mentioned earlier:
   what we have; the comment on `_Val` explains it.
 
 (Earlier we sketched **(2)**, an AnyDice-to-dyce-Python *transpiler*: a new
-`_codegen.py` plus a `dyce.anydyce_runtime` helper module containing the
+`_codegen.py` plus a `dyceum.anydice_runtime` helper module containing the
 operator dispatch. Whether (1) and (2) coexist is an open question; the
 natural prerequisite is extracting the operator dispatch into a runtime
 helper so both AnyDice NG and any codegen back-end can call it.)
@@ -1133,8 +1133,8 @@ The factoring summary:
 
 | Variant | Reuses | New |
 |---------|--------|-----|
-| AnyDice NG (1) | grammar, AST, transformer, unparser | `dyce.anydyce_ng` with replacement `_apply_*` methods |
-| Transpiler (2) | grammar, AST, transformer | `_codegen.py`; runtime helpers in `dyce.anydyce_runtime` |
+| AnyDice NG (1) | grammar, AST, transformer, unparser | `dyceum.anydice_ng` with replacement `_apply_*` methods |
+| Transpiler (2) | grammar, AST, transformer | `_codegen.py`; runtime helpers in `dyceum.anydice_runtime` |
 | AnyDice (current) | (everything we have) | none |
 
 ## AnyDice NG coercion principles
@@ -1282,7 +1282,7 @@ silently returns `H({})` and propagates per the empty-die rules.
 
 Proposed sketch:
 
-- Define `AnyDiceWarning(UserWarning)` in `dyce.anydyce`.
+- Define `AnyDiceWarning(UserWarning)` in `dyceum.anydice`.
 - Interpreter calls `warnings.warn("...", AnyDiceWarning)` at guard points
   (recursion-depth exhaustion first; later: explode depth, any other
   truncation).
@@ -1290,7 +1290,7 @@ Proposed sketch:
   suppresses other `UserWarning`s from dyce's internals (e.g. the
   `@experimental` decorator) but lets `AnyDiceWarning` through.
 - Users get warnings via standard Python machinery: `catch_warnings(record=
-  True)` to capture, `-W error::dyce.anydyce.AnyDiceWarning` to promote.
+  True)` to capture, `-W error::dyceum.anydice.AnyDiceWarning` to promote.
 
 Keeps the interface tiny, reuses stdlib mechanisms, and cleanly separates
 "the AnyDice program produced a notable behavior" from "dyce internals

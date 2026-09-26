@@ -19,10 +19,10 @@ You have only but to try.
 
 ## Starting discussions and filing issues
 
-You can [file new issues](https://github.com/posita/anydyce/issues) as you find them.
+You can [file new issues](https://github.com/posita/dyceum/issues) as you find them.
 Please try to avoid duplicating issues.
 
-For more free-flow discussions (beefs, rants, ideas, recipes, etc.), consider starting or joining a [discussion](https://github.com/beartype/dyceum/discussions).
+For more free-flow discussions (beefs, rants, ideas, recipes, etc.), consider starting or joining a [discussion](https://github.com/posita/dyceum/discussions).
 
 <!--
 ## Posting on StackExchange
@@ -36,7 +36,7 @@ Feel free to at-mention `@posita` as well.
 An easy way to bootstrap an isolated development environment is:
 
 ```sh
-% git clone --recurse-submodules https://github.com/posita/anydyce.git
+% git clone --recurse-submodules https://github.com/posita/dyceum.git
 …
 % cd dyceum
 % uv venv --clear --prompt "$( basename "${PWD}" )" --relocatable
@@ -63,7 +63,7 @@ Linting and type checking are run via [pre-commit](https://pre-commit.com/).
 
 ## Submission guidelines
 
-If you are willing and able, consider [submitting a pull request](https://github.com/posita/anydyce/pulls) with a fix.
+If you are willing and able, consider [submitting a pull request](https://github.com/posita/dyceum/pulls) with a fix.
 See [the docs](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) if you’re not already familiar with pull requests.
 `dyceum` releases from [`master`](https://github.com/posita/dyce/tree/master) (although not always immediately), so [this workflow](https://githubflow.github.io/#how-we-do-it) might be helpful to understand.
 There are only a few additional guidelines:
