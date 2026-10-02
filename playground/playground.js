@@ -236,18 +236,6 @@ async function fetchProgramFromUrl() {
     setStatus(`Invalid corpus URL for 0x${hexId}.`);
     return null;
   }
-  // Accept only the corpus mirror's sharded text-file URLs.
-  if (
-    url.protocol !== "https:" ||
-    url.hostname !== GH_MIRROR_HOSTNAME ||
-    !url.pathname.startsWith(GH_MIRROR_PATH_PREFIX) ||
-    !/^[0-9a-f]{2}\/[0-9a-f]{2}\/-?[0-9a-f]+\.txt$/.test(
-      url.pathname.slice(GH_MIRROR_PATH_PREFIX.length),
-    )
-  ) {
-    setStatus(`Refusing to load 0x${hexId} from outside the corpus mirror.`);
-    return null;
-  }
   setStatus(`Loading program 0x${hexId} from corpus...`);
   try {
     const resp = await fetch(url);
