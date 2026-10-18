@@ -311,7 +311,7 @@ loop N over {1..#S} {
                 f"position {i + 1}: expected {expected[i]}, got {dict(h.items())}"
             )
 
-    # TODO(posita): # ruff: ignore[missing-todo-link] - These tests probably belong in a
+    # TODO(@posita): # ruff: ignore[missing-todo-link] - These tests probably belong in a
     # different class
 
     def test_chained_d_is_left_associative(self) -> None:

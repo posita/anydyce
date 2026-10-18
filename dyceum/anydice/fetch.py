@@ -243,7 +243,7 @@ def fetch_anydice_program(program_loc_or_id: str | int) -> tuple[str, str, str, 
 @lru_cache(maxsize=128)
 def fetch_content_for_url_cached(url: str) -> tuple[str, str]:
     r"""
-    TODO(posita): Fill this out.
+    TODO(@posita): Fill this out.
     """
     if is_pyodide():
         from pyodide.http import (  # type: ignore[import-not-found] # ty: ignore[unresolved-import]

@@ -12,7 +12,7 @@
   Thank you!
 -->
 
-<!-- TODO(posita): This doesn't format well. Each package should have
+<!-- TODO(@posita): This doesn't format well. Each package should have
 its own doc once things settle down. -->
 # `dyceum` package reference
 
