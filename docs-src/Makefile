@@ -2,6 +2,7 @@ all : \
 	../docs/anydice-playground.svg \
 	../docs/index.md \
 	../docs/license.md \
+	../requirements-dev.txt \
 	jupyterlite \
 	playground
 
@@ -10,6 +11,9 @@ FORCE :
 
 wheel : FORCE
 	cd .. && uv build --wheel
+
+../requirements-dev.txt : Makefile ../uv.lock
+	cd .. && uv export --format requirements-txt --locked --no-hashes --output-file "$$( basename $@ )"
 
 ../docs/anydice-playground.svg : Makefile
 	curl --fail --silent --show-error --location --output $@ 'https://img.shields.io/badge/%F0%9F%A4%B7%F0%9F%8E%B2%20AnyDice-Compatible%20%F0%9F%9B%9D-teal.svg'

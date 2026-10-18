@@ -77,8 +77,8 @@ docs = [
     "mkdocstrings[python]",
     "pandas",
     "pandas-stubs",
-    "pymdown-extensions",
-    "zensical",
+    "pymdown-extensions<12.2.0",
+    "zensical>=0.0.66",
     {include-group = "jupyter"},
 ]
 # Mirrors optional dependencies
@@ -110,7 +110,7 @@ test = [
     {include-group = "test-pypy"},
 ]
 test-beartype = [
-    "beartype>=0.23.0rc0",
+    "beartype>=0.23.0",
     {include-group = "test"},
 ]
 # Only what's needed for uv run pytest specifically with PyPy (via Tox)
@@ -227,21 +227,21 @@ ignore = [
   "D",
   "DOC",
   "EM",
-  "FIX",  # TODO(posita): run occasionally, or figure out how to make these warnings
+  "FIX",  # TODO(@posita): run occasionally, or figure out how to make these warnings
   "PLC",
   "PLR",
-  "missing-trailing-comma",  # Trailing comma missing
-  "line-too-long",  # Line too long (... > ...)
-  "implicit-namespace-package",  # File ... is part of an implicit namespace package. Add an `__init__.py`.
-  "non-lowercase-variable-in-function",  # Variable ... in function should be lowercase
-  "superfluous-else-return",  # Unnecessary `else` after `return` statement
-  "superfluous-else-raise",  # Unnecessary `else` after `raise` statement
-  "superfluous-else-continue",  # Unnecessary `else` after `continue` statement
-  "ambiguous-unicode-character-docstring",  # Docstring contains ambiguous ...
-  "non-empty-init-module",  # `__init__` module should only contain docstrings and re-exports
-  "assert",  # Use of `assert` detected
-  "suspicious-non-cryptographic-random-usage",  # Standard pseudo-random generators are not suitable for cryptographic purposes
-  "raise-vanilla-args",  # Avoid specifying long messages outside the exception class
+  "missing-trailing-comma",
+  "line-too-long",
+  "implicit-namespace-package",
+  "non-lowercase-variable-in-function",
+  "superfluous-else-return",
+  "superfluous-else-raise",
+  "superfluous-else-continue",
+  "ambiguous-unicode-character-docstring",
+  "non-empty-init-module",
+  "assert",
+  "suspicious-non-cryptographic-random-usage",
+  "raise-vanilla-args",
 ]
 select = [
   "ALL",
