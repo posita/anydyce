@@ -2,7 +2,7 @@
 
 `dyceum` contains higher-level visualization and application experiments around `dyce`.
 It includes a cleanroom AnyDice-compatible interpreter, Jupyter integration, and a static Pyodide browser playground.
-It supports CPython 3.11–3.14 and PyPy 3.11.
+It supports CPython 3.11–3.15 and PyPy 3.11-3.12.
 Versions come from Git tags through `setuptools-scm`; do not edit a version file.
 
 The code is authoritative when this guidance becomes stale.
