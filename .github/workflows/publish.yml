@@ -1,4 +1,4 @@
-name: publish
+name: Publish Tagged Packages (2026-10)
 
 on:
   push:
