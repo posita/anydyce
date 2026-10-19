@@ -775,16 +775,16 @@ wheels = [
 
 [[package]]
 name = "dyce"
-version = "0.7.0rc11"
+version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "optype", version = "0.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "optype", version = "0.18.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/02/99/b9c9037cc68ea46f1d535592d6b7eb76333813a2d88e708ae498afd268a0/dyce-0.7.0rc11.tar.gz", hash = "sha256:e40d59247d872d95980a8b0e0ced5f060defdde8002ef0ba3584796ed5faa623", size = 1143401, upload-time = "2026-09-28T02:17:58.269Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7f/64/82dba1c0405248a2169905b02f0dd5d54bd4348daf25566823929a517423/dyce-0.7.0.tar.gz", hash = "sha256:b191f9dad8eeb522ecfc25e168d9e25ec7b71eb63d5b39f1c5f0c162725ce48f", size = 1042468, upload-time = "2026-10-19T01:10:22.369Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c3/97/c652d7a4ec7edc178814229d593416f585f6b1770b7038131b8db91a13c1/dyce-0.7.0rc11-py3-none-any.whl", hash = "sha256:c44c01cff6dee17b9b36f1377675577daa33fd69b5e5a036e0fd07169cbc79ad", size = 72371, upload-time = "2026-09-28T02:17:56.856Z" },
+    { url = "https://files.pythonhosted.org/packages/c1/58/d77a76ce5cb14747531795f6658631ac60c0cf2e0a93ff095b9496d2ce8b/dyce-0.7.0-py3-none-any.whl", hash = "sha256:1579470fae18b4ee8b28273f6dff07fd08fa6e9d7d86b8708cddeb0cbf5f36a6", size = 70597, upload-time = "2026-10-19T01:10:21.068Z" },
 ]
 
 [package.optional-dependencies]
@@ -941,7 +941,7 @@ tox = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dyce", specifier = "~=0.7.0rc11" },
+    { name = "dyce", specifier = "~=0.7.0" },
     { name = "dyce", extras = ["viz-mpl"], marker = "extra == 'jupyter'" },
     { name = "ipywidgets", marker = "extra == 'jupyter'" },
     { name = "lark", specifier = ">=1.3.1" },
