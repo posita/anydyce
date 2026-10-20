@@ -284,6 +284,8 @@ const viewBarsBtn       = document.getElementById("view-bars-btn");
 const viewLinesBtn      = document.getElementById("view-lines-btn");
 const viewRidgeBtn      = document.getElementById("view-ridge-btn");
 const viewTextBtn       = document.getElementById("view-text-btn");
+const probabilityControl = document.getElementById("probability-control");
+const probabilitySelect = document.getElementById("probability-select");
 const logsPlaceholder   = document.getElementById("logs-placeholder");
 const logsEl            = document.getElementById("logs");
 
@@ -318,6 +320,17 @@ let lastOutputs = null;
 let lastBarSpecs = [];
 let lastLineSpec = null;
 let lastRidgeSpec = null;
+let lastProbabilitySpecs = null;
+
+probabilitySelect.addEventListener("change", () => {
+  if (lastProbabilitySpecs !== null) {
+    const { barSpecs, lineSpec, ridgeSpec } = lastProbabilitySpecs[probabilitySelect.value];
+    lastBarSpecs = barSpecs;
+    lastLineSpec = lineSpec;
+    lastRidgeSpec = ridgeSpec;
+    rerenderCharts();
+  }
+});
 // Base64 CSV + download filename of the last successful run, both computed
 // in the worker via dyceum.csv (csv_base64 / csv_filename) so the
 // playground and the Jupyter widget produce byte-identical files with
@@ -474,6 +487,7 @@ function resizeVisibleCharts() {
 }
 
 function applyViewVisibility() {
+  probabilityControl.classList.toggle("invisible", viewMode === VIEW_MODE_TEXT);
   for (const { mode, el, btn } of VIEWS) {
     el.classList.toggle("hidden", !(mode === viewMode && !showingMessage));
     btn.classList.toggle("active", mode === viewMode);
@@ -698,6 +712,8 @@ async function handleRun() {
   enterRunningState();
   outputText.textContent = "";
   clearOutputCharts();
+  lastOutputs = null;
+  lastProbabilitySpecs = null;
   showMessage("Running...", { cancelable: true });
   resetLogs();
   // Re-enabled on success only, so a failed or cancelled run doesn't offer the
@@ -708,9 +724,7 @@ async function handleRun() {
     const {
       text,
       outputs,
-      barSpecs,
-      lineSpec,
-      ridgeSpec,
+      probabilitySpecs,
       csv,
       csvFilename,
       warnings,
@@ -724,6 +738,8 @@ async function handleRun() {
       lastOutputs = null;
       showMessage("(no output)");
     } else {
+      lastProbabilitySpecs = probabilitySpecs;
+      const { barSpecs, lineSpec, ridgeSpec } = probabilitySpecs[probabilitySelect.value];
       renderResults(text);
       renderOutputCharts(outputs, barSpecs, lineSpec, ridgeSpec);
     }

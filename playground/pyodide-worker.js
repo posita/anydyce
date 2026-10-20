@@ -15,7 +15,7 @@
 //   Worker -> Main:
 //     { type: "status", message }                   -- progress updates
 //     { type: "ready" }                             -- init complete
-//     { type: "result", text, outputs, barSpecs, lineSpec, ridgeSpec,
+//     { type: "result", text, outputs, probabilitySpecs,
 //       csv, csvFilename, warnings, runId }
 //                                                     -- successful run
 //     { type: "error", stage: "init"|"run", error,
@@ -52,6 +52,7 @@ import traceback as _traceback
 import warnings
 from dyce.lifecycle import ExperimentalWarning
 from dyce.viz.plotly import bar_spec, line_spec, ridge_spec
+from dyce.viz import GraphType, values_for_graph_type
 # Default action is "default" (print first occurrence per location). The
 # playground UI shows every warning explicitly in the logs pane, so we
 # switch to "always" -- a recurring TruncationWarning at the same site
@@ -104,21 +105,35 @@ def _do_run(source):
             {"label": label, "items": list(h.items()) if h else []}
             for label, h in results
         ],
+        "probabilitySpecs": {
+            graph_type.value: _plot_specs(results, settings.display_precision, graph_type)
+            for graph_type in GraphType
+        },
+        # Base64 CSV + filename via the same dyceum.csv helpers the Jupyter
+        # widget uses. Probability controls do not change these exports.
+        "csv": csv_base64([(label, h, None) for label, h in results]),
+        "csvFilename": csv_filename([label for label, _ in results]),
+        "warnings": list(_captured_warnings),
+    }
+
+def _plot_specs(results, precision, graph_type):
+    specs = {
         "barSpecs": [
             bar_spec(
                 h,
                 labels=[label],
                 colors=["#000000"],
                 horizontal=True,
+                graph_type=graph_type,
                 max_percent=max(
                     (
-                        float(probability) * 105.0
+                        probability * 105.0
                         for _, result_h in results
-                        for _, probability in result_h.probability_items()
+                        for probability in values_for_graph_type(result_h, graph_type)[1]
                     ),
                     default=None,
                 ),
-                precision=settings.display_precision,
+                precision=precision,
             ).as_dict()
             for label, h in results
         ],
@@ -126,7 +141,8 @@ def _do_run(source):
             *(h for _, h in results),
             labels=[label for label, _ in results],
             colors=["#000000"],
-            precision=settings.display_precision,
+            precision=precision,
+            graph_type=graph_type,
         ).as_dict(),
         # Portable Plotly structure generated alongside the results. Neutral
         # colors make the fill/label alpha part of dyce's specification while
@@ -136,17 +152,25 @@ def _do_run(source):
             labels=[label for label, _ in results],
             colors=["#000000"],
             label_bgcolor="rgba(0, 0, 0, 0.72)",
-            precision=settings.display_precision,
+            precision=precision,
+            graph_type=graph_type,
         ).as_dict(),
-        # Base64 CSV + filename via the same dyceum.csv helpers the Jupyter
-        # widget uses, so both surfaces export identical files with identical
-        # names. Computed eagerly (not on demand) so the download keeps
-        # working after a Cancel terminates the worker and wipes Python-side
-        # state.
-        "csv": csv_base64([(label, h, None) for label, h in results]),
-        "csvFilename": csv_filename([label for label, _ in results]),
-        "warnings": list(_captured_warnings),
     }
+    probability_label = {
+        GraphType.NORMAL: "Exactly",
+        GraphType.AT_LEAST: "At least",
+        GraphType.AT_MOST: "At most",
+    }[graph_type]
+    for spec in [*specs["barSpecs"], specs["lineSpec"], specs["ridgeSpec"]]:
+        for series in spec["data"]:
+            if "hovertemplate" in series:
+                series["hovertemplate"] = series["hovertemplate"].replace(
+                    "<br>", f"<br>{probability_label} "
+                )
+    for spec in specs["barSpecs"]:
+        spec["layout"]["xaxis"]["title"]["text"] = f"{probability_label} probability (%)"
+    specs["lineSpec"]["layout"]["yaxis"]["title"]["text"] = f"{probability_label} probability (%)"
+    return specs
 `;
 
 let pyodide = null;
@@ -250,9 +274,7 @@ self.addEventListener("message", async (ev) => {
           type: "result",
           text: out.text,
           outputs: out.outputs,
-          barSpecs: out.barSpecs,
-          lineSpec: out.lineSpec,
-          ridgeSpec: out.ridgeSpec,
+          probabilitySpecs: out.probabilitySpecs,
           csv: out.csv,
           csvFilename: out.csvFilename,
           warnings: out.warnings,

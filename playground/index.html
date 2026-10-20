@@ -68,6 +68,14 @@
               <button id="view-lines-btn" type="button">Lines</button>
               <button id="view-text-btn" type="button">Text</button>
             </div>
+            <label id="probability-control" class="probability-control">
+              Probability:
+              <select id="probability-select">
+                <option value="normal">Exactly</option>
+                <option value="at_least">At least</option>
+                <option value="at_most">At most</option>
+              </select>
+            </label>
             <button id="maximize-btn" type="button" class="btn btn-secondary icon-btn" aria-pressed="false" aria-label="Maximize the output panel (hides editor and logs)" title="Maximize the output panel (hides editor and logs)">
               <!-- Two glyphs; CSS shows one per [aria-pressed] state. Both
                    stroke currentColor so they follow the button's theme

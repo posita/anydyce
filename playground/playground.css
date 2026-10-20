@@ -330,11 +330,27 @@ main {
  * drift apart in height. Variant rules below add only what differs --
  * horizontal padding, borders, colors. (The CM6 search-panel buttons are a
  * deliberately separate, smaller family; see the editor theme.) */
-.pane-header button {
+.pane-header button,
+.pane-header select {
   font-family: inherit;
   font-size: 0.9em;
   padding-block: 0.3em;
   cursor: pointer;
+}
+
+.probability-control {
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+.probability-control select {
+  color: var(--text);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 1em;
+}
+.probability-control.invisible {
+  visibility: hidden;
 }
 
 /* One shared width for the two action buttons: wide enough for the Run
