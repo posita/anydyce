@@ -51,7 +51,7 @@ __all__ = (
     "VarAssign",
 )
 
-# ---- Expression nodes ------------------------------------------------------------------
+# ---- Expression nodes ----------------------------------------------------------------
 
 
 @dataclass
@@ -183,13 +183,13 @@ Expr = (
     | Call
 )
 
-# ---- Statement nodes -------------------------------------------------------------------
+# ---- Statement nodes -----------------------------------------------------------------
 
 
 @dataclass
 class OutputStmt:
     expr: Expr
-    name: "Expr | None" = None
+    name: Expr | None = None
 
 
 @dataclass
@@ -256,4 +256,4 @@ class Program:
     The root node of an AnyDice abstract syntax tree.
     """
 
-    stmts: "list[Stmt]" = field(default_factory=list)
+    stmts: list[Stmt] = field(default_factory=list)
