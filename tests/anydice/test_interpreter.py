@@ -26,7 +26,7 @@ from dyceum.anydice.settings import Settings
 __all__ = ()
 
 
-# ---- Literals and output -----------------------------------------------------------------
+# ---- Literals and output -------------------------------------------------------------
 
 
 class TestLiterals:
@@ -55,7 +55,7 @@ class TestLiterals:
         ]
 
 
-# ---- Dice --------------------------------------------------------------------------------
+# ---- Dice ----------------------------------------------------------------------------
 
 
 class TestDieUnary:
@@ -195,7 +195,7 @@ class TestDieBinary:
         assert run("output (d{})d(d{})") == [("output 1", dempty)]
 
 
-# ---- Variables ---------------------------------------------------------------------------
+# ---- Variables -----------------------------------------------------------------------
 
 
 class TestVariables:
@@ -215,7 +215,7 @@ class TestVariables:
         assert run("X: d6\nY: X\noutput Y") == [("output 1", H(6))]
 
 
-# ---- Sequences ---------------------------------------------------------------------------
+# ---- Sequences -----------------------------------------------------------------------
 
 
 class TestSequences:
@@ -243,7 +243,7 @@ class TestSequences:
         assert run("X: 5\nX: {1..3}\noutput X") == [("output 1", H({1: 1, 2: 1, 3: 1}))]
 
 
-# ---- Sequences (advanced) ----------------------------------------------------------------
+# ---- Sequences (advanced) ------------------------------------------------------------
 
 
 class TestSequencesAdvanced:
@@ -401,7 +401,7 @@ loop N over {1..#S} {
         assert run("S: {1, 2}\noutput # {S, 3}") == [("output 1", H({3: 1}))]
 
 
-# ---- Addition (+) ------------------------------------------------------------------------
+# ---- Addition (+) --------------------------------------------------------------------
 
 
 class TestAdd:
@@ -489,7 +489,7 @@ class TestAdd:
         assert run("output d{} + d{}") == [("output 1", dempty)]
 
 
-# ---- Subtraction (-) ---------------------------------------------------------------------
+# ---- Subtraction (-) -----------------------------------------------------------------
 
 
 class TestSub:
@@ -578,7 +578,7 @@ class TestSub:
         assert run("output d{} - d{}") == [("output 1", dempty)]
 
 
-# ---- Multiplication (*) ------------------------------------------------------------------
+# ---- Multiplication (*) --------------------------------------------------------------
 
 
 class TestMul:
@@ -660,7 +660,7 @@ class TestMul:
         assert run("output d{} * d{}") == [("output 1", dempty)]
 
 
-# ---- Division (/) ------------------------------------------------------------------------
+# ---- Division (/) --------------------------------------------------------------------
 
 
 class TestDiv:
@@ -771,7 +771,7 @@ class TestDiv:
         assert run("output d{} / d{}") == [("output 1", dempty)]
 
 
-# ---- Exponentiation (^) ------------------------------------------------------------------
+# ---- Exponentiation (^) --------------------------------------------------------------
 
 
 class TestPow:
@@ -918,7 +918,7 @@ class TestPow:
         ]
 
 
-# ---- Position selection (@) --------------------------------------------------------------
+# ---- Position selection (@) ----------------------------------------------------------
 
 
 class TestAt:
@@ -1101,7 +1101,7 @@ class TestAt:
         assert run("output 2 @ d{}d{}") == [("output 1", dzero)]
 
 
-# ---- Equality (=) ------------------------------------------------------------------------
+# ---- Equality (=) --------------------------------------------------------------------
 
 
 class TestEq:
@@ -1187,7 +1187,7 @@ class TestEq:
         assert run("output 2d6 = d{}") == [("output 1", dempty)]
 
 
-# ---- Inequality (!=) ---------------------------------------------------------------------
+# ---- Inequality (!=) -----------------------------------------------------------------
 
 
 class TestNeq:
@@ -1268,7 +1268,7 @@ class TestNeq:
         assert run("output 2d6 != d{}") == [("output 1", dempty)]
 
 
-# ---- Less than (<) -----------------------------------------------------------------------
+# ---- Less than (<) -------------------------------------------------------------------
 
 
 class TestLt:
@@ -1353,7 +1353,7 @@ class TestLt:
         assert run("output 2d6 < d{}") == [("output 1", dempty)]
 
 
-# ---- Greater than (>) --------------------------------------------------------------------
+# ---- Greater than (>) ----------------------------------------------------------------
 
 
 class TestGt:
@@ -1440,7 +1440,7 @@ class TestGt:
         assert run("output 2d6 > d{}") == [("output 1", dempty)]
 
 
-# ---- Less than or equal (<=) -------------------------------------------------------------
+# ---- Less than or equal (<=) ---------------------------------------------------------
 
 
 class TestLeq:
@@ -1528,7 +1528,7 @@ class TestLeq:
         assert run("output 2d6 <= d{}") == [("output 1", dempty)]
 
 
-# ---- Greater than or equal (>=) ----------------------------------------------------------
+# ---- Greater than or equal (>=) ------------------------------------------------------
 
 
 class TestGeq:
@@ -1613,7 +1613,7 @@ class TestGeq:
         assert run("output 2d6 >= d{}") == [("output 1", dempty)]
 
 
-# ---- Logical and (&) ---------------------------------------------------------------------
+# ---- Logical and (&) -----------------------------------------------------------------
 
 
 class TestAnd:
@@ -1697,7 +1697,7 @@ class TestAnd:
         assert run("output d{} & d{}") == [("output 1", dempty)]
 
 
-# ---- Logical or (|) ----------------------------------------------------------------------
+# ---- Logical or (|) ------------------------------------------------------------------
 
 
 class TestOr:
@@ -1801,7 +1801,7 @@ class TestOr:
         assert run("output d{} | d{}") == [("output 1", dempty)]
 
 
-# ---- Negation (unary -) ------------------------------------------------------------------
+# ---- Negation (unary -) --------------------------------------------------------------
 
 
 class TestNeg:
@@ -1823,7 +1823,7 @@ class TestNeg:
         assert run("output -d{}") == [("output 1", dempty)]
 
 
-# ---- Unary plus (unary +) ----------------------------------------------------------------
+# ---- Unary plus (unary +) ------------------------------------------------------------
 
 
 class TestPos:
@@ -1845,7 +1845,7 @@ class TestPos:
         assert run("output +d{}") == [("output 1", dempty)]
 
 
-# ---- Length / digit count (#) ------------------------------------------------------------
+# ---- Length / digit count (#) --------------------------------------------------------
 
 
 class TestHash:
@@ -1946,7 +1946,7 @@ class TestHash:
         assert run("output #(1d(3d2))") == [("output 1", H({3: 1}))]
 
 
-# ---- Logical not (!) ---------------------------------------------------------------------
+# ---- Logical not (!) -----------------------------------------------------------------
 
 
 class TestNot:
@@ -1975,7 +1975,7 @@ class TestNot:
         assert run("output !d{}") == [("output 1", dempty)]
 
 
-# ---- Error handling ----------------------------------------------------------------------
+# ---- Error handling ------------------------------------------------------------------
 
 
 class TestErrors:
@@ -1994,7 +1994,7 @@ class TestErrors:
             run("output X")
 
 
-# ---- Functions ---------------------------------------------------------------------------
+# ---- Functions -----------------------------------------------------------------------
 
 
 class TestFunctionBasic:
@@ -2300,7 +2300,7 @@ class TestFunctionMultiPatternDispatch:
         ]
 
 
-# ---- Function expansion LCM normalization -----------------------------------------------
+# ---- Function expansion LCM normalization --------------------------------------------
 
 
 class TestFunctionExpansionLCM:
@@ -2345,7 +2345,7 @@ output [boost 2d20 low 20 high 22 with d4]
         assert h[21] == 80
 
 
-# ---- Bare-param pass-through (no coercion, no expansion) --------------------------------
+# ---- Bare-param pass-through (no coercion, no expansion) -----------------------------
 
 
 class TestBareParamPassthrough:
@@ -2400,7 +2400,7 @@ class TestBareParamPassthrough:
         assert run(src) == [("output 1", H({2: 1, 4: 1, 6: 1, 8: 1, 10: 1, 12: 1}))]
 
 
-# ---- Function body returns under expansion (sum-coerce on tuple) ------------------------
+# ---- Function body returns under expansion (sum-coerce on tuple) ---------------------
 
 
 class TestFunctionBodySeqReturnSumCoerce:
@@ -2511,7 +2511,7 @@ output [ex [roll 1d6 1d6]]
         assert set(h.keys()) == {0}
 
 
-# ---- Function variable scoping -----------------------------------------------------------
+# ---- Function variable scoping -------------------------------------------------------
 
 
 class TestFunctionScoping:
@@ -2597,7 +2597,7 @@ class TestFunctionScoping:
         assert run(prog) == [("output 1", H({15: 1}))]
 
 
-# ---- Function signature: duplicate parameter names ---------------------------------------
+# ---- Function signature: duplicate parameter names -----------------------------------
 
 
 class TestFunctionDuplicateParamNames:
@@ -2655,7 +2655,7 @@ class TestFunctionDuplicateParamNames:
         assert run(prog) == [("output 1", H({0: 14, 15: 6}))]
 
 
-# ---- Function dispatch: multi-word and multi-shape patterns ------------------------------
+# ---- Function dispatch: multi-word and multi-shape patterns --------------------------
 
 
 class TestFunctionDispatchShapes:
@@ -2728,7 +2728,7 @@ class TestFunctionDispatchShapes:
         assert run(prog) == [("output 1", H({3: 1}))]
 
 
-# ---- Conditionals (if / else if / else) --------------------------------------------------
+# ---- Conditionals (if / else if / else) ----------------------------------------------
 
 
 class TestIfStmt:
@@ -2797,7 +2797,7 @@ class TestIfStmt:
         assert run("if 1 { X: 7 }\noutput X") == [("output 1", H({7: 1}))]
 
 
-# ---- Loops (loop X over <seq>) -----------------------------------------------------------
+# ---- Loops (loop X over <seq>) -------------------------------------------------------
 
 
 class TestLoopStmt:
@@ -2868,7 +2868,7 @@ class TestLoopStmt:
             run("loop X over 2d6 { output X }")
 
 
-# ---- Statement context restrictions ------------------------------------------------------
+# ---- Statement context restrictions --------------------------------------------------
 
 
 class TestStatementContextRestrictions:
@@ -2955,7 +2955,7 @@ class TestStatementContextRestrictions:
         assert result[2] == ("factor 3", H({3: 1}))
 
 
-# ---- Conditionals inside function bodies -------------------------------------------------
+# ---- Conditionals inside function bodies ---------------------------------------------
 
 
 class TestIfStmtInFunctionBody:
@@ -3009,7 +3009,7 @@ class TestIfStmtInFunctionBody:
         assert run(prog) == [("output 1", H({0: 3, 400: 1, 500: 1, 600: 1}))]
 
 
-# ---- Loops inside function bodies --------------------------------------------------------
+# ---- Loops inside function bodies ----------------------------------------------------
 
 
 class TestLoopStmtInFunctionBody:
@@ -3064,7 +3064,7 @@ class TestLoopStmtInFunctionBody:
         assert run(prog) == [("output 1", H({1: 1, 3: 1, 6: 1}))]
 
 
-# ---- String interpolation in named outputs -----------------------------------------------
+# ---- String interpolation in named outputs -------------------------------------------
 
 
 class TestStringInterpolation:
@@ -3151,7 +3151,7 @@ class TestStringInterpolation:
         ) == [("5+6", H({6: 1}))]
 
 
-# ---- Builtin: [highest of A and B] -------------------------------------------------------
+# ---- Builtin: [highest of A and B] ---------------------------------------------------
 
 
 class TestBuiltinHighestOfAnd:
@@ -3199,7 +3199,7 @@ class TestBuiltinHighestOfAnd:
         assert run("output [highest of d6 and d{}]") == [("output 1", dempty)]
 
 
-# ---- Builtin: [highest N of P] -----------------------------------------------------------
+# ---- Builtin: [highest N of P] -------------------------------------------------------
 
 
 class TestBuiltinHighestNOf:
@@ -3297,7 +3297,7 @@ class TestBuiltinHighestNOf:
         assert run("output [highest 3 of (4d6 + 4d6)]") == [("output 1", expected)]
 
 
-# ---- Builtin: [highest N of A and B [and C]] / [lowest N of A and B [and C]] -------
+# ---- Builtin: [highest N of A and B [and C]] / [lowest N of A and B [and C]] ---------
 #
 # These are undocumented but present in AnyDice: they construct a
 # heterogeneous pool from the two or three dice (and there is NO four-or-
@@ -3399,7 +3399,7 @@ class TestBuiltinLowestNOfAnd:
         assert run("output [lowest 1 of d6 and 0]") == [("output 1", H({0: 6}))]
 
 
-# ---- Builtin: [count A in B] -------------------------------------------------------
+# ---- Builtin: [count A in B] ---------------------------------------------------------
 
 
 class TestBuiltinCountIn:
@@ -3453,7 +3453,7 @@ class TestBuiltinCountIn:
         ]
 
 
-# ---- Builtin: [sort SEQ] -----------------------------------------------------------------
+# ---- Builtin: [sort SEQ] -------------------------------------------------------------
 
 
 class TestBuiltinSort:
@@ -3531,7 +3531,7 @@ class TestBuiltinSort:
         ]
 
 
-# ---- Set statement value validation ----------------------------------------------------
+# ---- Set statement value validation --------------------------------------------------
 
 
 class TestSetSettingValidation:
@@ -3568,7 +3568,7 @@ class TestSetSettingValidation:
             run('set "maximum function depth" to "10"')
 
 
-# ---- dyceum-specific precision settings -----------------------------------------------
+# ---- dyceum-specific precision settings ----------------------------------------------
 
 
 class TestProprietaryDyceumSettings:
@@ -3695,7 +3695,7 @@ class TestProprietaryDyceumSettings:
         assert s.calc_bit_width == 1024
 
 
-# ---- Builtin: [explode <die>] ----------------------------------------------------------
+# ---- Builtin: [explode <die>] --------------------------------------------------------
 
 
 class TestBuiltinExplode:
@@ -3874,7 +3874,7 @@ class TestBuiltinExplode:
         )
 
 
-# ---- Builtin: [lowest of A and B] -------------------------------------------------------
+# ---- Builtin: [lowest of A and B] ----------------------------------------------------
 
 
 class TestBuiltinLowestOfAnd:
@@ -3918,7 +3918,7 @@ class TestBuiltinLowestOfAnd:
         assert run("output [lowest of d{} and 3]") == [("output 1", dempty)]
 
 
-# ---- Builtin: [lowest N of P] -----------------------------------------------------------
+# ---- Builtin: [lowest N of P] --------------------------------------------------------
 
 
 class TestBuiltinLowestNOf:
@@ -4009,7 +4009,7 @@ class TestBuiltinLowestNOf:
         assert run("output [lowest 3 of (4d6 + 4d6)]") == [("output 1", expected)]
 
 
-# ---- Builtin: [maximum of <die>] -------------------------------------------------------
+# ---- Builtin: [maximum of <die>] -----------------------------------------------------
 
 
 class TestBuiltinMaximumOf:
@@ -4043,7 +4043,7 @@ class TestBuiltinMaximumOf:
         assert run("output [maximum of d{-3, -1, 2}]") == [("output 1", H({2: 1}))]
 
 
-# ---- Builtin: [reverse SEQ] ------------------------------------------------------------
+# ---- Builtin: [reverse SEQ] ----------------------------------------------------------
 
 
 class TestBuiltinReverse:
@@ -4106,7 +4106,7 @@ class TestBuiltinReverse:
         ]
 
 
-# ---- Builtin: [absolute N] -------------------------------------------------------------
+# ---- Builtin: [absolute N] -----------------------------------------------------------
 
 
 class TestBuiltinAbsolute:
@@ -4152,7 +4152,7 @@ class TestBuiltinAbsolute:
         assert run("output [absolute 2d{-3, 1}]") == [("output 1", H({2: 3, 6: 1}))]
 
 
-# ---- Builtin: [SEQ contains VAL] -------------------------------------------------------
+# ---- Builtin: [SEQ contains VAL] -----------------------------------------------------
 
 
 class TestBuiltinContains:
@@ -4193,7 +4193,7 @@ class TestBuiltinContains:
         assert run("output [d6 contains 3]") == [("output 1", H({0: 5, 1: 1}))]
 
 
-# ---- Builtin: [middle N of P] ----------------------------------------------------------
+# ---- Builtin: [middle N of P] --------------------------------------------------------
 
 
 class TestBuiltinMiddleNOf:
@@ -4278,7 +4278,7 @@ class TestBuiltinMiddleNOf:
         ) == [("output 1", H({1: 23, 2: 113, 3: 188, 4: 188, 5: 113, 6: 23}))]
 
 
-# ---- Corpus 0x1102: AnyDice :s-expanded-call aggregation divergence -------------------
+# ---- Corpus 0x1102: AnyDice :s-expanded-call aggregation divergence ------------------
 
 
 class TestCorpus1102SExpansionAggregationDivergence:
@@ -4370,7 +4370,7 @@ class TestCorpus1102SExpansionAggregationDivergence:
         ]
 
 
-# ---- Regression: parameter-expansion enumeration order (corpus 0x40389) -----------------
+# ---- Regression: parameter-expansion enumeration order (corpus 0x40389) --------------
 
 
 class TestExpansionEnumerationOrder:
@@ -4408,7 +4408,7 @@ class TestExpansionEnumerationOrder:
         ]
 
 
-# ---- Regression: negative-N dice count preserves pool structure -------------------------
+# ---- Regression: negative-N dice count preserves pool structure ----------------------
 
 
 class TestNegativeDiceCountPreservesPoolStructure:
@@ -4491,7 +4491,7 @@ class TestNegativeDiceCountPreservesPoolStructure:
         ]
 
 
-# ---- Regression: 1d(<pool>) is a no-op (corpus 0x41073) ---------------------------------
+# ---- Regression: 1d(<pool>) is a no-op (corpus 0x41073) ------------------------------
 
 
 class TestSingleDieOfPoolIsNoOp:
@@ -4544,7 +4544,7 @@ class TestSingleDieOfPoolIsNoOp:
         assert run("output [highest 1 of 1d(2d6)]") == run("output [highest 1 of 2d6]")
 
 
-# ---- Regression: `:s` expansion over a Pool iterates by AnyDice's bifurcated rule -------
+# ---- Regression: `:s` expansion over a Pool iterates by AnyDice's bifurcated rule ----
 
 
 class TestSParamPoolExpansionIterationOrder:
@@ -4675,7 +4675,7 @@ class TestSParamPoolExpansionIterationOrder:
         assert run(prog) == [("output 1", H({-10: 1, -3: 1}))]
 
 
-# ---- Regression: H({}) + H({}) propagates under recursion-cap (corpus 0x42f0) ------------
+# ---- Regression: H({}) + H({}) propagates under recursion-cap (corpus 0x42f0) --------
 
 
 class TestRecursionCapEmptyArithmetic:

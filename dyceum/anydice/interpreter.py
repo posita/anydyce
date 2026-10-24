@@ -87,7 +87,7 @@ _ParamIndexT = int
 _ExpansionT = list[tuple[_ParamIndexT, list[tuple[_Val, _CountT]]]]
 _BoundT = list[_Val]
 
-# ---- Operator tables ---------------------------------------------------------------------
+# ---- Operator tables -----------------------------------------------------------------
 
 # `0^negative` is mathematically undefined. AnyDice's behavior splits by
 # context: in scalar^scalar form it raises an explicit error; in any
@@ -202,7 +202,7 @@ _CMP_OPS = {"=", "!=", "<", ">", "<=", ">="}
 # +/- treat empty die as scalar 0; */^ propagate emptiness as H({})
 _EMPTY_DIE_SKIPS_ARITH = {"+", "-", "|"}
 
-# ---- Function pattern shape --------------------------------------------------------------
+# ---- Function pattern shape ----------------------------------------------------------
 
 # A pattern shape is a tuple slotting words at fixed positions and `None` for each
 # parameter slot. It is the user-visible function "name" in AnyDice: two definitions
@@ -230,7 +230,7 @@ class _ResultReturn(Exception):  # ruff: ignore[error-suffix-on-exception-name]
         self.value = value
 
 
-# ---- Interpreter -------------------------------------------------------------------------
+# ---- Interpreter ---------------------------------------------------------------------
 
 
 class AnyDiceInterpreter:

@@ -26,7 +26,7 @@ from dyce import H, P
 
 __all__ = ("BUILTINS",)
 
-# ---- Helpers ---------------------------------------------------------------------------
+# ---- Helpers -------------------------------------------------------------------------
 
 
 def _h_from_pool(p: P[int]) -> H[int]:
@@ -34,7 +34,7 @@ def _h_from_pool(p: P[int]) -> H[int]:
     return H({0: 1}) if len(p) == 0 else p.at(slice(0, None))
 
 
-# ---- Built-ins -------------------------------------------------------------------------
+# ---- Built-ins -----------------------------------------------------------------------
 
 
 def _absolute(x: int) -> int:
@@ -128,7 +128,7 @@ def _explode(die: H[int] | P[int], depth: int) -> H[int]:
     return H(expanded)
 
 
-# ---- Registry --------------------------------------------------------------------------
+# ---- Registry ------------------------------------------------------------------------
 
 BUILTINS: list[tuple[list[str | None], list[str | None], Callable[..., Any]]] = [
     # pattern               param_types          impl
