@@ -79,9 +79,7 @@ function ensureWorker() {
           handler.resolve({
             text: msg.text || "",
             outputs: msg.outputs || [],
-            barSpecs: msg.barSpecs || [],
-            lineSpec: msg.lineSpec || null,
-            ridgeSpec: msg.ridgeSpec || null,
+            probabilitySpecs: msg.probabilitySpecs,
             csv: msg.csv || "",
             csvFilename: msg.csvFilename || "",
             warnings: msg.warnings || [],
